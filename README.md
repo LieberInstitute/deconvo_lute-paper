@@ -2,6 +2,17 @@
 
 Contains analysis for the deconvolution methods paper
 
+## Details about this repository
+
+The path to this repository on JHPCE is:
+
+This repo contains analysis code, outputs, figures, etc. for the deconvolution methods paper. The subdirs contained here include:
+
+* `code` : Main location where scripts and code to generate content live.
+* `figures_and_tables`: Main location of figures and tables, with same layout as `code` subdir
+* `outputs`: Objects (i.e. not figures or tables) which are produced by scripts from `code`. Has same layout as `code` subdir.
+* `source`: Scripts, vignettes, etc. which are central to the planned deconvolution resource. This will have its own internal structure and be developed in parallel to analyses for the paper.
+
 ## File locations
 
 This is an integrative, multi-assay project including individual-matched data generated from human dorsolateral prefrontal cortex (DLPFC) using the RNAscope, 10X Chromium, and Illumina HiSeq platforms. 
