@@ -94,34 +94,3 @@ ldecon_example <- function(seed.num = NA, k.value = 2,
                  "z_data" = z.data, "pi_est" = pi.est, "metadata" = lmd)
   return(ldecon)
 }
-
-
-l1 <- ldecon_example(pi.est.funv = NA)
-
-l1 <- ldecon_example()
-
-
-y.data <- l1$y
-z.data <- l1$z
-
-pi.est.funv <- c("nnls")
-pi.est <- NA
-pi.est.funv <- pi.est.funv[pi.est.funv %in% c("nnls")]
-if(length(pi.est.funv)>0){
-  pi.est <- lapply(pi.est.funv, function(funi){
-    pi.dat <- NA
-    if(funi=="nnls"){
-      require(nnls)
-      pi.dat <- do.call(rbind, lapply(seq(ncol(z.data)), function(i){
-        nnls::nnls(y.data, z.data[,i])$x
-      }))
-      rownames(pi.dat) <- colnames(z.data)
-      colnames(pi.dat) <- colnames(y.data)
-    }
-    pi.dat
-  })
-  names(pi.est) <- pi.est.funv
-}
-
-
-nnlsi <- nnls::nnls(A = l1$y, b = l1$z[,1])
