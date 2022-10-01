@@ -1,7 +1,9 @@
 #!/usr/bin/env R
 
 #
-# Main script to parse parameters for a task
+# Main script to parse parameters for a task. For a given task, this reads in and
+# parses the project and task parameters at expected locations (e.g. ./code/* for 
+# project parameters file, and ./code/taskdir/* for task parameters file).
 # 
 # Notes:
 # * Recall we use standard terminology: Y = pi * Z
@@ -20,22 +22,30 @@ for(fn in list.files(source.dpath)){source(source.dpath)}
 
 
 # parse pi options
-
-
-
-
-# parse z options
-message("parsing options for z source data...")
-if(is.na(zsource.fpath.task)){
-	message("skipping z source for task...")
-	
+pi.data <- "NA"
+if(is.na(pi.source.task)){
+	if(y.type.task=="pseudobulk"){
+		message("Using pseudobulk for pi.")
+		pi.data <- se.pb$pidata
+	}
+} else{
+	pi.data <- get(load(pi.source.fpath.task))
 }
 
-
-
-if(!is.na(zsource.fpath.project)){
+# parse z options
+# parse z data options
+z.data <- "NA"
+message("parsing options for z source data...")
+if(is.na(z.data.fpath.task)){
+	message("skipping z source for task...")
+} else{
+	z.data <- get(load(z.data.fpath.task))
+}
+# parse z source options
+z.source <- "NA"
+if(!is.na(z.source.fpath.task)){
 	message("loading sce object...")
-	sce <- get(load(zsource.fpath.project))
+	z.source <- get(load(z.source.fpath.task))
 } else{
 	message("skipping z source...")
 }

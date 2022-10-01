@@ -14,21 +14,30 @@ dname.task <- "test-sk"
 #
 #
 #
-# pu-specific parameters
-pi.source.task <- NA
+# pi parameters
+# note: if this is NA and y.type.task == "pseudobulk", takes pi from pseudobulk data.
+pi.source.task <- NA 
+pi.source.fpath.task <- ""
 #
 #
 #
-# y-specific parameters
+# y parameters
 y.type.task <- "pseudobulk"
 #
 #
 #
 #
 #
-# z-specific parameters
-z.fpath.task <- ""
-zsource.fpath.task <- NA
+# z parameters
+# source data
+# note: if na, ignores source data
+# note: options here, either NA or z.source.fpath.project
+z.source.fpath.task <- NA
+# z
+# note: if na, ignores z
+z.data.fpath.task <- "path_to_z_object" 
+# z.type.task <- "mean.mr.genemarkers"
+# transformations
+# note: parameters here will source transformation functions at `./source...`
 z.transform.task <- "sk"
 z.postprocess.task <- NA
-z.type.task <- "mean.mr.genemarkers"
