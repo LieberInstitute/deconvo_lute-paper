@@ -24,8 +24,9 @@ zsource_type <- function(zsource, type.varname = "cellType_broad_hc"){
   typev <- NA
   if(is(zsource, "SingleCellExperiment")){
     typev <- zsource[[type.varname]]} else{
-      if(varname %in% colnames(zsource)){zsource[,type.varname]} else{
-        stop("varname not a column name in zsource.")
+      if(type.varname %in% colnames(zsource)){
+        zsource[,type.varname]} else{
+        stop("type.varname not a column name in zsource.")
       }
     }
   return(typev)
@@ -49,9 +50,9 @@ zsource_markerdata <- function(zsource, type.varname = "cellType_broad_hc",
   #   type (e.g. cell type) in zsource.
   #
   markerdata <- NA
-  if(is(zsource, "SingleCellExperiment")){zsource <- counts(zsource)}
   message("checking type.varname exists in zsource")
-  typev <- zsource_type(zsource = zsource, type.varname = type.varname)
+  typev <- zsource_type(zsource = zsource, 
+                        type.varname = type.varname)
   if(method == "mean_ratio"){
     if(!is(zsource, "SingleCellExperiment")){
       stop("method mean_ratio requires that zsource is a SingleCellExperiment")}
@@ -63,6 +64,7 @@ zsource_markerdata <- function(zsource, type.varname = "cellType_broad_hc",
                                                   add_symbol = TRUE)
   } else if(method == "findMarkers"){
     message("using method findMarkers")
+    if(is(zsource, "SingleCellExperiment")){zsource <- counts(zsource)}
     require(scran)
     # findMarkers code goes here
   }
@@ -85,21 +87,28 @@ get_z_experiment <- function(ngenes.byk = NA, type.summary = "mean",
   #   provided upstream.
   # type.summary: function to use to summarize data by type.
   # 
+  require(dplyr)
   if(is.na(markerdata)){
-    markerdata <- zsource_markerdata(zsource, varname, method, mr.assay)
+    markerdata <- zsource_markerdata(zsource, type.varname, method, mr.assay)
   }
   # get types
   typev <- unique(zsource[[type.varname]])
   # get z
-  # get top genes
-  top.markers <- unique(unlist(lapply(typev, function(ki){
-    # which.ki <- zsource[[type.varname]]==ki
-    markerdati <- markerdata[[ki]]
-    ki.summary.cols <- c(4:5) # PARSE ROWS TO SUMMARIZE
-    # get ranked genes
-    ki.markers <- rownames(markerdati)
-    if(is.numeric(ngenes.byk)){ki.markers <- ki.markers[seq(ngenes.byk)]}
-    markerdati <- markerdati[ki.markers,]
+  # get marker data for top genes
+  ma <- markerdata
+  top.markers <- lapply(typev, function(ki){
+    markerv <- NA
+    if(method == "mean_ratio"){
+      # note: parses output from DeconvoBuddies::get_mean_ratio2()
+      colnames(ma)[2] <- "celltype.target"
+      mi <- ma %>% filter(celltype.target == ki) %>% arrange(rank_ratio)
+      if(ngenes.byk < nrow(mi)){markerv <- markerv[seq(ngenes.byk)]}
+    }
+    message("keeping ",length(markerv)," features for type ",ki)
+    markerv})
+    
+    
+    
     # get k summaries
     if(type.summary == "mean"){
       ki.summary <- rowMeans(markerdati[,ki.summary.cols])
