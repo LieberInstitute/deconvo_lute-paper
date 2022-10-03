@@ -9,6 +9,9 @@ s_rescale <- function(z, factorv = NULL, meanv = NULL, sdv = NULL,
                       return.md = FALSE, constrain.nn = TRUE){
   # rescale z using some type-level factor s
   #
+  # Notes: this type of transformation is used, for instance, to rescale cell
+  #   types according to their expected sizes. 
+  #
   # Note: if meanv and varv provided, select factor values randomly from
   # a distribution.
   # z : signature matrix (cols = k types, rows = g genes)
@@ -25,6 +28,8 @@ s_rescale <- function(z, factorv = NULL, meanv = NULL, sdv = NULL,
   # constrain.nn : whether to constrain values in z_rescale to be non-negative.
   #   Changes negative values to 0 if TRUE.
   #
+  # example:
+  # s_rescale(z)
   z_rescale <- NA # newly rescaled z matrix output
   ms <- NA # matrix corresponding to the s factor values
   if(is.null(factorv)){
