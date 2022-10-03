@@ -85,15 +85,16 @@ get_top_markers <- function(markerdata, typev, ngenes.byk,
   #
   ma <- markerdata
   ma.top <- do.call(rbind, lapply(typev, function(ki){
-    markerv <- NA
+    mi <- NA
     if(method.markers == "mean_ratio"){
       # note: parses output from DeconvoBuddies::get_mean_ratio2()
       colnames(ma)[2] <- "celltype.target"
-      mi <- ma %>% filter(celltype.target == ki) %>% arrange(rank_ratio)
-      if(nrow(mi)>0 & ngenes.byk < nrow(mi)){mi <- mi[seq(ngenes.byk),]}
+      mi <- ma %>% filter(celltype.target == ki) %>% 
+        arrange(rank_ratio)
+      if(nrow(mi)>0 & ngenes.byk<nrow(mi)){
+        mi <- mi[seq(ngenes.byk),]}
     }
-    message("keeping ",nrow(mi)," features for type ",ki)
-    mi}))
+    message("keeping ",nrow(mi)," features for type ",ki); mi}))
   return(ma.top)
 }
 
@@ -102,7 +103,7 @@ get_z_experiment <- function(zsource,
                              method.markers = "mean_ratio", 
                              mr.assay = "logcounts",
                              ngenes.byk = 20, 
-                             type.varname = "cellType_broad_hc", 
+                             type.varname = "cellType", 
                              summary.varname = "donor",
                              k.summary.method = "mean",
                              z.summary.method = "mean",
@@ -126,11 +127,14 @@ get_z_experiment <- function(zsource,
   # return:
   #   data for the z tables, with option to include intermediate outputs (see 
   #   argument return.all)
+  #
+  # example:
+  # get_z_experiment(sce)
   # 
   require(dplyr)
   if(!is(zsource, "SingleCellExperiment")){
     stop("zsource should be of type SingleCellExperiment")}
-  if(is.na(markerdata)){
+  if(is(markerdata, "logical")){
     markerdata <- zsource_markerdata(zsource = zsource, 
                                      type.varname = type.varname, 
                                      method = method.markers, 
@@ -158,8 +162,7 @@ get_z_experiment <- function(zsource,
     colnames(si) <- paste0(ii, ";", typev);si
   }))
   # get z by summarizing type by category (e.g. donors)
-  message("summarizing counts by type for final z table...")
-  cnv.zs <- colnames(zs)
+  message("summarizing counts by type for final z table..."); cnv.zs <- colnames(zs)
   z <- t(apply(zs, 1, function(ri){
     unlist(lapply(typev, function(ki){
       datf <- ri[grepl(ki, names(ri))]; dati <- NA
