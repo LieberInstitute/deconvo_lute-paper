@@ -4,7 +4,16 @@
 # Makes some example data for use in a deconvolution task
 #
 
-ldecon_example <- function(seed.num = NA, k.value = 2,
+zdata_example <- function(){
+  
+}
+
+
+ydata_example <- function(){
+  
+}
+
+ldecon_example <- function(seed.num = 0, k.value = 2,
                            j.value = 10, n.feat = 1000,
                            pi.data = NA, z.dist = c(5, 3),
                            y.dist = c(10, 5), force.yz.nonneg = TRUE,
@@ -35,9 +44,11 @@ ldecon_example <- function(seed.num = NA, k.value = 2,
   # ldecon, list of deconvolution experiment entities
   #
   #
-  # get seed info
-  if(is.na(seed.num)){seed.num <- rnorm(1,100,100)}
-  set.seed(seed.num)
+  # set value defaults
+  z_original <- z_rescale <- NA
+  y_original <- y_rescale <- NA
+  pi_data <- pi_est <- lmd <- NA
+  set.seed(seed.num) # get seed info
   # get the k total types 
   # (e.g. cell types)
   if(is.na(k.value)){
@@ -48,42 +59,44 @@ ldecon_example <- function(seed.num = NA, k.value = 2,
   # features the same in z and y
   z.nfeat <- y.nfeat <- n.feat 
   # get the pi amounts (proportions) by type
-  if(is.na(pi.data)){pi.data <- rep(1/k.value, k.value)}
+  if(is.na(pi_data)){pi_data <- rep(1/k.value, k.value)}
   # get z data
   z.dist.mean <- z.dist[1]; z.dist.var <- z.dist[2]
-  z.data <- do.call(cbind, lapply(seq(k.value), function(i){
+  z_original <- do.call(cbind, lapply(seq(k.value), function(i){
     z.dati <- rnorm(z.nfeat, z.dist.mean, z.dist.var)
     if(force.yz.nonneg){z.dati[z.dati<0] <- -1*z.dati[z.dati<0]}
     z.dati
   }))
-  colnames(z.data) <- paste0("k_",seq(k.value))
+  colnames(z_original) <- paste0("k_",seq(k.value))
   # do z transformations
+  z.transformv <- z.transformv[z.transformv %in% c("s_rescale")]
+  if(length(z.transformv) > 0){z_rescale <- z_original}
   if("s_rescale" %in% z.transformv){
     message("transforming z using `s_rescale` method...")
     lparam <- ltransform[["s_rescale"]]
-    z.data <- s_rescale(z.data, factorv = lparam[["factorv"]],
-                        constrain.nn = force.yz.nonneg)
+    z_rescale <- s_rescale(z_rescale, factorv = lparam[["factorv"]],
+                           constrain.nn = force.yz.nonneg)
   }
   # get y data
   if(is.na(j.value)){
     j.value <- sample(100, 1)
   } else{if(j.value<1){stop("j.value must be > 0")}}
   y.dist.mean <- y.dist[1]; y.dist.var <- y.dist[2]
-  y.data <- do.call(cbind, lapply(seq(j.value), function(i){
+  y_original <- do.call(cbind, lapply(seq(j.value), function(i){
     y.dati <- rnorm(y.nfeat, y.dist.mean, y.dist.var)
     if(force.yz.nonneg){y.dati[y.dati<0] <- -1*y.dati[y.dati<0]}
     y.dati
   }))
-  colnames(y.data) <- paste0("j_",seq(j.value))
+  colnames(y_original) <- paste0("j_",seq(j.value))
   # get pi estimates 
-  # note: this is the same as "strict deconvolution"
-  pi.est <- NA
-  # note: filter on some list of valid methods, pi.method.validv
+  # note: 
+  #   this is the same as "strict deconvolution"
+  #   filter on some list of valid methods, pi.method.validv
   pi.method.validv <- c("nnls")
   pi.est.funv <- tolower(pi.est.funv)
   pi.est.funv <- pi.est.funv[pi.est.funv %in% pi.method.validv]
   if(length(pi.est.funv)>0){
-    pi.est <- lapply(pi.est.funv, function(funi){
+    pi_est <- lapply(pi.est.funv, function(funi){
       pi.dat <- NA
       if(funi=="nnls"){
         require(nnls)
@@ -95,7 +108,7 @@ ldecon_example <- function(seed.num = NA, k.value = 2,
       }
       pi.dat
     })
-    names(pi.est) <- pi.est.funv
+    names(pi_est) <- pi.est.funv
   }
   # parse metadata list
   z.data.info.misc <- list("dist.mean" = z.dist.mean,
@@ -112,8 +125,9 @@ ldecon_example <- function(seed.num = NA, k.value = 2,
               "z_info" = z.data.info, "y_info" = y.data.info,
               "z_transformations" = z.transformv)
   # return ldecon
-  ldecon <- list("pi_data" = pi.data, "y_data" = y.data, 
-                 "z_data" = z.data, "pi_est" = pi.est, 
+  ldecon <- list("pi_data" = pi_data, "pi_est" = pi_est, 
+                 "y_original" = y_original, "y_rescale" = y_rescale,
+                 "z_original" = z_original, "z_rescale" = z_rescale,
                  "metadata" = lmd)
   return(ldecon)
 }
