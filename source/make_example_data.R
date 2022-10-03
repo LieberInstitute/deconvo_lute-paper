@@ -4,7 +4,8 @@
 # Makes some example data for use in a deconvolution task
 #
 # example:
-# source(make_example_data.R)
+# source("make_example_data.R")
+# source("z_transform.R")
 # ldecon <- ldecon_example()
 #
 
@@ -75,7 +76,7 @@ pi_example <- function(pi_data, pi_est, k.value, pi.est.funv, z.data, y.data,
   # pi.method.validv <- c("nnls")
   if(is.na(pi_est)){skip.pi.est <- FALSE}
   if(skip.pi.est){
-    message("using provided pi_est rather than calculating.")
+    message("using provided pi_est rather than calculating new pi_est.")
   } else{
     message("calculating pi_est using provided function(s)...")
     pi.est.funv <- tolower(pi.est.funv)
@@ -170,7 +171,7 @@ ldecon_example <- function(seed.num = 0, k.value = 2, j.value = 10,
                       j.value = j.value)
   # get pi data
   lpi <- pi_example(pi_data = pi_data, pi_est = pi_est, k.value = k.value, 
-                    pi.est.funv = pi.est.funv, z.data = z.data, y.data = y.data, 
+                    pi.est.funv = pi.est.funv, z.data = lz[[2]], y.data = ly[[2]], 
                     pi.method.validv = c("nnls"))
   # parse metadata list
   lmd <- lmd_example(z.dist.mean = z.dist[1], z.dist.var = z.dist[2], 
