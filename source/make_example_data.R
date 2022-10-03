@@ -114,13 +114,11 @@ lmd_example <- function(z.dist.mean, z.dist.var, y.dist.mean, y.dist.var,
   return(lmd)
 }
 
-ldecon_example <- function(seed.num = 0, k.value = 2,
-                           j.value = 10, n.feat = 1000,
-                           pi.data = NA, z.dist = c(5, 3),
+ldecon_example <- function(seed.num = 0, k.value = 2, j.value = 10, 
+                           n.feat = 1000, pi.data = NA, z.dist = c(5, 3),
                            y.dist = c(10, 5), force.yz.nonneg = TRUE,
                            z.transformv = c("s_rescale"),
-                           ltransform = list(
-                             s_rescale = list(factorv = seq(2))),
+                           ltransform = list(s_rescale = list(factorv = seq(2))),
                            pi.est.funv = c("nnls")){
   # example:
   # 
