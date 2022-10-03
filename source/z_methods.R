@@ -1,7 +1,10 @@
 #!/usr/bin/env R
 
 #
-# methods for calculating z
+# methods for calculating z from zsource, where z is the features-by-types matrix
+# e.g. genes-by-cell types or [G,K], and zsource is the data from which z is
+# calculated (e.g. a counts matrix or a SingleCellExperiment from which counts 
+# are obtainable).
 #
 #
 
@@ -12,22 +15,23 @@ zsource_transform <- function(zsource, transformv){
   #
 }
 
-zsource_type <- function(zsource, varname = "cellType_broad_hc"){
+zsource_type <- function(zsource, type.varname = "cellType_broad_hc"){
   # get the types (e.g. cell types.columns in z)
   #
   # zsource: matrix of data used to calculate z (e.g. counts matrix)
+  # type.varname: name of the types variable, identifiable from zsource.
   #
   typev <- NA
   if(is(zsource, "SingleCellExperiment")){
-    typev <- zsource[[varname]]} else{
-      if(varname %in% colnames(zsource)){zsource[,varname]} else{
+    typev <- zsource[[type.varname]]} else{
+      if(varname %in% colnames(zsource)){zsource[,type.varname]} else{
         stop("varname not a column name in zsource.")
       }
     }
   return(typev)
 }
 
-zsource_markerdata <- function(zsource, varname = "cellType_broad_hc", 
+zsource_markerdata <- function(zsource, type.varname = "cellType_broad_hc", 
                            method = "mean_ratio", mr.assay = "logcounts"){
   # get the gene markers (e.g. features/rows in z)
   #
@@ -36,26 +40,74 @@ zsource_markerdata <- function(zsource, varname = "cellType_broad_hc",
   #
   # zsource: matrix of data used to calculate z (e.g. counts matrix)
   # varname : name of variable in zsource containing types
+  # method : name of method to identify marker genes from zsource.
   # mr.assay : assay_name argument for get_mean_ratio2()
   #
-  marker.data <- NA
+  # returns
+  #
+  # marker.data : data containing the features of interest and the values by 
+  #   type (e.g. cell type) in zsource.
+  #
+  markerdata <- NA
   if(is(zsource, "SingleCellExperiment")){zsource <- counts(zsource)}
-  message("checking varname exists in zsource")
-  typev <- zsource_type(zsource = zsource, varname = varname)
+  message("checking type.varname exists in zsource")
+  typev <- zsource_type(zsource = zsource, type.varname = type.varname)
   if(method == "mean_ratio"){
     if(!is(zsource, "SingleCellExperiment")){
       stop("method mean_ratio requires that zsource is a SingleCellExperiment")}
     message("using method mean_ratio")
     require(DeconvoBuddies)
-    marker.data <- DeconvoBuddies::get_mean_ratio2(zsource, 
-                                                   cellType_col = varname, 
-                                                   assay_name = mr.assay,
-                                                   add_symbol = TRUE)
+    markerdata <- DeconvoBuddies::get_mean_ratio2(zsource, 
+                                                  cellType_col = type.varname, 
+                                                  assay_name = mr.assay,
+                                                  add_symbol = TRUE)
   } else if(method == "findMarkers"){
     message("using method findMarkers")
     require(scran)
     # findMarkers code goes here
   }
-  return(marker.data)
+  return(markerdata)
+}
+
+get_z_experiment <- function(ngenes.byk = NA, type.summary = "mean",
+                             zsource = NA, type.varname = "cellType_broad_hc", 
+                             method = "mean_ratio", mr.assay = "logcounts", 
+                             markerdata = NA, type = NA, transform = NA){
+  # calculate z for a deconvolution experiment
+  #
+  # zsource: matrix of data used to calculate z (e.g. counts matrix)
+  # type.varname : name of variable in zsource containing types
+  # method : name of method to identify marker genes from zsource.
+  # mr.assay : assay_name argument for get_mean_ratio2()
+  # marker.data : data containing the features of interest and the values by 
+  #   type (e.g. cell type) in zsource.
+  # ngenes.byk: top genes to select by type. If NA, retains all marker genes 
+  #   provided upstream.
+  # type.summary: function to use to summarize data by type.
+  # 
+  if(is.na(markerdata)){
+    markerdata <- zsource_markerdata(zsource, varname, method, mr.assay)
+  }
+  # get types
+  typev <- unique(zsource[[type.varname]])
+  # get z
+  # get top genes
+  top.markers <- unique(unlist(lapply(typev, function(ki){
+    # which.ki <- zsource[[type.varname]]==ki
+    markerdati <- markerdata[[ki]]
+    ki.summary.cols <- c(4:5) # PARSE ROWS TO SUMMARIZE
+    # get ranked genes
+    ki.markers <- rownames(markerdati)
+    if(is.numeric(ngenes.byk)){ki.markers <- ki.markers[seq(ngenes.byk)]}
+    markerdati <- markerdati[ki.markers,]
+    # get k summaries
+    if(type.summary == "mean"){
+      ki.summary <- rowMeans(markerdati[,ki.summary.cols])
+      rownames(ki.summary) <- ki.markers
+    }
+    ki.summary
+  })))
+  # summarize top genes
+  md.byk <- do.call(cbind, lapply(seq(length(markerdata)), function(ii)))
 }
 
