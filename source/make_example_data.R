@@ -29,7 +29,8 @@ zdata_example <- function(z.dist, k.value, z.nfeat, force.yz.nonneg,
     z_rescale <- s_rescale(z_rescale, factorv = lparam[["factorv"]],
                            constrain.nn = force.yz.nonneg)
   }
-  if(is.na(y_rescale)){y_rescale <- y_original} # parse rescale default
+  if(is.na(z_rescale[1])){
+    z_rescale <- z_original} # parse rescale default
   return(list(z_original = z_original, z_rescale = z_rescale))
 }
 
@@ -118,7 +119,8 @@ ldecon_example <- function(seed.num = 0, k.value = 2,
                            pi.data = NA, z.dist = c(5, 3),
                            y.dist = c(10, 5), force.yz.nonneg = TRUE,
                            z.transformv = c("s_rescale"),
-                           ltransform = list(s_rescale = list(factorv = seq(2))),
+                           ltransform = list(
+                             s_rescale = list(factorv = seq(2))),
                            pi.est.funv = c("nnls")){
   # example:
   # 
@@ -164,12 +166,10 @@ ldecon_example <- function(seed.num = 0, k.value = 2,
   ly <- ydata_example(y.dist = y.dist, y.nfeat = y.nfeat, 
                       force.yz.nonneg = force.yz.nonneg, 
                       j.value = j.value)
-  
   # get pi data
   lpi <- pi_example(pi_data = pi_data, pi_est = pi_est, k.value = k.value, 
                     pi.est.funv = pi.est.funv, z.data = z.data, y.data = y.data, 
                     pi.method.validv = c("nnls"))
-  
   # parse metadata list
   lmd <- lmd_example(z.dist.mean = z.dist.mean, z.dist.var = z.dist.var, 
                      y.dist.mean = y.dist.mean, y.dist.var = y.dist.var,
@@ -177,7 +177,6 @@ ldecon_example <- function(seed.num = 0, k.value = 2,
                      k.value = k.value, j.value = j.value, 
                      z.transformv = z.transformv,
                      source = source)
-  
   # return ldecon
   ldecon <- list("pi_data" = lpi[["pi_data"]], "pi_est" = lpi[["pi_est"]], 
                  "y_original" = ly[["y_original"]], 
