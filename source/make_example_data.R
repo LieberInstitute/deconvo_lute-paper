@@ -171,8 +171,8 @@ ldecon_example <- function(seed.num = 0, k.value = 2,
                     pi.est.funv = pi.est.funv, z.data = z.data, y.data = y.data, 
                     pi.method.validv = c("nnls"))
   # parse metadata list
-  lmd <- lmd_example(z.dist.mean = z.dist.mean, z.dist.var = z.dist.var, 
-                     y.dist.mean = y.dist.mean, y.dist.var = y.dist.var,
+  lmd <- lmd_example(z.dist.mean = z.dist[1], z.dist.var = z.dist[2], 
+                     y.dist.mean = y.dist[1], y.dist.var = y.dist[2],
                      desc.str = desc.str, seed.num = seed.num, 
                      k.value = k.value, j.value = j.value, 
                      z.transformv = z.transformv,
