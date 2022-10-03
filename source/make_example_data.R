@@ -10,6 +10,7 @@ zdata_example <- function(z.dist, k.value, z.nfeat, force.yz.nonneg,
   #
   #
   #
+  message("getting example z datasets...")
   z_original <- z_rescale <- NA
   # get z data
   z.dist.mean <- z.dist[1]; z.dist.var <- z.dist[2]
@@ -37,6 +38,7 @@ ydata_example <- function(y.dist, y.nfeat, force.yz.nonneg, j.value = NA){
   #
   #
   #
+  message("getting example y datasets...")
   y_original <- y_rescale <- NA
   if(is.na(j.value)){
     j.value <- sample(100, 1)
@@ -58,6 +60,7 @@ pi_example <- function(pi_data, pi_est, k.value, pi.est.funv, z.data, y.data,
   #
   #
   #
+  message("getting example pi values...")
   # get the pi amounts (proportions) by type
   if(is.na(pi_data)){pi_data <- rep(1/k.value, k.value)}
   # get pi estimates 
@@ -97,6 +100,7 @@ lmd_example <- function(z.dist.mean, z.dist.var, y.dist.mean, y.dist.var,
   # get metadata for example deconvolution datasets
   #
   #
+  message("making example metadata...")
   z.data.info.misc <- list("dist.mean" = z.dist.mean, "dist.var" = z.dist.var)
   y.data.info.misc <- list("dist.mean" = y.dist.mean, "dist.var" = y.dist.var)
   y.data.info <- list(source = "example", misc = y.data.info.misc)
@@ -175,9 +179,11 @@ ldecon_example <- function(seed.num = 0, k.value = 2,
                      source = source)
   
   # return ldecon
-  ldecon <- list("pi_data" = pi_data, "pi_est" = pi_est, 
-                 "y_original" = y_original, "y_rescale" = y_rescale,
-                 "z_original" = z_original, "z_rescale" = z_rescale,
+  ldecon <- list("pi_data" = lpi[["pi_data"]], "pi_est" = lpi[["pi_est"]], 
+                 "y_original" = ly[["y_original"]], 
+                 "y_rescale" = ly[["y_rescale"]],
+                 "z_original" = lz[["z_original"]], 
+                 "z_rescale" = lz[["z_rescale"]],
                  "metadata" = lmd)
   return(ldecon)
 }
