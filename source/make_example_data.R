@@ -4,13 +4,109 @@
 # Makes some example data for use in a deconvolution task
 #
 
-zdata_example <- function(){
-  
+zdata_example <- function(z.dist, k.value, z.nfeat, force.yz.nonneg, 
+                          z.transformv, ltransform){
+  # get example z data (e.g. feature values by type)
+  #
+  #
+  #
+  z_original <- z_rescale <- NA
+  # get z data
+  z.dist.mean <- z.dist[1]; z.dist.var <- z.dist[2]
+  z_original <- do.call(cbind, lapply(seq(k.value), function(i){
+    z.dati <- rnorm(z.nfeat, z.dist.mean, z.dist.var)
+    if(force.yz.nonneg){z.dati[z.dati<0] <- -1*z.dati[z.dati<0]}
+    z.dati
+  }))
+  colnames(z_original) <- paste0("k_",seq(k.value))
+  # do z transformations
+  z.transformv <- z.transformv[z.transformv %in% c("s_rescale")]
+  if(length(z.transformv) > 0){z_rescale <- z_original}
+  if("s_rescale" %in% z.transformv){
+    message("transforming z using `s_rescale` method...")
+    lparam <- ltransform[["s_rescale"]]
+    z_rescale <- s_rescale(z_rescale, factorv = lparam[["factorv"]],
+                           constrain.nn = force.yz.nonneg)
+  }
+  if(is.na(y_rescale)){y_rescale <- y_original} # parse rescale default
+  return(list(z_original = z_original, z_rescale = z_rescale))
 }
 
+ydata_example <- function(y.dist, y.nfeat, force.yz.nonneg, j.value = NA){
+  # get example y data (e.g. feature values by sample)
+  #
+  #
+  #
+  y_original <- y_rescale <- NA
+  if(is.na(j.value)){
+    j.value <- sample(100, 1)
+  } else{if(j.value<1){stop("j.value must be > 0")}}
+  y.dist.mean <- y.dist[1]; y.dist.var <- y.dist[2]
+  y_original <- do.call(cbind, lapply(seq(j.value), function(i){
+    y.dati <- rnorm(y.nfeat, y.dist.mean, y.dist.var)
+    if(force.yz.nonneg){y.dati[y.dati<0] <- -1*y.dati[y.dati<0]}
+    y.dati
+  }))
+  colnames(y_original) <- paste0("j_",seq(j.value))
+  if(is.na(y_rescale)){y_rescale <- y_original} # parse rescale default
+  return(list(y_original = y_original, y_rescale = y_rescale))
+}
 
-ydata_example <- function(){
-  
+pi_example <- function(pi_data, pi_est, k.value, pi.est.funv, z.data, y.data, 
+                       pi.method.validv = c("nnls")){
+  # get example pi data (actual and estimated vectors of amounts by k type)
+  #
+  #
+  #
+  # get the pi amounts (proportions) by type
+  if(is.na(pi_data)){pi_data <- rep(1/k.value, k.value)}
+  # get pi estimates 
+  # note: 
+  #   this is the same as "strict deconvolution"
+  #   filter on some list of valid methods, pi.method.validv
+  # pi.method.validv <- c("nnls")
+  if(is.na(pi_est)){skip.pi.est <- FALSE}
+  if(skip.pi.est){
+    message("using provided pi_est rather than calculating.")
+  } else{
+    message("calculating pi_est using provided function(s)...")
+    pi.est.funv <- tolower(pi.est.funv)
+    pi.est.funv <- pi.est.funv[pi.est.funv %in% pi.method.validv]
+    if(length(pi.est.funv)>0){
+      pi_est <- lapply(pi.est.funv, function(funi){
+        pi.dat <- NA
+        if(funi=="nnls"){
+          require(nnls)
+          pi.dat <- do.call(rbind, lapply(seq(ncol(z.data)), function(i){
+            nnls::nnls(y.data, z.data[,i])$x
+          }))
+          rownames(pi.dat) <- colnames(z.data)
+          colnames(pi.dat) <- colnames(y.data)
+        }
+        pi.dat
+      })
+      names(pi_est) <- pi.est.funv
+    }
+  }
+  return(list(pi_data = pi_data, pi_est = pi_est))
+}
+
+lmd_example <- function(z.dist.mean, z.dist.var, y.dist.mean, y.dist.var,
+                        desc.str, seed.num, k.value, j.value, z.transformv,
+                        source = "example"){
+  # get metadata for example deconvolution datasets
+  #
+  #
+  z.data.info.misc <- list("dist.mean" = z.dist.mean, "dist.var" = z.dist.var)
+  y.data.info.misc <- list("dist.mean" = y.dist.mean, "dist.var" = y.dist.var)
+  y.data.info <- list(source = "example", misc = y.data.info.misc)
+  z.data.info <- list(source = "example", misc = z.data.info.misc)
+  desc.str <- "example random dataset"
+  lmd <- list("description" = desc.str, "seed" = seed.num, 
+              "k_value" = k.value, "j_value" = j.value,
+              "z_info" = z.data.info, "y_info" = y.data.info,
+              "z_transformations" = z.transformv)
+  return(lmd)
 }
 
 ldecon_example <- function(seed.num = 0, k.value = 2,
@@ -45,8 +141,7 @@ ldecon_example <- function(seed.num = 0, k.value = 2,
   #
   #
   # set value defaults
-  z_original <- z_rescale <- NA
-  y_original <- y_rescale <- NA
+  # z_original <- z_rescale <- NA; y_original <- y_rescale <- NA
   pi_data <- pi_est <- lmd <- NA
   set.seed(seed.num) # get seed info
   # get the k total types 
@@ -54,76 +149,31 @@ ldecon_example <- function(seed.num = 0, k.value = 2,
   if(is.na(k.value)){
     k.value <- sample(c(2:10), 1)
   } else{if(k.value < 2){stop("k.value must be > 1")}}
-  # 
   # get pi, z, y
-  # features the same in z and y
-  z.nfeat <- y.nfeat <- n.feat 
-  # get the pi amounts (proportions) by type
-  if(is.na(pi_data)){pi_data <- rep(1/k.value, k.value)}
+  z.nfeat <- y.nfeat <- n.feat # features the same in z and y
   # get z data
-  z.dist.mean <- z.dist[1]; z.dist.var <- z.dist[2]
-  z_original <- do.call(cbind, lapply(seq(k.value), function(i){
-    z.dati <- rnorm(z.nfeat, z.dist.mean, z.dist.var)
-    if(force.yz.nonneg){z.dati[z.dati<0] <- -1*z.dati[z.dati<0]}
-    z.dati
-  }))
-  colnames(z_original) <- paste0("k_",seq(k.value))
-  # do z transformations
-  z.transformv <- z.transformv[z.transformv %in% c("s_rescale")]
-  if(length(z.transformv) > 0){z_rescale <- z_original}
-  if("s_rescale" %in% z.transformv){
-    message("transforming z using `s_rescale` method...")
-    lparam <- ltransform[["s_rescale"]]
-    z_rescale <- s_rescale(z_rescale, factorv = lparam[["factorv"]],
-                           constrain.nn = force.yz.nonneg)
-  }
+  lz <- zdata_example(z.dist = z.dist, k.value = k.value, z.nfeat = z.nfeat, 
+                      force.yz.nonneg = force.yz.nonneg, 
+                      z.transformv = z.transformv, 
+                      ltransform = ltransform)
   # get y data
-  if(is.na(j.value)){
-    j.value <- sample(100, 1)
-  } else{if(j.value<1){stop("j.value must be > 0")}}
-  y.dist.mean <- y.dist[1]; y.dist.var <- y.dist[2]
-  y_original <- do.call(cbind, lapply(seq(j.value), function(i){
-    y.dati <- rnorm(y.nfeat, y.dist.mean, y.dist.var)
-    if(force.yz.nonneg){y.dati[y.dati<0] <- -1*y.dati[y.dati<0]}
-    y.dati
-  }))
-  colnames(y_original) <- paste0("j_",seq(j.value))
-  # get pi estimates 
-  # note: 
-  #   this is the same as "strict deconvolution"
-  #   filter on some list of valid methods, pi.method.validv
-  pi.method.validv <- c("nnls")
-  pi.est.funv <- tolower(pi.est.funv)
-  pi.est.funv <- pi.est.funv[pi.est.funv %in% pi.method.validv]
-  if(length(pi.est.funv)>0){
-    pi_est <- lapply(pi.est.funv, function(funi){
-      pi.dat <- NA
-      if(funi=="nnls"){
-        require(nnls)
-        pi.dat <- do.call(rbind, lapply(seq(ncol(z.data)), function(i){
-          nnls::nnls(y.data, z.data[,i])$x
-        }))
-        rownames(pi.dat) <- colnames(z.data)
-        colnames(pi.dat) <- colnames(y.data)
-      }
-      pi.dat
-    })
-    names(pi_est) <- pi.est.funv
-  }
+  ly <- ydata_example(y.dist = y.dist, y.nfeat = y.nfeat, 
+                      force.yz.nonneg = force.yz.nonneg, 
+                      j.value = j.value)
+  
+  # get pi data
+  lpi <- pi_example(pi_data = pi_data, pi_est = pi_est, k.value = k.value, 
+                    pi.est.funv = pi.est.funv, z.data = z.data, y.data = y.data, 
+                    pi.method.validv = c("nnls"))
+  
   # parse metadata list
-  z.data.info.misc <- list("dist.mean" = z.dist.mean,
-                           "dist.var" = z.dist.var)
-  y.data.info.misc <- list("dist.mean" = y.dist.mean,
-                           "dist.var" = y.dist.var)
-  y.data.info <- list(source = "example",
-                      misc = y.data.info.misc)
-  z.data.info <- list(source = "example",
-                           misc = z.data.info.misc)
-  desc.str <- "example random dataset"
-  lmd <- list("description" = desc.str, "seed" = seed.num, 
-              "k_value" = k.value, "j_value" = j.value,
-              "z_info" = z.data.info, "y_info" = y.data.info,
-              "z_transformations" = z.transformv)
+  lmd <- lmd_example(z.dist.mean = z.dist.mean, z.dist.var = z.dist.var, 
+                     y.dist.mean = y.dist.mean, y.dist.var = y.dist.var,
+                     desc.str = desc.str, seed.num = seed.num, 
+                     k.value = k.value, j.value = j.value, 
+                     z.transformv = z.transformv,
+                     source = source)
+  
   # return ldecon
   ldecon <- list("pi_data" = pi_data, "pi_est" = pi_est, 
                  "y_original" = y_original, "y_rescale" = y_rescale,
