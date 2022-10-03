@@ -7,6 +7,10 @@
 # are obtainable).
 #
 #
+# example:
+# sce <- get(load(sce.fpath))
+# z.expt <- get_z_experiment(sce)
+#
 
 zsource_transform <- function(zsource, transformv){
   # transform zsource dataset
@@ -103,7 +107,7 @@ get_z_experiment <- function(zsource,
                              method.markers = "mean_ratio", 
                              mr.assay = "logcounts",
                              ngenes.byk = 20, 
-                             type.varname = "cellType", 
+                             type.varname = "cellType_broad_hc", 
                              summary.varname = "donor",
                              k.summary.method = "mean",
                              z.summary.method = "mean",

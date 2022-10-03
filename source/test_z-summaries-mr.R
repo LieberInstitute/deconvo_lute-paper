@@ -13,3 +13,4 @@ zsource_type(scef, type.varname)
 # get markerdata
 markerdata <- zsource_markerdata(zsource = scef, type.varname = type.varname)
 dim(markerdata) # [1] 9188    8
+

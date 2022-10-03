@@ -3,6 +3,10 @@
 #
 # Makes some example data for use in a deconvolution task
 #
+# example:
+# source(make_example_data.R)
+# ldecon <- ldecon_example()
+#
 
 zdata_example <- function(z.dist, k.value, z.nfeat, force.yz.nonneg, 
                           z.transformv, ltransform){
