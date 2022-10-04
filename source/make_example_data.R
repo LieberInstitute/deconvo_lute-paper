@@ -189,3 +189,4 @@ ldecon_example <- function(seed.num = 0, k.value = 2, j.value = 10,
                  "metadata" = lmd)
   return(ldecon)
 }
+
