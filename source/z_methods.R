@@ -169,9 +169,12 @@ get_z_experiment <- function(zsource,
   message("summarizing counts by type for final z table..."); cnv.zs <- colnames(zs)
   z <- t(apply(zs, 1, function(ri){
     unlist(lapply(typev, function(ki){
-      datf <- ri[grepl(ki, names(ri))]; dati <- NA
-      if(z.summary.method == "mean"){
-        dati <- mean(datf, na.rm = T)}
+      dati <- NA; datf <- ri[grepl(ki, names(ri))]
+      if(length(datf) > 0){
+        if(z.summary.method == "mean"){
+          dati <- mean(datf, na.rm = T)
+        }
+      }
       dati
     }))
   }))
