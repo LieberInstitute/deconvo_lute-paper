@@ -35,6 +35,23 @@ ggbp1 <- ggplot(dfpi, aes(x = celltype.target, y = ratio, fill = celltype.target
   theme_bw() + geom_boxplot() + ylab("MR_k") + xlab("cell_type") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
 
+lr <- list(single.plots = list(violin = ggvp1, jitter = ggjt1, box = ggbp1))
+
+plot.single.fnamev <- c("mr-k_violin-plot.png", "mr-k_jitter-plot.png",
+                        "mr-k_box-plot.png")
+plot.fpathv <- file.path(save.dpath, plot.single.fnamev)
+
+png.width.splot <- 4
+png.height.splot <- 3
+png.units <- "in"
+png.res <- 400
+
+for(ii in seq(length(lr[[1]]))){
+  png(plot.fpathv[ii], width = png.width.splot, 
+      height = png.height.splot, res = png.res, units = png.units)
+  print(lr[[1]][[ii]]); dev.off()
+}
+
 # plots for composite figures
 ggvp2 <- ggplot(dfpi, aes(x = celltype.target, y = ratio, fill = celltype.target)) + 
   theme_bw() + geom_violin(draw_quantiles = 0.5) + ylab("MR_k") + xlab("cell_type") +
@@ -55,18 +72,20 @@ ggbp2 <- ggplot(dfpi, aes(x = celltype.target, y = ratio, fill = celltype.target
 
 # save individual plots
 
+
+png.width.cplot <- 4
+png.height.cplot <- 6
+png.units <- "in"
+png.res <- 400
+png.fname.cplot <- "mr-k_composite-vp-jt-bp.png"
+
 # save composite plot
 lm <- matrix(c(1,1,2,2,3,3,3),ncol=1) # adds extra space for xaxis labels
-
-plot.comp.fname <- "mr-k_composite-vp-jt-bp.png"
-plot.fpath <- file.path(save.dpath, plot.comp.fname)
-
-png(plot.fpath, width = 4, height = 6, units = 'in', res = 400)
-
+png(file.path(save.dpath, png.fname.cplot), width = png.width.cplot, 
+    height = png.height.cplot, units = png.units, res = png.res)
 grid.arrange(ggvp2, ggjt2, ggbp2, ncol = 1, layout_matrix = lm, 
              left = paste0(paste0(rep(" ", 20),collapse=""), "MR_k"), 
              bottom = "cell_type")
-
 dev.off()
 
 # save composite plot
