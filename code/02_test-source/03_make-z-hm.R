@@ -103,13 +103,15 @@ get_lhm <- function(){
   lz1 <- lz1[order(match(lz1[,1], colnames(hmi))),]
   cond <- identical(colnames(hmi), lz1[,1])
   dfa.col <- data.frame(cell_type = lz1[,2])
+  rownames(dfa.col) <- colnames(hmi)
   # "hmch-mr_withscale_coldefault_genemarkers-vs-donortype_dlpfc-ro1.png"
-  hm1 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname1.1), hmi = hmi, 
+  hm1 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname1.1), 
+                hmi = hmi, 
                 rowlab = rowlab, collab = collab, 
                 legend.name = "Scaled\nMR_dk", 
                 rescale = T, show.col.names = F, use.colpal = "ch",
                 append.rowanno = T, rowanno = rowAnnotation(df = dfa.row),
-                append.colanno = T, colanno = columnAnnotation(df = dfa.col))
+                append.colanno = T, colanno = columnAnnotation(df = t(dfa.col)))
   # "hmch-mr_noscale_coldefault_genemarkers-vs-donortype_dlpfc-ro1.png"
   hm2 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname1.2), hmi = hmi, 
                 rowlab = rowlab, collab = collab, legend.name = "MR_dk",
@@ -134,26 +136,38 @@ get_lhm <- function(){
   hmi <- lz$z.final
   rowlab <- paste0("Marker genes (N = ", nrow(hmi), ")")
   collab <- paste0("Cell types (N = ",ncol(hmi),")")
+  # get rowanno
+  lz1 <- as.data.frame(lz[[1]])
+  lz1 <- lz1[order(match(lz1[,1], rownames(hmi))),]
+  cond <- identical(rownames(hmi), lz1[,1])
+  if(cond){
+    dfa.row <- data.frame(cell_type = lz1[,2])
+    rownames(dfa.row) <- rownames(hmi)
+  } else{dfa.row <- NA}
   # "hmch-mr_withscale_coldefault_genemarkers-vs-celltype_dlpfc-ro1.png"
   hm5 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname2.1), hmi = hmi,
                 rowlab = rowlab, collab = collab, legend.name = "Scaled\nMR_k",
                 rescale = T, use.colpal = "ch", show.col.names = T,
-                png.width = 4)
+                png.width = 4, append.rowanno = T, 
+                rowanno = rowAnnotation(df = dfa.row))
   # "hmch-mr_noscale_coldefault_genemarkers-vs-celltype_dlpfc-ro1.png"
   hm6 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname2.2), hmi = hmi,
                 rowlab = rowlab, collab = collab, legend.name = "MR_k",
                 rescale = F, use.colpal = "ch", show.col.names = T,
-                png.width = 4)
+                png.width = 4, append.rowanno = T, 
+                rowanno = rowAnnotation(df = dfa.row))
   # "hmch-mr_withscale_colphm_genemarkers-vs-celltype_dlpfc-ro1.png"
   hm7 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname2.3), hmi = hmi,
                 rowlab = rowlab, collab = collab, legend.name = "Scaled\nMR_k",
                 rescale = T, use.colpal = "phm", show.col.names = T, 
-                png.width = 4)
+                png.width = 4, append.rowanno = T, 
+                rowanno = rowAnnotation(df = dfa.row))
   # "hmch-mr_noscale_colphm_genemarkers-vs-celltype_dlpfc-ro1.png"
   hm8 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname2.4), hmi = hmi,
                 rowlab = rowlab, collab = collab, legend.name = "MR_k",
                 rescale = F, use.colpal = "phm", show.col.names = T,
-                png.width = 4)
+                png.width = 4, append.rowanno = T, 
+                rowanno = rowAnnotation(df = dfa.row))
   return(list(hm1, hm2, hm3, hm4, hm5, hm6, hm7, hm8))
 }
 
