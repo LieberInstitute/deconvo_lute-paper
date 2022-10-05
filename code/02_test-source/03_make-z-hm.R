@@ -55,30 +55,26 @@ new_hm <- function(hm.fpath, hmi, rowlab, collab, legend.name, rescale = T,
   #
   set.seed(seed.num) # set seed for random color palette
   if(rescale){hmi <- base::scale(hmi)}
+  # parse color palette
   if(use.colpal == "ch"){
-    hm <- Heatmap(hmi, row_title = rowlab, 
-                  column_title = collab, 
-                  row_labels = "none", 
-                  show_row_names = F, 
-                  show_column_names = show.col.names, 
-                  name = legend.name, 
-                  show_row_dend = F, 
-                  show_column_dend = F)
+    col.pal <- ComplexHeatmap:::default_col(hmi, main_matrix = TRUE)
   } else{
     pal <- RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")
     col.pal <- colorRampPalette(rev(pal))(100)
-    hm <- Heatmap(hmi, row_title = rowlab, 
-                  column_title = collab, 
-                  row_labels = "none", 
-                  show_row_names = F,
-                  show_column_names = show.col.names,
-                  name = legend.name, 
-                  show_row_dend = F, 
-                  show_column_dend = F, 
-                  col = col.pal)
   }
-  if(append.rowanno){hm <- hm + rowanno}
-  if(append.colanno){hm <- hm + colanno}
+  # parse top annotation
+  if(append.colanno){
+    hm <- Heatmap(hmi, row_title = rowlab, column_title = collab, col = col.pal,
+                  row_labels = "none", show_row_names = F, 
+                  show_column_names = show.col.names, name = legend.name, 
+                  show_row_dend = F, show_column_dend = F,
+                  top_annotation = colanno)
+  } else{
+    hm <- Heatmap(hmi, row_title = rowlab, column_title = collab, col = col.pal,
+                  row_labels = "none", show_row_names = F, 
+                  show_column_names = show.col.names, name = legend.name, 
+                  show_row_dend = F, show_column_dend = F)
+  }
   if(save.fig){
     png(hm.fpath, width = png.width, height = png.height, res = png.res, 
         units = png.units); print(hm); dev.off()
@@ -107,17 +103,22 @@ get_lhm <- function(){
   # "hmch-mr_withscale_coldefault_genemarkers-vs-donortype_dlpfc-ro1.png"
   hm1 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname1.1), 
                 hmi = hmi, 
-                rowlab = rowlab, collab = collab, 
+                rowlab = rowlab, 
+                collab = collab, 
                 legend.name = "Scaled\nMR_dk", 
-                rescale = T, show.col.names = F, use.colpal = "ch",
-                append.rowanno = T, rowanno = rowAnnotation(df = dfa.row),
-                append.colanno = T, colanno = columnAnnotation(df = t(dfa.col)))
+                rescale = T, 
+                show.col.names = F, 
+                use.colpal = "ch",
+                append.rowanno = T, 
+                rowanno = rowAnnotation(df = dfa.row),
+                append.colanno = T, 
+                colanno = HeatmapAnnotation(df = dfa.col))
   # "hmch-mr_noscale_coldefault_genemarkers-vs-donortype_dlpfc-ro1.png"
   hm2 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname1.2), hmi = hmi, 
                 rowlab = rowlab, collab = collab, legend.name = "MR_dk",
                 rescale = F, show.col.names = F, use.colpal = "ch",
                 append.rowanno = T, rowanno = rowAnnotation(df = dfa.row),
-                append.colanno = T, colanno = columnAnnotation(df = dfa.col))
+                append.colanno = T, colanno = HeatmapAnnotation(df = dfa.col, which = "column"))
   # "hmch-mr_withscale_colphm_genemarkers-vs-donortype_dlpfc-ro1.png"
   hm3 <- new_hm(hm.fpath = file.path(save.dpath, hm.png.fname1.3), hmi = hmi,
                 rowlab = rowlab, collab = collab, legend.name = "Scaled\nMR_dk",
