@@ -106,7 +106,6 @@ get_lgg_markers <- function(df.markers, save.new.plots = T,
 #---------------
 lgg <- get_lgg_markers(lz$top.marker.data)
 
-
 #-------------
 # violin plots
 #-------------
