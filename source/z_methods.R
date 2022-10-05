@@ -12,13 +12,6 @@
 # z.expt <- get_z_experiment(sce)
 #
 
-zsource_transform <- function(zsource, transformv){
-  # transform zsource dataset
-  #
-  # zsource: matrix of data used to calculate z (e.g. counts matrix)
-  #
-}
-
 zsource_type <- function(zsource, type.varname = "cellType_broad_hc"){
   # get the types (e.g. cell types.columns in z)
   #
