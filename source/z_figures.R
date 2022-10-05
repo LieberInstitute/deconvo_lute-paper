@@ -6,6 +6,7 @@
 #
 
 get_lgg_markers <- function(df.markers, save.new.plots = T,
+                            save.dpath = "deconvo_method-paper/outputs/02_test-source/",
                             png.fname.cplot = "mr-k_composite-vp-jt-bp.png",
                             plot.single.fnamev = c("mr-k_violin-plot.png", 
                                                    "mr-k_jitter-plot.png",

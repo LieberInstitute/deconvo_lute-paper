@@ -104,6 +104,7 @@ get_z_experiment <- function(zsource,
                              summary.varname = "donor",
                              k.summary.method = "mean",
                              z.summary.method = "mean",
+                             marker.plots = TRUE,
                              return.all = FALSE){
   # calculate z for a deconvolution experiment
   #
@@ -117,7 +118,8 @@ get_z_experiment <- function(zsource,
   #   which to summarize the zsource counts.
   # k.summary.method : name of method for summarizing zsource counts on variable
   #   summary.varname and k types.
-  # z.summary.method : name of method for summarizing within the k types for z.
+  # z.summary.method : name of method for summarizing within the k types for z
+  # marker.plots : whether to generate new marker plots.
   # return.all: whether to return all intermediate outputs. If FALSE, returns 
   #   only the final z table.
   #
@@ -173,6 +175,10 @@ get_z_experiment <- function(zsource,
   }))
   colnames(z) <- typev; lr <- z
   if(return.all){
+    if(marker.plots){
+      source("z_figures.R")
+      lgg <- get_lgg_markers(df.markers = ma.top)
+    }
     lr <- list(top.marker.data = ma.top, z.summary.filt = zs, z.final = z)
   }
   return(lr)
