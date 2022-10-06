@@ -7,9 +7,10 @@
 
 get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
                     counts.summary.method = "mean", seed.num = 2,
-                    scale.range = 500:2000){
+                    scale.range = 500:2000, get.results = TRUE, lz = NA){
   # get list of pseudobulked counts tables
   #
+  # arguments
   # datv : vector of relative cell type representation weights. Length should be 
   #   equal to nj*nk. Values here correspond to the mpb design matrix. If NA, this is 
   #   randomized and variable nj is used. For example, datv = c(1,2) implies the
@@ -19,7 +20,12 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   # counts.summary.method : method for summarizing counts to get y.data table.
   # scale.range: range of total counts for random scaling of total expression.
   #   This is taken randomly for each simulated sample.
+  # get.results : whether to make table of results.
   # 
+  # returns
+  # list of pseudobulk results, inc. option for results df.
+  #
+  #
   require(dplyr);require(DelayedArray)
   set.seed(seed.num); lpb <- list()
   # parse types
@@ -69,10 +75,17 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     rownames(ypb) <- rownames(scef)
     lpb[["y_data_pb"]] <- ypb
   }
+  if(get.results & !is(lz, "logical")){
+    df.res <- pb_report(lz, cell.typev, pi.pb, znamev, save.results = F)
+    lpb[["pb_report"]] <- df.res
+  }
   return(lpb)
 }
 
-pb_report <- function(){
+pb_report <- function(lz, cell.typev = c("Inhib", "Oligo", "other", "Excit"),
+                      pi.pb = lpb[["pi_pb"]], znamev = c("z.final", "zs1", "zs2"),
+                      save.results = TRUE,
+                      save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
   # makes results table for pseudobulk experiment.
   # 
   # note: 
@@ -83,28 +96,25 @@ pb_report <- function(){
   # method1 cell_type sample_id pi_true pi_est diff_pb_minus_est
   # method2 cell_type sample_id pi_true pi_est diff_pb_minus_est
   #
+  # arguments:
+  # cell.typev : ordered vector of cell type names
+  # pi.pb : matrix of true cell proportions (cells X samples).
+  # znamev : names of z tables to use in lz list.
+  # save.results : whether to save final results table.
+  # save.fpath : path to save final results table.
+  # 
   #
-  #
-  # cell types to assign
-  cell.typev <- c("Inhib", "Oligo", "other", "Excit")
-  # compare to pi_pb
-  pi.pb <- lpb[["pi_pb"]]
-  colnames(pi.pb) <- names(lpb[[2]])
-  rownames(pi.pb) <- cell.typev
-  
-  # make new table:
-  # method1 cell_type sample_id pi_true pi_est diff_pb_minus_est
-  # method2 cell_type sample_id pi_true pi_est diff_pb_minus_est
   require(reshape2)
   znamev <- c("z.final", "zs1", "zs2")
-  y.data <- lpb[["y_data_pb"]]
+  y.data <- pi.pb
   pi.pb.matrix <- pi.pb
   df.tall <- do.call(rbind, lapply(znamev, function(znamei){
     message(znamei)
     z.data <- lz[[znamei]]
     pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
                                      function(i){
-                                       nnls::nnls(y.data, z.data[,i])$x}))
+                                       nnls::nnls(y.data, 
+                                                  z.data[,i])$x}))
     pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)})
     colnames(pi.dati) <- colnames(y.data)
     rownames(pi.dati) <- colnames(z.data)
@@ -122,10 +132,8 @@ pb_report <- function(){
                           pi_est = pi.dati.tall$value,
                           pi_true = pi.pb.tall$value,
                           pi_diff = pi.pb.tall$value-pi.dati.tall$value)
-    df.tall$method <- znamei
-    return(df.tall)
+    df.tall$method <- znamei; return(df.tall)
   }))
-  
-  df.tall.fname <- "df-results_s-transform-expt_dlpfc-ro1.rda"
-  save(df.tall, file = file.path(save.dpath, df.tall.fname))
+  if(save.results){save(df.tall, file = save.fpath)}
+  return(df.tall)
 }
