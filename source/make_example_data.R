@@ -31,8 +31,17 @@ zdata_example <- function(z.dist, k.value, z.nfeat, force.yz.nonneg,
   if("s_rescale" %in% z.transformv){
     message("transforming z using `s_rescale` method...")
     lparam <- ltransform[["s_rescale"]]
-    z_rescale <- s_rescale(z_rescale, factorv = lparam[["factorv"]],
-                           constrain.nn = force.yz.nonneg)
+    if("factorv" %in% names(lparam)){
+      z_rescale <- s_rescale(z_rescale, factorv = lparam[["factorv"]],
+                             constrain.nn = force.yz.nonneg)
+    } else if("meanv" %in% names(lparam) & "sdv" %in% names(lparam)){
+      z_rescale <- s_rescale(z_rescale, meanv = lparam[["meanv"]],
+                             sdv = lparam[["sdv"]], 
+                             constrain.nn = force.yz.nonneg)
+    } else{
+      stop("invalid ltransform for chosen transformation method.")
+    }
+    
   }
   if(is.na(z_rescale[1])){
     z_rescale <- z_original} # parse rescale default
