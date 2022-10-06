@@ -127,14 +127,58 @@ table(sce[["celltype"]])
 
 
 
+get_lpb <- function(datv, scef, nj = 4, ctvarname = "celltype.treg", seed.num = 2){
+  # get list of pseudobulked counts tables
+  #
+  # datv : vector of cell type scale data. Length should be equal to nj*nk. 
+  #   Values here correspond to the mpb design matrix.
+  # scef : SingleCellExperiment, ideally filtered on some marker genes or z features.
+  # nj : number of pseudobulked samples to simulate.
+  # 
+  set.seed(seed.num)
+  kvarv <- scef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
+  ncol <- length(datv)/nk
+  # get pseudobulk design matrix
+  mpb <- matrix(datv, ncol=ncol) %>% 
+    apply(2, function(ci){ci/sum(ci)})
+  rownames(mpb) <- klabv
+  colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+  # sample scale factors (total counts)
+  scalev <- sample(1000:10000, ncol(mpb)) 
+  # set up counts for sampling
+  ct <- counts(scef); ctlabv <- paste0(kvarv, "_", seq(ncol(ct)))
+  # get list of pseudobulked counts tables
+  lpb <- lapply(seq(ncol(mpb)), function(ji){
+    # get sample-specific info
+    scalej <- scalev[ji] # sample scale factor
+    cellv.ij <- mpb[,ji]*scalej # vector of total cell counts
+    # get randomized counts data
+    ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
+      num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
+      cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
+      cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), 
+                                   num.cells.ij, replace = T)]
+      return(ct[,cnvf.index.ij])
+    }))
+    return(ct.pb.j)
+  })
+  names(lpb) <- colnames(mpb)
+  lpb[["mpb"]] <- mpb
+  return(lpb)
+}
 
+markerv <- rownames(lz$z.final)
+datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
+lpb <- get_lpb(datv, scef = sce[markerv,])
 
 
 
 # get pi_ref matrix
 require(dplyr)
+
+datv <- c(1,2,3,3,2,3,5,2,4,2,1,1); 
 kvarv <- sce[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
-datv <- c(1,2,3,3,2,3,5,2,4,2,1,1); ncol <- length(datv)/nk
+ncol <- length(datv)/nk
 mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
 rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
 
