@@ -71,3 +71,61 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   }
   return(lpb)
 }
+
+pb_report <- function(){
+  # makes results table for pseudobulk experiment.
+  # 
+  # note: 
+  # 
+  # * makes tall table of results comparing pi_est to pi_pb 
+  #     (truth), similar to:
+  # 
+  # method1 cell_type sample_id pi_true pi_est diff_pb_minus_est
+  # method2 cell_type sample_id pi_true pi_est diff_pb_minus_est
+  #
+  #
+  #
+  # cell types to assign
+  cell.typev <- c("Inhib", "Oligo", "other", "Excit")
+  # compare to pi_pb
+  pi.pb <- lpb[["pi_pb"]]
+  colnames(pi.pb) <- names(lpb[[2]])
+  rownames(pi.pb) <- cell.typev
+  
+  # make new table:
+  # method1 cell_type sample_id pi_true pi_est diff_pb_minus_est
+  # method2 cell_type sample_id pi_true pi_est diff_pb_minus_est
+  require(reshape2)
+  znamev <- c("z.final", "zs1", "zs2")
+  y.data <- lpb[["y_data_pb"]]
+  pi.pb.matrix <- pi.pb
+  df.tall <- do.call(rbind, lapply(znamev, function(znamei){
+    message(znamei)
+    z.data <- lz[[znamei]]
+    pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+                                     function(i){
+                                       nnls::nnls(y.data, z.data[,i])$x}))
+    pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)})
+    colnames(pi.dati) <- colnames(y.data)
+    rownames(pi.dati) <- colnames(z.data)
+    # get results table
+    # assign cell_type
+    pi.pb.df <- as.data.frame(pi.pb.matrix)
+    pi.dati <- as.data.frame(pi.dati)
+    pi.dati$cell_type <- pi.pb.df$cell_type <- cell.typev
+    # get tall tables
+    pi.dati.tall <- melt(pi.dati, id = "cell_type")
+    pi.pb.tall <- melt(pi.pb.df, id = "cell_type")
+    # return tall table
+    df.tall <- data.frame(cell_type = pi.dati.tall$cell_type,
+                          sample_id = pi.dati.tall$variable,
+                          pi_est = pi.dati.tall$value,
+                          pi_true = pi.pb.tall$value,
+                          pi_diff = pi.pb.tall$value-pi.dati.tall$value)
+    df.tall$method <- znamei
+    return(df.tall)
+  }))
+  
+  df.tall.fname <- "df-results_s-transform-expt_dlpfc-ro1.rda"
+  save(df.tall, file = file.path(save.dpath, df.tall.fname))
+}
