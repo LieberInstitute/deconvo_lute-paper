@@ -87,47 +87,92 @@ table(sce[[celltype.treg.varname]])
 # 24809 11067 32051  9677
 
 # get new lz for k=4
-lz <- get_z_experiment(sce[seq(100),], ngenes.byk = 25, summary.varname = "BrNum", 
+lz <- get_z_experiment(sce, ngenes.byk = 25, summary.varname = "BrNum", 
                        return.all = TRUE, type.varname = celltype.treg.varname,
                        save.dpath = save.dpath)
 # inspect z.final
-head(lz[["z.final"]])
+dim(lz[[3]]) # [1] 100   4
+head(lz[[3]])
+#                Inhib      Oligo      other    Excit
+# RNF220     0.6776153 6.65279170 0.88312716 1.882595
+# PKN2-AS1   0.6086981 0.12758524 0.14509842 3.043970
+# MIR137HG   1.3667413 0.21631744 0.18032267 5.961459
+# C1orf61    1.0006925 0.32648768 2.18928067 1.026195
+# ATP1A2     0.1820084 0.38670884 4.05657646 0.407281
+# AC011995.2 0.2868810 0.09214082 0.03466446 2.787617
+
+# save new lz
+save(lz, file = file.path(save.dpath, "lz_s-rescale-k4_dlpfc-ro1.rda"))
 
 # get z transformations
+# note: order of vectors to be c(Inhib, Oligo, other, Excit)
+meanv <- c(6,2,2,8); sdv <- c(2, 1, 1, 3)
 # z static
-lz[["zs1"]] <- s_rescale(lz[["z.final"]], factorv = c(2,2,6,8))
+lz[["zs1"]] <- s_rescale(lz[["z.final"]], factorv = meanv)
 # z randomized
-lz[["zs2"]] <- s_rescale(lz[["z.final"]], meanv = c(), sdv = c())
+lz[["zs2"]] <- s_rescale(lz[["z.final"]], meanv = meanv, sdv = sdv)
 
+
+#---------------------------
 # make new pseudobulk series
+#---------------------------
+ctvarname <- "celltype"
+sce[["celltype"]] <- ifelse(sce[["cellType"]]=="Oligo", "Oligo", 
+                            ifelse(sce[["cellType"]]=="Astro", "Astro",
+                                   ifelse(sce[["cellType"]]=="OPC", "OPC", "other")))
+table(sce[["celltype"]])
+# Astro Oligo   OPC other 
+# 782  5455   572  4393
+
+
+
+
+
+
+
+
 # get pi_ref matrix
-datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
-ncol <- length(datv)/unique(sce[[celltype.treg.varname]])
+require(dplyr)
+kvarv <- sce[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
+datv <- c(1,2,3,3,2,3,5,2,4,2,1,1); ncol <- length(datv)/nk
 mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
-rownames(mpb) <- c("Excit", "Inhib", "Oligo", "other")
-colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+
 # make new pb samples from pi_ref matrix
 seed.num = 2
 set.seed(seed.num)
-varv <- scef[[celltype.treg.varname]]
+scalev <- sample(1000:10000, ncol(mpb)) # sample scale factors (total counts)
 
 # set up counts for sampling
-ct <- counts(sce[rownames(sce) %in% marker.genev,])
-colnames(ct) <- paste0(varv, "_", seq(ncol(ct)))
-ctlabv <- colnames(ct)
+# ct <- counts(sce[rownames(sce) %in% marker.genev,])
+ct <- counts(sce[seq(100),])
+ctlabv <- paste0(kvarv, "_", seq(ncol(ct)))
 
-# get scale factors for samples
-scalev <- sample(1000:10000, ncol(mpb))
 # for sample, get pb
 ji <- 1
-scalej <- scalev[ji]
-cellv.ij <- mpb[,ji]*scalej
+scalej <- scalev[ji] # sample scale factor
+cellv.ij <- mpb[,ji]*scalej # vector of total cell counts
 # sample by cell type ki
-ki <- "Inhib"
-num.cells.ij <- cellv.ij[ki]
-cnvf <- cnv[grepl(ki, gsub("_.*", "", cnv))]
+ki <- "Astro"
+num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
+cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
+cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), num.cells.ij, replace = T)]
 
-sample()
+lpb <- lapply(seq(ncol(mpb)), function(ji){
+  # get sample-specific info
+  scalej <- scalev[ji] # sample scale factor
+  cellv.ij <- mpb[,ji]*scalej # vector of total cell counts
+  # get randomized counts data
+  ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
+    num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
+    cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
+    cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), num.cells.ij, replace = T)]
+    return(ct[,cnvf.index.ij])
+  }))
+  return(ct.pb.j)
+})
+lpb[["mpb"]] <- mpb
+return(lpb)
 
 
 
