@@ -5,24 +5,24 @@
 #
 
 s_rescale <- function(z, factorv = NULL, meanv = NULL, sdv = NULL,
-                      disttype = c("norm"), seed.num = NULL, 
+                      disttype = c("norm"), seed.num = 2, 
                       return.md = FALSE, constrain.nn = TRUE){
   # rescale z using some type-level factor s
   #
   # Notes: this type of transformation is used, for instance, to rescale cell
   #   types according to their expected sizes. 
   #
-  # Note: if meanv and varv provided, select factor values randomly from
+  # Note: if meanv and sdv provided, select factor values randomly from
   # a distribution.
   # z : signature matrix (cols = k types, rows = g genes)
   # factorv : vector of rescale factors to be applied to types 
   #   (length == ncol(z))
   # meanv : vector of distribution means to be applied to types
-  #   (length == ncol(z), order same as varv).
+  #   (length == ncol(z), order same as sdv).
   # sd : vector of distribution variances, to be applied to types 
   #   (length == ncol(z), order same as meanv).
   # disttype : type of distribution, or distribution function, from which
-  #   to randomly sample. Only applies if meanv and varv also provided.
+  #   to randomly sample. Only applies if meanv and sdv also provided.
   # seed.num : set the random seed. If NULL, is assigned using rnorm.
   # return.md : whether to return z_rescale with metadata.
   # constrain.nn : whether to constrain values in z_rescale to be non-negative.
@@ -33,23 +33,23 @@ s_rescale <- function(z, factorv = NULL, meanv = NULL, sdv = NULL,
   z_rescale <- NA # newly rescaled z matrix output
   ms <- NA # matrix corresponding to the s factor values
   if(is.null(factorv)){
-    if(is.null(meanv)|is.null(varv)){
+    if(is.null(meanv)|is.null(sdv)){
       stop("need to provide factors or distribution info.")
     } else{
       if(length(meanv)==ncol(z) & length(sdv)==ncol(z)){
         if(disttype == "norm"){
-          if(is.null(seed.num)){set.seed(seq(1000))}else{set.seed(seed.num)}
+          set.seed(seed.num)
           # draw random transform values from dist
-          ms <- do.call(rbind, 
+          ms <- t(do.call(rbind, 
                            lapply(seq(length(meanv)), function(ii){
             rnorm(n = nrow(z), mean = meanv[ii], sd = sdv[ii])
-          }))
+          })))
           z_rescale <- z*ms
         } else{
           stop("distribution function not recognized.")
         }
       } else{
-        stop("lengths of meanv and varv must be equal to num. types in z.")
+        stop("lengths of meanv and sdv must be equal to num. types in z.")
       }
     }
   } else{
