@@ -138,27 +138,22 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
   # 
   set.seed(seed.num)
-  
   # parse types
   kvarv <- scef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
-  
-  # parse pb data
+  # parse pb data -- get datv using either arg datv,nj
   if(is.na(datv)){
     if(is.na(nj)){
       stop("provide either datv or nj.")
+    } else{
+      datv <- rep(sample(1e3, nk), nj)
     }
   }
-  
   ncol <- length(datv)/nk
   # get pseudobulk design matrix
-  mpb <- matrix(datv, ncol=ncol) %>% 
-    apply(2, function(ci){ci/sum(ci)})
-  rownames(mpb) <- klabv
-  colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
-  # sample scale factors (total counts)
-  scalev <- sample(1000:10000, ncol(mpb)) 
-  # set up counts for sampling
-  ct <- counts(scef)
+  mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
+  rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+  scalev <- sample(1000:10000, ncol(mpb)) # sample scale factors (total counts)
+  ct <- counts(scef) # set up counts for sampling
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
   # get list of pseudobulked counts tables
   lpb <- lapply(seq(ncol(mpb)), function(ji){
@@ -175,66 +170,22 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     }))
     return(ct.pb.j)
   })
-  names(lpb) <- colnames(mpb)
-  lpb[["mpb"]] <- mpb
+  names(lpb) <- colnames(mpb); lpb[["mpb"]] <- mpb
   return(lpb)
 }
 
 markerv <- rownames(lz$z.final)
 datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
 lpb <- get_lpb(datv, scef = sce[markerv,])
+
 names(lpb)
-[1] "j_1" "j_2" "j_3" "mpb"
-
-
-
-
-# get pi_ref matrix
-require(dplyr)
-
-datv <- c(1,2,3,3,2,3,5,2,4,2,1,1); 
-kvarv <- sce[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
-ncol <- length(datv)/nk
-mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
-rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
-
-# make new pb samples from pi_ref matrix
-seed.num = 2
-set.seed(seed.num)
-scalev <- sample(1000:10000, ncol(mpb)) # sample scale factors (total counts)
-
-# set up counts for sampling
-# ct <- counts(sce[rownames(sce) %in% marker.genev,])
-ct <- counts(sce[seq(100),])
-ctlabv <- paste0(kvarv, "_", seq(ncol(ct)))
-
-# for sample, get pb
-ji <- 1
-scalej <- scalev[ji] # sample scale factor
-cellv.ij <- mpb[,ji]*scalej # vector of total cell counts
-# sample by cell type ki
-ki <- "Astro"
-num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
-cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
-cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), num.cells.ij, replace = T)]
-
-lpb <- lapply(seq(ncol(mpb)), function(ji){
-  # get sample-specific info
-  scalej <- scalev[ji] # sample scale factor
-  cellv.ij <- mpb[,ji]*scalej # vector of total cell counts
-  # get randomized counts data
-  ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
-    num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
-    cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
-    cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), num.cells.ij, replace = T)]
-    return(ct[,cnvf.index.ij])
-  }))
-  return(ct.pb.j)
-})
-lpb[["mpb"]] <- mpb
-return(lpb)
-
-
+# [1] "j_1" "j_2" "j_3" "mpb"
+lpb$mpb
+#             j_1       j_2   j_3
+# Inhib 0.1111111 0.1666667 0.500
+# Oligo 0.2222222 0.2500000 0.250
+# other 0.3333333 0.4166667 0.125
+# Excit 0.3333333 0.1666667 0.125
 
 # get pi_est series
 
