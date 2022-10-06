@@ -26,6 +26,7 @@ get_lgg_markers <- function(df.markers, save.new.plots = T,
   #
   #
   require(ggplot2)
+  require(gridExtra)
   dfpi <- as.data.frame(df.markers[,c(1,2,4,6,7)]) # index colnames of interest
   # mean ratio by cell type
   # plots for individual figures
@@ -57,6 +58,9 @@ get_lgg_markers <- function(df.markers, save.new.plots = T,
           axis.title.x = element_blank(), axis.title.y = element_blank(),
           legend.position = "none") +
     ggtitle("Boxplots")
+  # get return list
+  lr <- list(single.plots = list(violin = ggvp1, jitter = ggjt1, box = ggbp1),
+             composite.plots = list(violin = ggvp2, jitter = ggjt2, box = ggbp2))
   # save plots
   if(save.new.plots){
     message("Saving new plot files...")
@@ -81,8 +85,5 @@ get_lgg_markers <- function(df.markers, save.new.plots = T,
                  bottom = "cell_type")
     dev.off()
   }
-  # get return list
-  lr <- list(single.plots = list(violin = ggvp1, jitter = ggjt1, box = ggbp1),
-             composite.plots = list(violin = ggvp2, jitter = ggjt2, box = ggbp2))
   return(lr)
 }

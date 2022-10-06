@@ -87,7 +87,7 @@ table(sce[[celltype.treg.varname]])
 # 24809 11067 32051  9677
 
 # get new lz for k=4
-lz <- get_z_experiment(sce[seq(1000),], ngenes.byk = 25, summary.varname = "BrNum", 
+lz <- get_z_experiment(sce[seq(100),], ngenes.byk = 25, summary.varname = "BrNum", 
                        return.all = TRUE, type.varname = celltype.treg.varname,
                        save.dpath = save.dpath)
 # inspect z.final
@@ -121,10 +121,10 @@ scalev <- sample(1000:10000, ncol(mpb))
 # for sample, get pb
 ji <- 1
 scalej <- scalev[ji]
-abs.cells <- mpb[,ji]*scalej
+cellv.ij <- mpb[,ji]*scalej
 # sample by cell type ki
 ki <- "Inhib"
-num.cells.ij <- abs.cells[ki]
+num.cells.ij <- cellv.ij[ki]
 cnvf <- cnv[grepl(ki, gsub("_.*", "", cnv))]
 
 sample()
