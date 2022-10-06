@@ -6,15 +6,19 @@
 #
 
 get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
-                    counts.summary.method = "mean", seed.num = 2){
+                    counts.summary.method = "mean", seed.num = 2,
+                    scale.range = 500:2000){
   # get list of pseudobulked counts tables
   #
-  # datv : vector of cell type scale data. Length should be equal to nj*nk. 
-  #   Values here correspond to the mpb design matrix. If NA, this is randomized 
-  #   and variable nj is used.
+  # datv : vector of relative cell type representation weights. Length should be 
+  #   equal to nj*nk. Values here correspond to the mpb design matrix. If NA, this is 
+  #   randomized and variable nj is used. For example, datv = c(1,2) implies the
+  #   relative representation of c(0.33, 0.66) for the first and second types.
   # scef : SingleCellExperiment, ideally filtered on some marker genes or z features.
   # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
   # counts.summary.method : method for summarizing counts to get y.data table.
+  # scale.range: range of total counts for random scaling of total expression.
+  #   This is taken randomly for each simulated sample.
   # 
   set.seed(seed.num)
   # parse types
@@ -31,7 +35,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   # get pseudobulk design matrix
   mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
   rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
-  scalev <- sample(1000:10000, ncol(mpb)) # sample scale factors (total counts)
+  scalev <- sample(scale.range, ncol(mpb)) # sample scale factors (total counts)
   ct <- counts(scef) # set up counts for sampling
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
   # get list of pseudobulked counts tables
