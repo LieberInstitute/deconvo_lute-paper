@@ -26,14 +26,38 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   # returns
   # list of pseudobulk results, inc. option for results df.
   #
+  # examples
   #
-  require(dplyr);require(DelayedArray)
+  # ct <- matrix(sample(100, 50*102, replace = T), nrow = 50)
+  # sef <- SummarizedExperiment(assays = list(counts = ct))
+  # sef[["celltypes"]] <- c(rep("glia", 2), rep("neuron", 100))
+  # lpb <- get_lpb(sef, datv = c(1,10), ctvarname = "celltypes")
+  # print(dim(lpb[[1]])) # [1] 2 1
+  # print(dim(lpb[[2]][[1]])) # [1] 50 1474
+  # print(dim(lpb[[3]])) # [1] 50  1
+  # lpb[[1]]
+  # #              j_1
+  # #glia   0.09090909
+  # #neuron 0.90909091
+  # head(lpb[[3]])
+  # #          j_1
+  # #[1,] 54.36092
+  # #[2,] 48.54138
+  # #[3,] 42.43284
+  # #[4,] 50.17843
+  # #[5,] 52.94844
+  # #[6,] 46.34600
+  #
+  require(dplyr)
+  if(is(scef, "SingleCellExperiment")){
+    require(SingleCellExperiment);require(DelayedArray)
+  }
   set.seed(seed.num); lpb <- list()
   # parse types
   kvarv <- scef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
   # parse pb data -- get datv using either arg datv,nj
-  if(is.na(datv)){
-    if(is.na(nj)){
+  if(is(datv, "logical")){
+    if(is(nj, "logical")){
       stop("provide either datv or nj.")
     } else{
       datv <- rep(sample(1e3, nk), nj)
@@ -42,8 +66,9 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   ncol <- length(datv)/nk
   # get pseudobulk design matrix
   mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
+  rownames(mpb) <- klabv
+  colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
   lpb[["pi_pb"]] <- mpb
-  rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
   scalev <- sample(scale.range, ncol(mpb)) # sample scale factors (total counts)
   ct <- assays(scef)$counts # set up counts for sampling
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
@@ -83,9 +108,9 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   return(lpb)
 }
 
-pb_report <- function(lz, cell.typev = c("Inhib", "Oligo", "other", "Excit"),
-                      pi.pb = lpb[["pi_pb"]], znamev = c("z.final", "zs1", "zs2"),
-                      save.results = TRUE,
+pb_report <- function(lz, save.results = FALSE, 
+                      cell.typev = c("Inhib", "Oligo", "other", "Excit"),
+                      znamev = c("z.final", "zs1", "zs2"), pi.pb = lpb[["pi_pb"]],
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
   # makes results table for pseudobulk experiment.
   # 
