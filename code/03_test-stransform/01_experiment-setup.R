@@ -115,7 +115,23 @@ lz[["zs2"]] <- s_rescale(lz[["z.final"]], meanv = meanv, sdv = sdv)
 # get pseudobulked tables
 markerv <- rownames(lz$z.final)
 datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
-lpb <- get_lpb(datv, scef = sce[markerv,])
+
+# realize scef subset of sce
+scef <- sce[markerv,]
+scef <- SingleCellExperiment(assays = list(counts = counts(scef)))
+colData(scef) <- colData(sce)
+lpb <- get_lpb(datv, scef = scef, scale.range = 100:200, 
+               counts.summary.method = "mean")
+
+DelayedMatrixStats::rowMeans2(lpb[[1]][[1]])
+
+# test duration of process for small table
+t1 <- Sys.time()
+mm <- DelayedArray::rowMeans(lpb[[1]][[1]])
+t2 <- Sys.time()
+t1-t2
+
+rowMeans(as.matrix(lpb[[1]][[1]]))
 
 names(lpb) # [1] "listed_counts_pb" "y_data_pb"        "pi_pb"
 lpb$pi_pb

@@ -20,7 +20,8 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   # scale.range: range of total counts for random scaling of total expression.
   #   This is taken randomly for each simulated sample.
   # 
-  set.seed(seed.num)
+  require(dplyr);require(DelayedArray)
+  set.seed(seed.num); lpb <- list()
   # parse types
   kvarv <- scef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
   # parse pb data -- get datv using either arg datv,nj
@@ -34,6 +35,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   ncol <- length(datv)/nk
   # get pseudobulk design matrix
   mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
+  lpb[["pi_pb"]] <- mpb
   rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
   scalev <- sample(scale.range, ncol(mpb)) # sample scale factors (total counts)
   ct <- counts(scef) # set up counts for sampling
@@ -53,14 +55,19 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     }))
     return(ct.pb.j)
   })
-  if(counts.summary.method == "mean"){
-    ypb <- do.call(cbind, lapply(lct, function(ii){rowMeans(ii)}))
-  } else if(counts.summary.method == "median"){
-    ypb <- do.call(cbind, lapply(lct, function(ii){rowMedians(ii)}))
-  } else{
-    stop("counts.summary.method not recognized.")
+  names(lct) <- colnames(mpb)
+  lpb[["listed_counts_pb"]] <- lct
+  if(!is.na(counts.summary.method)){
+    if(counts.summary.method == "mean"){
+      ypb <- do.call(cbind, lapply(lct, function(ii){rowMeans(ii)}))
+    } else if(counts.summary.method == "median"){
+      ypb <- do.call(cbind, lapply(lct, function(ii){rowMedians(ii)}))
+    } else{
+      stop("counts.summary.method not recognized")
+    }
+    colnames(ypb) <- colnames(mpb)
+    rownames(ypb) <- rownames(scef)
+    lpb[["y_data_pb"]] <- ypb
   }
-  rownames(ypb) <- names(lct)
-  lpb <- list("listed_counts_pb" = lct, "y_data_pb" = ypb, "pi_pb" = mpb)
   return(lpb)
 }
