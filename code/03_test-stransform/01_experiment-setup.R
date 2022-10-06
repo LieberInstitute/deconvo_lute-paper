@@ -19,11 +19,15 @@ source.dpath <- file.path(proj.dpath, "source")
 save.dpath <- file.path(proj.dpath, "outputs/03_test-stransform")
 
 lz.fname <- "lz-mr_expt-stransform_dlpfc-ro1.rda"
-
 sce.fpath <- "DLPFC_snRNAseq/processed-data/sce/sce_DLPFC.Rdata"
-
 script.fnamev <- c("z_methods.R", "z_transform.R", "make_example_data.R", 
                    "z_figures.R", "y_methods.R")
+
+# saved objects
+# new z datasets
+lz.fname <- "lz_s-rescale-k4_dlpfc-ro1.rda"
+# new pseudobulked data
+lpb.fname <- "lpseudobulk_stransform-expt_dlpfc-ro1.rda"
 
 #-----
 # load
@@ -102,53 +106,125 @@ head(lz[[3]])
 # AC011995.2 0.2868810 0.09214082 0.03466446 2.787617
 
 # save new lz
-save(lz, file = file.path(save.dpath, "lz_s-rescale-k4_dlpfc-ro1.rda"))
+save(lz, file = file.path(save.dpath, lz.fname))
 
-# get z transformations
+# get pseudobulked tables
+# realize scef subset of sce
+# get scef subset
+markerv <- rownames(lz$z.final)
+scef <- sce[markerv,]
+scef <- SingleCellExperiment(assays = list(counts = counts(scef)))
+colData(scef) <- colData(sce)
+# set the cell weights
+datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
+# get the pseudobulked data
+lpb <- get_lpb(datv, scef = scef, scale.range = 100:200, 
+               counts.summary.method = "mean")
+
+head(lpb[[3]])
+#               j_1       j_2       j_3
+# RNF220     2.302198 1.7102273 2.2142857
+# PKN2-AS1   1.824176 1.2954545 0.8452381
+# MIR137HG   3.521978 1.9318182 1.7083333
+# C1orf61    1.181319 1.2840909 0.9404762
+# ATP1A2     1.857143 2.1590909 0.9583333
+# AC011995.2 1.329670 0.9886364 0.4523810
+
+
+save(lpb, file = file.path(save.dpath, lpb.fname))
+
+#----------------------
+# compare pi_est, pi_pb
+#----------------------
+lz <- get(load(file.path(save.dpath, lz.fname)))
+lpb <- get(load(file.path(save.dpath, lpb.fname)))
+
+# make new z tables/do s transformations
 # note: order of vectors to be c(Inhib, Oligo, other, Excit)
 meanv <- c(6,2,2,8); sdv <- c(2, 1, 1, 3)
-# z static
+# get the s-rescaled z tables
 lz[["zs1"]] <- s_rescale(lz[["z.final"]], factorv = meanv)
 # z randomized
 lz[["zs2"]] <- s_rescale(lz[["z.final"]], meanv = meanv, sdv = sdv)
 
-# get pseudobulked tables
-markerv <- rownames(lz$z.final)
-datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
-
-# realize scef subset of sce
-scef <- sce[markerv,]
-scef <- SingleCellExperiment(assays = list(counts = counts(scef)))
-colData(scef) <- colData(sce)
-lpb <- get_lpb(datv, scef = scef, scale.range = 100:200, 
-               counts.summary.method = "mean")
-
-DelayedMatrixStats::rowMeans2(lpb[[1]][[1]])
-
-# test duration of process for small table
-t1 <- Sys.time()
-mm <- DelayedArray::rowMeans(lpb[[1]][[1]])
-t2 <- Sys.time()
-t1-t2
-
-rowMeans(as.matrix(lpb[[1]][[1]]))
-
-names(lpb) # [1] "listed_counts_pb" "y_data_pb"        "pi_pb"
-lpb$pi_pb
-#             j_1       j_2   j_3
-# Inhib 0.1111111 0.1666667 0.500
-# Oligo 0.2222222 0.2500000 0.250
-# other 0.3333333 0.4166667 0.125
-# Excit 0.3333333 0.1666667 0.125
-
-# get pi_est series
+# get nnls solutions
+znamev <- c("z.final", "zs1", "zs2")
 y.data <- lpb[["y_data_pb"]]
+# get as list
+lpi <- lapply(znamev, function(znamei){
+  z.data <- lz[[znamei]]
+  pi.dati <- as.data.frame(do.call(rbind, lapply(seq(ncol(z.data)), function(i){
+    nnls::nnls(y.data, z.data[,i])$x
+  })))
+  colnames(pi.dati) <- colnames(y.data)
+  rownames(pi.dati) <- colnames(z.data)
+  pi.dati$type <- znamei
+  pi.dati
+})
+names(lpi) <- znamev
+# get as table
+df.pi <- do.call(rbind, lpi)
 
-pi.dat <- do.call(rbind, lapply(seq(ncol(z.data)), function(i){
-  nnls::nnls(y.data, z.data[,i])$x
+# get proportions from nnls
+# get nnls solutions
+znamev <- c("z.final", "zs1", "zs2")
+y.data <- lpb[["y_data_pb"]]
+# get as list
+lpi <- lapply(znamev, function(znamei){
+  z.data <- lz[[znamei]]
+  pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+                                          function(i){
+    nnls::nnls(y.data, z.data[,i])$x}))
+  pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)})
+  pi.dati <- as.data.frame(pi.dati)
+  colnames(pi.dati) <- colnames(y.data)
+  rownames(pi.dati) <- colnames(z.data)
+  pi.dati$type <- znamei
+  pi.dati
+})
+names(lpi) <- znamev
+# get as table
+df.pi <- do.call(rbind, lpi)
+
+
+
+
+# compare to pi_pb
+pi.pb <- lpb[["pi_pb"]]
+
+
+# make new table:
+# method1 cell_type sample_id pi_true pi_est diff_pb_minus_est
+# method2 cell_type sample_id pi_true pi_est diff_pb_minus_est
+require(reshape2)
+znamev <- c("z.final", "zs1", "zs2")
+y.data <- lpb[["y_data_pb"]]
+lpi <- do.call(rbind, lapply(znamev, function(znamei){
+  z.data <- lz[[znamei]]
+  pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+                                   function(i){
+                                     nnls::nnls(y.data, z.data[,i])$x}))
+  pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)})
+  pi.dati <- as.data.frame(pi.dati)
+  colnames(pi.dati) <- colnames(y.data)
+  rownames(pi.dati) <- colnames(z.data)
+  
+  # get diff matrix
+  pi.diff <- as.data.frame(pi.pb-pi.dati)
+  pi.diff$cell_type <- rownames(pi.diff)
+  
+  
+  
+  pi.pb <- as.data.frame(pi.pb)
+  pi.dati <- as.data.frame(pi.dati)
+  
+  
+  
+  pi.pb.tall <- melt(pi.dati, id = "cell_type")
+  pi.dati.tall <- melt(pi.pb, id = "cell_type")
+  pi.diff.tall <- melt(pi.diff, id = "cell_type")
+  
+  pi.dati$type <- znamei
+  pi.dati
 }))
-
-
-
-# eval pi differences
-
+names(lpi) <- znamev
