@@ -179,7 +179,7 @@ get_z_experiment <- function(zsource,
   if(return.all){
     lr <- list(top.marker.data = ma.top, z.summary.filt = zs, z.final = z)
     if(marker.plots){
-      source("z_figures.R")
+      # source("z_figures.R")
       lr[["plots"]] <- get_lgg_markers(df.markers = ma.top, save.dpath = save.dpath)
     }
   }

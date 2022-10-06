@@ -19,9 +19,11 @@ source.dpath <- file.path(proj.dpath, "source")
 save.dpath <- file.path(proj.dpath, "outputs/03_test-stransform")
 
 lz.fname <- "lz-mr_expt-stransform_dlpfc-ro1.rda"
-script.fnamev <- c("z_methods.R", "z_transform.R", "make_example_data.R")
 
 sce.fpath <- "DLPFC_snRNAseq/processed-data/sce/sce_DLPFC.Rdata"
+
+script.fnamev <- c("z_methods.R", "z_transform.R", 
+                   "make_example_data.R", "z_figures.R")
 
 #-----
 # load
@@ -85,7 +87,7 @@ table(sce[[celltype.treg.varname]])
 # 24809 11067 32051  9677
 
 # get new lz for k=4
-lz <- get_z_experiment(sce, ngenes.byk = 25, summary.varname = "BrNum", 
+lz <- get_z_experiment(sce[seq(1000),], ngenes.byk = 25, summary.varname = "BrNum", 
                        return.all = TRUE, type.varname = celltype.treg.varname,
                        save.dpath = save.dpath)
 # inspect z.final
@@ -97,5 +99,39 @@ lz[["zs1"]] <- s_rescale(lz[["z.final"]], factorv = c(2,2,6,8))
 # z randomized
 lz[["zs2"]] <- s_rescale(lz[["z.final"]], meanv = c(), sdv = c())
 
+# make new pseudobulk series
+# get pi_ref matrix
+datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
+ncol <- length(datv)/unique(sce[[celltype.treg.varname]])
+mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
+rownames(mpb) <- c("Excit", "Inhib", "Oligo", "other")
+colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+# make new pb samples from pi_ref matrix
+seed.num = 2
+set.seed(seed.num)
+varv <- scef[[celltype.treg.varname]]
 
+# set up counts for sampling
+ct <- counts(sce[rownames(sce) %in% marker.genev,])
+colnames(ct) <- paste0(varv, "_", seq(ncol(ct)))
+ctlabv <- colnames(ct)
+
+# get scale factors for samples
+scalev <- sample(1000:10000, ncol(mpb))
+# for sample, get pb
+ji <- 1
+scalej <- scalev[ji]
+abs.cells <- mpb[,ji]*scalej
+# sample by cell type ki
+ki <- "Inhib"
+num.cells.ij <- abs.cells[ki]
+cnvf <- cnv[grepl(ki, gsub("_.*", "", cnv))]
+
+sample()
+
+
+
+# get pi_est series
+
+# eval pi differences
 
