@@ -15,7 +15,8 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   #   equal to nj*nk. Values here correspond to the mpb design matrix. If NA, this is 
   #   randomized and variable nj is used. For example, datv = c(1,2) implies the
   #   relative representation of c(0.33, 0.66) for the first and second types.
-  # scef : SingleCellExperiment, ideally filtered on some marker genes or z features.
+  # scef : SummarizedExperiment, SingleCellExperiment, or similar, ideally 
+  #   filtered on some marker genes or z features.
   # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
   # counts.summary.method : method for summarizing counts to get y.data table.
   # scale.range: range of total counts for random scaling of total expression.
@@ -44,7 +45,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   lpb[["pi_pb"]] <- mpb
   rownames(mpb) <- klabv; colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
   scalev <- sample(scale.range, ncol(mpb)) # sample scale factors (total counts)
-  ct <- counts(scef) # set up counts for sampling
+  ct <- assays(scef)$counts # set up counts for sampling
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
   # get list of pseudobulked counts tables
   lct <- lapply(seq(ncol(mpb)), function(ji){

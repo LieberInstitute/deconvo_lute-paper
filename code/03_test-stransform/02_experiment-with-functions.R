@@ -13,7 +13,8 @@ save.dpath <- file.path(proj.dpath, "outputs/03_test-stransform")
 
 # list of z tables
 lz.fname <- "lz-mr_expt-stransform_dlpfc-ro1.rda"
-sef.fname <- "sef-markers_stransform-expt_dlpfc-ro1.rda"
+# sef.fname <- "sef-markers_stransform-expt_dlpfc-ro1.rda"
+sef.fname <- "sef-markers_ct-treg_stransform-expt_dlpfc-ro1.rda"
 script.fnamev <- c("z_methods.R", "z_transform.R", "make_example_data.R", 
                    "z_figures.R", "y_methods.R")
 
@@ -32,13 +33,11 @@ script.fnamev <- c("z_methods.R", "z_transform.R", "make_example_data.R",
 # source key functions
 for(scripti in script.fnamev){source(file.path(source.dpath, scripti))}
 
-
 #----------------------
 # get pseudobulk series
 #----------------------
 # set the cell weights
 datv <- c(1,1,1,1)
 # get the pseudobulked data
-lpb <- get_lpb(scef = sef, datv = datv, nj = NA, ctvarname = "celltype.treg", 
-               counts.summary.method = "mean", seed.num = 2,
-               scale.range = 500:2000, get.results = TRUE, lz = NA)
+lpb <- get_lpb(scef = sef, datv = datv, get.results = TRUE,
+               ctvarname = celltype.treg.varname, scale.range = 500:2000)
