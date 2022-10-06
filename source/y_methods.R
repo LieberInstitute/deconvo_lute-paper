@@ -6,7 +6,7 @@
 #
 
 get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
-                    seed.num = 2){
+                    counts.summary.method = "mean", seed.num = 2){
   # get list of pseudobulked counts tables
   #
   # datv : vector of cell type scale data. Length should be equal to nj*nk. 
@@ -14,6 +14,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   #   and variable nj is used.
   # scef : SingleCellExperiment, ideally filtered on some marker genes or z features.
   # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
+  # counts.summary.method : method for summarizing counts to get y.data table.
   # 
   set.seed(seed.num)
   # parse types
@@ -48,7 +49,14 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     }))
     return(ct.pb.j)
   })
-  ypb <- do.call(cbind, lapply(lct, function(ii){ii}));rownames(ypb)<-names(lct)
+  if(counts.summary.method == "mean"){
+    ypb <- do.call(cbind, lapply(lct, function(ii){rowMeans(ii)}))
+  } else if(counts.summary.method == "median"){
+    ypb <- do.call(cbind, lapply(lct, function(ii){rowMedians(ii)}))
+  } else{
+    stop("counts.summary.method not recognized.")
+  }
+  rownames(ypb) <- names(lct)
   lpb <- list("listed_counts_pb" = lct, "y_data_pb" = ypb, "pi_pb" = mpb)
   return(lpb)
 }

@@ -117,9 +117,8 @@ markerv <- rownames(lz$z.final)
 datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
 lpb <- get_lpb(datv, scef = sce[markerv,])
 
-names(lpb)
-# [1] "j_1" "j_2" "j_3" "mpb"
-lpb$mpb
+names(lpb) # [1] "listed_counts_pb" "y_data_pb"        "pi_pb"
+lpb$pi_pb
 #             j_1       j_2   j_3
 # Inhib 0.1111111 0.1666667 0.500
 # Oligo 0.2222222 0.2500000 0.250
@@ -127,7 +126,7 @@ lpb$mpb
 # Excit 0.3333333 0.1666667 0.125
 
 # get pi_est series
-y.data <- lpb[[1]]
+y.data <- lpb[["y_data_pb"]]
 
 pi.dat <- do.call(rbind, lapply(seq(ncol(z.data)), function(i){
   nnls::nnls(y.data, z.data[,i])$x
