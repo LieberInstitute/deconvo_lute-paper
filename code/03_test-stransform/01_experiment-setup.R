@@ -9,6 +9,8 @@
 # 
 #
 
+library(SingleCellExperiment)
+
 #------
 # paths
 #------
@@ -17,7 +19,7 @@ source.dpath <- file.path(proj.dpath, "source")
 save.dpath <- file.path(proj.dpath, "outputs/03_test-stransform")
 
 lz.fname <- "lz-mr_expt-stransform_dlpfc-ro1.rda"
-script.fnamev <- c("z_methods.R", "z_transform")
+script.fnamev <- c("z_methods.R", "z_transform.R", "make_example_data.R")
 
 sce.fpath <- "DLPFC_snRNAseq/processed-data/sce/sce_DLPFC.Rdata"
 
@@ -25,6 +27,7 @@ sce.fpath <- "DLPFC_snRNAseq/processed-data/sce/sce_DLPFC.Rdata"
 # params
 #-------
 celltype.varname <- "cellType_broad_hc"
+celltype.treg.varname <- "celltype.treg"
 
 #-----
 # load
@@ -38,19 +41,36 @@ sce <- get(load(sce.fpath))
 #-------------------------------------------------
 # make new cell type -- make types per tregs paper
 #-------------------------------------------------
-varv <- sce[[celltype.varname]]
+varv <- as.character(sce[[celltype.varname]])
+varv[!varv %in% c("Excit", "Inhib", "Oligo")] <- "other"
+sce[[celltype.treg.varname]] <- varv
+
 table(varv)
 #  Astro EndoMural     Micro     Oligo       OPC     Excit     Inhib
 #   3979      2157      1601     32051      1940     24809     11067
 
-new.ct <- rep("other", ncol(sce))
-net.ct[which(sce[[celltype.varname]])]
+table(sce[[celltype.treg.varname]])
+# Excit Inhib Oligo other
+# 24809 11067 32051  9677
+
+#------------------------------------
+# show how it works with example data
+#------------------------------------
+# note:
+# ltransform arg contains params for s_rescale()
+
+# static s transform
+ltrans <- list(s_rescale = list(factorv = seq(4)))
+ldecon1 <- ldecon_example(k.value = 4, ltransform = ltrans)
+
+# randomized s transform
+ltrans <- list(s_rescale = list(meanv = seq(4), sdv = rep(2,4)))
+ldecon2 <- ldecon_example(k.value = 4, ltransform = ltrans)
 
 
-#-----------------------------------------------------
-# make lz -- list containing z table and other outputs
-#-----------------------------------------------------
-
+#-----------------------
+# conduct new experiment
+#-----------------------
 # get detailed zexpt data
 lz <- get_z_experiment(sce, method.markers = "mean_ratio", 
                        mr.assay = "logcounts", ngenes.byk = 25, 

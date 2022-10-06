@@ -62,9 +62,8 @@ s_rescale <- function(z, factorv = NULL, meanv = NULL, sdv = NULL,
   if(constrain.nn){z_rescale[z_rescale<0] <- 0} # parse non-negativity
   lr <- z_rescale
   if(return.md){
-    largs <- list(seed.num = seed.num, factorv = factorv,
-                  meanv = meanv, varv = varv, mfact = mfact,
-                  constrain.nn = constrain.nn)
+    largs <- list(seed.num = seed.num, factorv = factorv, meanv = meanv, 
+                  sdv = sdv, mfact = mfact, constrain.nn = constrain.nn)
     lmd <- list(s = ms, args = largs)
     lr <- list(z_rescale = z_rescale, metadata = lmd)
   }

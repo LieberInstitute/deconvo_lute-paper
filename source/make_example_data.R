@@ -74,6 +74,7 @@ pi_example <- function(pi_data, pi_est, k.value, pi.est.funv, z.data, y.data,
   #   this is the same as "strict deconvolution"
   #   filter on some list of valid methods, pi.method.validv
   # pi.method.validv <- c("nnls")
+  require(nnls)
   if(is.na(pi_est)){skip.pi.est <- FALSE}
   if(skip.pi.est){
     message("using provided pi_est rather than calculating new pi_est.")
@@ -85,7 +86,6 @@ pi_example <- function(pi_data, pi_est, k.value, pi.est.funv, z.data, y.data,
       pi_est <- lapply(pi.est.funv, function(funi){
         pi.dat <- NA
         if(funi=="nnls"){
-          require(nnls)
           pi.dat <- do.call(rbind, lapply(seq(ncol(z.data)), function(i){
             nnls::nnls(y.data, z.data[,i])$x
           }))
