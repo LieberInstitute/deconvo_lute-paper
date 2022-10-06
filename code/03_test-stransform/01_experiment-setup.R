@@ -127,6 +127,13 @@ lpb$mpb
 # Excit 0.3333333 0.1666667 0.125
 
 # get pi_est series
+y.data <- lpb[[1]]
+
+pi.dat <- do.call(rbind, lapply(seq(ncol(z.data)), function(i){
+  nnls::nnls(y.data, z.data[,i])$x
+}))
+
+
 
 # eval pi differences
 

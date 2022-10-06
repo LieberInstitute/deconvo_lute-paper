@@ -34,7 +34,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   ct <- counts(scef) # set up counts for sampling
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
   # get list of pseudobulked counts tables
-  lpb <- lapply(seq(ncol(mpb)), function(ji){
+  lct <- lapply(seq(ncol(mpb)), function(ji){
     # get sample-specific info
     scalej <- scalev[ji] # sample scale factor
     cellv.ij <- mpb[,ji]*scalej # vector of total cell counts
@@ -48,6 +48,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     }))
     return(ct.pb.j)
   })
-  names(lpb) <- colnames(mpb); lpb[["mpb"]] <- mpb
+  ypb <- do.call(cbind, lapply(lct, function(ii){ii}));rownames(ypb)<-names(lct)
+  lpb <- list("listed_counts_pb" = lct, "y_data_pb" = ypb, "pi_pb" = mpb)
   return(lpb)
 }
