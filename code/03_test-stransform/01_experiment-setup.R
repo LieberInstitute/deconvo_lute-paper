@@ -143,9 +143,11 @@ lpb <- get(load(file.path(save.dpath, lpb.fname)))
 # note: order of vectors to be c(Inhib, Oligo, other, Excit)
 meanv <- c(6,2,2,8); sdv <- c(2, 1, 1, 3)
 # get the s-rescaled z tables
-lz[["zs1"]] <- s_rescale(lz[["z.final"]], factorv = meanv)
+lz[["zs1"]] <- s_rescale(lz[["z.final"]], 
+                         factorv = meanv)
 # z randomized
-lz[["zs2"]] <- s_rescale(lz[["z.final"]], meanv = meanv, sdv = sdv)
+lz[["zs2"]] <- s_rescale(lz[["z.final"]], 
+                         meanv = meanv, sdv = sdv)
 
 # get nnls solutions
 znamev <- c("z.final", "zs1", "zs2")
@@ -186,12 +188,12 @@ names(lpi) <- znamev
 # get as table
 df.pi <- do.call(rbind, lpi)
 
-
-
-
+# cell types to assign
+cell.typev <- c("Inhib", "Oligo", "other", "Excit")
 # compare to pi_pb
 pi.pb <- lpb[["pi_pb"]]
-
+colnames(pi.pb) <- names(lpb[[2]])
+rownames(pi.pb) <- cell.typev
 
 # make new table:
 # method1 cell_type sample_id pi_true pi_est diff_pb_minus_est
@@ -199,32 +201,33 @@ pi.pb <- lpb[["pi_pb"]]
 require(reshape2)
 znamev <- c("z.final", "zs1", "zs2")
 y.data <- lpb[["y_data_pb"]]
-lpi <- do.call(rbind, lapply(znamev, function(znamei){
+pi.pb.matrix <- pi.pb
+df.tall <- do.call(rbind, lapply(znamev, function(znamei){
+  message(znamei)
   z.data <- lz[[znamei]]
   pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
                                    function(i){
                                      nnls::nnls(y.data, z.data[,i])$x}))
   pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)})
-  pi.dati <- as.data.frame(pi.dati)
   colnames(pi.dati) <- colnames(y.data)
   rownames(pi.dati) <- colnames(z.data)
-  
-  # get diff matrix
-  pi.diff <- as.data.frame(pi.pb-pi.dati)
-  pi.diff$cell_type <- rownames(pi.diff)
-  
-  
-  
-  pi.pb <- as.data.frame(pi.pb)
+  # get results table
+  # assign cell_type
+  pi.pb.df <- as.data.frame(pi.pb.matrix)
   pi.dati <- as.data.frame(pi.dati)
-  
-  
-  
-  pi.pb.tall <- melt(pi.dati, id = "cell_type")
-  pi.dati.tall <- melt(pi.pb, id = "cell_type")
-  pi.diff.tall <- melt(pi.diff, id = "cell_type")
-  
-  pi.dati$type <- znamei
-  pi.dati
+  pi.dati$cell_type <- pi.pb.df$cell_type <- cell.typev
+  # get tall tables
+  pi.dati.tall <- melt(pi.dati, id = "cell_type")
+  pi.pb.tall <- melt(pi.pb.df, id = "cell_type")
+  # return tall table
+  df.tall <- data.frame(cell_type = pi.dati.tall$cell_type,
+                        sample_id = pi.dati.tall$variable,
+                        pi_est = pi.dati.tall$value,
+                        pi_true = pi.pb.tall$value,
+                        pi_diff = pi.pb.tall$value-pi.dati.tall$value)
+  df.tall$method <- znamei
+  return(df.tall)
 }))
-names(lpi) <- znamev
+
+df.tall.fname <- "df-results_s-transform-expt_dlpfc-ro1.rda"
+save(df.tall, file = file.path(save.dpath, df.tall.fname))
