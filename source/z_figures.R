@@ -25,6 +25,7 @@ get_lgg_markers <- function(df.markers, save.new.plots = T,
   # save.new.plots: Whether to save new plots of ggplot objects.
   #
   #
+  require(ggplot2)
   dfpi <- as.data.frame(df.markers[,c(1,2,4,6,7)]) # index colnames of interest
   # mean ratio by cell type
   # plots for individual figures
