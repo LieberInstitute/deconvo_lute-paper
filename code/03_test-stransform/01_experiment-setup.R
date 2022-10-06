@@ -127,16 +127,28 @@ table(sce[["celltype"]])
 
 
 
-get_lpb <- function(datv, scef, nj = 4, ctvarname = "celltype.treg", seed.num = 2){
+get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
+                    seed.num = 2){
   # get list of pseudobulked counts tables
   #
   # datv : vector of cell type scale data. Length should be equal to nj*nk. 
-  #   Values here correspond to the mpb design matrix.
+  #   Values here correspond to the mpb design matrix. If NA, this is randomized 
+  #   and variable nj is used.
   # scef : SingleCellExperiment, ideally filtered on some marker genes or z features.
-  # nj : number of pseudobulked samples to simulate.
+  # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
   # 
   set.seed(seed.num)
+  
+  # parse types
   kvarv <- scef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
+  
+  # parse pb data
+  if(is.na(datv)){
+    if(is.na(nj)){
+      stop("provide either datv or nj.")
+    }
+  }
+  
   ncol <- length(datv)/nk
   # get pseudobulk design matrix
   mpb <- matrix(datv, ncol=ncol) %>% 
@@ -146,7 +158,8 @@ get_lpb <- function(datv, scef, nj = 4, ctvarname = "celltype.treg", seed.num = 
   # sample scale factors (total counts)
   scalev <- sample(1000:10000, ncol(mpb)) 
   # set up counts for sampling
-  ct <- counts(scef); ctlabv <- paste0(kvarv, "_", seq(ncol(ct)))
+  ct <- counts(scef)
+  ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
   # get list of pseudobulked counts tables
   lpb <- lapply(seq(ncol(mpb)), function(ji){
     # get sample-specific info
@@ -170,6 +183,9 @@ get_lpb <- function(datv, scef, nj = 4, ctvarname = "celltype.treg", seed.num = 
 markerv <- rownames(lz$z.final)
 datv <- c(1,2,3,3,2,3,5,2,4,2,1,1)
 lpb <- get_lpb(datv, scef = sce[markerv,])
+names(lpb)
+[1] "j_1" "j_2" "j_3" "mpb"
+
 
 
 
