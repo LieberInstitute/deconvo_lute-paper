@@ -133,7 +133,7 @@ get_pi_est <- function(z.data, y.data, return.prop = TRUE){
   return(pi.dati)
 }
 
-pb_report <- function(lz, save.results = FALSE, 
+pb_report <- function(lz.compare, save.results = FALSE, 
                       cell.typev = c("Inhib", "Oligo", "other", "Excit"),
                       znamev = c("z.final", "zs1", "zs2"), pi.pb = lpb[["pi_pb"]],
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
@@ -151,6 +151,7 @@ pb_report <- function(lz, save.results = FALSE,
   # method2 cell_type sample_id pi_true pi_est diff_pb_minus_est
   #
   # arguments:
+  # lz.compare : list of z tables to compare
   # cell.typev : ordered vector of cell type names
   # pi.pb : matrix of true cell proportions (cells X samples).
   # znamev : names of z tables to use in lz list.
@@ -159,19 +160,11 @@ pb_report <- function(lz, save.results = FALSE,
   # 
   #
   require(reshape2)
-  znamev <- c("z.final", "zs1", "zs2")
-  y.data <- pi.pb
-  pi.pb.matrix <- pi.pb
+  lz <- lz.compare; znamev <- names(lz); y.data <- pi.pb.matrix <- pi.pb
   df.tall <- do.call(rbind, lapply(znamev, function(znamei){
     message(znamei)
     z.data <- lz[[znamei]]
-    pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
-                                     function(i){
-                                       nnls::nnls(y.data, 
-                                                  z.data[,i])$x}))
-    pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)})
-    colnames(pi.dati) <- colnames(y.data)
-    rownames(pi.dati) <- colnames(z.data)
+    pi.dati <- get_pi_est(z.data, y.data)
     # get results table
     # assign cell_type
     pi.pb.df <- as.data.frame(pi.pb.matrix)
