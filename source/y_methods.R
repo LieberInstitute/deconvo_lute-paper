@@ -108,10 +108,37 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   return(lpb)
 }
 
+get_pi_est <- function(z.data, y.data, return.prop = TRUE){
+  # get pi est using nnls
+  #
+  # return.prop: whether to return proportions. if False, returns magnitudes 
+  #   from NNLS.
+  #
+  # example:
+  # z.data <- matrix(sample(1000, 100), ncol = 5)
+  # y.data <- matrix(sample(1000, 40), ncol = 2)
+  # pi.est <- get_pi_est(z.data, y.data)
+  # colSums(pi.est) # check within-sample types add to 1
+  # # [1] 1 1
+  #
+  #
+  pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+                                   function(i){
+                                     nnls::nnls(y.data, 
+                                                z.data[,i])$x}))
+  if(return.prop){
+    pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)}) 
+  }
+  return(pi.dati)
+}
+
 pb_report <- function(lz, save.results = FALSE, 
                       cell.typev = c("Inhib", "Oligo", "other", "Excit"),
                       znamev = c("z.final", "zs1", "zs2"), pi.pb = lpb[["pi_pb"]],
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
+  #
+  #
+  #
   # makes results table for pseudobulk experiment.
   # 
   # note: 
