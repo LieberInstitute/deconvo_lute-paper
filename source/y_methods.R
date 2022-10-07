@@ -162,13 +162,10 @@ pb_report <- function(lz.compare, save.results = FALSE,
   require(reshape2)
   lz <- lz.compare; znamev <- names(lz); y.data <- pi.pb.matrix <- pi.pb
   df.tall <- do.call(rbind, lapply(znamev, function(znamei){
-    message(znamei)
-    z.data <- lz[[znamei]]
-    pi.dati <- get_pi_est(z.data, y.data)
+    message(znamei); z.data <- lz[[znamei]];pi.dati <- get_pi_est(z.data, y.data)
     # get results table
-    # assign cell_type
-    pi.pb.df <- as.data.frame(pi.pb.matrix)
-    pi.dati <- as.data.frame(pi.dati)
+    # define cell type variables
+    pi.pb.df <- as.data.frame(pi.pb.matrix); pi.dati <- as.data.frame(pi.dati)
     pi.dati$cell_type <- pi.pb.df$cell_type <- cell.typev
     # get tall tables
     pi.dati.tall <- melt(pi.dati, id = "cell_type")
