@@ -121,7 +121,6 @@ get_pi_est <- function(z.data, y.data, return.prop = TRUE){
   # colSums(pi.est) # check within-sample types add to 1
   # # [1] 1 1
   #
-  #
   pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
                                    function(i){
                                      nnls::nnls(y.data, 
@@ -129,6 +128,8 @@ get_pi_est <- function(z.data, y.data, return.prop = TRUE){
   if(return.prop){
     pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)}) 
   }
+  colnames(pi.dati) <- colnames(y.data)
+  rownames(pi.dati) <- colnames(z.data)
   return(pi.dati)
 }
 
