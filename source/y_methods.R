@@ -187,6 +187,52 @@ pi_plot <- function(est, true){
   return(ggpt)
 }
 
+scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
+  # makes plot series
+  #
+  #
+  require(ggplot2)
+  if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
+  # pi est vs true, scale as size
+  ggpt.scalesize <- ggplot(df.tall, 
+                           aes(x = pi_true, 
+                               y = pi_est, 
+                               size = scale)) +
+    geom_point(alpha = alpha.value)
+  # get main template plot for series
+  ggpt.main <- ggplot(df.tall, aes(x = scale))
+  # get plot series
+  ggpt.main.piest <- ggpt.main + 
+    geom_point(aes(y = pi_est), 
+               alpha = alpha.value)
+  ggpt.main.pitrue <- ggpt.main + 
+    geom_point(aes(y = pi_true), 
+               alpha = alpha.value)
+  ggpt.main.pidiff <- ggpt.main + 
+    geom_point(aes(y = pi_diff), 
+               alpha = alpha.value)
+  ggpt.main.pidiff.sampleid.col <- ggpt.main + 
+    geom_point(aes(y = pi_diff, 
+                   color = sample_id), 
+               alpha = alpha.value)
+  # get facets
+  ggpt.main.pidiff.sampleid.facet <- ggpt.main.pidiff + 
+    facet_wrap(~sample_id)
+  ggpt.main.pidiff.sampleid.celltype.facet <- ggpt.main.pidiff + 
+    facet_wrap(~sample_id+cell_type)
+  return(list(
+    ggpt.scalesize = ggpt.scalesize,
+    ggpt.main = ggpt.main,
+    ggpt.main.piest = ggpt.main.piest,
+    ggpt.main.pitrue = ggpt.main.pitrue,
+    ggpt.main.pidiff = ggpt.main.pidiff,
+    ggpt.main.pidiff.sampleid.col = ggpt.main.pidiff.sampleid.col,
+    ggpt.main.pidiff.sampleid.facet = ggpt.main.pidiff.sampleid.facet,
+    ggpt.main.pidiff.sampleid.celltype.facet =
+      ggpt.main.pidiff.sampleid.celltype.facet
+  ))
+}
+
 get_exe_dftall <- function(seed.num = 2){
   # get example tall report data
   #
