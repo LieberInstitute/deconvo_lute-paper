@@ -65,14 +65,20 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
       datv <- rep(sample(1e3, nk), nj)
     }
   }
-  ncol <- length(datv)/nk
   # get pseudobulk design matrix
-  mpb <- matrix(datv, ncol=ncol) %>% apply(2, function(ci){ci/sum(ci)})
+  ncol <- length(datv)/nk
+  if(!ncol %% 1 == 0){stop("invalid datv dimensions")}
+  mpb <- matrix(datv, ncol=ncol) %>% 
+    apply(2, function(ci){ci/sum(ci)})
   rownames(mpb) <- klabv
   colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
   lpb[["pi_pb"]] <- mpb
-  scalev <- sample(scale.range, ncol(mpb)) # sample scale factors (total counts)
-  ct <- assays(scef)$counts # set up counts for sampling
+  # get sample scale factors, or randomized total counts
+  scalev <- sample(scale.range, ncol(mpb))
+  lpb[["scalev"]] <- scalev
+  names(lpb[["scalev"]]) <- colnames(mpb)
+  # set up counts for sampling
+  ct <- assays(scef)$counts 
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
   # get list of pseudobulked counts tables
   lct <- lapply(seq(ncol(mpb)), function(ji){
@@ -90,8 +96,6 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     return(ct.pb.j)
   })
   names(lct) <- colnames(mpb)
-  lpb[["scalev"]] <- scalev
-  names(lpb[["scalev"]]) <- colnames(mpb)
   lpb[["listed_counts_pb"]] <- lct
   if(!is.na(counts.summary.method)){
     if(counts.summary.method == "mean"){
@@ -200,7 +204,7 @@ get_exe_lpb <- function(seed.num = 2){
 get_exe_lz <- function(seed.num = 2){
   # get example lz object
   #
-  set.seed(seed.nume)
+  set.seed(seed.num)
   cell.typev = c("excit", "inhib", "oligo", "other")
   z.data <- matrix(sample(1000, 200), ncol = 4)
   colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
@@ -212,11 +216,10 @@ get_exe_sef <- function(seed.num = 2){
   # get example filtered summarized experiment
   #
   ct <- matrix(
-    sample(100, 50*102, replace = T), 
+    sample(100, 50*100, replace = T), 
     nrow = 50)
   sef <- SummarizedExperiment(assays = list(counts = ct))
-  sef[["celltypes"]] <- c(rep("glia", 2), 
-                          rep("neuron", 100))
+  sef[["celltypes"]] <- paste0(rep("k_", 100), seq(4))
   return(sef)
 }
 
@@ -443,9 +446,9 @@ scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
 #-----------------------------------
 # main pseudobulk experiment wrapper
 #-----------------------------------
-get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), 
+get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), nj = NA,
                               scale.range = 500:2000,
-                              ctvarname = "celltype.treg",
+                              ctvarname = "celltypes",
                               plot.results = TRUE,
                               method.str = "nnls", 
                               seed.num = 2){
@@ -476,7 +479,7 @@ get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1),
   # pb.expt <- get_pb_experiment(lz, sef, datv = c(1,1,1,1,10,1,1,1))
   # 
   lr <- list()
-  lr[["lpb"]] <- get_lpb(scef = scef, lz = lz, datv = NA, nj = NA, 
+  lr[["lpb"]] <- get_lpb(scef = scef, lz = lz, datv = datv, nj = NA, 
                          ctvarname = ctvarname, seed.num = seed.num, 
                          scale.range = scale.range, get.results = TRUE)
   if(plot.results){
