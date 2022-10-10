@@ -8,22 +8,25 @@
 #---------------------------------------
 # pseudobulk experiment helper functions
 #---------------------------------------
-get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
+get_lpb <- function(sef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
                     counts.summary.method = "mean", seed.num = 2,
                     scale.range = 500:2000, get.results = TRUE, lz = NA){
   # get list of pseudobulked counts tables
   #
   # arguments
+  # sef : SummarizedExperiment, SingleCellExperiment, or similar, ideally 
+  #   filtered on some marker genes or z features. Note, cell type labels in
+  #   sef[[ctvarname]] should not contain "_" (underscore) characters.
   # datv : vector of relative cell type representation weights. Length should be 
   #   equal to nj*nk. Values here correspond to the mpb design matrix. If NA, this is 
   #   randomized and variable nj is used. For example, datv = c(1,2) implies the
   #   relative representation of c(0.33, 0.66) for the first and second types.
-  # scef : SummarizedExperiment, SingleCellExperiment, or similar, ideally 
-  #   filtered on some marker genes or z features.
   # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
+  # ctvarname : name of the cell type labels, contained in sef coldata.
   # counts.summary.method : method for summarizing counts to get y.data table.
-  # scale.range: range of total counts for random scaling of total expression.
-  #   This is taken randomly for each simulated sample.
+  # seed.num : token for random seed, should be an integer.
+  # scale.range: integer vector from which to randomly take total counts in
+  #   sample-wise expression.
   # get.results : whether to make table of results.
   # 
   # returns
@@ -31,32 +34,13 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   #
   # examples
   #
-  # require(SummarizedExperiment)
-  # sef <- get_exe_sef()
-  # lpb <- get_lpb(sef, datv = c(1,10), ctvarname = "celltypes")
-  # print(dim(lpb[[1]])) # [1] 2 1
-  # print(dim(lpb[[2]][[1]])) # [1] 50 1474
-  # print(dim(lpb[[3]])) # [1] 50  1
-  # lpb[[1]]
-  # #              j_1
-  # #glia   0.09090909
-  # #neuron 0.90909091
-  # head(lpb[[3]])
-  # #          j_1
-  # #[1,] 54.36092
-  # #[2,] 48.54138
-  # #[3,] 42.43284
-  # #[4,] 50.17843
-  # #[5,] 52.94844
-  # #[6,] 46.34600
-  #
   require(dplyr)
-  if(is(scef, "SingleCellExperiment")){
+  if(is(sef, "SingleCellExperiment")){
     require(SingleCellExperiment);require(DelayedArray)
   }
   set.seed(seed.num); lpb <- list()
   # parse types
-  kvarv <- scef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
+  kvarv <- sef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
   # parse pb data -- get datv using either arg datv,nj
   if(is(datv, "logical")){
     if(is(nj, "logical")){
@@ -78,13 +62,13 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   lpb[["scalev"]] <- scalev
   names(lpb[["scalev"]]) <- colnames(mpb)
   # set up counts for sampling
-  ct <- assays(scef)$counts 
+  ct <- assays(sef)$counts 
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
   # get list of pseudobulked counts tables
   lct <- lapply(seq(ncol(mpb)), function(ji){
     # get sample-specific info
     scalej <- scalev[ji] # sample scale factor
-    cellv.ij <- mpb[,ji]*scalej # vector of total cell counts
+    cellv.ij <- round(mpb[,ji]*scalej) # vector of total cell counts
     # get randomized counts data
     ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
       num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
@@ -108,7 +92,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
       stop("counts.summary.method not recognized")
     }
     colnames(ypb) <- colnames(mpb)
-    rownames(ypb) <- rownames(scef)
+    rownames(ypb) <- rownames(sef)
     lpb[["y_data_pb"]] <- ypb
   }
   if(get.results & !is(lz, "logical")){
@@ -212,14 +196,17 @@ get_exe_lz <- function(seed.num = 2){
   return(lz)
 }
 
-get_exe_sef <- function(seed.num = 2){
+get_exe_sef <- function(ct.str = "celltype", seed.num = 2){
   # get example filtered summarized experiment
+  #
+  # ct.str : base string for cell types. should not include "_" (underscore).
+  #
   #
   ct <- matrix(
     sample(100, 50*100, replace = T), 
     nrow = 50)
   sef <- SummarizedExperiment(assays = list(counts = ct))
-  sef[["celltypes"]] <- paste0(rep("k_", 100), seq(4))
+  sef[["celltypes"]] <- paste0(rep("celltype", 100), seq(4))
   return(sef)
 }
 
@@ -474,9 +461,6 @@ get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), nj = NA,
   # randomiezed pseudobulk data, results table, optional plots
   #
   # example
-  # lz <- get_exe_lz()
-  # sef <- get_exe_sef()
-  # pb.expt <- get_pb_experiment(lz, sef, datv = c(1,1,1,1,10,1,1,1))
   # 
   lr <- list()
   lr[["lpb"]] <- get_lpb(scef = scef, lz = lz, datv = datv, nj = NA, 
@@ -490,3 +474,9 @@ get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), nj = NA,
   }
   return(lr)
 }
+
+
+lz <- get_exe_lz()
+sef <- get_exe_sef()
+pb.expt <- get_pb_experiment(lz, sef, 
+                             datv = c(1,1,1,1))
