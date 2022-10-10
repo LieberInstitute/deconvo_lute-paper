@@ -187,6 +187,68 @@ pi_plot <- function(est, true){
   return(ggpt)
 }
 
+get_exe_dftall <- function(seed.num = 2){
+  # get example tall report data
+  #
+  message("getting example df.tall data...")
+  set.seed(seed.num)
+  df.tall <- data.frame(cell_type = rep(c("k_1", "k_2"), 4),
+                        sample_id = rep(paste0("j_", seq(2)), each = 2),
+                        pi_est = rnorm(4, 100, 20)/100,
+                        pi_true = rnorm(4, 100, 20)/100,
+                        method = rep("z1", 4),
+                        scale = c(rep(c(100,1000), each = 2)))
+  df.tall$pi_diff <- df.tall$pi_true-df.tall$pi_est
+  df.tall <- df.tall[,c(1:4, 7, 5:6)]
+  return(df.tall)
+}
+
+pi_plot_series <- function(df.tall = NA){
+  # makes plot series
+  #
+  # df.tall : valid tall report data.frame, e.g. such as returned by running 
+  #   `pb_report()`.
+  #
+  # example
+  # pi_plot_series()
+  #
+  # returns
+  # lgg, list of ggplot objects
+  #
+  require(ggplot2)
+  if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
+  # get main plot object
+  ggpt.main <- ggplot(df.tall, aes(x = pi_true, y = pi_est)) +
+    geom_abline(intercept = 0, 
+                slope = 1, 
+                color = "red", 
+                lwd = 1.2, 
+                alpha = 0.8) +
+    geom_smooth(method = "lm", 
+                color = "blue", 
+                lwd = 1.2, 
+                alpha = 0.5)
+  # label series
+  ggpt.all <- ggpt.main + geom_point(alpha = 0.3)
+  ggpt.all.method <- ggpt.main + 
+    geom_point(aes(color = method), alpha = 0.3)
+  ggpt.all.sampleid <- ggpt.main + 
+    geom_point(aes(color = sample_id), alpha = 0.3)
+  ggpt.all.col <- ggpt.main + 
+    geom_point(aes(color = cell_type), alpha = 0.3)
+  # get facet series
+  ggpt.all.celltype.facet <- ggpt.all.col + 
+    facet_wrap(~cell_type, nrow = 1)
+  ggpt.all.method.facet <- ggpt.all.col + 
+    facet_wrap(~method, nrow = 1)
+  ggpt.all.sampleid.facet <- ggpt.all.col + 
+    facet_wrap(~sample_id, nrow = 1)
+  return(list(ggpt.main = ggpt.main, 
+              ggpt.all = ggpt.all, 
+              ggpt.all.col = ggpt.all.col, 
+              ggpt.all.facet = ggpt.all.facet))
+}
+
 pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE, 
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
   #
@@ -213,45 +275,38 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
   #
   # example:
   #
-  #require(SummarizedExperiment)
+  # require(SummarizedExperiment)
   ## get example data
-  #method.str <- "nnls"
-  #cell.typev = c("excit", "inhib", "oligo", "other")
-  #z.data <- matrix(sample(1000, 200), ncol = 4)
-  #colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
+  # method.str <- "nnls"
+  # cell.typev = c("excit", "inhib", "oligo", "other")
+  # z.data <- matrix(sample(1000, 200), ncol = 4)
+  # colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
   #
   ## make counts data
-  #ct <- matrix(sample(100, 50*100, replace = T), nrow = 50)
+  # ct <- matrix(sample(100, 50*100, replace = T), nrow = 50)
   #
   ## get summarized experiment
-  #sef <- SummarizedExperiment(assays = list(counts = ct))
-  #sef[["celltypes"]] <- c(rep("excit", 40), rep("inhib", 30), 
-  #                        rep("oligo", 10), rep("other", 20))
+  # sef <- SummarizedExperiment(assays = list(counts = ct))
+  # sef[["celltypes"]] <- c(rep("excit", 40), rep("inhib", 30), rep("oligo", 10), rep("other", 20))
   # make pb series
-  #samp1.ratios <- c(10,10,5,10)
-  #samp2.ratios <- c(5,5,10,5)
-  #lpb <- get_lpb(sef, 
-  #               datv = c(samp1.ratios, 
-  #                        samp2.ratios), 
-  #               ctvarname = "celltypes")
+  # samp1.ratios <- c(10,10,5,10)
+  # samp2.ratios <- c(5,5,10,5)
+  # lpb <- get_lpb(sef, datv = c(samp1.ratios, samp2.ratios), ctvarname = "celltypes")
   #
-  #lz <- 
-  #  list(z1 = z.data, 
-  #       z2 = z.data)
-  #pi.pb <- lpb$pi_pb
-  #y.data <- lpb$y_data_pb
+  # lz <- list(z1 = z.data, z2 = z.data)
+  # pi.pb <- lpb$pi_pb
+  # y.data <- lpb$y_data_pb
   #
-  #znamev <- names(lz)
+  # znamev <- names(lz)
   #
-  #head(pb_report(lz.compare = lz, lpb = lpb,
-  #          method.str = method.str))
-  # cell_type sample_id    pi_est   pi_true     pi_diff method scale
-  # 1     excit       j_1 0.0000000 0.2857143  0.28571429     z1  1474
-  # 2     inhib       j_1 0.3639567 0.2857143 -0.07824240     z1  1474
-  # 3     oligo       j_1 0.2596562 0.1428571 -0.11679908     z1  1474
-  # 4     other       j_1 0.3763871 0.2857143 -0.09067281     z1  1474
-  # 5     excit       j_2 0.6862226 0.2000000 -0.48622262     z1  1209
-  # 6     inhib       j_2 0.0000000 0.2000000  0.20000000     z1  1209
+  # head(pb_report(lz.compare = lz, lpb = lpb, method.str = method.str))
+  ## cell_type sample_id    pi_est   pi_true     pi_diff method scale
+  ## 1     excit       j_1 0.0000000 0.2857143  0.28571429     z1  1474
+  ## 2     inhib       j_1 0.3639567 0.2857143 -0.07824240     z1  1474
+  ## 3     oligo       j_1 0.2596562 0.1428571 -0.11679908     z1  1474
+  ## 4     other       j_1 0.3763871 0.2857143 -0.09067281     z1  1474
+  ## 5     excit       j_2 0.6862226 0.2000000 -0.48622262     z1  1209
+  ## 6     inhib       j_2 0.0000000 0.2000000  0.20000000     z1  1209
   # 
   #
   require(reshape2)
@@ -307,5 +362,10 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
   return(df.tall)
 }
 
-
-
+get_pb_experiment <- function(lz, scef, scale.range = 500:2000, 
+                              save.results = FALSE, plot.results = TRUE,
+                              method.str = "nnls", seed.num = 2, ){
+  lpb <- get_lpb()
+  dfr <- pb_report()
+  ggpt <- pi_plot()
+}
