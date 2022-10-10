@@ -3,6 +3,9 @@
 # 
 # Methods for conducting experiments with random pseudobulking with some 
 # cell-level reference data.
+# 
+# example:
+# new_pseudobulk_expt <- get_pb_experiment()
 #
 
 #---------------------------------------
