@@ -107,8 +107,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     lpb[["y_data_pb"]] <- ypb
   }
   if(get.results & !is(lz, "logical")){
-    df.res <- pb_report(lz, cell.typev, pi.pb, 
-                        znamev, save.results = F)
+    df.res <- pb_report(lz, lpb)
     lpb[["pb_report"]] <- df.res
   }
   return(lpb)
@@ -167,140 +166,52 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
   return(pi.dati)
 }
 
-pi_plot <- function(est, true){
-  # pi_plot
-  # 
-  # est: vector of estimated pi values
-  # true: vector of true pi values
-  #
-  #
-  #
-  require(ggplot2)
-  est <- rnorm(1000, 1000, 500)/1000
-  true <- rnorm(1000, 1000, 500)/1000
-  ggpt <- ggplot(dfp, aes(x = true, y = est)) + theme_bw() +
-    geom_point(alpha = 0.3) + xlab("pi_true") + ylab("pi_est") +
-    geom_abline(intercept = 0, slope = 1, color = "red", 
-                lwd = 1.2, alpha = 0.8) +
-    geom_smooth(method = "lm", color = "blue",
-                lwd = 1.2, alpha = 0.5)
-  return(ggpt)
-}
-
-scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
-  # makes plot series
-  #
-  #
-  require(ggplot2)
-  if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
-  # pi est vs true, scale as size
-  ggpt.scalesize <- ggplot(df.tall, 
-                           aes(x = pi_true, 
-                               y = pi_est, 
-                               size = scale)) +
-    geom_point(alpha = alpha.value)
-  # get main template plot for series
-  ggpt.main <- ggplot(df.tall, aes(x = scale))
-  # get plot series
-  ggpt.main.piest <- ggpt.main + 
-    geom_point(aes(y = pi_est), 
-               alpha = alpha.value)
-  ggpt.main.pitrue <- ggpt.main + 
-    geom_point(aes(y = pi_true), 
-               alpha = alpha.value)
-  ggpt.main.pidiff <- ggpt.main + 
-    geom_point(aes(y = pi_diff), 
-               alpha = alpha.value)
-  ggpt.main.pidiff.sampleid.col <- ggpt.main + 
-    geom_point(aes(y = pi_diff, 
-                   color = sample_id), 
-               alpha = alpha.value)
-  # get facets
-  ggpt.main.pidiff.sampleid.facet <- ggpt.main.pidiff + 
-    facet_wrap(~sample_id)
-  ggpt.main.pidiff.sampleid.celltype.facet <- ggpt.main.pidiff + 
-    facet_wrap(~sample_id+cell_type)
-  return(list(
-    ggpt.scalesize = ggpt.scalesize,
-    ggpt.main = ggpt.main,
-    ggpt.main.piest = ggpt.main.piest,
-    ggpt.main.pitrue = ggpt.main.pitrue,
-    ggpt.main.pidiff = ggpt.main.pidiff,
-    ggpt.main.pidiff.sampleid.col = ggpt.main.pidiff.sampleid.col,
-    ggpt.main.pidiff.sampleid.facet = ggpt.main.pidiff.sampleid.facet,
-    ggpt.main.pidiff.sampleid.celltype.facet =
-      ggpt.main.pidiff.sampleid.celltype.facet
-  ))
-}
-
-get_exe_dftall <- function(seed.num = 2){
-  # get example tall report data
-  #
-  message("getting example df.tall data...")
-  set.seed(seed.num)
-  df.tall <- data.frame(cell_type = rep(c("k_1", "k_2"), 4),
-                        sample_id = rep(paste0("j_", seq(2)), each = 2),
-                        pi_est = rnorm(4, 100, 20)/100,
-                        pi_true = rnorm(4, 100, 20)/100,
-                        method = rep("z1", 4),
-                        scale = c(rep(c(100,1000), each = 2)))
-  df.tall$pi_diff <- df.tall$pi_true-df.tall$pi_est
-  df.tall <- df.tall[,c(1:4, 7, 5:6)]
-  return(df.tall)
-}
-
-pi_plot_series <- function(df.tall = NA, alpha.value = 0.4){
-  # makes plot series
-  #
-  # df.tall : valid tall report data.frame, e.g. such as returned by running 
-  #   `pb_report()`.
+# example object functions
+get_exe_lpb <- function(seed.num = 2){
+  # get example lpb object
   #
   # example
-  # pi_plot_series()
+  # get_exe_lpb()
   #
-  # returns
-  # lgg, list of ggplot objects
-  #
-  require(ggplot2)
-  if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
-  # get main plot object
-  ggpt.main <- ggplot(df.tall, 
-                      aes(x = pi_true, 
-                          y = pi_est)) +
-    geom_abline(intercept = 0, 
-                slope = 1, 
-                color = "red", 
-                lwd = 1.2, 
-                alpha = alpha.value) +
-    geom_smooth(method = "lm", 
-                color = "blue", 
-                lwd = 1.2, 
-                alpha = alpha.value)
-  # label series
-  ggpt.all <- ggpt.main + 
-    geom_point(alpha = alpha.value)
-  ggpt.all.method <- ggpt.main + 
-    geom_point(aes(color = method), 
-               alpha = alpha.value)
-  ggpt.all.sampleid <- ggpt.main + 
-    geom_point(aes(color = sample_id), 
-               alpha = alpha.value)
-  ggpt.all.col <- ggpt.main + 
-    geom_point(aes(color = cell_type), 
-               alpha = alpha.value)
-  # get facet series
-  ggpt.all.celltype.facet <- ggpt.all.col + 
-    facet_wrap(~cell_type, nrow = 1)
-  ggpt.all.method.facet <- ggpt.all.col + 
-    facet_wrap(~method, nrow = 1)
-  ggpt.all.sampleid.facet <- ggpt.all.col + 
-    facet_wrap(~sample_id, nrow = 1)
-  return(list(ggpt.main = ggpt.main, 
-              ggpt.all = ggpt.all, 
-              ggpt.all.col = ggpt.all.col, 
-              ggpt.all.facet = ggpt.all.facet))
+  require(SummarizedExperiment)
+  set.seed(seed.num)
+  # make counts data
+  ct <- matrix(
+    sample(100, 50*100, replace = T), 
+    nrow = 50)
+  # get summarized experiment
+  sef <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(counts = ct))
+  sef[["celltypes"]] <- c(rep("excit", 40), 
+                          rep("inhib", 30), 
+                          rep("oligo", 10), 
+                          rep("other", 20))
+  # make pb series
+  samp1.ratios <- c(10,10,5,10)
+  samp2.ratios <- c(5,5,10,5)
+  lpb <- get_lpb(sef, 
+                 datv = c(samp1.ratios, 
+                          samp2.ratios), 
+                 ctvarname = "celltypes")
+  return(lpb)
 }
 
+get_exe_lz <- function(seed.num = 2){
+  # get example lz object
+  #
+  set.seed(seed.nume)
+  cell.typev = c("excit", "inhib", "oligo", "other")
+  z.data <- matrix(sample(1000, 200), ncol = 4)
+  colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
+  lz <- list(z1 = z.data, z2 = z.data)
+  return(lz)
+}
+
+
+#----------------------------
+# report data.frame functions
+#----------------------------
+# results df
 pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE, 
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
   #
@@ -329,28 +240,10 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
   #
   # require(SummarizedExperiment)
   ## get example data
-  # method.str <- "nnls"
-  # cell.typev = c("excit", "inhib", "oligo", "other")
-  # z.data <- matrix(sample(1000, 200), ncol = 4)
-  # colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
+  # lpb <- get_exe_lpb()
+  # lz <- get_exe_lz()
   #
-  ## make counts data
-  # ct <- matrix(sample(100, 50*100, replace = T), nrow = 50)
-  #
-  ## get summarized experiment
-  # sef <- SummarizedExperiment(assays = list(counts = ct))
-  # sef[["celltypes"]] <- c(rep("excit", 40), rep("inhib", 30), rep("oligo", 10), rep("other", 20))
-  # make pb series
-  # samp1.ratios <- c(10,10,5,10)
-  # samp2.ratios <- c(5,5,10,5)
-  # lpb <- get_lpb(sef, datv = c(samp1.ratios, samp2.ratios), ctvarname = "celltypes")
-  #
-  # lz <- list(z1 = z.data, z2 = z.data)
-  # pi.pb <- lpb$pi_pb
-  # y.data <- lpb$y_data_pb
-  #
-  # znamev <- names(lz)
-  #
+  ## get report
   # head(pb_report(lz.compare = lz, lpb = lpb, method.str = method.str))
   ## cell_type sample_id    pi_est   pi_true     pi_diff method scale
   ## 1     excit       j_1 0.0000000 0.2857143  0.28571429     z1  1474
@@ -414,10 +307,165 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
   return(df.tall)
 }
 
-get_pb_experiment <- function(lz, scef, scale.range = 500:2000, 
+get_exe_dftall <- function(seed.num = 2){
+  # get example tall report data
+  #
+  message("getting example df.tall data...")
+  set.seed(seed.num)
+  df.tall <- data.frame(cell_type = rep(c("k_1", "k_2"), 4),
+                        sample_id = rep(paste0("j_", seq(2)), each = 2),
+                        pi_est = rnorm(4, 100, 20)/100,
+                        pi_true = rnorm(4, 100, 20)/100,
+                        method = rep("z1", 4),
+                        scale = c(rep(c(100,1000), each = 2)))
+  df.tall$pi_diff <- df.tall$pi_true-df.tall$pi_est
+  df.tall <- df.tall[,c(1:4, 7, 5:6)]
+  return(df.tall)
+}
+
+#---------------
+# plot functions
+#---------------
+# pi plot functions
+pi_plot <- function(est, true){
+  # pi_plot
+  # 
+  # est: vector of estimated pi values
+  # true: vector of true pi values
+  #
+  #
+  #
+  require(ggplot2)
+  est <- rnorm(1000, 1000, 500)/1000
+  true <- rnorm(1000, 1000, 500)/1000
+  ggpt <- ggplot(dfp, aes(x = true, y = est)) + theme_bw() +
+    geom_point(alpha = 0.3) + xlab("pi_true") + ylab("pi_est") +
+    geom_abline(intercept = 0, slope = 1, color = "red", 
+                lwd = 1.2, alpha = 0.8) +
+    geom_smooth(method = "lm", color = "blue",
+                lwd = 1.2, alpha = 0.5)
+  return(ggpt)
+}
+
+pi_plot_series <- function(df.tall = NA, alpha.value = 0.4){
+  # makes plot series
+  #
+  # df.tall : valid tall report data.frame, e.g. such as returned by running 
+  #   `pb_report()`.
+  #
+  # example
+  # pi_plot_series()
+  #
+  # returns
+  # lgg, list of ggplot objects
+  #
+  require(ggplot2)
+  if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
+  # get main plot object
+  ggpt.main <- ggplot(df.tall, 
+                      aes(x = pi_true, 
+                          y = pi_est)) +
+    geom_abline(intercept = 0, 
+                slope = 1, 
+                color = "red", 
+                lwd = 1.2, 
+                alpha = alpha.value) +
+    geom_smooth(method = "lm", 
+                color = "blue", 
+                lwd = 1.2, 
+                alpha = alpha.value)
+  # label series
+  ggpt.all <- ggpt.main + 
+    geom_point(alpha = alpha.value)
+  ggpt.all.method <- ggpt.main + 
+    geom_point(aes(color = method), 
+               alpha = alpha.value)
+  ggpt.all.sampleid <- ggpt.main + 
+    geom_point(aes(color = sample_id), 
+               alpha = alpha.value)
+  ggpt.all.col <- ggpt.main + 
+    geom_point(aes(color = cell_type), 
+               alpha = alpha.value)
+  # get facet series
+  ggpt.all.celltype.facet <- ggpt.all.col + 
+    facet_wrap(~cell_type, nrow = 1)
+  ggpt.all.method.facet <- ggpt.all.col + 
+    facet_wrap(~method, nrow = 1)
+  ggpt.all.sampleid.facet <- ggpt.all.col + 
+    facet_wrap(~sample_id, nrow = 1)
+  return(list(ggpt.main = ggpt.main, 
+              ggpt.all = ggpt.all, 
+              ggpt.all.col = ggpt.all.col, 
+              ggpt.all.facet = ggpt.all.facet))
+}
+
+# scale plot functions
+scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
+  # makes plot series
+  #
+  #
+  require(ggplot2)
+  if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
+  # pi est vs true, scale as size
+  ggpt.scalesize <- ggplot(df.tall, 
+                           aes(x = pi_true, 
+                               y = pi_est, 
+                               size = scale)) +
+    geom_point(alpha = alpha.value)
+  # get main template plot for series
+  ggpt.main <- ggplot(df.tall, aes(x = scale))
+  # get plot series
+  ggpt.main.piest <- ggpt.main + 
+    geom_point(aes(y = pi_est), 
+               alpha = alpha.value)
+  ggpt.main.pitrue <- ggpt.main + 
+    geom_point(aes(y = pi_true), 
+               alpha = alpha.value)
+  ggpt.main.pidiff <- ggpt.main + 
+    geom_point(aes(y = pi_diff), 
+               alpha = alpha.value)
+  ggpt.main.pidiff.sampleid.col <- ggpt.main + 
+    geom_point(aes(y = pi_diff, 
+                   color = sample_id), 
+               alpha = alpha.value)
+  # get facets
+  ggpt.main.pidiff.sampleid.facet <- ggpt.main.pidiff + 
+    facet_wrap(~sample_id)
+  ggpt.main.pidiff.sampleid.celltype.facet <- ggpt.main.pidiff + 
+    facet_wrap(~sample_id+cell_type)
+  return(list(
+    ggpt.scalesize = ggpt.scalesize,
+    ggpt.main = ggpt.main,
+    ggpt.main.piest = ggpt.main.piest,
+    ggpt.main.pitrue = ggpt.main.pitrue,
+    ggpt.main.pidiff = ggpt.main.pidiff,
+    ggpt.main.pidiff.sampleid.col = ggpt.main.pidiff.sampleid.col,
+    ggpt.main.pidiff.sampleid.facet = ggpt.main.pidiff.sampleid.facet,
+    ggpt.main.pidiff.sampleid.celltype.facet =
+      ggpt.main.pidiff.sampleid.celltype.facet
+  ))
+}
+
+#-----------------------------------
+# main pseudobulk experiment wrapper
+#-----------------------------------
+get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), 
+                              scale.range = 500:2000,
+                              crvarname = "celltype.treg",
                               save.results = FALSE, plot.results = TRUE,
                               method.str = "nnls", seed.num = 2, ){
-  lpb <- get_lpb()
-  dfr <- pb_report()
-  ggpt <- pi_plot()
+  #
+  # 
+  # example
+  # 
+  #
+  lpb <- get_lpb(scef = scef, lz = lz, datv = NA, nj = NA, ctvarname = ctvarname, 
+                 seed.num = seed.num, scale.range = scale.range, get.results = TRUE)
+  lgg.pi <- pi_plot_series(lpb[["pb_report"]])
+  lgg.scale <- scale_plot_series(lpb[["pb_report"]])
+  return(list("lpb" = lpb, 
+              "lgg_plots" = list("lgg.pt" = lgg.pt, 
+                                 "lgg.scale" = lgg.scale)
+              )
+         )
 }
