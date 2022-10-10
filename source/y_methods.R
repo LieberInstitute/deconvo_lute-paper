@@ -213,6 +213,45 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
   #
   # example:
   #
+  #require(SummarizedExperiment)
+  ## get example data
+  #method.str <- "nnls"
+  #cell.typev = c("excit", "inhib", "oligo", "other")
+  #z.data <- matrix(sample(1000, 200), ncol = 4)
+  #colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
+  #
+  ## make counts data
+  #ct <- matrix(sample(100, 50*100, replace = T), nrow = 50)
+  #
+  ## get summarized experiment
+  #sef <- SummarizedExperiment(assays = list(counts = ct))
+  #sef[["celltypes"]] <- c(rep("excit", 40), rep("inhib", 30), 
+  #                        rep("oligo", 10), rep("other", 20))
+  # make pb series
+  #samp1.ratios <- c(10,10,5,10)
+  #samp2.ratios <- c(5,5,10,5)
+  #lpb <- get_lpb(sef, 
+  #               datv = c(samp1.ratios, 
+  #                        samp2.ratios), 
+  #               ctvarname = "celltypes")
+  #
+  #lz <- 
+  #  list(z1 = z.data, 
+  #       z2 = z.data)
+  #pi.pb <- lpb$pi_pb
+  #y.data <- lpb$y_data_pb
+  #
+  #znamev <- names(lz)
+  #
+  #head(pb_report(lz.compare = lz, lpb = lpb,
+  #          method.str = method.str))
+  # cell_type sample_id    pi_est   pi_true     pi_diff method scale
+  # 1     excit       j_1 0.0000000 0.2857143  0.28571429     z1  1474
+  # 2     inhib       j_1 0.3639567 0.2857143 -0.07824240     z1  1474
+  # 3     oligo       j_1 0.2596562 0.1428571 -0.11679908     z1  1474
+  # 4     other       j_1 0.3763871 0.2857143 -0.09067281     z1  1474
+  # 5     excit       j_2 0.6862226 0.2000000 -0.48622262     z1  1209
+  # 6     inhib       j_2 0.0000000 0.2000000  0.20000000     z1  1209
   # 
   #
   require(reshape2)
@@ -269,37 +308,4 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
 }
 
 
-require(SummarizedExperiment)
 
-# get example data
-method.str <- "nnls"
-cell.typev = c("excit", "inhib", "oligo", "other")
-z.data <- matrix(sample(1000, 200), ncol = 4)
-colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
-
-# make counts data
-ct <- matrix(sample(100, 50*100, replace = T), nrow = 50)
-
-# get summarized experiment
-sef <- SummarizedExperiment(assays = list(counts = ct))
-sef[["celltypes"]] <- c(rep("excit", 40), rep("inhib", 30), 
-                        rep("oligo", 10), rep("other", 20))
-# make pb series
-samp1.ratios <- c(10,10,5,10)
-samp2.ratios <- c(5,5,10,5)
-lpb <- get_lpb(sef, 
-               datv = c(samp1.ratios, 
-                        samp2.ratios), 
-               ctvarname = "celltypes")
-
-lz <- 
-  list(z1 = z.data, 
-       z2 = z.data)
-pi.pb <- lpb$pi_pb
-y.data <- lpb$y_data_pb
-
-znamev <- names(lz)
-
-pb_report(lz.compare = lz, 
-          lpb = lpb,
-          method.str = method.str)
