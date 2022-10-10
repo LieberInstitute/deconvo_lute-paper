@@ -249,7 +249,7 @@ get_exe_dftall <- function(seed.num = 2){
   return(df.tall)
 }
 
-pi_plot_series <- function(df.tall = NA){
+pi_plot_series <- function(df.tall = NA, alpha.value = 0.4){
   # makes plot series
   #
   # df.tall : valid tall report data.frame, e.g. such as returned by running 
@@ -264,24 +264,30 @@ pi_plot_series <- function(df.tall = NA){
   require(ggplot2)
   if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
   # get main plot object
-  ggpt.main <- ggplot(df.tall, aes(x = pi_true, y = pi_est)) +
+  ggpt.main <- ggplot(df.tall, 
+                      aes(x = pi_true, 
+                          y = pi_est)) +
     geom_abline(intercept = 0, 
                 slope = 1, 
                 color = "red", 
                 lwd = 1.2, 
-                alpha = 0.8) +
+                alpha = alpha.value) +
     geom_smooth(method = "lm", 
                 color = "blue", 
                 lwd = 1.2, 
-                alpha = 0.5)
+                alpha = alpha.value)
   # label series
-  ggpt.all <- ggpt.main + geom_point(alpha = 0.3)
+  ggpt.all <- ggpt.main + 
+    geom_point(alpha = alpha.value)
   ggpt.all.method <- ggpt.main + 
-    geom_point(aes(color = method), alpha = 0.3)
+    geom_point(aes(color = method), 
+               alpha = alpha.value)
   ggpt.all.sampleid <- ggpt.main + 
-    geom_point(aes(color = sample_id), alpha = 0.3)
+    geom_point(aes(color = sample_id), 
+               alpha = alpha.value)
   ggpt.all.col <- ggpt.main + 
-    geom_point(aes(color = cell_type), alpha = 0.3)
+    geom_point(aes(color = cell_type), 
+               alpha = alpha.value)
   # get facet series
   ggpt.all.celltype.facet <- ggpt.all.col + 
     facet_wrap(~cell_type, nrow = 1)
