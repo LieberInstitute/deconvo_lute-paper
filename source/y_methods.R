@@ -155,62 +155,6 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
   return(pi.dati)
 }
 
-# example object functions
-get_exe_lpb <- function(seed.num = 2){
-  # get example lpb object
-  #
-  # example
-  # get_exe_lpb()
-  #
-  require(SummarizedExperiment)
-  set.seed(seed.num)
-  # make counts data
-  ct <- matrix(
-    sample(100, 50*100, replace = T), 
-    nrow = 50)
-  # get summarized experiment
-  sef <- SummarizedExperiment::SummarizedExperiment(
-    assays = list(counts = ct))
-  sef[["celltypes"]] <- c(rep("excit", 40), 
-                          rep("inhib", 30), 
-                          rep("oligo", 10), 
-                          rep("other", 20))
-  # make pb series
-  samp1.ratios <- c(10,10,5,10)
-  samp2.ratios <- c(5,5,10,5)
-  lpb <- get_lpb(sef, 
-                 datv = c(samp1.ratios, 
-                          samp2.ratios), 
-                 ctvarname = "celltypes")
-  return(lpb)
-}
-
-get_exe_lz <- function(seed.num = 2){
-  # get example lz object
-  #
-  set.seed(seed.num)
-  cell.typev = c("excit", "inhib", "oligo", "other")
-  z.data <- matrix(sample(1000, 200), ncol = 4)
-  colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
-  lz <- list(z1 = z.data, z2 = z.data)
-  return(lz)
-}
-
-get_exe_sef <- function(ct.str = "celltype", seed.num = 2){
-  # get example filtered summarized experiment
-  #
-  # ct.str : base string for cell types. should not include "_" (underscore).
-  #
-  #
-  ct <- matrix(
-    sample(100, 50*100, replace = T), 
-    nrow = 50)
-  sef <- SummarizedExperiment(assays = list(counts = ct))
-  sef[["celltypes"]] <- paste0(rep("celltype", 100), seq(4))
-  return(sef)
-}
-
-
 #----------------------------
 # report data.frame functions
 #----------------------------
@@ -288,22 +232,6 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
     samplei <- unique(df.tall$sample_id)[ji]
     df.tall[df.tall$sample_id==samplei,]$scale <- scalev[ji]}
   if(save.results){save(df.tall, file = save.fpath)}
-  return(df.tall)
-}
-
-get_exe_dftall <- function(seed.num = 2){
-  # get example tall report data
-  #
-  message("getting example df.tall data...")
-  set.seed(seed.num)
-  df.tall <- data.frame(cell_type = rep(c("k_1", "k_2"), 4),
-                        sample_id = rep(paste0("j_", seq(2)), each = 2),
-                        pi_est = rnorm(4, 100, 20)/100,
-                        pi_true = rnorm(4, 100, 20)/100,
-                        method = rep("z1", 4),
-                        scale = c(rep(c(100,1000), each = 2)))
-  df.tall$pi_diff <- df.tall$pi_true-df.tall$pi_est
-  df.tall <- df.tall[,c(1:4, 7, 5:6)]
   return(df.tall)
 }
 
@@ -430,6 +358,79 @@ scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
   ))
 }
 
+#----------------
+# example objects
+#----------------
+get_exe_lpb <- function(seed.num = 2){
+  # get example lpb object
+  #
+  # example
+  # get_exe_lpb()
+  #
+  require(SummarizedExperiment)
+  set.seed(seed.num)
+  # make counts data
+  ct <- matrix(
+    sample(100, 50*100, replace = T), 
+    nrow = 50)
+  # get summarized experiment
+  sef <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(counts = ct))
+  sef[["celltypes"]] <- c(rep("excit", 40), 
+                          rep("inhib", 30), 
+                          rep("oligo", 10), 
+                          rep("other", 20))
+  # make pb series
+  samp1.ratios <- c(10,10,5,10)
+  samp2.ratios <- c(5,5,10,5)
+  lpb <- get_lpb(sef, 
+                 datv = c(samp1.ratios, 
+                          samp2.ratios), 
+                 ctvarname = "celltypes")
+  return(lpb)
+}
+
+get_exe_lz <- function(seed.num = 2){
+  # get example lz object
+  #
+  set.seed(seed.num)
+  cell.typev = c("excit", "inhib", "oligo", "other")
+  z.data <- matrix(sample(1000, 200), ncol = 4)
+  colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
+  lz <- list(z1 = z.data, z2 = z.data)
+  return(lz)
+}
+
+get_exe_sef <- function(ct.str = "celltype", seed.num = 2){
+  # get example filtered summarized experiment
+  #
+  # ct.str : base string for cell types. should not include "_" (underscore).
+  #
+  #
+  ct <- matrix(
+    sample(100, 50*100, replace = T), 
+    nrow = 50)
+  sef <- SummarizedExperiment(assays = list(counts = ct))
+  sef[["celltypes"]] <- paste0(rep("celltype", 100), seq(4))
+  return(sef)
+}
+
+get_exe_dftall <- function(seed.num = 2){
+  # get example tall report data
+  #
+  message("getting example df.tall data...")
+  set.seed(seed.num)
+  df.tall <- data.frame(cell_type = rep(c("k_1", "k_2"), 4),
+                        sample_id = rep(paste0("j_", seq(2)), each = 2),
+                        pi_est = rnorm(4, 100, 20)/100,
+                        pi_true = rnorm(4, 100, 20)/100,
+                        method = rep("z1", 4),
+                        scale = c(rep(c(100,1000), each = 2)))
+  df.tall$pi_diff <- df.tall$pi_true-df.tall$pi_est
+  df.tall <- df.tall[,c(1:4, 7, 5:6)]
+  return(df.tall)
+}
+
 #-----------------------------------
 # main pseudobulk experiment wrapper
 #-----------------------------------
@@ -461,9 +462,15 @@ get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), nj = NA,
   # randomiezed pseudobulk data, results table, optional plots
   #
   # example
+  # # get example experiment
+  # lz <- get_exe_lz(); sef <- get_exe_sef()
+  # pb.expt <- get_pb_experiment(lz, sef, datv = c(1,1,1,1))
+  # # make plots with returned functions
+  # attach(pb.expt$lpb$pb_report)
+  # pb.expt$lgg_plots$lgg.scale$ggpt.scalesize
   # 
   lr <- list()
-  lr[["lpb"]] <- get_lpb(scef = scef, lz = lz, datv = datv, nj = NA, 
+  lr[["lpb"]] <- get_lpb(sef = sef, lz = lz, datv = datv, nj = NA, 
                          ctvarname = ctvarname, seed.num = seed.num, 
                          scale.range = scale.range, get.results = TRUE)
   if(plot.results){
@@ -474,9 +481,3 @@ get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), nj = NA,
   }
   return(lr)
 }
-
-
-lz <- get_exe_lz()
-sef <- get_exe_sef()
-pb.expt <- get_pb_experiment(lz, sef, 
-                             datv = c(1,1,1,1))
