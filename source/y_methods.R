@@ -187,12 +187,7 @@ pi_plot <- function(est, true){
   return(ggpt)
 }
 
-pb_report <- function(lz.compare, method.str = "nnls", 
-                      save.results = FALSE, 
-                      plot.results = TRUE,
-                      cell.typev = c("Inhib", "Oligo", "other", "Excit"),
-                      znamev = c("z.final", "zs1", "zs2"), 
-                      pi.pb = lpb[["pi_pb"]],
+pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE, 
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
   #
   #
@@ -218,6 +213,59 @@ pb_report <- function(lz.compare, method.str = "nnls",
   #
   # example:
   #
+  # 
+  #
+  require(reshape2)
+  lz <- lz.compare
+  znamev <- names(lz)
+  if(!"pi_pb" %in% names(lpb)|
+     !"y_data_pb" %in% names(lpb)){
+    stop("lpb requires items 'pi_pb' and 'y_data_pb'.")
+  }
+  pi.pb.matrix <- 
+    pi.pb <- 
+    lpb[["pi_pb"]] 
+  y.data <- lpb[["y_data_pb"]]
+  cell.typev <- rownames(pi.pb)
+  if(!ncol(lz[[1]])==length(cell.typev)){
+    stop("num. k not equal in lz and lpb.")
+  }
+  df.tall <- do.call(rbind, 
+                     lapply(seq(length(znamev)), 
+                            function(ii){
+                              znamei <- znamev[ii]
+                              
+                              message(znamei); z.data <- lz[[znamei]]
+                              pi.dati <- get_pi_est(z.data, 
+                                                    y.data, 
+                                                    method = method.str)
+                              # define cell type variables
+                              pi.pb.df <- as.data.frame(pi.pb.matrix)
+                              pi.dati <- as.data.frame(pi.dati)
+                              pi.dati$cell_type <- 
+                                pi.pb.df$cell_type <- 
+                                cell.typev
+                              # get tall tables
+                              pi.dati.tall <- reshape2::melt(pi.dati, id = "cell_type")
+                              pi.pb.tall <- reshape2::melt(pi.pb.df, id = "cell_type")
+                              # return tall table
+                              df.tall <- data.frame(cell_type = pi.dati.tall$cell_type,
+                                                    sample_id = pi.dati.tall$variable,
+                                                    pi_est = pi.dati.tall$value,
+                                                    pi_true = pi.pb.tall$value,
+                                                    pi_diff = pi.pb.tall$value-
+                                                      pi.dati.tall$value)
+                              df.tall$method <- znamei; return(df.tall)
+                            }))
+  # append scale info
+  df.tall$scale <- NA
+  for(ji in seq(length(unique(df.tall$sample_id)))){
+    samplei <- unique(df.tall$sample_id)[ji]
+    df.tall[df.tall$sample_id==samplei,]$scale <- scalev[ji]}
+  if(save.results){save(df.tall, file = save.fpath)}
+  return(df.tall)
+}
+
 
 require(SummarizedExperiment)
 
@@ -243,7 +291,6 @@ lpb <- get_lpb(sef,
                ctvarname = "celltypes")
 
 lz <- 
-  lz.compare <- 
   list(z1 = z.data, 
        z2 = z.data)
 pi.pb <- lpb$pi_pb
@@ -251,73 +298,7 @@ y.data <- lpb$y_data_pb
 
 znamev <- names(lz)
 
-require(reshape2)
-
-lz <- lz.compare
-znamev <- names(lz); 
-pi.pb.matrix <- pi.pb 
-y.data <- y.data
-cell.typev <- rownames(pi.pb)
-
-scalev <- lpb$scalev
-
-df.tall <- do.call(rbind, lapply(seq(length(znamev)), function(ii){
-  znamei <- znamev[ii]
-  
-  message(znamei); z.data <- lz[[znamei]]
-  pi.dati <- get_pi_est(z.data, 
-                        y.data, 
-                        method = method.str)
-  # define cell type variables
-  pi.pb.df <- as.data.frame(pi.pb.matrix)
-  pi.dati <- as.data.frame(pi.dati)
-  pi.dati$cell_type <- 
-    pi.pb.df$cell_type <- 
-    cell.typev
-  # get tall tables
-  pi.dati.tall <- reshape2::melt(pi.dati, id = "cell_type")
-  pi.pb.tall <- reshape2::melt(pi.pb.df, id = "cell_type")
-  # return tall table
-  df.tall <- data.frame(cell_type = pi.dati.tall$cell_type,
-                        sample_id = pi.dati.tall$variable,
-                        pi_est = pi.dati.tall$value,
-                        pi_true = pi.pb.tall$value,
-                        pi_diff = pi.pb.tall$value-
-                          pi.dati.tall$value)
-  df.tall$method <- znamei; return(df.tall)
-}))
-# append scale info
-df.tall$scale <- NA
-for(ji in seq(length(unique(df.tall$sample_id)))){
-  samplei <- unique(df.tall$sample_id)[ji]
-  df.tall[df.tall$sample_id==samplei,]$scale <- scalev[ji]}
-
-
-
-  # 
-  #
-  require(reshape2)
-  lz <- lz.compare; znamev <- names(lz); 
-  pi.pb.matrix <- pi.pb 
-  y.data <- y.data
-  df.tall <- do.call(rbind, lapply(znamev, function(znamei){
-    message(znamei); z.data <- lz[[znamei]]
-    pi.dati <- get_pi_est(z.data, y.data, method = method.str)
-    # get results table
-    # define cell type variables
-    pi.pb.df <- as.data.frame(pi.pb.matrix); pi.dati <- as.data.frame(pi.dati)
-    pi.dati$cell_type <- pi.pb.df$cell_type <- cell.typev
-    # get tall tables
-    pi.dati.tall <- melt(pi.dati, id = "cell_type")
-    pi.pb.tall <- melt(pi.pb.df, id = "cell_type")
-    # return tall table
-    df.tall <- data.frame(cell_type = pi.dati.tall$cell_type,
-                          sample_id = pi.dati.tall$variable,
-                          pi_est = pi.dati.tall$value,
-                          pi_true = pi.pb.tall$value,
-                          pi_diff = pi.pb.tall$value-pi.dati.tall$value)
-    df.tall$method <- znamei; return(df.tall)
-  }))
-  if(save.results){save(df.tall, file = save.fpath)}
-  return(df.tall)
-}
+pb_report(lz.compare = lz, 
+          lpb = lpb, 
+          cell.typev = cell.typev, 
+          method.str = method.str)
