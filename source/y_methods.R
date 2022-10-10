@@ -89,12 +89,16 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     return(ct.pb.j)
   })
   names(lct) <- colnames(mpb)
+  lpb[["scalev"]] <- scalev
+  names(lpb[["scalev"]]) <- colnames(mpb)
   lpb[["listed_counts_pb"]] <- lct
   if(!is.na(counts.summary.method)){
     if(counts.summary.method == "mean"){
-      ypb <- do.call(cbind, lapply(lct, function(ii){rowMeans(ii)}))
+      ypb <- do.call(cbind, lapply(lct, 
+                                   function(ii){rowMeans(ii)}))
     } else if(counts.summary.method == "median"){
-      ypb <- do.call(cbind, lapply(lct, function(ii){rowMedians(ii)}))
+      ypb <- do.call(cbind, lapply(lct, 
+                                   function(ii){rowMedians(ii)}))
     } else{
       stop("counts.summary.method not recognized")
     }
@@ -103,7 +107,8 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     lpb[["y_data_pb"]] <- ypb
   }
   if(get.results & !is(lz, "logical")){
-    df.res <- pb_report(lz, cell.typev, pi.pb, znamev, save.results = F)
+    df.res <- pb_report(lz, cell.typev, pi.pb, 
+                        znamev, save.results = F)
     lpb[["pb_report"]] <- df.res
   }
   return(lpb)
@@ -125,7 +130,7 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
   # # [1] 1 1
   #
   methodv.valid <- c("nnls", "glm", "bvls")
-  if(method %in% method.valid){
+  if(method %in% methodv.valid){
     message("running ", method, "...")
     if(method == "nnls"){
       require(nnls)
@@ -182,9 +187,12 @@ pi_plot <- function(est, true){
   return(ggpt)
 }
 
-pb_report <- function(lz.compare, save.results = FALSE, plot.results = TRUE,
+pb_report <- function(lz.compare, method.str = "nnls", 
+                      save.results = FALSE, 
+                      plot.results = TRUE,
                       cell.typev = c("Inhib", "Oligo", "other", "Excit"),
-                      znamev = c("z.final", "zs1", "zs2"), pi.pb = lpb[["pi_pb"]],
+                      znamev = c("z.final", "zs1", "zs2"), 
+                      pi.pb = lpb[["pi_pb"]],
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
   #
   #
@@ -210,15 +218,91 @@ pb_report <- function(lz.compare, save.results = FALSE, plot.results = TRUE,
   #
   # example:
   #
-z.data <- matrix(sample(1000, 100), ncol = 5)
-  # y.data <- matrix(sample(1000, 40), ncol = 2)
-  # pi.est <- get_pi_est(z.data, y.data)
+
+require(SummarizedExperiment)
+
+# get example data
+method.str <- "nnls"
+cell.typev = c("excit", "inhib", "oligo", "other")
+z.data <- matrix(sample(1000, 200), ncol = 4)
+colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
+
+# make counts data
+ct <- matrix(sample(100, 50*100, replace = T), nrow = 50)
+
+# get summarized experiment
+sef <- SummarizedExperiment(assays = list(counts = ct))
+sef[["celltypes"]] <- c(rep("excit", 40), rep("inhib", 30), 
+                        rep("oligo", 10), rep("other", 20))
+# make pb series
+samp1.ratios <- c(10,10,5,10)
+samp2.ratios <- c(5,5,10,5)
+lpb <- get_lpb(sef, 
+               datv = c(samp1.ratios, 
+                        samp2.ratios), 
+               ctvarname = "celltypes")
+
+lz <- 
+  lz.compare <- 
+  list(z1 = z.data, 
+       z2 = z.data)
+pi.pb <- lpb$pi_pb
+y.data <- lpb$y_data_pb
+
+znamev <- names(lz)
+
+require(reshape2)
+
+lz <- lz.compare
+znamev <- names(lz); 
+pi.pb.matrix <- pi.pb 
+y.data <- y.data
+cell.typev <- rownames(pi.pb)
+
+scalev <- lpb$scalev
+
+df.tall <- do.call(rbind, lapply(seq(length(znamev)), function(ii){
+  znamei <- znamev[ii]
+  
+  message(znamei); z.data <- lz[[znamei]]
+  pi.dati <- get_pi_est(z.data, 
+                        y.data, 
+                        method = method.str)
+  # define cell type variables
+  pi.pb.df <- as.data.frame(pi.pb.matrix)
+  pi.dati <- as.data.frame(pi.dati)
+  pi.dati$cell_type <- 
+    pi.pb.df$cell_type <- 
+    cell.typev
+  # get tall tables
+  pi.dati.tall <- reshape2::melt(pi.dati, id = "cell_type")
+  pi.pb.tall <- reshape2::melt(pi.pb.df, id = "cell_type")
+  # return tall table
+  df.tall <- data.frame(cell_type = pi.dati.tall$cell_type,
+                        sample_id = pi.dati.tall$variable,
+                        pi_est = pi.dati.tall$value,
+                        pi_true = pi.pb.tall$value,
+                        pi_diff = pi.pb.tall$value-
+                          pi.dati.tall$value)
+  df.tall$method <- znamei; return(df.tall)
+}))
+# append scale info
+df.tall$scale <- NA
+for(ji in seq(length(unique(df.tall$sample_id)))){
+  samplei <- unique(df.tall$sample_id)[ji]
+  df.tall[df.tall$sample_id==samplei,]$scale <- scalev[ji]}
+
+
+
   # 
   #
   require(reshape2)
-  lz <- lz.compare; znamev <- names(lz); y.data <- pi.pb.matrix <- pi.pb
+  lz <- lz.compare; znamev <- names(lz); 
+  pi.pb.matrix <- pi.pb 
+  y.data <- y.data
   df.tall <- do.call(rbind, lapply(znamev, function(znamei){
-    message(znamei); z.data <- lz[[znamei]];pi.dati <- get_pi_est(z.data, y.data)
+    message(znamei); z.data <- lz[[znamei]]
+    pi.dati <- get_pi_est(z.data, y.data, method = method.str)
     # get results table
     # define cell type variables
     pi.pb.df <- as.data.frame(pi.pb.matrix); pi.dati <- as.data.frame(pi.dati)
