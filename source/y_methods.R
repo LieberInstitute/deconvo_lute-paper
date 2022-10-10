@@ -28,6 +28,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   #
   # examples
   #
+  # require(SummarizedExperiment)
   # ct <- matrix(sample(100, 50*102, replace = T), nrow = 50)
   # sef <- SummarizedExperiment(assays = list(counts = ct))
   # sef[["celltypes"]] <- c(rep("glia", 2), rep("neuron", 100))
