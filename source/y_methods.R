@@ -5,6 +5,9 @@
 # for G gene marker features and J samples.
 #
 
+#---------------------------------------
+# pseudobulk experiment helper functions
+#---------------------------------------
 get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
                     counts.summary.method = "mean", seed.num = 2,
                     scale.range = 500:2000, get.results = TRUE, lz = NA){
@@ -29,9 +32,7 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   # examples
   #
   # require(SummarizedExperiment)
-  # ct <- matrix(sample(100, 50*102, replace = T), nrow = 50)
-  # sef <- SummarizedExperiment(assays = list(counts = ct))
-  # sef[["celltypes"]] <- c(rep("glia", 2), rep("neuron", 100))
+  # sef <- get_exe_sef()
   # lpb <- get_lpb(sef, datv = c(1,10), ctvarname = "celltypes")
   # print(dim(lpb[[1]])) # [1] 2 1
   # print(dim(lpb[[2]][[1]])) # [1] 50 1474
@@ -207,6 +208,18 @@ get_exe_lz <- function(seed.num = 2){
   return(lz)
 }
 
+get_exe_sef <- function(seed.num = 2){
+  # get example filtered summarized experiment
+  #
+  ct <- matrix(
+    sample(100, 50*102, replace = T), 
+    nrow = 50)
+  sef <- SummarizedExperiment(assays = list(counts = ct))
+  sef[["celltypes"]] <- c(rep("glia", 2), 
+                          rep("neuron", 100))
+  return(sef)
+}
+
 
 #----------------------------
 # report data.frame functions
@@ -214,9 +227,6 @@ get_exe_lz <- function(seed.num = 2){
 # results df
 pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE, 
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
-  #
-  #
-  #
   # makes results table for pseudobulk experiment.
   # 
   # note: 
@@ -235,24 +245,8 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
   # save.results : whether to save final results table.
   # save.fpath : path to save final results table.
   #
-  #
   # example:
-  #
-  # require(SummarizedExperiment)
-  ## get example data
-  # lpb <- get_exe_lpb()
-  # lz <- get_exe_lz()
-  #
-  ## get report
-  # head(pb_report(lz.compare = lz, lpb = lpb, method.str = method.str))
-  ## cell_type sample_id    pi_est   pi_true     pi_diff method scale
-  ## 1     excit       j_1 0.0000000 0.2857143  0.28571429     z1  1474
-  ## 2     inhib       j_1 0.3639567 0.2857143 -0.07824240     z1  1474
-  ## 3     oligo       j_1 0.2596562 0.1428571 -0.11679908     z1  1474
-  ## 4     other       j_1 0.3763871 0.2857143 -0.09067281     z1  1474
-  ## 5     excit       j_2 0.6862226 0.2000000 -0.48622262     z1  1209
-  ## 6     inhib       j_2 0.0000000 0.2000000  0.20000000     z1  1209
-  # 
+  # df.report <- pb_report(lz.compare=get_exe_lz(),lpb=get_exe_lpb())
   #
   require(reshape2)
   lz <- lz.compare
@@ -451,21 +445,45 @@ scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
 #-----------------------------------
 get_pb_experiment <- function(lz, scef, datv = c(1,1,1,1), 
                               scale.range = 500:2000,
-                              crvarname = "celltype.treg",
-                              save.results = FALSE, plot.results = TRUE,
-                              method.str = "nnls", seed.num = 2, ){
+                              ctvarname = "celltype.treg",
+                              plot.results = TRUE,
+                              method.str = "nnls", 
+                              seed.num = 2){
+  # run a pseudobulk experiment
   #
+  # lz : list of z signature matrices for which to compare pi estimates.
+  # scef : filtered SummarizedExperiment or similar object containing the gene
+  #   markers or cell type-specific features.
+  # datv : vector of relative cell type representation weights. Length should be 
+  #   equal to nj*nk. Values here correspond to the mpb design matrix. If NA, this is 
+  #   randomized and variable nj is used. For example, datv = c(1,2) implies the
+  #   relative representation of c(0.33, 0.66) for the first and second types.
+  # scale.range: range of total counts for random scaling of total expression.
+  #   This is taken randomly for each simulated sample.
+  # ctvarname : cell type variable name, should be contained in scef coldata.
+  # plot.results : whether to make summary plots of various pi variables, scale
+  #   versus pi differences, etc.
+  # method.str : character string of strict deconvolution method to make pi_est,
+  #   can be either "nnls" (default), "glm", or "bvls".
+  # seed.num : integer for the random seed.
   # 
+  # returns
+  # randomiezed pseudobulk data, results table, optional plots
+  #
   # example
+  # lz <- get_exe_lz()
+  # sef <- get_exe_sef()
+  # pb.expt <- get_pb_experiment(lz, sef, datv = c(1,1,1,1,10,1,1,1))
   # 
-  #
-  lpb <- get_lpb(scef = scef, lz = lz, datv = NA, nj = NA, ctvarname = ctvarname, 
-                 seed.num = seed.num, scale.range = scale.range, get.results = TRUE)
-  lgg.pi <- pi_plot_series(lpb[["pb_report"]])
-  lgg.scale <- scale_plot_series(lpb[["pb_report"]])
-  return(list("lpb" = lpb, 
-              "lgg_plots" = list("lgg.pt" = lgg.pt, 
-                                 "lgg.scale" = lgg.scale)
-              )
-         )
+  lr <- list()
+  lr[["lpb"]] <- get_lpb(scef = scef, lz = lz, datv = NA, nj = NA, 
+                         ctvarname = ctvarname, seed.num = seed.num, 
+                         scale.range = scale.range, get.results = TRUE)
+  if(plot.results){
+    lgg.pi <- pi_plot_series(lpb[["pb_report"]])
+    lgg.scale <- scale_plot_series(lpb[["pb_report"]])
+    lr[["lgg_plots"]] <- list("lgg.pi" = lgg.pi, 
+                              "lgg.scale" = lgg.scale)
+  }
+  return(lr)
 }
