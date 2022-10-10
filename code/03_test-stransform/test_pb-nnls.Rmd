@@ -17,7 +17,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 ```
 
-# nnls tests
+# pi estimates
+
+## nnls tests
 
 ```{r}
 z.data <- matrix(sample(1000, 100), ncol = 5)
@@ -36,7 +38,7 @@ pi.dati
 nnls::nnls(y.data, t(z.data))
 ```
 
-# glm tests
+## glm tests
 
 ```{r}
 library(glmnet)
@@ -58,7 +60,7 @@ mod <- do.call(cbind, lapply(seq(ncol(z.data)), function(ii){
 mod
 ```
 
-# bounded-variable least squares
+## bounded-variable least squares
 
 ```{r}
 install.packages("bvls")

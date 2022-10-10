@@ -162,7 +162,27 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
   return(pi.dati)
 }
 
-pb_report <- function(lz.compare, save.results = FALSE, 
+pi_plot <- function(est, true){
+  # pi_plot
+  # 
+  # est: vector of estimated pi values
+  # true: vector of true pi values
+  #
+  #
+  #
+  require(ggplot2)
+  est <- rnorm(1000, 1000, 500)/1000
+  true <- rnorm(1000, 1000, 500)/1000
+  ggpt <- ggplot(dfp, aes(x = true, y = est)) + theme_bw() +
+    geom_point(alpha = 0.3) + xlab("pi_true") + ylab("pi_est") +
+    geom_abline(intercept = 0, slope = 1, color = "red", 
+                lwd = 1.2, alpha = 0.8) +
+    geom_smooth(method = "lm", color = "blue",
+                lwd = 1.2, alpha = 0.5)
+  return(ggpt)
+}
+
+pb_report <- function(lz.compare, save.results = FALSE, plot.results = TRUE,
                       cell.typev = c("Inhib", "Oligo", "other", "Excit"),
                       znamev = c("z.final", "zs1", "zs2"), pi.pb = lpb[["pi_pb"]],
                       save.fpath = "df-results_s-transform-expt_dlpfc-ro1.rda"){
@@ -186,6 +206,13 @@ pb_report <- function(lz.compare, save.results = FALSE,
   # znamev : names of z tables to use in lz list.
   # save.results : whether to save final results table.
   # save.fpath : path to save final results table.
+  #
+  #
+  # example:
+  #
+z.data <- matrix(sample(1000, 100), ncol = 5)
+  # y.data <- matrix(sample(1000, 40), ncol = 2)
+  # pi.est <- get_pi_est(z.data, y.data)
   # 
   #
   require(reshape2)
