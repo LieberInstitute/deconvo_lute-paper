@@ -109,9 +109,11 @@ get_lpb <- function(scef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   return(lpb)
 }
 
-get_pi_est <- function(z.data, y.data, return.prop = TRUE){
+get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
   # get pi est using nnls
   #
+  # method: type of strict deconvolution method to use (either "nnls", "glm" or 
+  #   "bvls"). Defaults to "nnls".
   # return.prop: whether to return proportions. if False, returns magnitudes 
   #   from NNLS.
   #
@@ -122,10 +124,36 @@ get_pi_est <- function(z.data, y.data, return.prop = TRUE){
   # colSums(pi.est) # check within-sample types add to 1
   # # [1] 1 1
   #
-  pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
-                                   function(i){
-                                     nnls::nnls(y.data, 
-                                                z.data[,i])$x}))
+  methodv.valid <- c("nnls", "glm", "bvls")
+  if(method %in% method.valid){
+    message("running ", method, "...")
+    if(method == "nnls"){
+      require(nnls)
+      pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+                                       function(i){
+                                         nnls::nnls(y.data, 
+                                                    z.data[,i])$x}))
+    } else if(method == "glm"){
+      require(glmnet)
+      pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+                                       function(i){
+                                         coef(glmnet(y.data, 
+                                                     z.data[,i], 
+                                                     lambda = 0, 
+                                                     lower.limits = 0, 
+                                                     intercept = FALSE))}))
+    } else{
+      require(bvls)
+      pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+                                       function(i){
+                                         bvls(y.data, z.data[,ii],
+                                              bl = rep(0, ncol(y.data)), 
+                                              bu = rep(Inf, ncol(y.data)))$x
+                                       }))
+    }
+  } else{
+    stop("provide a valid method.")
+  }
   if(return.prop){
     pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)}) 
   }
