@@ -219,14 +219,16 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
   lz <- lz.compare
   znamev <- names(lz)
   if(!"pi_pb" %in% names(lpb)|
-     !"y_data_pb" %in% names(lpb)){
-    stop("lpb requires items 'pi_pb' and 'y_data_pb'.")
+     !"y_data_pb" %in% names(lpb)|
+     !"scalev" %in% names(lpb)){
+    stop("lpb requires items 'pi_pb', 'y_data_pb', and 'scalev'.")
   }
   pi.pb.matrix <- 
     pi.pb <- 
     lpb[["pi_pb"]] 
   y.data <- lpb[["y_data_pb"]]
   cell.typev <- rownames(pi.pb)
+  scalev <- lpb[["scalev"]]
   if(!ncol(lz[[1]])==length(cell.typev)){
     stop("num. k not equal in lz and lpb.")
   }
@@ -299,6 +301,5 @@ y.data <- lpb$y_data_pb
 znamev <- names(lz)
 
 pb_report(lz.compare = lz, 
-          lpb = lpb, 
-          cell.typev = cell.typev, 
+          lpb = lpb,
           method.str = method.str)
