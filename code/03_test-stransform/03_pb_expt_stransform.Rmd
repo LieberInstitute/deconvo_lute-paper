@@ -3,11 +3,13 @@ title: "pseudobulk_experiment_stransform"
 author: "Sean Maden"
 date: '2022-10-10'
 output: html_document
+bibliography: citations.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(here)
+knitr::opts_chunk$set(echo = TRUE)
+message("here: ", here())
 proj.dpath <- "deconvo_method-paper"
 # source methods
 source.dpath <- file.path("deconvo_method-paper","source")
@@ -54,10 +56,13 @@ When we define some vector of factors, e.g. `meanv`, we wish to applye to cell t
 1 the value corresponding to `meanv[1]`, to cell type 2 the value corresponding to
 `meanv[2]`, etc.
 
-Below, we use the following data as obtained from the paper (CITATION HERE).
+Below, we use the following data as obtained from the paper @huuki-myers_data-driven_2022. These
+indicate the mean and SD in sizes of four types of cells in brain tissues.
 
-```{r}
-knitr::kable(data.frame(cell_type = c("Excit", "Inhib", "Oligo", "other")))
+```{r, echo = F}
+knitr::kable(data.frame(cell_type = c("Excit", "Inhib", "Oligo", "other"),
+                        mean = c(6, 8, 2, 2), sd = c(2, 3, 1, 1)),
+             align = "c", label = "Cell type sizes")
 ```
 
 For static s, we only need the means (or medians), and this same value is applied
