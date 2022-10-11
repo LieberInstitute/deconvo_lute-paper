@@ -1,0 +1,39 @@
+---
+title: "pseudobulk_experiment_stransform"
+author: "Sean Maden"
+date: '2022-10-10'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source.dpath <- file.path("deconvo_method-paper", "source")
+source.fnv <- c("pb_methods.R")
+for(fni in source.fnv){source(file.path(source.dpath, fni))}
+```
+
+# Pseudobulk example
+
+To run a minimal pseudobulk experiment, we need example data consisting of the 
+cell-level reference expression data, cell labels, cell ratio vectors, and scale
+range. Many of these have default values, and they can be varied for experiments.
+
+```{r}
+```
+
+# S-transformation experiment
+
+We wish to evaluate the impact of performing transformations on the signature matrix data.
+To do this, we need the transformation values and an outline of the experiment design.
+
+Here, we focus on the cell type labels in the `celltypes` variable of `sef`, a 
+SummarizedExperiment object. We can summarize the cell abundances by their labels
+as follows.
+
+```{r}
+```
+
+
