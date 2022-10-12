@@ -265,7 +265,9 @@ pi_plot <- function(est, true){
   return(ggpt)
 }
 
-pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4){
+pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4,
+                           save.plots = TRUE, save.dpath = file.path(),
+                           fn.handle = "newplots"){
   # makes plot series
   #
   # df.tall : valid tall report data.frame, e.g. such as returned by running 
@@ -280,7 +282,6 @@ pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4){
   require(ggplot2)
   if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
   # parse variable names
-  
   # get main plot object
   ggpt.main <- ggplot(df.tall, 
                       aes(x = pi_true, 
@@ -313,6 +314,31 @@ pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4){
     facet_wrap(~method, nrow = 1)
   ggpt.all.sampleid.facet <- ggpt.all.col + 
     facet_wrap(~sample_id, nrow = 1)
+  # parse save options
+  if(save.plots){
+    message("saving new plots...")
+    ggsave(paste0("ggpt-all_",fn.handle,".png"), 
+           plot = ggpt.all, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-all-method_",fn.handle,".png"), 
+           plot = ggpt.all.method, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-all-sampleid_",fn.handle,".png"), 
+           plot = ggpt.all.sampleid, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-all-col_",fn.handle,".png"), plot = ggpt.all.col, 
+           device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-all-celltype-facet_",fn.handle,".png"), 
+           plot = ggpt.all.celltype.facet, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-all-method-facet_",fn.handle,".png"), 
+           plot = ggpt.all.method.facet, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-all-sampleid-facet_",fn.handle,".png"), 
+           plot = ggpt.all.sampleid.facet, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+  }
   return(list(ggpt.main = ggpt.main, 
               ggpt.all = ggpt.all, 
               ggpt.all.method = ggpt.all.method,
@@ -324,7 +350,8 @@ pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4){
 }
 
 # scale plot functions
-scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
+scale_plot_series <- function(df.tall = NA, alpha.value = 0.4, save.plots = TRUE,
+                              save.dpath = file.path(), fn.handle = "newplots"){
   # makes plot series
   #
   #
@@ -357,6 +384,25 @@ scale_plot_series <- function(df.tall = NA, alpha.value = 0.4){
     facet_wrap(~sample_id)
   ggpt.main.pidiff.sampleid.celltype.facet <- ggpt.main.pidiff + 
     facet_wrap(~sample_id+cell_type)
+  if(save.plots){
+    message("saving new plots...")
+    ggsave(paste0("ggpt-scalesize_",fn.handle,".png"), 
+           plot = ggpt.scalesize, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-scale-main-piest_",fn.handle,".png"), 
+           plot = ggpt.main.piest, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-scale-main-pitrue_",fn.handle,".png"), 
+           plot = ggpt.main.pitrue, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-scale-main-pidiff_",fn.handle,".png"), 
+           plot = ggpt.main.pidiff, 
+           device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+    ggsave(paste0("ggpt-scale-main-pidiff-sampleid-col_",fn.handle,".png"), 
+           plot = ggpt.main.pidiff.sampleid.col, device = "png",
+           path = save.dpath, width = 5, height = 5, units = "in", dpi = 400)
+  }
   return(list(
     ggpt.scalesize = ggpt.scalesize,
     ggpt.main = ggpt.main,
