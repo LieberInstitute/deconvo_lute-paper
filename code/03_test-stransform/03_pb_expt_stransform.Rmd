@@ -167,4 +167,27 @@ pb.expt <- get_pb_experiment(lz = lexpt,
                              method.str = "nnls", 
                              seed.num = 2)
 ```
+# Results
 
+```{r}
+attach(pb.expt$lpb$pb_report)
+```
+
+```{r}
+pb.expt$lgg_plots$lgg.pi$ggpt.all.col
+pb.expt$lgg_plots$lgg.pi$ggpt.all.celltype.facet
+```
+
+
+```{r}
+df.tall <- pb.expt$lpb$pb_report
+alpha.value <- 0.4
+ggmain <- pb.expt$lgg_plots$lgg.pi$ggpt.all.col
+ggpt.all.col <- ggmain + geom_point(aes(color = cell_type),alpha = alpha.value)
+ggpt.all.col
+```
+
+```{r}
+ggpt.all.celltype.facet <- ggpt.all.col + facet_wrap(~cell_type, nrow = 1)
+ggpt.all.celltype.facet
+```

@@ -265,7 +265,7 @@ pi_plot <- function(est, true){
   return(ggpt)
 }
 
-pi_plot_series <- function(df.tall = NA, alpha.value = 0.4){
+pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4){
   # makes plot series
   #
   # df.tall : valid tall report data.frame, e.g. such as returned by running 
@@ -279,6 +279,8 @@ pi_plot_series <- function(df.tall = NA, alpha.value = 0.4){
   #
   require(ggplot2)
   if(is(df.tall, "logical")){df.tall<-get_exe_dftall()}
+  # parse variable names
+  
   # get main plot object
   ggpt.main <- ggplot(df.tall, 
                       aes(x = pi_true, 
