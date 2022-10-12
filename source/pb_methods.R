@@ -493,7 +493,7 @@ get_exe_dftall <- function(seed.num = 2){
 #-----------------------------------
 # main pseudobulk experiment wrapper
 #-----------------------------------
-get_pb_experiment <- function(lz = NA, scef = NA, 
+get_pb_experiment <- function(lz = NA, sef = NA, 
                               datv = c(1,1,1,1), nj = NA,
                               scale.range = 500:2000,
                               ctvarname = "celltypes",
