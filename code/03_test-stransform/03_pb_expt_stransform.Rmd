@@ -12,12 +12,15 @@ knitr::opts_chunk$set(echo = TRUE)
 message("here: ", here())
 proj.dpath <- "deconvo_method-paper"
 # source methods
-source.dpath <- file.path("deconvo_method-paper","source")
-source.fnv <- c("pb_methods.R")
+source.dpath <- file.path("deconvo_method-paper",
+                          "source")
+source.fnv <- c("pb_methods", 
+                "z_transformations")
 for(fni in source.fnv){
   source(
     file.path(here(), 
-              source.dpath, fni))}
+              source.dpath, 
+              paste0(fni, ".R")))}
 ```
 
 # Overview
@@ -41,9 +44,10 @@ To do this, we need the transformation values and an outline of the experiment d
 Load the preprocessed signature matrix table.
 
 ```{r}
+lz.fname <- "lz_s-rescale-k4_dlpfc-ro1.rda"
 lz.fpath <- file.path(proj.dpath, 
-                      "outputs/02_test-source", 
-                      "lz_mr_dlpfc-ro1.rda")
+                      "outputs/03_test-stransform", 
+                      lz.fname)
 lz <- get(load(file.path(here(), lz.fpath)))
 ```
 
@@ -60,9 +64,12 @@ Below, we use the following data as obtained from the paper @huuki-myers_data-dr
 indicate the mean and SD in sizes of four types of cells in brain tissues.
 
 ```{r, echo = F}
-knitr::kable(data.frame(cell_type = c("Excit", "Inhib", "Oligo", "other"),
-                        mean = c(6, 8, 2, 2), sd = c(2, 3, 1, 1)),
-             align = "c", label = "Cell type sizes")
+dft <- data.frame(cell_type = c("Excit", "Inhib", "Oligo", "other"),
+                        mean = c(6, 8, 2, 2), 
+                        sd = c(2, 3, 1, 1))
+knitr::kable(dft,
+             align = "c", 
+             label = "Cell type sizes")
 ```
 
 For static s, we only need the means (or medians), and this same value is applied
@@ -110,13 +117,17 @@ when equal numbers of cells are present? For each of these conditions, we also
 test outcomes for the 3 Z signature matrices defined above to see if either of
 the S-transformation strategies had any effect. 
 
-## Get data objects
+### Get data objects
 
 We need to load the `SummarizedExperiment` from which to sample cell-level 
 expression counts.
 
 ```{r}
-sef <- get(load(file.path(here())))
+sef.fname <- "sef-markers_ct-treg_stransform-expt_dlpfc-ro1.rda"
+sef.fpath <- file.path(proj.dpath, 
+                      "outputs/03_test-stransform", 
+                      sef.fname)
+sef <- get(load(file.path(here(), sef.fpath)))
 ```
 
 We also need to subset the `lz` list to include just the Z signature matrices of
@@ -127,11 +138,29 @@ interest.
 lexpt <- lz[c("z.final", "zs.stat", "zs.rand")]
 ```
 
+### Experiment design
+
+We wish to evaluate a series of scales and cell proportions. 
+
+```{r}
+scalev <- seq(500, 5000, 500)
+cell.propv <- seq(0, 1000, 225)
+datv <- c(0, 1, 2, 3,
+          1, 2, 3, 0,
+          2, 3, 0, 1,
+          3, 0, 1, 2,
+          0, 0, 1, 0)
+```
+
+
+
 ## Run experiments
 
 ```{r}
 # run experiment
-pb.expt <- get_pb_experiment(lz = lexpt, scef = sef, datv = c(1,1,1,1), nj = NA,
+pb.expt <- get_pb_experiment(lz = lexpt, 
+                             scef = sef, 
+                             datv = datv,
                              scale.range = 500:2000, ctvarname = "celltypes",
                              plot.results = TRUE, method.str = "nnls", 
                              seed.num = 2)

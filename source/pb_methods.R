@@ -53,9 +53,9 @@ get_lpb <- function(sef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     }
   }
   # get pseudobulk design matrix
-  ncol <- length(datv)/nk
-  if(!ncol %% 1 == 0){stop("invalid datv dimensions")}
-  mpb <- matrix(datv, ncol=ncol) %>% 
+  ncoln <- length(datv)/nk
+  if(!ncoln %% 1 == 0){stop("invalid datv dimensions")}
+  mpb <- matrix(datv, ncol = ncoln) %>% 
     apply(2, function(ci){ci/sum(ci)})
   rownames(mpb) <- klabv
   colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
