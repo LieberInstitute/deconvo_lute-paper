@@ -313,8 +313,12 @@ pi_plot_series <- function(df.tall = NA, alpha.value = 0.4){
     facet_wrap(~sample_id, nrow = 1)
   return(list(ggpt.main = ggpt.main, 
               ggpt.all = ggpt.all, 
+              ggpt.all.method = ggpt.all.method,
+              ggpt.all.sampleid = ggpt.all.sampleid,
               ggpt.all.col = ggpt.all.col, 
-              ggpt.all.facet = ggpt.all.facet))
+              ggpt.all.celltype.facet = ggpt.all.celltype.facet,
+              ggpt.all.method.facet = ggpt.all.method.facet,
+              ggpt.all.sampleid.facet = ggpt.all.sampleid.facet))
 }
 
 # scale plot functions
