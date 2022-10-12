@@ -171,30 +171,74 @@ pb.expt <- get_pb_experiment(lz = lexpt,
                                                          "03_test-stransform"),
                              save.plots = FALSE,
                              seed.num = 2)
-
-pb.expt$lgg_plots$lgg.pi$ggpt.all.celltype.facet
 ```
+
 # Results
 
-```{r}
-attach(pb.expt$lpb$pb_report)
-```
-
-```{r}
-pb.expt$lgg_plots$lgg.pi$ggpt.all.col
-pb.expt$lgg_plots$lgg.pi$ggpt.all.celltype.facet
-```
-
+## Plotting pi_est versus pi_true
 
 ```{r}
 df.tall <- pb.expt$lpb$pb_report
 alpha.value <- 0.4
-ggmain <- pb.expt$lgg_plots$lgg.pi$ggpt.all.col
-ggpt.all.col <- ggmain + geom_point(aes(color = cell_type),alpha = alpha.value)
+```
+
+```{r}
+ggpt.main <- ggplot(df.tall, aes_string(x = pi_true, y = pi_est),
+                      environment = environment()) +
+    geom_abline(intercept = 0, slope = 1, color = "red", lwd = 1.2, 
+                alpha = alpha.value) +
+    geom_smooth(method = "lm", color = "blue", lwd = 1.2, 
+                alpha = alpha.value)
+ggpt.main
+```
+
+```{r}
+# label series
+ggpt.all <- ggpt.main + geom_point(alpha = alpha.value)
+ggpt.all
+```
+
+```{r}
+ggpt.all.method <- ggpt.main + geom_point(aes(color = method),
+                                          alpha = alpha.value)
+ggpt.all.method
+```
+```{r}
+ggpt.all.sampleid <- ggpt.main + 
+  geom_point(aes(color = sample_id), alpha = alpha.value)
+ggpt.all.sampleid
+```
+
+```{r}
+ggpt.all.col <- ggpt.main + 
+  geom_point(aes(color = cell_type), alpha = alpha.value)
 ggpt.all.col
 ```
 
 ```{r}
-ggpt.all.celltype.facet <- ggpt.all.col + facet_wrap(~cell_type, nrow = 1)
+# get facet series
+ggpt.all.celltype.facet <- ggpt.all.col + facet_wrap(vars(cell_type), nrow = 1)
 ggpt.all.celltype.facet
 ```
+
+
+```{r}
+ggpt.all.method.facet <- ggpt.all.col + 
+    facet_wrap(~method, nrow = 1)
+ggpt.all.method.facet
+```
+
+```{r}
+ggpt.all.sampleid.facet <- ggpt.all.col + 
+    facet_wrap(~sample_id, nrow = 1)
+ggpt.all.sampleid.facet
+```
+
+## Plotting by scale/total counts
+
+```{r}
+```
+
+
+
+

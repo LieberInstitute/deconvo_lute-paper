@@ -547,8 +547,7 @@ get_pb_experiment <- function(lz = NA, scef = NA,
                                    save.dpath = plot.save.dpath, 
                                    fn.handle = plot.fname.handle,
                                    save.plots = save.plots)
-    lr[["lgg_plots"]] <- list("lgg.pi" = lgg.pi, 
-                              "lgg.scale" = lgg.scale)
+    lr[["lgg_plots"]] <- list("lgg.pi" = lgg.pi, "lgg.scale" = lgg.scale)
   }
   return(lr)
 }
