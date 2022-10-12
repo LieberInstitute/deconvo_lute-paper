@@ -498,6 +498,8 @@ get_pb_experiment <- function(lz = NA, scef = NA,
                               ctvarname = "celltypes",
                               plot.results = TRUE,
                               method.str = "nnls", 
+                              plot.save.dpath = "",
+                              plot.fname.handle = "newplots",
                               seed.num = 2){
   # run a pseudobulk experiment
   #
@@ -516,6 +518,8 @@ get_pb_experiment <- function(lz = NA, scef = NA,
   # method.str : character string of strict deconvolution method to make pi_est,
   #   can be either "nnls" (default), "glm", or "bvls".
   # seed.num : integer for the random seed.
+  # plot.save.dpath : path location to save new plots.
+  # plot.fname.handle : character string to append to new plot filenames.
   # 
   # returns
   # randomiezed pseudobulk data, results table, optional plots
@@ -533,8 +537,12 @@ get_pb_experiment <- function(lz = NA, scef = NA,
                          ctvarname = ctvarname, seed.num = seed.num, 
                          scale.range = scale.range, get.results = TRUE)
   if(plot.results){
-    lgg.pi <- pi_plot_series(lr[["pb_report"]])
-    lgg.scale <- scale_plot_series(lr[["pb_report"]])
+    lgg.pi <- pi_plot_series(lr[["pb_report"]], 
+                             save.dpath = plot.save.dpath, 
+                             fn.handle = plot.fname.handle)
+    lgg.scale <- scale_plot_series(lr[["pb_report"]],
+                                   save.dpath = plot.save.dpath, 
+                                   fn.handle = plot.fname.handle)
     lr[["lgg_plots"]] <- list("lgg.pi" = lgg.pi, 
                               "lgg.scale" = lgg.scale)
   }
