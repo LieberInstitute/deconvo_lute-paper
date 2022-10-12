@@ -460,17 +460,16 @@ get_exe_lz <- function(seed.num = 2){
   return(lz)
 }
 
-get_exe_sef <- function(ct.str = "celltype", seed.num = 2){
+get_exe_sef <- function(num.col = 100, num.row = 50, sample.num = 100,
+                        num.celltypes = 4, ct.str = "celltype", seed.num = 2){
   # get example filtered summarized experiment
   #
   # ct.str : base string for cell types. should not include "_" (underscore).
   #
   #
-  ct <- matrix(
-    sample(100, 50*100, replace = T), 
-    nrow = 50)
+  ct <- matrix(sample(sample.num, num.row*num.col, replace = T), nrow = num.row)
   sef <- SummarizedExperiment(assays = list(counts = ct))
-  sef[["celltypes"]] <- paste0(rep("celltype", 100), seq(4))
+  sef[["celltypes"]] <- paste0(rep("celltype", num.col), seq(num.celltypes))
   return(sef)
 }
 
@@ -501,7 +500,7 @@ get_pb_experiment <- function(lz = NA, sef = NA,
                               method.str = "nnls", 
                               plot.save.dpath = "",
                               plot.fname.handle = "newplots",
-                              save.plots = TRUE,
+                              save.plots = FALSE,
                               seed.num = 2){
   # run a pseudobulk experiment
   #
