@@ -41,6 +41,8 @@ get_lpb <- function(sef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   if(is(sef, "SingleCellExperiment")){
     require(SingleCellExperiment);require(DelayedArray)
   }
+  if(!ctvarname %in% colnames(colData(sef))){
+    stop("variable ", ctvarname, " not in sef coldata.")}
   set.seed(seed.num); lpb <- list()
   # parse types
   kvarv <- sef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
