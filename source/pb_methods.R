@@ -38,6 +38,7 @@ get_lpb <- function(sef, datv = NA, nj = NA, ctvarname = "celltype.treg",
   # examples
   #
   require(dplyr)
+  lpb <- list() # make return object
   if(is(sef, "SingleCellExperiment")){
     require(SingleCellExperiment);require(DelayedArray)
   }
@@ -101,7 +102,7 @@ get_lpb <- function(sef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     lpb[["y_data_pb"]] <- ypb
   }
   if(get.results & !is(lz, "logical")){
-    df.res <- pb_report(lz, lpb)
+    df.res <- pb_report(lz.compare = lz, lpb = lpb)
     lpb[["pb_report"]] <- df.res
   }
   return(lpb)
@@ -480,8 +481,8 @@ get_pb_experiment <- function(lz = NA, scef = NA,
                          ctvarname = ctvarname, seed.num = seed.num, 
                          scale.range = scale.range, get.results = TRUE)
   if(plot.results){
-    lgg.pi <- pi_plot_series(lpb[["pb_report"]])
-    lgg.scale <- scale_plot_series(lpb[["pb_report"]])
+    lgg.pi <- pi_plot_series(lr[["pb_report"]])
+    lgg.scale <- scale_plot_series(lr[["pb_report"]])
     lr[["lgg_plots"]] <- list("lgg.pi" = lgg.pi, 
                               "lgg.scale" = lgg.scale)
   }
