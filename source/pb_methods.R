@@ -284,8 +284,9 @@ pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4,
   # parse variable names
   # get main plot object
   ggpt.main <- ggplot(df.tall, 
-                      aes(x = pi_true, 
-                          y = pi_est)) +
+                      aes_string(x = pi_true, 
+                          y = pi_est),
+                      environment = environment()) +
     geom_abline(intercept = 0, 
                 slope = 1, 
                 color = "red", 
@@ -309,7 +310,7 @@ pi_plot_series <- function(df.tall = NA, ctvarname = NA, alpha.value = 0.4,
                alpha = alpha.value)
   # get facet series
   ggpt.all.celltype.facet <- ggpt.all.col + 
-    facet_wrap(~cell_type, nrow = 1)
+    facet_wrap(vars(cell_type), nrow = 1)
   ggpt.all.method.facet <- ggpt.all.col + 
     facet_wrap(~method, nrow = 1)
   ggpt.all.sampleid.facet <- ggpt.all.col + 
@@ -500,6 +501,7 @@ get_pb_experiment <- function(lz = NA, scef = NA,
                               method.str = "nnls", 
                               plot.save.dpath = "",
                               plot.fname.handle = "newplots",
+                              save.plots = TRUE,
                               seed.num = 2){
   # run a pseudobulk experiment
   #
@@ -539,10 +541,12 @@ get_pb_experiment <- function(lz = NA, scef = NA,
   if(plot.results){
     lgg.pi <- pi_plot_series(lr[["pb_report"]], 
                              save.dpath = plot.save.dpath, 
-                             fn.handle = plot.fname.handle)
+                             fn.handle = plot.fname.handle,
+                             save.plots = save.plots)
     lgg.scale <- scale_plot_series(lr[["pb_report"]],
                                    save.dpath = plot.save.dpath, 
-                                   fn.handle = plot.fname.handle)
+                                   fn.handle = plot.fname.handle,
+                                   save.plots = save.plots)
     lr[["lgg_plots"]] <- list("lgg.pi" = lgg.pi, 
                               "lgg.scale" = lgg.scale)
   }
