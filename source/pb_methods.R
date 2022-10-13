@@ -62,6 +62,7 @@ get_lpb <- function(sef, datv = NA, nj = NA, ctvarname = "celltype.treg",
     apply(2, function(ci){ci/sum(ci)})
   rownames(mpb) <- klabv
   colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+  message("getting pb data for ",ncol(mpb), " samples...")
   lpb[["pi_pb"]] <- mpb
   # get sample scale factors, or randomized total counts
   scalev <- sample(scale.range, ncol(mpb))
