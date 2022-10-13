@@ -11,7 +11,7 @@
 #---------------------------------------
 # pseudobulk experiment helper functions
 #---------------------------------------
-get_lpb <- function(sef, datv = NA, nj = NA, ctvarname = "celltype.treg", 
+get_lpb <- function(sef, ctvarname, datv = NA, nj = NA, 
                     counts.summary.method = "mean", seed.num = 2,
                     scale.range = 500:2000, get.results = TRUE, lz = NA){
   # get list of pseudobulked counts tables

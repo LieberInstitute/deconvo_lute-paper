@@ -1,0 +1,24 @@
+---
+title: "test_lpb"
+author: "Sean Maden"
+date: '2022-10-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# define params
+
+```{r}
+sef <- get_exe_sef()
+# lz <- get_exe_lz()
+```
+
+
+# run lpb function
+
+```{r}
+get_lpb(lz, datv = rep(1, 4))
+```
