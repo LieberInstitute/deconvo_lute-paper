@@ -82,21 +82,19 @@ tv <- do.call(rbind,
                      function(nj){
                        time_lpb_run(nj)}))
 ```
+```{r}
+tv
+```
+# do log scale test
 
 ```{r}
-datv <- sample(10, 100*4, replace = T) + 1
+njv <- c(1, 10, 100, 1000)
+tv <- do.call(rbind, 
+              lapply(njv, 
+                     function(nj){
+                       time_lpb_run(nj)}))
 ```
 
 ```{r}
-
+tv
 ```
-
-```{r}
-pb.expt$lpb$pi_pb
-```
-
-```{r}
-head(pb.expt$lpb$y_data_pb)
-```
-
-
