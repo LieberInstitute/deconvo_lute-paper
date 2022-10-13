@@ -1,0 +1,100 @@
+---
+title: "04_scale-pb-expt"
+author: "Sean Maden"
+date: '2022-10-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(here)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+message("here: ", here())
+proj.dpath <- "deconvo_method-paper"
+
+# source methods
+source.dpath <- file.path("deconvo_method-paper",
+                          "source")
+source.fnv <- c("pb_methods", 
+                "z_transformations")
+for(fni in source.fnv){
+  source(
+    file.path(here(), 
+              source.dpath, 
+              paste0(fni, ".R")))}
+lz.fname <- "lz_s-rescale-k4_dlpfc-ro1.rda"
+lz.fpath <- file.path(proj.dpath, 
+                      "outputs/03_test-stransform", 
+                      lz.fname)
+lz <- get(load(file.path(here(), lz.fpath)))
+dft <- data.frame(cell_type = c("Excit", "Inhib", "Oligo", "other"),
+                        mean = c(6, 8, 2, 2), 
+                        sd = c(2, 3, 1, 1))
+meanv <- c(6, 2, 2, 8)
+sdv <- c(2, 1, 1, 3)
+lz[["zs.stat"]] <- s_rescale(lz[["z.final"]], factorv = meanv)
+lz[["zs.rand"]] <- s_rescale(lz[["z.final"]], meanv = meanv, sdv = sdv)
+sef.fname <- "sef-markers_ct-treg_stransform-expt_dlpfc-ro1.rda"
+sef.fpath <- file.path(proj.dpath, 
+                      "outputs/03_test-stransform", 
+                      sef.fname)
+sef <- get(load(file.path(here(), sef.fpath)))
+lexpt <- lz[c("z.final", "zs.stat", "zs.rand")]
+```
+
+# time run for n samples
+
+Define a helper function to time the run.
+
+```{r}
+time_run <- function(nj, datv.str = c("c(sample(10, 100*",
+                                      ", replace = T) + 1)")){
+  t1 <- Sys.time()
+  datv = eval(parse(text = paste0(datv.str[1], nj,
+                                  datv.str[2])))
+  pb.expt <- suppressWarnings(get_pb_experiment(lz = lexpt, 
+                               sef = sef, 
+                               datv = datv, 
+                               scale.range = 100:10000, 
+                               ctvarname = "celltype.treg", 
+                               plot.results = FALSE, 
+                               method.str = "nnls",
+                               seed.num = 2))
+  tdif <- Sys.time()-t1
+  dfi <- data.frame(nj = nj, time = tdif)
+  return(dfi)
+}
+
+# time_run(4)
+
+```
+
+Define a series of samples.
+
+```{r}
+nj <- c(1, 10, 20, 50, 80, 100)
+```
+
+Get the times for each nj.
+
+```{r}
+tv <- do.call()
+```
+
+```{r}
+datv <- sample(10, 100*4, replace = T) + 1
+```
+
+```{r}
+
+```
+
+```{r}
+pb.expt$lpb$pi_pb
+```
+
+```{r}
+head(pb.expt$lpb$y_data_pb)
+```
+
+
