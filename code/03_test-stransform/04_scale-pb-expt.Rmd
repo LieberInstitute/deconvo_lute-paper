@@ -5,13 +5,15 @@ date: '2022-10-13'
 output: html_document
 ---
 
+This vignette times the lpb function by sampling cells from sef, where 
+sef represents data from a real (non-simulated) snRNAseq experiment.
+
 ```{r setup, include=FALSE}
 library(here)
-library(ggplot2)
+# library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 message("here: ", here())
 proj.dpath <- "deconvo_method-paper"
-
 # source methods
 source.dpath <- file.path("deconvo_method-paper",
                           "source")
@@ -27,19 +29,19 @@ lz.fpath <- file.path(proj.dpath,
                       "outputs/03_test-stransform", 
                       lz.fname)
 lz <- get(load(file.path(here(), lz.fpath)))
-dft <- data.frame(cell_type = c("Excit", "Inhib", "Oligo", "other"),
-                        mean = c(6, 8, 2, 2), 
-                        sd = c(2, 3, 1, 1))
-meanv <- c(6, 2, 2, 8)
-sdv <- c(2, 1, 1, 3)
-lz[["zs.stat"]] <- s_rescale(lz[["z.final"]], factorv = meanv)
-lz[["zs.rand"]] <- s_rescale(lz[["z.final"]], meanv = meanv, sdv = sdv)
+#dft <- data.frame(cell_type = c("Excit", "Inhib", "Oligo", "other"),
+#                        mean = c(6, 8, 2, 2), 
+#                        sd = c(2, 3, 1, 1))
+#meanv <- c(6, 2, 2, 8)
+#sdv <- c(2, 1, 1, 3)
+#lz[["zs.stat"]] <- s_rescale(lz[["z.final"]], factorv = meanv)
+#lz[["zs.rand"]] <- s_rescale(lz[["z.final"]], meanv = meanv, sdv = sdv)
 sef.fname <- "sef-markers_ct-treg_stransform-expt_dlpfc-ro1.rda"
 sef.fpath <- file.path(proj.dpath, 
                       "outputs/03_test-stransform", 
                       sef.fname)
 sef <- get(load(file.path(here(), sef.fpath)))
-lexpt <- lz[c("z.final", "zs.stat", "zs.rand")]
+#lexpt <- lz[c("z.final", "zs.stat", "zs.rand")]
 ```
 
 # time run for n samples
@@ -63,8 +65,7 @@ time_run <- function(nj, datv.str = c("c(sample(10, 100*",
   return(dfi)
 }
 
-# time_run(4)
-
+time_run(4)
 ```
 
 Define a series of samples.

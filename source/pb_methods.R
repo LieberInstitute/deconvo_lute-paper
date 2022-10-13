@@ -164,6 +164,17 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
   return(pi.dati)
 }
 
+#--------------------
+# interactive methods
+#--------------------
+get_ctvarname_frominput <- function(ct.str = "^(c|C)ell(t|T)ype.*"){
+  # get_ctvarname_frominput
+  #
+  # if passed cell type variable name not found in sef, shows
+  # first encountered similar variable in coldata colnames, and asks 
+  # user to verify (Y/N) if this is the cell ctvarname to proceed with.
+}
+
 #----------------------------
 # report data.frame functions
 #----------------------------
