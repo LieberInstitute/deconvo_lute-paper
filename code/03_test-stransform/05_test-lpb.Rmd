@@ -7,6 +7,15 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+# source methods
+source.dpath <- file.path("deconvo_method-paper",
+                          "source")
+source.fnv <- c("pb_methods")
+for(fni in source.fnv){
+  source(
+    file.path(here(), 
+              source.dpath, 
+              paste0(fni, ".R")))}
 ```
 
 # define params
@@ -20,5 +29,10 @@ sef <- get_exe_sef()
 # run lpb function
 
 ```{r}
-get_lpb(lz, datv = rep(1, 4))
+lpb <- get_lpb(sef, ctvarname = "celltypes", datv = rep(1, 4))
 ```
+
+
+
+
+

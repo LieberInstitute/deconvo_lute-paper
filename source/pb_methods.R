@@ -47,6 +47,8 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   set.seed(seed.num); lpb <- list()
   # parse types
   kvarv <- sef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
+  message("identified ", nk, " cell types...")
+  message("identified ", nrow(sef), " features...")
   # parse pb data -- get datv using either arg datv,nj
   if(is(datv, "logical")){
     if(is(nj, "logical")){
@@ -63,7 +65,6 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   rownames(mpb) <- klabv
   colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
   lpb[["pi_pb"]] <- mpb
-  message("identified ",nrow(mpb), " samples...")
   message("getting pb data for ",ncol(mpb), " samples...")
   # get sample scale factors, or randomized total counts
   scalev <- sample(scale.range, ncol(mpb))
