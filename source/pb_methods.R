@@ -13,7 +13,8 @@
 #---------------------------------------
 get_lpb <- function(sef, ctvarname, datv = NA, nj = NA, 
                     counts.summary.method = "mean", seed.num = 2,
-                    scale.range = 500:2000, get.results = TRUE, lz = NA){
+                    scale.range = 500:2000, get.results = TRUE, lz = NA,
+                    ctvarnamecheck.interactive = TRUE){
   # get list of pseudobulked counts tables
   #
   # arguments
@@ -31,6 +32,8 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   # scale.range: integer vector from which to randomly take total counts in
   #   sample-wise expression.
   # get.results : whether to make table of results.
+  # ctvarnamecheck.interactive : whether to allow interactive check of cell 
+  # type variable name.
   # 
   # returns
   # list of pseudobulk results, inc. option for results df.
@@ -56,11 +59,12 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
     } else{
       datv <- rep(sample(1e3, nk), nj)
     }
+  } else{
+    nj <- length(datv)/nk
   }
   # get pseudobulk design matrix
-  ncoln <- length(datv)/nk
-  if(!ncoln %% 1 == 0){stop("invalid datv dimensions")}
-  mpb <- matrix(datv, ncol = ncoln) %>% 
+  if(!nj %% 1 == 0){stop("invalid datv dimensions")}
+  mpb <- matrix(datv, ncol = nj) %>% 
     apply(2, function(ci){ci/sum(ci)})
   rownames(mpb) <- klabv
   colnames(mpb) <- paste0("j_", seq(ncol(mpb)))

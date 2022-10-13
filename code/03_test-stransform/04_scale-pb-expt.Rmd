@@ -49,35 +49,38 @@ sef <- get(load(file.path(here(), sef.fpath)))
 Define a helper function to time the run.
 
 ```{r}
-time_run <- function(nj, datv.str = c("c(sample(10, 100*",
+time_lpb_run <- function(nj, nk = 4, ng = 100, 
+                         datv.str = c("c(sample(10, ","*",
                                       ", replace = T) + 1)")){
+  # time_lpb_run
+  #
+  # example:
+  # time_run(4)
+  #
+  #
   t1 <- Sys.time()
-  datv = eval(parse(text = paste0(datv.str[1], nj,
-                                  datv.str[2])))
-  pb.expt <- suppressWarnings(
-    get_pb_experiment(lz = lexpt, sef = sef, datv = datv, 
+  datv = eval(parse(text = paste0(datv.str[1], nk, datv.str[2], nj, datv.str[3])))
+  pb.expt <- get_pb_experiment(lz = lexpt, sef = sef, datv = datv, 
                       scale.range = 100:10000, ctvarname = "celltype.treg", 
-                      plot.results = FALSE, method.str = "nnls",
-                      seed.num = 2)
-    )
+                      plot.results = FALSE, method.str = "nnls", seed.num = 2)
   tdif <- Sys.time()-t1
   dfi <- data.frame(nj = nj, time = tdif)
   return(dfi)
 }
-
-time_run(4)
+```
+```{r}
+time_lpb_run(4)
 ```
 
-Define a series of samples.
+
+Define a series of samples nj, and get the times for a series of nj values.
 
 ```{r}
-nj <- c(1, 10, 20, 50, 80, 100)
-```
-
-Get the times for each nj.
-
-```{r}
-tv <- do.call()
+njv <- seq(10)
+tv <- do.call(rbind, 
+              lapply(njv, 
+                     function(nj){
+                       time_lpb_run(nj)}))
 ```
 
 ```{r}
