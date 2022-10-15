@@ -11,20 +11,71 @@
 #---------------------------------------
 # pseudobulk experiment helper functions
 #---------------------------------------
+
+check_sef <- function(sef, ctvarname){
+  # checks properties of the provided sef
+  # 
+  if(is(sef, "SingleCellExperiment")){
+    require(SingleCellExperiment);require(DelayedArray)
+  } else{
+    require(SummarizedExperiment)
+  }
+  if(!ctvarname %in% colnames(colData(sef))){
+    stop("variable ", ctvarname, " not in sef coldata.")}
+  return(sef)
+}
+
+make_mpb <- function(datv = NA, nj = NA, klabv = NA){
+  # get pseudobulk design matrix from datv vector
+  #
+  # 
+  # called by `make_mpb_from_datv()`
+  require(dplyr)
+  mpb <- matrix(datv, ncol = nj) %>% 
+    apply(2, function(ci){ci/sum(ci)})
+  rownames(mpb) <- klabv
+  colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+  return(mpb)
+}
+
+make_mpb_from_datv <- function(datv = NA, nk = NA, nj = NA, klabv = NA){
+  # get pseudobulk design matrix from datv vector
+  #
+  # called by `get_lpb()`
+  #
+  # parse pb data -- get datv using either arg datv,nj
+  if(is(datv, "logical")){
+    if(is(nj, "logical")){
+      stop("provide either datv or nj.")
+    } else{
+      datv <- rep(sample(1e3, nk), nj)
+    }
+  } else{
+    nj <- length(datv)/nk
+  }
+  # get pseudobulk design matrix
+  if(!nj %% 1 == 0){stop("invalid datv dimensions")}
+  mpb <- make_mpb(datv = datv, nj = nj, klabv = klabv)
+  return(mpb)
+}
+
 get_lpb <- function(sef, ctvarname, datv = NA, nj = NA, 
                     counts.summary.method = "mean", seed.num = 2,
                     scale.range = 500:2000, get.results = TRUE, lz = NA,
                     ctvarnamecheck.interactive = TRUE){
+  #
+  #
   # get list of pseudobulked counts tables
   #
   # arguments
   # sef : SummarizedExperiment, SingleCellExperiment, or similar, ideally 
   #   filtered on some marker genes or z features. Note, cell type labels in
   #   sef[[ctvarname]] should not contain "_" (underscore) characters.
-  # datv : vector of relative cell type representation weights. Length should be 
-  #   equal to nj*nk. Values here correspond to the mpb design matrix. If NA, this is 
-  #   randomized and variable nj is used. For example, datv = c(1,2) implies the
-  #   relative representation of c(0.33, 0.66) for the first and second types.
+  # datv : relative cell amounts across samples. For example, datv = c(1,2) 
+  #   implies the relative representation of c(0.33, 0.66) for the first and 
+  #   second types.Length should be equal to number of cell types times number 
+  #   of pb samples to simulate (nk*nj). These values are used in the pseudobulk 
+  #   design matrix. If NA, this is randomized and the variable `nj` is then used.
   # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
   # ctvarname : name of the cell type labels, contained in sef coldata.
   # counts.summary.method : method for summarizing counts to get y.data table.
@@ -40,34 +91,14 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   #
   # examples
   #
-  require(dplyr)
-  lpb <- list() # make return object
-  if(is(sef, "SingleCellExperiment")){
-    require(SingleCellExperiment);require(DelayedArray)
-  }
-  if(!ctvarname %in% colnames(colData(sef))){
-    stop("variable ", ctvarname, " not in sef coldata.")}
-  set.seed(seed.num); lpb <- list()
+  set.seed(seed.num);lpb <- list() # make return object
+  sef <- check_sef(sef, ctvarname)
   # parse types
   kvarv <- sef[[ctvarname]]; klabv <- unique(kvarv); nk <- length(klabv)
   message("identified ", nk, " cell types...")
   message("identified ", nrow(sef), " features...")
-  # parse pb data -- get datv using either arg datv,nj
-  if(is(datv, "logical")){
-    if(is(nj, "logical")){
-      stop("provide either datv or nj.")
-    } else{
-      datv <- rep(sample(1e3, nk), nj)
-    }
-  } else{
-    nj <- length(datv)/nk
-  }
-  # get pseudobulk design matrix
-  if(!nj %% 1 == 0){stop("invalid datv dimensions")}
-  mpb <- matrix(datv, ncol = nj) %>% 
-    apply(2, function(ci){ci/sum(ci)})
-  rownames(mpb) <- klabv
-  colnames(mpb) <- paste0("j_", seq(ncol(mpb)))
+  mpb <- make_mpb_from_datv(datv = datv, nk = nk, 
+                            nj = nj, klabv = klabv)
   lpb[["pi_pb"]] <- mpb
   message("getting pb data for ",ncol(mpb), " samples...")
   # get sample scale factors, or randomized total counts
@@ -77,22 +108,36 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   # set up counts for sampling
   ct <- assays(sef)$counts 
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
-  # get list of pseudobulked counts tables
-  lct <- lapply(seq(ncol(mpb)), function(ji){
-    # get sample-specific info
-    scalej <- scalev[ji] # sample scale factor
-    cellv.ij <- round(mpb[,ji]*scalej) # vector of total cell counts
-    # get randomized counts data
-    ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
-      num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
-      cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
-      cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), 
-                                   num.cells.ij, replace = T)]
-      return(ct[,cnvf.index.ij])
-    }))
-    return(ct.pb.j)
-  })
-  names(lct) <- colnames(mpb)
+  
+  make_lct <- function(mpb, scalev, klabv){
+    #
+    # makes a list of pseudobulked counts tables
+    #
+    # scalev: vector of scale values of length equal to num. samples (nj). Note,
+    # the same value is applied to each cell type
+    #
+    #
+    # get list of pseudobulked counts tables
+    if(!ncol(mpb)==length(scalev)){
+      stop("num. cols in mpb should be same as length of scalev")}
+    lct <- lapply(seq(ncol(mpb)), function(ji){
+      # get sample-specific info
+      scalej <- scalev[ji] # sample scale factor
+      cellv.ij <- round(mpb[,ji]*scalej) # vector of total cell counts
+      # get randomized counts data
+      ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
+        num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
+        cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
+        cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), 
+                                     num.cells.ij, replace = T)]
+        return(ct[,cnvf.index.ij])
+      }))
+      return(ct.pb.j)
+    })
+    names(lct) <- colnames(mpb)
+  }
+  
+  
   lpb[["listed_counts_pb"]] <- lct
   if(!is.na(counts.summary.method)){
     if(counts.summary.method == "mean"){
@@ -109,7 +154,7 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
     lpb[["y_data_pb"]] <- ypb
   }
   if(get.results & !is(lz, "logical")){
-    df.res <- pb_report(lz.compare = lz, lpb = lpb)
+    df.res <- try(pb_report(lz.compare = lz, lpb = lpb))
     lpb[["pb_report"]] <- df.res
   }
   return(lpb)
@@ -135,10 +180,10 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
     message("running ", method, "...")
     if(method == "nnls"){
       require(nnls)
-      pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
+      pi.dati <- try(do.call(rbind, lapply(seq(ncol(z.data)), 
                                        function(i){
                                          nnls::nnls(y.data, 
-                                                    z.data[,i])$x}))
+                                                    z.data[,i])$x})))
     } else if(method == "glm"){
       require(glmnet)
       pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
@@ -161,10 +206,12 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
     stop("provide a valid method.")
   }
   if(return.prop){
-    pi.dati <- apply(pi.dati, 2, function(ci){ci/sum(ci)}) 
+    pi.dati <- try(apply(pi.dati, 2, function(ci){ci/sum(ci)})) 
   }
-  colnames(pi.dati) <- colnames(y.data)
-  rownames(pi.dati) <- colnames(z.data)
+  if(!class(pi.dati) == "try-error"){
+    colnames(pi.dati) <- colnames(y.data)
+    rownames(pi.dati) <- colnames(z.data)
+  }
   return(pi.dati)
 }
 
