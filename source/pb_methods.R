@@ -59,6 +59,35 @@ make_mpb_from_datv <- function(datv = NA, nk = NA, nj = NA, klabv = NA){
   return(mpb)
 }
 
+make_lct <- function(mpb, scalev, klabv, ctlabv){
+  #
+  # makes a list of pseudobulked counts tables
+  #
+  # scalev: vector of scale values of length equal to num. samples (nj). Note,
+  # the same value is applied to each cell type
+  #
+  #
+  # get list of pseudobulked counts tables
+  if(!ncol(mpb)==length(scalev)){
+    stop("num. cols in mpb should be same as length of scalev")}
+  lct <- lapply(seq(ncol(mpb)), function(ji){
+    # get sample-specific info
+    scalej <- scalev[ji] # sample scale factor
+    cellv.ij <- round(mpb[,ji]*scalej) # vector of total cell counts
+    # get randomized counts data
+    ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
+      num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
+      cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
+      cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), 
+                                   num.cells.ij, replace = T)]
+      return(ct[,cnvf.index.ij])
+    }))
+    return(ct.pb.j)
+  })
+  names(lct) <- colnames(mpb)
+  return(lct)
+}
+
 get_lpb <- function(sef, ctvarname, datv = NA, nj = NA, 
                     counts.summary.method = "mean", seed.num = 2,
                     scale.range = 500:2000, get.results = TRUE, lz = NA,
@@ -79,6 +108,7 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   # nj : number of pseudobulked samples to simulate. This is only used if datv==NA.
   # ctvarname : name of the cell type labels, contained in sef coldata.
   # counts.summary.method : method for summarizing counts to get y.data table.
+  #   Can either be "mean" or "median".
   # seed.num : token for random seed, should be an integer.
   # scale.range: integer vector from which to randomly take total counts in
   #   sample-wise expression.
@@ -108,50 +138,23 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   # set up counts for sampling
   ct <- assays(sef)$counts 
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
-  
-  make_lct <- function(mpb, scalev, klabv){
-    #
-    # makes a list of pseudobulked counts tables
-    #
-    # scalev: vector of scale values of length equal to num. samples (nj). Note,
-    # the same value is applied to each cell type
-    #
-    #
-    # get list of pseudobulked counts tables
-    if(!ncol(mpb)==length(scalev)){
-      stop("num. cols in mpb should be same as length of scalev")}
-    lct <- lapply(seq(ncol(mpb)), function(ji){
-      # get sample-specific info
-      scalej <- scalev[ji] # sample scale factor
-      cellv.ij <- round(mpb[,ji]*scalej) # vector of total cell counts
-      # get randomized counts data
-      ct.pb.j <- do.call(cbind, lapply(klabv, function(ki){
-        num.cells.ij <- cellv.ij[ki] # num cells to sample for this type
-        cnvf <- ctlabv[grepl(ki, gsub("_.*", "", ctlabv))]
-        cnvf.index.ij <- cnvf[sample(seq(length(cnvf)), 
-                                     num.cells.ij, replace = T)]
-        return(ct[,cnvf.index.ij])
-      }))
-      return(ct.pb.j)
-    })
-    names(lct) <- colnames(mpb)
-  }
-  
-  
+  lct <- make_lct(mpb = mpb, scalev = scalev, klabv = klabv, ctlabv = ctlabv)
   lpb[["listed_counts_pb"]] <- lct
-  if(!is.na(counts.summary.method)){
+  csm <- counts.summary.method
+  if(!is.na(csm) & csm %in% c("mean", "median")){
     if(counts.summary.method == "mean"){
       ypb <- do.call(cbind, lapply(lct, 
                                    function(ii){rowMeans(ii)}))
     } else if(counts.summary.method == "median"){
-      ypb <- do.call(cbind, lapply(lct, 
-                                   function(ii){rowMedians(ii)}))
+      ypb <- do.call(cbind, 
+                     lapply(lct, function(ii){rowMedians(ii)}))
     } else{
       stop("counts.summary.method not recognized")
     }
-    colnames(ypb) <- colnames(mpb)
-    rownames(ypb) <- rownames(sef)
+    colnames(ypb) <- colnames(mpb); rownames(ypb) <- rownames(sef)
     lpb[["y_data_pb"]] <- ypb
+  } else{
+    message("invalid counts.summary.method found.")
   }
   if(get.results & !is(lz, "logical")){
     df.res <- try(pb_report(lz.compare = lz, lpb = lpb))
