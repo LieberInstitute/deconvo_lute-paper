@@ -59,7 +59,7 @@ make_mpb_from_datv <- function(datv = NA, nk = NA, nj = NA, klabv = NA){
   return(mpb)
 }
 
-make_lct <- function(mpb, scalev, klabv, ctlabv){
+make_lct <- function(mpb, ct, scalev, klabv, ctlabv){
   #
   # makes a list of pseudobulked counts tables
   #
@@ -138,7 +138,8 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   # set up counts for sampling
   ct <- assays(sef)$counts 
   ctlabv <- colnames(ct) <- paste0(kvarv, "_", seq(ncol(ct)))
-  lct <- make_lct(mpb = mpb, scalev = scalev, klabv = klabv, ctlabv = ctlabv)
+  lct <- make_lct(mpb = mpb, ct = ct, scalev = scalev, 
+                  klabv = klabv, ctlabv = ctlabv)
   lpb[["listed_counts_pb"]] <- lct
   csm <- counts.summary.method
   if(!is.na(csm) & csm %in% c("mean", "median")){
