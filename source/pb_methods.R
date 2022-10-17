@@ -68,6 +68,7 @@ make_lct <- function(mpb, ct, scalev, klabv, ctlabv){
   #
   #
   # get list of pseudobulked counts tables
+  message("making randomized counts tables...")
   if(!ncol(mpb)==length(scalev)){
     stop("num. cols in mpb should be same as length of scalev")}
   lct <- lapply(seq(ncol(mpb)), function(ji){
@@ -132,7 +133,7 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   lpb[["pi_pb"]] <- mpb
   message("getting pb data for ",ncol(mpb), " samples...")
   # get sample scale factors, or randomized total counts
-  scalev <- sample(scale.range, ncol(mpb))
+  scalev <- scale.range[sample(length(scale.range), ncol(mpb), replace = T)]
   lpb[["scalev"]] <- scalev
   names(lpb[["scalev"]]) <- colnames(mpb)
   # set up counts for sampling
