@@ -158,8 +158,13 @@ get_lpb <- function(sef, ctvarname, datv = NA, nj = NA,
   } else{
     message("invalid counts.summary.method found.")
   }
-  if(get.results & !is(lz, "logical")){
-    df.res <- try(pb_report(lz.compare = lz, lpb = lpb))
+  if(get.results){
+    df.res <- "NA"
+    if(!is(lz, "logical")){
+      df.res <- try(pb_report(lz.compare = lz, lpb = lpb))
+    } else{
+      message("lz not defined. Skipping results report...")
+    }
     lpb[["pb_report"]] <- df.res
   }
   return(lpb)
