@@ -529,27 +529,29 @@ get_exe_lpb <- function(seed.num = 2){
   return(lpb)
 }
 
-get_exe_lz <- function(seed.num = 2){
+get_exe_lz <- function(cell.typev = c("excit", "inhib", "oligo", "other"), 
+                       seed.num = 2){
   # get example lz object
   #
   set.seed(seed.num)
-  cell.typev = c("excit", "inhib", "oligo", "other")
-  z.data <- matrix(sample(1000, 200), ncol = 4)
+  z.data <- matrix(sample(1000, 200), ncol = length(cell.typev))
   colnames(z.data) <- paste0("k_", seq(ncol(z.data)))
   lz <- list(z1 = z.data, z2 = z.data)
   return(lz)
 }
 
-get_exe_sef <- function(num.col = 100, num.row = 50, sample.num = 100,
-                        num.celltypes = 4, ct.str = "celltype", seed.num = 2){
+get_exe_sef <- function(num.cells = 100, num.genes = 50, sample.num = 100,
+                        num.celltypes = 4, ct.str = "celltypes", seed.num = 2){
   # get example filtered summarized experiment
   #
+  # sample.num : value passed to sample() defining random values.
   # ct.str : base string for cell types. should not include "_" (underscore).
   #
   #
-  ct <- matrix(sample(sample.num, num.row*num.col, replace = T), nrow = num.row)
+  ct <- matrix(sample(sample.num, num.genes*num.cells, replace = T), 
+               nrow = num.genes)
   sef <- SummarizedExperiment(assays = list(counts = ct))
-  sef[["celltypes"]] <- paste0(rep("celltype", num.col), seq(num.celltypes))
+  sef[[ct.str]] <- paste0(rep("celltype", num.cells), seq(num.celltypes))
   return(sef)
 }
 
