@@ -548,6 +548,7 @@ get_exe_sef <- function(num.cells = 100, num.genes = 50, sample.num = 100,
   # ct.str : base string for cell types. should not include "_" (underscore).
   #
   #
+  require(SummarizedExperiment)
   ct <- matrix(sample(sample.num, num.genes*num.cells, replace = T), 
                nrow = num.genes)
   sef <- SummarizedExperiment(assays = list(counts = ct))
