@@ -185,10 +185,9 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
     message("running ", method, "...")
     if(method == "nnls"){
       require(nnls)
-      pi.dati <- try(do.call(rbind, lapply(seq(ncol(z.data)), 
+      pi.dati <- try(do.call(cbind, lapply(seq(ncol(y.data)), 
                                        function(i){
-                                         nnls::nnls(y.data, 
-                                                    z.data[,i])$x})))
+                                         nnls::nnls(z.data, y.data[,i])$x})))
     } else if(method == "glm"){
       require(glmnet)
       pi.dati <- do.call(rbind, lapply(seq(ncol(z.data)), 
@@ -212,18 +211,15 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
   }
   if(return.prop){
     pi.dati <- try(
-      apply(pi.dati, 2, function(ci){
-        
-        
-        if(sum(ci)==0){
-          rep(0, length(ci))} else{
-            ci/sum(ci)
-            }
-        }
+      apply(pi.dati, 2, 
+            function(ci){
+              if(sum(ci)==0){rep(0, length(ci))} else{ci/sum(ci)}}
         )
       ) 
   }
-  if(!class(pi.dati) == "try-error"){
+  if(class(pi.dati)[1] == "try-error"){
+    return(pi.dati)
+  } else{
     colnames(pi.dati) <- colnames(y.data)
     rownames(pi.dati) <- colnames(z.data)
   }
@@ -291,7 +287,7 @@ pb_report <- function(lz.compare, lpb, method.str = "nnls", save.results = FALSE
                     znamei <- znamev[ii]
                     message(znamei); z.data <- lz[[znamei]]
                     pi.dati <- try(get_pi_est(z.data, y.data, method = method.str))
-                    if(class(pi.dati) == "try-error"){
+                    if(class(pi.dati)[1] == "try-error"){
                       message(
                         "couldn't get pi est for z table ",znamev[ii])
                     } else{
@@ -581,6 +577,7 @@ get_pb_experiment <- function(lz = NA, sef = NA,
                               scale.range = 500:2000,
                               ctvarname = "celltypes",
                               plot.results = TRUE,
+                              get.results = TRUE,
                               method.str = "nnls", 
                               plot.save.dpath = "",
                               plot.fname.handle = "newplots",
@@ -600,6 +597,7 @@ get_pb_experiment <- function(lz = NA, sef = NA,
   # ctvarname : cell type variable name, should be contained in scef coldata.
   # plot.results : whether to make summary plots of various pi variables, scale
   #   versus pi differences, etc.
+  # get.results: whether to get the results table for analysis of pb datasets.
   # method.str : character string of strict deconvolution method to make pi_est,
   #   can be either "nnls" (default), "glm", or "bvls".
   # seed.num : integer for the random seed.
@@ -620,7 +618,7 @@ get_pb_experiment <- function(lz = NA, sef = NA,
   if(is(lz, "logical")){lz <- get_exe_lz()}
   lr[["lpb"]] <- get_lpb(sef = sef, lz = lz, datv = datv, nj = NA, 
                          ctvarname = ctvarname, seed.num = seed.num, 
-                         scale.range = scale.range, get.results = TRUE)
+                         scale.range = scale.range, get.results = get.results)
   if(plot.results){
     lgg.pi <- pi_plot_series(lr[["pb_report"]], 
                              save.dpath = plot.save.dpath, 

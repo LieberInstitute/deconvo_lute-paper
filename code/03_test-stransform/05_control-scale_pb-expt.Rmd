@@ -1,0 +1,129 @@
+---
+title: "05_control-scale_pb-expt"
+author: "Sean Maden"
+date: '2022-10-14'
+output: html_document
+---
+
+This vignette looks at deconvolution outcomes where scale is the same.
+
+```{r}
+library(here)
+# library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+message("here: ", here())
+proj.dpath <- "deconvo_method-paper"
+# source methods
+source.dpath <- file.path("deconvo_method-paper",
+                          "source")
+source.fnv <- c("pb_methods", 
+                "z_transformations")
+for(fni in source.fnv){
+  source(
+    file.path(here(), 
+              source.dpath, 
+              paste0(fni, ".R")))}
+lz.fname <- "lz_s-rescale-k4_dlpfc-ro1.rda"
+lz.fpath <- file.path(proj.dpath, 
+                      "outputs/03_test-stransform", 
+                      lz.fname)
+lz <- get(load(file.path(here(), lz.fpath)))
+sef.fname <- "sef-markers_ct-treg_stransform-expt_dlpfc-ro1.rda"
+sef.fpath <- file.path(proj.dpath, 
+                      "outputs/03_test-stransform", 
+                      sef.fname)
+sef <- get(load(file.path(here(), sef.fpath)))
+lexpt <- lz["z.final"]
+```
+
+# Set seed vector
+
+Set vector of seed values for 1000 reps.
+
+```{r}
+seedv <- seq(100)
+```
+
+# Scale is high
+
+```{r}
+scalei <- 5000
+```
+
+Here, we test the results when scale is `r scalei`.
+
+```{r}
+nk <- 4; nj <- 2
+# datv <- c(sample(10, nk*nj, replace = T))
+datv <- rep(1, nk*nj)
+```
+
+```{r}
+lexpt <- lapply(seedv, function(si){
+  message("working on rep ", si)
+  suppressMessages(
+    get_pb_experiment(lz = lexpt, sef = sef, datv = datv, 
+                      scale.range = scalei:scalei,ctvarname = "celltype.treg",
+                      plot.results = FALSE, method.str = "nnls", seed.num = si)) 
+})
+```
+
+```{r}
+# bind rep data
+dfp <- do.call(rbind, lapply(seq(length(lexpt)), function(ii){
+  dfi <- lexpt[[ii]]$lpb$pb_report; dfi$rep <- ii; dfi
+}))
+
+library(ggplot2)
+
+alpha.value <- 0.5
+
+ggpt <- ggplot(dfp, aes(x = pi_est, y = pi_true, color = cell_type)) + 
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1, 
+              color = "red", lwd = 1.2, 
+                alpha = alpha.value) +
+    geom_smooth(method = "lm", color = "blue", 
+                lwd = 1.2, 
+                alpha = alpha.value)
+
+ggpt + facet_wrap(~cell_type)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Debug report and pi expt functions
+
+```{r}
+scalei <- 1000
+nk <- 4; nj <- 10
+datv <- rep(c(10,10,5,5), nj)
+```
+
+```{r}
+lpb <- get_pb_experiment(lz = lexpt, 
+                         sef = sef, 
+                         datv = datv, 
+                         scale.range = scalei, 
+                         ctvarname = "celltype.treg", 
+                         plot.results = FALSE, 
+                         method.str = "nnls", 
+                         seed.num = si,
+                         get.results = F)
+```
+```{r}
+get_pi_est(z.data = lexpt[[1]], y.data = lpb$lpb$y_data_pb)
+```
+
