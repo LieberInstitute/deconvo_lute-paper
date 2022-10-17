@@ -30,6 +30,8 @@ s_rescale <- function(z, factorv = NULL, meanv = NULL, sdv = NULL,
   #
   # example:
   # s_rescale(z)
+  #
+  #
   z_rescale <- NA # newly rescaled z matrix output
   ms <- NA # matrix corresponding to the s factor values
   if(is.null(factorv)){
@@ -54,7 +56,7 @@ s_rescale <- function(z, factorv = NULL, meanv = NULL, sdv = NULL,
     }
   } else{
     if(length(factorv)==ncol(z)){
-      z_rescale <- z*rep(factorv, each = nrow(z))
+      z_rescale <- sweep(z, 2, factorv, "*")
       ms <- matrix(rep(factorv, each = nrow(z)), nrow = nrow(z))
     } else{
       stop("Num. factors in factorv must be equal to num. types in z.")}
