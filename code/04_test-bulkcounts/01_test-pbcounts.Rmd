@@ -12,7 +12,7 @@ library(ComplexHeatmap)
 #-----
 # load
 #-----
-source(file.path(here(), ""))
+source(file.path(here(), "deconvo_method-paper", "source", "load_pb_demo.R"))
 ```
 
 This demo looks at the results of performing pseudobulking where the scale of the 
