@@ -15,9 +15,29 @@ This demo looks at the results of performing pseudobulking where the scale of th
 convoluted signals differs from that of the signature matrix (e.g. where Y consists 
 of counts rather than mean ratios).
 
+Note, we take $Y = \pi * Z$ as our representation of the deconvolution model.
+
 # Assumptions
 
 Suppose K = 4.
+
+# Mathematical representation
+
+$Y = \pi * Z$
+
+$Y * F_{Y} = Y'$
+
+So we have that
+
+$Y' = Y * F_{Y} = \pi * Z * F_{Y}$
+
+## The signature matrix $Z$
+
+$Z' = R(L(C))$
+
+or we might have
+
+$Z' = Z' * F_{Z}$
 
 # section
 
