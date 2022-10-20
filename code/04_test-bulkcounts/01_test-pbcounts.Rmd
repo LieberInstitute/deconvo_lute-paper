@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(ComplexHeatmap)
+#-----
+# load
+#-----
+source(file.path(here(), ""))
 ```
 
 This demo looks at the results of performing pseudobulking where the scale of the 
@@ -33,7 +37,8 @@ $Y' = Y * F_{Y} = \pi * Z * F_{Y}$
 
 ## The signature matrix $Z$
 
-$Z' = R(L(C))$
+$Z' = R(L(C))$ where $R$ is the mean ratio function, $L$ is some log function, 
+$C$ is counts.
 
 or we might have
 
