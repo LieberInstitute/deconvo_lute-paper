@@ -1,0 +1,52 @@
+---
+title: "01_test-pbcounts"
+author: "Sean Maden"
+date: '2022-10-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ComplexHeatmap)
+```
+
+This demo looks at the results of performing pseudobulking where the scale of the 
+convoluted signals differs from that of the signature matrix (e.g. where Y consists 
+of counts rather than mean ratios).
+
+# Assumptions
+
+Suppose K = 4.
+
+# section
+
+```{r}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
