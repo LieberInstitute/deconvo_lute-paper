@@ -190,6 +190,9 @@ get_pi_est <- function(z.data, y.data, method = "nnls", return.prop = TRUE){
     message("running ", method, "...")
     if(method == "nnls"){
       require(nnls)
+      # passing y to nnls by sample -- should be sample outputs regardless of length(J)
+      # 
+      #
       pi.dati <- try(do.call(cbind, lapply(seq(ncol(y.data)), 
                                        function(i){
                                          nnls::nnls(z.data, y.data[,i])$x})))
