@@ -133,8 +133,8 @@ get_z_experiment <- function(zsource,
   # get_z_experiment(sce)
   # 
   require(dplyr)
-  if(!is(zsource, "SingleCellExperiment")){
-    stop("zsource should be of type SingleCellExperiment")}
+  #if(!is(zsource, "SingleCellExperiment")){
+  #  stop("zsource should be of type SingleCellExperiment")}
   if(is(markerdata, "logical")){
     markerdata <- zsource_markerdata(zsource = zsource, 
                                      type.varname = type.varname, 

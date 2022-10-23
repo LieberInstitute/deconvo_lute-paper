@@ -13,7 +13,9 @@ proj.dpath <- "deconvo_method-paper"
 sce.fpath <- "DLPFC_snRNAseq/processed-data/sce/sce_DLPFC.Rdata"
 source.dpath <- file.path(proj.dpath, "source")
 save.dpath <- file.path(proj.dpath, "outputs/02_test-source")
-if(!dir.exists(save.dpath)){dir.create(save.dpath)}
+
+if(!dir.exists(save.dpath)){
+  dir.create(save.dpath)}
 lz.fname <- "lz_mr_dlpfc-ro1.rda"
 script.fname <- "z_methods.R"
 
