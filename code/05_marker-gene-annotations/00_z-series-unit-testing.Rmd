@@ -1,0 +1,23 @@
+---
+title: "00_z-series-unit-testing"
+author: "Sean Maden"
+date: '2022-10-24'
+output: html_document
+---
+
+This shows progress with unit testing the functions to generate some series of signature
+matrices ($Z$) from a `SummarizedExperiment` object.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Finding marker gene sets
+
+# Making a single signature matrix
+
+# Making matrix plots
+
+# Making a signature matrix series
+
+# Final matrix series runs, varying K and G

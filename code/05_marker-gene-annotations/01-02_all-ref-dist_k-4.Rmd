@@ -1,301 +1,45 @@
 ---
-title: "get all reference distributions"
+title: "01-02_all-ref-dist_k-4"
 author: "Sean Maden"
-date: '2022-10-23'
+date: '2022-10-24'
 output: html_document
 ---
 
+This vignette shows summary statistics for the restrictive example cell type labels
+(e.g. K = 4) corresponding to the cell type labels from the TREG paper.
+
+# Get cell data and labels
+
+## Load data
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(SummarizedExperiment)
-library(here)
-library(ggplot2)
-library(gridExtra)
-
+library(SummarizedExperiment); library(here); library(ggplot2); library(gridExtra)
 #------
-# load 
+# paths
 #------
-# set base paths
 proj.dpath <- "deconvo_method-paper"
-source.dpath <- file.path(proj.dpath,"source")
-
-# load se object
+# filtered summarized experiment paths
 sef.fname <- "sef-markers_ct-treg_stransform-expt_dlpfc-ro1.rda"
-sef.fpath <- file.path(proj.dpath, "outputs/03_test-stransform", sef.fname)
-sef <- get(load(sef.fpath))
-
-# load signal matrices
+sef.fpath <- file.path(proj.dpath, "outputs", "03_test-stransform", sef.fname)
+# lz signature matrix list
 lz.fname <- "lz_s-rescale-k4_dlpfc-ro1.rda"
-lz.fpath <- file.path(proj.dpath, "outputs/03_test-stransform", lz.fname)
-lz <- get(load(file.path(lz.fpath)))
-
-#-------
-# source
-#-------
-source.fnv <- c("z_methods")
-for(fni in source.fnv){
-  source(file.path(source.dpath, paste0(fni, ".R")))}
-
-```
-
-# Append glial cell label
-
-```{r}
-ctvarname <- "cellType_broad_hc"
-glialv <- c("Astro", "MicroOligo", "Micro", "Oligo", "OPC")
-colData(sef)$glial <- ifelse(sef[[ctvarname]] %in% glialv, TRUE, FALSE)
-```
-
-# Summarize by donor
-
-## cell abundance by glial label
-
-```{r}
+lz.fpath <- file.path(proj.dpath, "outputs", "03_test-stransform", lz.fname)
+#-----
+# load 
+#-----
+sef <- get(load(sef.fpath)) # load sef
+lz <- get(load(lz.fpath)) # load z signature matrix list
+#-----------
+# set params
+#-----------
+ctvarname <- "celltype.treg"
+gvarname <- "glial"
 dvarname <- "BrNum"
-donorv <- unique(sef[[dvarname]])
-dfp <- do.call(rbind, lapply(donorv, function(di){
-  cdi <- colData(sef[,sef[[dvarname]]==di])
-  is.glial <- cdi$glial == T
-  data.frame(glial_nuclei_count = length(which(is.glial)),
-             neuron_nuclei_count = length(which(cdi[[ctvarname]] 
-                                              %in% c("Inhib", "Excit"))),
-             total_nuclei = nrow(cdi), donor = di)
-}))
-```
-
-## scatterplot of glial versus neurons, by donor
-
-```{r}
-ggplot(dfp, aes(x = glial_nuclei_count, 
-                y = neuron_nuclei_count, 
-                size = total_nuclei)) + 
-  geom_abline(yintercept = 0, slope = 1, col = "red", lwd = 1.5) +
-  geom_point() + ggtitle("Nuclei by donor")
-```
-## stacked barplots of cell abundances by donor
-
-```{r}
-dfp <- do.call(rbind, lapply(donorv, function(di){
-  cdi <- colData(sef[,sef[[dvarname]]==di])
-  dfpi <- as.data.frame(table(cdi[,ctvarname]))
-  dfpi$donor <- di
-  return(dfpi)
-}))
-# order by donor totals
-totalv <- unlist(lapply(donorv, function(di){sum(dfp[dfp$donor==di,]$Freq)}))
-dfp$donor <- factor(dfp$donor, levels = donorv[rev(order(totalv))])
-```
-
-Barplots, absolute counts
-
-```{r}
-ggplot(dfp, aes(x = donor, y = Freq, fill = Var1)) + 
-  geom_bar(stat = "identity", color = "blue") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  ylab("Nuclei count")
-```
-
-Barplots, percentages
-
-```{r}
-ggplot(dfp, aes(x = donor, y = Freq, fill = Var1)) + 
-  geom_bar(stat = "identity", position = "fill", color = "blue") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  ylab("Percent of nuclei (%)")
-```
-
-
-
-# Counts distributions
-
-## Cell type abundances
-
-```{r}
-dfp.bp <- as.data.frame(table(sef[["celltype.treg"]]))
-colnames(dfp.bp) <- c("cell_type", "number_of_cells")
-#dfp.bp$cell_type <- as.factor(dfp.bp$cell_type, levels = c(""))
-dfp.bp$glial <- ifelse(dfp.bp$cell_type %in% c("Astro", "MicroOligo", "Oligo", "OPC", "other"), TRUE, FALSE)
-ggplot(dfp.bp, aes(x = cell_type, y = number_of_cells, fill = glial)) + geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 45))
-```
-
-```{r}
-ctvarname <- "cellType_broad_hc"
-dfp <- as.data.frame(table(sef[[ctvarname]]))
-colnames(dfp) <- c("cell_type", "number_of_cells")
-dfp$glial <- ifelse(dfp$cell_type %in% c("Astro", "MicroOligo", 
-                                         "Micro", "Oligo", "OPC"), 
-                    TRUE, FALSE)
-#dfp.bp$cell_type <- as.factor(dfp.bp$cell_type, levels = c(""))
-# order on medians
-ctv <- unique(dfp$cell_type)
-medianv <- unlist(lapply(ctv, function(ci){
-  median(dfp[dfp$cell_type==ci,]$mean_counts)}))
-dfp$cell_type <- factor(dfp$cell_type, 
-                        levels = c("Excit", "Inhib", 
-                                   "OPC", "Oligo", 
-                                   "Astro", "EndoMural", 
-                                   "Micro"))
-```
-```{r}
-ggplot(dfp, aes(x = cell_type, y = number_of_cells, fill = glial)) + geom_bar(stat = "identity") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-
-## Mean marker counts by donor, cell type
-
-Scatter plots of mean expression counts versus cell abundances, by donor and cell type.
-
-```{r}
-ctv <- unique(sef[["celltype.treg"]])
-brv <- unique(sef[["BrNum"]])
-dfp <- do.call(rbind, lapply(ctv, function(cti){
-  which.var <- sef[["celltype.treg"]]==cti
-  dfi <- do.call(rbind, lapply(brv, function(bri){
-    which.var <- which.var & sef[["BrNum"]]==bri
-    dfi <- data.frame(mean_counts = rowMeans(assays(sef[,which.var])$counts), 
-                      gene_name = rownames(sef),
-                      number_of_cells = length(which(which.var)))
-    dfi$donor <- bri
-    dfi
-  }))
-  dfi$cell_type <- cti
-  return(dfi)
-}))
-```
-
-```{r}
-ggplot(dfp, aes(x = number_of_cells, y = mean_counts, color = cell_type, size = number_of_cells)) + 
-  geom_point() + facet_wrap(~donor)
-```
-
-## Mean across donors/samples -- K = 7
-
-```{r}
-# get counts table by k cell type
-ctvarname <- "cellType_broad_hc"
-ctk <- do.call(cbind, lapply(unique(sef[[ctvarname]]), function(ki){
-  rowMeans(assays(sef[,sef[[ctvarname]]==ki])$counts)
-}))
-colnames(ctk) <- unique(sef[[ctvarname]])
-```
-
-```{r}
-# get dfp
-dfp <- reshape::melt(ctk)
-colnames(dfp) <- c("gene_name", "cell_type", "mean_counts")
-dfp$glial <- ifelse(dfp$cell_type %in% c("Astro", "MicroOligo", "Micro", "Oligo", "OPC", "other"), TRUE, FALSE)
-# order on medians
-ctv <- unique(dfp$cell_type)
-medianv <- unlist(lapply(ctv, function(ci){
-  median(dfp[dfp$cell_type==ci,]$mean_counts)}))
-dfp$cell_type <- factor(dfp$cell_type, 
-                        levels = ctv[rev(order(medianv))])
-```
-
-```{r}
-ggplot(dfp, aes(x = cell_type, y = mean_counts, fill = glial)) + 
-  geom_violin(draw_quantiles = 0.5) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-## Mean across donors/samples -- K = 4
-
-Gets the distributions of counts summaries for marker genes.
-
-```{r}
-# get counts table by k cell type
-ctk <- do.call(cbind, lapply(unique(sef[["celltype.treg"]]), function(ki){
-  rowMeans(assays(sef[,sef[["celltype.treg"]]==ki])$counts)
-}))
-colnames(ctk) <- unique(sef[["celltype.treg"]])
-# get dfp
-dfp <- reshape::melt(ctk)
-colnames(dfp) <- c("gene_name", "cell_type", "mean_counts")
-```
-
-Violin plots
-
-```{r}
-dfp$glial <- ifelse(dfp$cell_type %in% c("Astro", "MicroOligo", "Oligo", "OPC", "other"), TRUE, FALSE)
-ggplot(dfp, aes(x = cell_type, y = mean_counts, fill = glial)) + 
-  geom_violin(draw_quantiles = 0.5)
-```
-
-## Upset plot of markers
-
-```{r}
-library(UpSetR)
-```
-
-## Mean by donors/samples
-
-```{r}
-# get counts table by k cell type
-ctk2 <- do.call(cbind, lapply(unique(sef[["celltype.treg"]]), function(ki){
-  # filter on cell type
-  which.k <- which(sef[["celltype.treg"]]==ki)
-  sefk <- sef[,which.k]
-  # get means by donor
-  ctki <- do.call(cbind, lapply(unique(sefk[["BrNum"]]), function(bi){
-    rowMeans(assays(sefk[,sefk[["BrNum"]]==bi])$counts)
-  }))
-  # get final means
-  rowMeans(ctki)
-}))
-colnames(ctk2) <- unique(sef[["celltype.treg"]])
-# get dfp
-dfp2 <- reshape::melt(ctk2)
-colnames(dfp2) <- c("gene_name", "cell_type", "mean_counts")
-```
-
-Violin plots
-
-```{r}
-ggplot(dfp2, aes(x = cell_type, y = mean_counts)) + 
-  geom_violin(draw_quantiles = 0.5)
-```
-
-# Mean ratio by donor
-
-```{r}
-dfp3 <- reshape::melt(lz$z.summary.filt)
-dfp3$cell_type <- gsub(".*;", "", dfp3$X2)
-
-colnames(dfp3) <- c("gene_name", "donor;cell_type", "MR_kd", "cell_type")
-ggplot(dfp3, aes(x = cell_type, y = MR_kd)) + 
-  geom_violin(draw_quantiles = 0.5)
-```
-
-# Mean ratio plots -- K = 7
-
-## Get datasets
-```{r}
-# get mean ratio by k cell type
-ctvarname <- "cellType_broad_hc"
-# append normcounts and logcounts to sef
-ct <- assays(sef)$counts # counts
-sf <- 2^rnorm(ncol(sef))
-sf <- sf/mean(sf)
-assays(sef)$normcounts <- t(t(ct)/sf)
-dim(assays(sef)$normcounts)
-assays(sef)$logcounts <- log2(assays(sef)$normcounts+1)
-# get data tables
-nc <- assays(sef)$normcounts
-lc <- assays(sef)$logcounts
-mrk <- do.call(cbind, lapply(ctv, function(ki){
-  which.ki <- sef[[ctvarname]]==ki
-  rowMeans(lc[,which.ki])/rowMeans(lc[,!which.ki])
-}))
-colnames(mrk) <- ctv
-```
-
-## Plot counts and logcounts
-
-Helper function
-
-```{r}
+glialv <- c("Astro", "MicroOligo", "Micro", "Oligo", "OPC")
+#-----------------
+# helper functions
+#-----------------
 get_ggvp <- function(dfp, yaxis.name, xaxis.text){
   colnames(dfp) <- c("gene_name", "cell_type", "value")
   dfp$glial <- ifelse(dfp$cell_type %in% c("Astro", "MicroOligo", "Micro", 
@@ -335,7 +79,149 @@ get_lggvp <- function(df, make.dfp = TRUE, yaxis.name = "mean_counts",
 }
 ```
 
-Make violin plots
+## Append glial cell label
+
+```{r}
+sef[[gvarname]] <- ifelse(sef[[ctvarname]] %in% glialv, TRUE, FALSE)
+```
+
+# Cell abundance summaries
+
+Summaries of the cell type labels contained in variables "`r ctvarname`" and 
+"`r gvarname`."
+
+## Table of type abundance
+
+```{r}
+knitr::kable(table(x = sef[[ctvarname]]), align = "c")
+```
+
+## Table of type, glial status
+
+```{r}
+knitr::kable(table(sef[[gvarname]]), align = "c")
+```
+
+```{r}
+knitr::kable(table(sef[[ctvarname]], sef[[gvarname]]), align = "c")
+```
+
+## Type abundances barplot
+
+```{r}
+dfp <- as.data.frame(table(sef[[ctvarname]], sef[[gvarname]]))
+colnames(dfp) <- c("cell_type", "glial", "num_nuclei")
+dfp[,1] <- as.character(dfp[,1])
+dfp[,2] <- as.character(dfp[,2])
+# order on value
+dfp[,1] <- factor(dfp[,1], levels = dfp[,1][order(dfp[,4])])
+```
+```{r}
+ggplot(dfp, aes(x = cell_type, y = num_nuclei, fill = glial)) + geom_bar(stat = "identity")
+```
+
+## Abundances by donor
+
+Cell nuclei abundances/counts, grouped by donor variable "`r dvarname`", or the donor brain ID.
+
+### Type abundances violin plots
+
+```{r}
+cd <- colData(sef)
+dv <- unique(sef[[dvarname]])
+dfp <- do.call(rbind, lapply(dv, function(di){
+  cdi <- cd[cd[,dvarname]==di,]
+  dfp <- as.data.frame(table(cdi[,ctvarname]))
+  dfp$donor <- di
+  dfp
+}))
+colnames(dfp) <- c("cell_type", "num_nuclei", "donor")
+```
+```{r}
+ggplot(dfp, aes(x = cell_type, y = num_nuclei)) + 
+  geom_violin(draw_quantiles = 0.5)
+```
+
+### Type abundances stacked barplots
+
+```{r}
+# order donor var
+sumv <- as.data.frame(table(sef[[dvarname]]))
+dfp$donor <- factor(dfp$donor, levels = sumv[,1][rev(order(sumv[,2]))])
+```
+
+Counts
+
+```{r}
+ggplot(dfp, aes(x = donor, y = num_nuclei, fill = cell_type)) + 
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Percentages
+
+```{r}
+ggplot(dfp, aes(x = donor, y = num_nuclei, fill = cell_type)) + 
+  geom_bar(position = "fill", stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Scatterplot of glial versus neurons, by donor
+
+```{r}
+dfp <- do.call(rbind, lapply(dv, function(donori){
+  sefi <- sef[,sef[[dvarname]]==donori]
+  data.frame(glial_nuclei = length(which(sefi[[gvarname]]==T)),
+             neuronal_nuclei = length(which(
+               sefi[[ctvarname]] %in% c("Inhib", "Excit"))),
+             total_nuclei = ncol(sefi), donor = donori)
+}))
+```
+```{r}
+ggplot(dfp, aes(x = glial_nuclei, y = neuronal_nuclei, size = total_nuclei)) + 
+  geom_abline(intercept = 0, slope = 1, col = "red", lwd = 1.5) +
+  geom_point() + ggtitle("Nuclei by donor")
+```
+
+### Scatterplot of neuronal types
+
+Plotting Excit versus Inhib neuron abundances.
+
+```{r}
+sefi <- sef[,sef[[ctvarname]] %in% c("Inhib", "Excit")]
+dfp <- as.data.frame(table(sefi[[ctvarname]], sefi[[dvarname]]))
+dfp <- cbind(dfp[dfp[,1]=="Excit",], dfp[dfp[,1]=="Inhib",])[,c(2,3,6)]
+colnames(dfp) <- c("donor", "Excit", "Inhib")
+dfp$total_neurons <- dfp$Excit+dfp$Inhib
+```
+```{r}
+ggplot(dfp, aes(x = Excit, y = Inhib)) + 
+  geom_point(aes(size = total_neurons), alpha = 0.5, color = "blue") +
+  geom_abline(intercept = 0, slope = 1, col = "red", lwd = 1.5) +
+  geom_text(aes(label = donor), position = "dodge", color = "black")
+```
+
+### Scatterplot of Oligo versus non-Oligo cell types
+
+```{r}
+sefi <- sef[,!sef[[ctvarname]] %in% c("Inhib", "Excit")]
+dfp <- as.data.frame(table(sefi[[ctvarname]], sefi[[dvarname]]))
+dfp <- cbind(dfp[dfp[,1]=="Oligo",], dfp[dfp[,1]=="other",])[,c(2,3,6)]
+colnames(dfp) <- c("donor", "Oligo", "Other")
+dfp$total_glial <- dfp$Oligo+dfp$Other
+```
+```{r}
+ggplot(dfp, aes(x = Oligo, y = Other)) + 
+  geom_point(aes(size = total_glial), alpha = 0.5, color = "blue") +
+  geom_abline(intercept = 0, slope = 1, col = "red", lwd = 1.5) +
+  geom_text(aes(label = donor), position = "dodge", color = "black")
+```
+
+# Marker genes plots
+## Upset plot of marker gene identities
+
+# Expression at marker genes
+## Get expression plots
 
 ```{r}
 # get violin plots of means
@@ -346,7 +232,9 @@ lmr <- get_lggvp(reshape::melt(mrk), make.dfp = F,
                  yaxis.name = "mean_ratio", xaxis.text = T)
 ```
 
-Make composite plot
+## Make expression composite plot
+
+Make composite plots with `grid.arrange`.
 
 ```{r}
 # make composite plot
@@ -355,32 +243,4 @@ grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, lmr$ggvp, ncol = 1)
 
 ```{r}
 grid.arrange(llc$ggvp, lmr$ggvp, ncol = 1)
-```
-
-## Get markers from sef
-
-```{r}
-get_z_experiment(sef, type.varname = "cellType_broad_hc")
-```
-
-## Heatmap
-
-```{r}
-library(ComplexHeatmap)
-library(gridtext)
-library(RColorBrewer)
-```
-
-```{r}
-hmi <- mrk
-col.pal <- ComplexHeatmap:::default_col(hmi, main_matrix = TRUE)
-Heatmap(hmi)
-```
-
-```{r}
-Heatmap(hmi, row_title = rowlab, column_title = collab, col = col.pal,
-                  row_labels = "none", show_row_names = F, 
-                  show_column_names = show.col.names, name = legend.name, 
-                  show_row_dend = F, show_column_dend = F,
-                  top_annotation = colanno)
 ```
