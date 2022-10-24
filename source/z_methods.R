@@ -18,10 +18,11 @@ zsource_type <- function(zsource, type.varname = "cellType_broad_hc"){
   # zsource: matrix of data used to calculate z (e.g. counts matrix)
   # type.varname: name of the types variable, identifiable from zsource.
   #
+  require(SummarizedExperiment)
   typev <- NA
-  if(is(zsource, "SingleCellExperiment")){
+  if(is(zsource, "SingleCellExperiment")|is(zsource,"SummarizedExperiment")){
     typev <- zsource[[type.varname]]} else{
-      if(type.varname %in% colnames(zsource)){
+      if(type.varname %in% colnames(colData(zsource))){
         zsource[,type.varname]} else{
         stop("type.varname not a column name in zsource.")
       }
@@ -51,8 +52,8 @@ zsource_markerdata <- function(zsource, type.varname = "cellType_broad_hc",
   typev <- zsource_type(zsource = zsource, 
                         type.varname = type.varname)
   if(method == "mean_ratio"){
-    if(!is(zsource, "SingleCellExperiment")){
-      stop("method mean_ratio requires that zsource is a SingleCellExperiment")}
+    #if(!is(zsource, "SingleCellExperiment")){
+    #  stop("method mean_ratio requires that zsource is a SingleCellExperiment")}
     message("using method mean_ratio")
     require(DeconvoBuddies)
     markerdata <- DeconvoBuddies::get_mean_ratio2(zsource, 
@@ -60,9 +61,9 @@ zsource_markerdata <- function(zsource, type.varname = "cellType_broad_hc",
                                                   assay_name = mr.assay,
                                                   add_symbol = TRUE)
   } else if(method == "findMarkers"){
-    message("using method findMarkers")
-    if(is(zsource, "SingleCellExperiment")){zsource <- counts(zsource)}
-    require(scran)
+    # message("using method findMarkers")
+    # if(is(zsource, "SingleCellExperiment")){zsource <- counts(zsource)}
+    # require(scran)
     # findMarkers code goes here
   }
   return(markerdata)
