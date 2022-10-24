@@ -104,6 +104,8 @@ ggplot(dfp, aes(x = donor, y = Freq, fill = Var1)) +
   ylab("Percent of nuclei (%)")
 ```
 
+
+
 # Counts distributions
 
 ## Cell type abundances
