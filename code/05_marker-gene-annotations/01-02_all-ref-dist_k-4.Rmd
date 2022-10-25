@@ -33,7 +33,7 @@ lz <- get(load(lz.fpath)) # load z signature matrix list
 #-----------
 # set params
 #-----------
-knamevarname <- "celltype.treg"
+kvarname <- "celltype.treg"
 gvarname <- "glial"
 dvarname <- "BrNum"
 glialv <- c("Astro", "MicroOligo", "Micro", "Oligo", "OPC")
@@ -41,7 +41,11 @@ glialv <- c("Astro", "MicroOligo", "Micro", "Oligo", "OPC")
 # helper functions
 #-----------------
 
-get_ggvp <- function(dfp, yaxis.name, xaxis.text){
+get_ggvp <- function(dfp, kvarname, yaxis.name, xaxis.text){
+  #
+  # note: dfp input order c("gene_name", "cell_type", "value")
+  #
+  #
   colnames(dfp) <- c("gene_name", "cell_type", "value")
   dfp$glial <- ifelse(dfp$cell_type %in% c("Astro", "MicroOligo", "Micro", 
                           "Oligo", "OPC", "other"), TRUE, FALSE)
@@ -62,18 +66,20 @@ get_ggvp <- function(dfp, yaxis.name, xaxis.text){
   return(ggvp)
 }
 
-get_lggvp <- function(df, make.dfp = TRUE, yaxis.name = "mean_counts", 
+get_lggvp <- function(df, kvarname, make.dfp = TRUE, yaxis.name = "mean_counts", 
                       xaxis.text = TRUE){
   if(make.dfp){
     # get means by cell types
-    knamev <- unique(sef[[ctvarname]])
+    knamev <- unique(sef[[kvarname]])
     mc <- do.call(cbind, lapply(knamev, function(ki){
-      rowMeans(df[,sef[[knamevarname]]==ki])
+      rowMeans(df[,sef[[kvarname]]==ki])
     })); colnames(mc) <- knamev
     dfp <- reshape::melt(mc)
   } else{dfp <- df}
   # get plot data
-  ggvp <- get_ggvp(dfp, yaxis.name, xaxis.text) 
+  ggvp <- get_ggvp(dfp = dfp, yaxis.name = yaxis.name, 
+                   xaxis.text = xaxis.text, 
+                   kvarname = kvarname) 
  return(
    list(dfp = dfp, ggvp = ggvp))
 }
@@ -82,18 +88,18 @@ get_lggvp <- function(df, make.dfp = TRUE, yaxis.name = "mean_counts",
 ## Append glial cell label
 
 ```{r}
-sef[[gvarname]] <- ifelse(sef[[knamevarname]] %in% glialv, TRUE, FALSE)
+sef[[gvarname]] <- ifelse(sef[[kvarname]] %in% glialv, TRUE, FALSE)
 ```
 
 # Cell abundance summaries
 
-Summaries of the cell type labels contained in variables "`r knamevarname`" and 
+Summaries of the cell type labels contained in variables "`r kvarname`" and 
 "`r gvarname`."
 
 ## Table of type abundance
 
 ```{r}
-knitr::kable(table(x = sef[[knamevarname]]), align = "c")
+knitr::kable(table(x = sef[[kvarname]]), align = "c")
 ```
 
 ## Table of type, glial status
@@ -103,13 +109,13 @@ knitr::kable(table(sef[[gvarname]]), align = "c")
 ```
 
 ```{r}
-knitr::kable(table(sef[[knamevarname]], sef[[gvarname]]), align = "c")
+knitr::kable(table(sef[[kvarname]], sef[[gvarname]]), align = "c")
 ```
 
 ## Type abundances barplot
 
 ```{r}
-dfp <- as.data.frame(table(sef[[knamevarname]], sef[[gvarname]]))
+dfp <- as.data.frame(table(sef[[kvarname]], sef[[gvarname]]))
 colnames(dfp) <- c("cell_type", "glial", "num_nuclei")
 dfp[,1] <- as.character(dfp[,1])
 dfp[,2] <- as.character(dfp[,2])
@@ -129,7 +135,7 @@ cd <- colData(sef)
 dv <- unique(sef[[dvarname]])
 dfp <- do.call(rbind, lapply(dv, function(di){
   cdi <- cd[cd[,dvarname]==di,]
-  dfp <- as.data.frame(table(cdi[,knamevarname]))
+  dfp <- as.data.frame(table(cdi[,kvarname]))
   dfp$donor <- di
   dfp
 }))
@@ -172,7 +178,7 @@ dfp <- do.call(rbind, lapply(dv, function(donori){
   sefi <- sef[,sef[[dvarname]]==donori]
   data.frame(glial_nuclei = length(which(sefi[[gvarname]]==T)),
              neuronal_nuclei = length(which(
-               sefi[[knamevarname]] %in% c("Inhib", "Excit"))),
+               sefi[[kvarname]] %in% c("Inhib", "Excit"))),
              total_nuclei = ncol(sefi), donor = donori)
 }))
 ```
@@ -188,8 +194,8 @@ ggplot(dfp, aes(x = glial_nuclei, y = neuronal_nuclei)) +
 Plotting Excit versus Inhib neuron abundances.
 
 ```{r}
-sefi <- sef[,sef[[knamevarname]] %in% c("Inhib", "Excit")]
-dfp <- as.data.frame(table(sefi[[knamevarname]], sefi[[dvarname]]))
+sefi <- sef[,sef[[kvarname]] %in% c("Inhib", "Excit")]
+dfp <- as.data.frame(table(sefi[[kvarname]], sefi[[dvarname]]))
 dfp <- cbind(dfp[dfp[,1]=="Excit",], dfp[dfp[,1]=="Inhib",])[,c(2,3,6)]
 colnames(dfp) <- c("donor", "Excit", "Inhib")
 dfp$total_neurons <- dfp$Excit+dfp$Inhib
@@ -204,8 +210,8 @@ ggplot(dfp, aes(x = Excit, y = Inhib)) +
 ### Scatterplot of Oligo versus non-Oligo cell types
 
 ```{r}
-sefi <- sef[,!sef[[knamevarname]] %in% c("Inhib", "Excit")]
-dfp <- as.data.frame(table(sefi[[knamevarname]], sefi[[dvarname]]))
+sefi <- sef[,!sef[[kvarname]] %in% c("Inhib", "Excit")]
+dfp <- as.data.frame(table(sefi[[kvarname]], sefi[[dvarname]]))
 dfp <- cbind(dfp[dfp[,1]=="Oligo",], dfp[dfp[,1]=="other",])[,c(2,3,6)]
 colnames(dfp) <- c("donor", "Oligo", "Other")
 dfp$total_glial <- dfp$Oligo+dfp$Other
@@ -224,6 +230,10 @@ ggplot(dfp, aes(x = Oligo, y = Other)) +
 
 ## Composite violin plots
 
+Make composite plots with `grid.arrange`.
+
+Get expression distributions across variable scales, grouped by cell types.
+
 ```{r}
 # expression data
 ct <- assays(sef)$counts
@@ -233,14 +243,14 @@ nc <- t(t(ct)/sf)
 lc <- log2(nc+1)
 
 # get mean ratio expression -- by donor,type
-knamev <- unique(sef[[knamevarname]])
+knamev <- unique(sef[[kvarname]])
 mr.kd <- do.call(cbind, lapply(knamev, function(ki){
-  sefi <- sef[,sef[[knamevarname]]==ki] # type subset
+  sefi <- sef[,sef[[kvarname]]==ki] # type subset
   dfpi <- do.call(cbind, lapply(dv, function(donori){
     sefii <- sefi[,sefi[[dvarname]]==donori] # donor, type subset
-    numerv <- rowMeans(assays(sefii[,sefii[[knamevarname]]==ki])$counts)
+    numerv <- rowMeans(assays(sefii[,sefii[[kvarname]]==ki])$counts)
     ldenom <- lapply(knamev[!knamev==ki], function(kj){
-      filtj <- sef[[knamevarname]]==kj & sef[[dvarname]]==donori
+      filtj <- sef[[kvarname]]==kj & sef[[dvarname]]==donori
       rowMeans(assays(sef[,filtj])$counts)+1e-6
     })
     mrkdv <- rep(numerv, length(knamev)-1)/unlist(ldenom)
@@ -251,8 +261,10 @@ mr.kd <- do.call(cbind, lapply(knamev, function(ki){
   dfpi
 }))
 dfp.mrkd <- reshape::melt(mr.kd)
-colnames(dfp.mrkd) <- c("gene_name", "donor;type", "mr_kd")
+colnames(dfp.mrkd) <- c("gene_name", "donor;type", "value")
 dfp.mrkd$cell_type <- gsub(".*;", "", dfp.mrkd$`donor;type`)
+dfp.mrkd <- dfp.mrkd[,c(1,4,3)]
+
 # get mean ratio expression -- by type
 mr.k <- do.call(cbind, lapply(knamev, function(ki){
   which.ki <- grepl(ki, colnames(mr.kd)); rowMeans(mr.kd[,which.ki])
@@ -260,31 +272,65 @@ mr.k <- do.call(cbind, lapply(knamev, function(ki){
 colnames(mr.k) <- knamev
 rownames(mr.k) <- rownames(mr.kd)
 dfp.mrk <- reshape::melt(mr.k)
-colnames(dfp.mrk) <- c("gene_name", "cell_type", "mr_k")
+colnames(dfp.mrk) <- c("gene_name", "cell_type", "value")
 ```
 
 ```{r}
 # get violin plots of means
-lmc <- get_lggvp(ct, yaxis.name = "mean_counts", xaxis.text = F) # counts
-lnc <- get_lggvp(nc, yaxis.name ="mean_normcounts", xaxis.text = F) # norm counts
-llc <- get_lggvp(lc, yaxis.name = "mean_logcounts", xaxis.text = F) # log counts
+lmc <- get_lggvp(ct, yaxis.name = "mean_counts", xaxis.text = F, kvarname = kvarname) # counts
+lnc <- get_lggvp(nc, yaxis.name ="mean_normcounts", xaxis.text = F, kvarname = kvarname) # norm counts
+llc <- get_lggvp(lc, yaxis.name = "mean_logcounts", xaxis.text = F, kvarname = kvarname) # log counts
 # mr by k,d
-lmrkd <- get_lggvp(dfp.mrkd, make.dfp = F, yaxis.name = "mean_ratio",
-                   xaxis.text = T)
+lmrkd <- get_lggvp(dfp.mrkd, make.dfp = F, yaxis.name = "mean_ratio_kd",
+                   xaxis.text = T, kvarname = kvarname)
 # mr by k
-lmrk <- get_lggvp(dfp.mrk, make.dfp = F, yaxis.name = "mean_ratio",
-                  xaxis.text = T)
+lmrk <- get_lggvp(dfp.mrk, make.dfp = F, yaxis.name = "mean_ratio_k",
+                  xaxis.text = T, kvarname = kvarname)
 ```
 
-Make composite plots with `grid.arrange`.
+### Individual violin plots
+
+Counts
+
+```{r}
+lmc$ggvp
+```
+
+Normalized counts
+
+```{r}
+lnc$ggvp
+```
+
+Log counts
+
+```{r}
+llc$ggvp
+```
+
+Mean ratio by cell type (k) and donor (d), e.g. "mr_kd"
+
+```{r}
+lmrkd$ggvp
+```
+
+Mean ratio by cell type (k)
+
+```{r}
+lmrk$ggvp
+```
+
+### Composite -- all scales
 
 ```{r}
 # make composite plot
-grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, lmr$ggvp, ncol = 1)
+grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, lmrkd$ggvp, lmrk$ggvp, ncol = 1)
 ```
 
+### Composite -- counts without mean ratios
+
 ```{r}
-grid.arrange(llc$ggvp, lmr$ggvp, ncol = 1)
+grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, ncol = 1)
 ```
 
 ## Heatmap
