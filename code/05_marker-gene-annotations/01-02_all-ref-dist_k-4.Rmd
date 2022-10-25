@@ -2,6 +2,7 @@
 title: "01-02_all-ref-dist_k-4"
 author: "Sean Maden"
 date: '2022-10-24'
+number_sections: true
 output: html_document
 ---
 
@@ -336,7 +337,9 @@ grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, ncol = 1)
 
 ## Heatmaps of mean ratios
 
-### Make cell type, donor annotations
+### Prep heatmap params
+
+Make annotations
 
 ```{r}
 dfm <- as.data.frame(lz$top.marker.data)
@@ -352,25 +355,74 @@ ca.kd <- columnAnnotation(cell_type = gsub(".*;", "", colnames(mr.kd)))
 ca.k <- columnAnnotation(cell_type = gsub(".*;", "", colnames(mr.k)))
 ```
 
-### Unscaled
+Make axis labels
 
 ```{r}
-hm.kd <- Heatmap(mr.kd, top_annotation = ca.kd)
-hm.k <- Heatmap(mr.k, top_annotation = ca.k, right_annotation = ra)
+ylab <- paste0("Genes (G = ",nrow(mr.kd),")")
+xlab.kd <- paste0("Donors, types (k;d = ",ncol(mr.kd),")")
+xlab.k <- paste0("Type (K = ",ncol(mr.k),")")
 ```
+
+### Prep heatmap data
+
+Unscaled
 
 ```{r}
 set.seed(0)
+hm.kd <- Heatmap(mr.kd, top_annotation = ca.kd, 
+                 show_row_names = F, show_column_names = F,
+                 row_title = ylab, column_title = xlab.kd,
+                 name = "MR_kd_unscaled")
+hm.k <- Heatmap(mr.k, top_annotation = ca.k, right_annotation = ra,
+                show_row_names = F, show_column_names = F,
+                row_title = ylab, column_title = xlab.k,
+                name = "MR_k_unscaled")
+```
+
+Scaled 
+
+```{r}
+set.seed(0)
+hm.kds <- Heatmap(scale(mr.kd), top_annotation = ca.kd, 
+                  show_row_names = F, show_column_names = F,
+                  row_title = ylab, column_title = xlab.kd,
+                  name = "MR_kd_scaled")
+hm.ks <- Heatmap(scale(mr.k), top_annotation = ca.k, right_annotation = ra,
+                 show_row_names = F, show_column_names = F,
+                 row_title = ylab, column_title = xlab.k,
+                 name = "MR_k_scaled")
+```
+
+### Plot heatmaps
+
+Heatmap of MRKD
+
+```{r}
+hm.kd
+```
+
+Heatmap of MRK
+
+```{r}
+hm.k
+```
+
+Composite heatmap
+
+```{r}
 hm.kd + hm.k
 ```
 
 ### Scaled
 
 ```{r}
-hm.kd <- Heatmap(scale(mr.kd), top_annotation = ca.kd)
-hm.k <- Heatmap(scale(mr.k), top_annotation = ca.k, right_annotation = ra)
+hm.kds
 ```
 
 ```{r}
-hm.kd + hm.k
+hm.ks
+```
+
+```{r}
+hm.kds + hm.ks
 ```
