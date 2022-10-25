@@ -15,6 +15,7 @@ This vignette shows summary statistics for the restrictive example cell type lab
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(SummarizedExperiment); library(here); library(ggplot2); library(gridExtra)
+library(ComplexHeatmap)
 #------
 # paths
 #------
@@ -333,7 +334,43 @@ grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, lmrkd$ggvp, lmrk$ggvp, ncol = 1)
 grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, ncol = 1)
 ```
 
-## Heatmap
+## Heatmaps of mean ratios
+
+### Make cell type, donor annotations
 
 ```{r}
+dfm <- as.data.frame(lz$top.marker.data)
+dfm <- dfm[order(match(dfm$gene, rownames(sef))),]
+cond <- identical(dfm$gene, rownames(sef))
+if(!cond){stop("couldn't match gene names.")}
+# cell type annotations
+rowData(sef)$cell_type <- dfm$celltype.target
+rowData(sef)$top_mean_ratio <- dfm$ratio
+ra <- rowAnnotation(cell_type = rowData(sef)$cell_type,
+                    top_mean_ratio = rowData(sef)$top_mean_ratio)
+ca.kd <- columnAnnotation(cell_type = gsub(".*;", "", colnames(mr.kd)))
+ca.k <- columnAnnotation(cell_type = gsub(".*;", "", colnames(mr.k)))
+```
+
+### Unscaled
+
+```{r}
+hm.kd <- Heatmap(mr.kd, top_annotation = ca.kd)
+hm.k <- Heatmap(mr.k, top_annotation = ca.k, right_annotation = ra)
+```
+
+```{r}
+set.seed(0)
+hm.kd + hm.k
+```
+
+### Scaled
+
+```{r}
+hm.kd <- Heatmap(scale(mr.kd), top_annotation = ca.kd)
+hm.k <- Heatmap(scale(mr.k), top_annotation = ca.k, right_annotation = ra)
+```
+
+```{r}
+hm.kd + hm.k
 ```
