@@ -33,7 +33,7 @@ lz <- get(load(lz.fpath)) # load z signature matrix list
 #-----------
 # set params
 #-----------
-ctvarname <- "celltype.treg"
+knamevarname <- "celltype.treg"
 gvarname <- "glial"
 dvarname <- "BrNum"
 glialv <- c("Astro", "MicroOligo", "Micro", "Oligo", "OPC")
@@ -66,11 +66,10 @@ get_lggvp <- function(df, make.dfp = TRUE, yaxis.name = "mean_counts",
                       xaxis.text = TRUE){
   if(make.dfp){
     # get means by cell types
-    ctvarname <- "cellType_broad_hc"
-    ctv <- unique(sef[[ctvarname]])
-    mc <- do.call(cbind, lapply(ctv, function(ki){
-      rowMeans(df[,sef[[ctvarname]]==ki])
-    })); colnames(mc) <- ctv
+    knamev <- unique(sef[[ctvarname]])
+    mc <- do.call(cbind, lapply(knamev, function(ki){
+      rowMeans(df[,sef[[knamevarname]]==ki])
+    })); colnames(mc) <- knamev
     dfp <- reshape::melt(mc)
   } else{dfp <- df}
   # get plot data
@@ -83,18 +82,18 @@ get_lggvp <- function(df, make.dfp = TRUE, yaxis.name = "mean_counts",
 ## Append glial cell label
 
 ```{r}
-sef[[gvarname]] <- ifelse(sef[[ctvarname]] %in% glialv, TRUE, FALSE)
+sef[[gvarname]] <- ifelse(sef[[knamevarname]] %in% glialv, TRUE, FALSE)
 ```
 
 # Cell abundance summaries
 
-Summaries of the cell type labels contained in variables "`r ctvarname`" and 
+Summaries of the cell type labels contained in variables "`r knamevarname`" and 
 "`r gvarname`."
 
 ## Table of type abundance
 
 ```{r}
-knitr::kable(table(x = sef[[ctvarname]]), align = "c")
+knitr::kable(table(x = sef[[knamevarname]]), align = "c")
 ```
 
 ## Table of type, glial status
@@ -104,18 +103,16 @@ knitr::kable(table(sef[[gvarname]]), align = "c")
 ```
 
 ```{r}
-knitr::kable(table(sef[[ctvarname]], sef[[gvarname]]), align = "c")
+knitr::kable(table(sef[[knamevarname]], sef[[gvarname]]), align = "c")
 ```
 
 ## Type abundances barplot
 
 ```{r}
-dfp <- as.data.frame(table(sef[[ctvarname]], sef[[gvarname]]))
+dfp <- as.data.frame(table(sef[[knamevarname]], sef[[gvarname]]))
 colnames(dfp) <- c("cell_type", "glial", "num_nuclei")
 dfp[,1] <- as.character(dfp[,1])
 dfp[,2] <- as.character(dfp[,2])
-# order on value
-dfp[,1] <- factor(dfp[,1], levels = dfp[,1][order(dfp[,4])])
 ```
 ```{r}
 ggplot(dfp, aes(x = cell_type, y = num_nuclei, fill = glial)) + geom_bar(stat = "identity")
@@ -132,14 +129,15 @@ cd <- colData(sef)
 dv <- unique(sef[[dvarname]])
 dfp <- do.call(rbind, lapply(dv, function(di){
   cdi <- cd[cd[,dvarname]==di,]
-  dfp <- as.data.frame(table(cdi[,ctvarname]))
+  dfp <- as.data.frame(table(cdi[,knamevarname]))
   dfp$donor <- di
   dfp
 }))
 colnames(dfp) <- c("cell_type", "num_nuclei", "donor")
+dfp$glial <- ifelse(dfp$cell_type %in% c("Oligo"), T, F)
 ```
 ```{r}
-ggplot(dfp, aes(x = cell_type, y = num_nuclei)) + 
+ggplot(dfp, aes(x = cell_type, y = num_nuclei, fill = glial)) + 
   geom_violin(draw_quantiles = 0.5)
 ```
 
@@ -174,14 +172,15 @@ dfp <- do.call(rbind, lapply(dv, function(donori){
   sefi <- sef[,sef[[dvarname]]==donori]
   data.frame(glial_nuclei = length(which(sefi[[gvarname]]==T)),
              neuronal_nuclei = length(which(
-               sefi[[ctvarname]] %in% c("Inhib", "Excit"))),
+               sefi[[knamevarname]] %in% c("Inhib", "Excit"))),
              total_nuclei = ncol(sefi), donor = donori)
 }))
 ```
 ```{r}
-ggplot(dfp, aes(x = glial_nuclei, y = neuronal_nuclei, size = total_nuclei)) + 
-  geom_abline(intercept = 0, slope = 1, col = "red", lwd = 1.5) +
-  geom_point() + ggtitle("Nuclei by donor")
+ggplot(dfp, aes(x = glial_nuclei, y = neuronal_nuclei)) + 
+  geom_abline(intercept = 0, slope = 1, col = "red", lwd = 1.5) + ggtitle("Nuclei by donor") +
+  geom_point(aes(size = total_nuclei), alpha = 0.5, color = "blue") + 
+  geom_text(aes(label = donor), position = "dodge", color = "black")
 ```
 
 ### Scatterplot of neuronal types
@@ -189,8 +188,8 @@ ggplot(dfp, aes(x = glial_nuclei, y = neuronal_nuclei, size = total_nuclei)) +
 Plotting Excit versus Inhib neuron abundances.
 
 ```{r}
-sefi <- sef[,sef[[ctvarname]] %in% c("Inhib", "Excit")]
-dfp <- as.data.frame(table(sefi[[ctvarname]], sefi[[dvarname]]))
+sefi <- sef[,sef[[knamevarname]] %in% c("Inhib", "Excit")]
+dfp <- as.data.frame(table(sefi[[knamevarname]], sefi[[dvarname]]))
 dfp <- cbind(dfp[dfp[,1]=="Excit",], dfp[dfp[,1]=="Inhib",])[,c(2,3,6)]
 colnames(dfp) <- c("donor", "Excit", "Inhib")
 dfp$total_neurons <- dfp$Excit+dfp$Inhib
@@ -205,8 +204,8 @@ ggplot(dfp, aes(x = Excit, y = Inhib)) +
 ### Scatterplot of Oligo versus non-Oligo cell types
 
 ```{r}
-sefi <- sef[,!sef[[ctvarname]] %in% c("Inhib", "Excit")]
-dfp <- as.data.frame(table(sefi[[ctvarname]], sefi[[dvarname]]))
+sefi <- sef[,!sef[[knamevarname]] %in% c("Inhib", "Excit")]
+dfp <- as.data.frame(table(sefi[[knamevarname]], sefi[[dvarname]]))
 dfp <- cbind(dfp[dfp[,1]=="Oligo",], dfp[dfp[,1]=="other",])[,c(2,3,6)]
 colnames(dfp) <- c("donor", "Oligo", "Other")
 dfp$total_glial <- dfp$Oligo+dfp$Other
@@ -222,18 +221,60 @@ ggplot(dfp, aes(x = Oligo, y = Other)) +
 ## Upset plot of marker gene identities
 
 # Expression at marker genes
-## Get expression plots
+
+## Composite violin plots
+
+```{r}
+# expression data
+ct <- assays(sef)$counts
+sf <- 2^rnorm(ncol(sef))
+sf <- sf/mean(sf)
+nc <- t(t(ct)/sf)
+lc <- log2(nc+1)
+
+# get mean ratio expression -- by donor,type
+knamev <- unique(sef[[knamevarname]])
+mr.kd <- do.call(cbind, lapply(knamev, function(ki){
+  sefi <- sef[,sef[[knamevarname]]==ki] # type subset
+  dfpi <- do.call(cbind, lapply(dv, function(donori){
+    sefii <- sefi[,sefi[[dvarname]]==donori] # donor, type subset
+    numerv <- rowMeans(assays(sefii[,sefii[[knamevarname]]==ki])$counts)
+    ldenom <- lapply(knamev[!knamev==ki], function(kj){
+      filtj <- sef[[knamevarname]]==kj & sef[[dvarname]]==donori
+      rowMeans(assays(sef[,filtj])$counts)+1e-6
+    })
+    mrkdv <- rep(numerv, length(knamev)-1)/unlist(ldenom)
+    rowMeans(matrix(mrkdv, nrow = length(numerv)))
+  }))
+  colnames(dfpi) <- paste0(dv, ";", ki)
+  rownames(dfpi) <- rownames(sef)
+  dfpi
+}))
+dfp.mrkd <- reshape::melt(mr.kd)
+colnames(dfp.mrkd) <- c("gene_name", "donor;type", "mr_kd")
+dfp.mrkd$cell_type <- gsub(".*;", "", dfp.mrkd$`donor;type`)
+# get mean ratio expression -- by type
+mr.k <- do.call(cbind, lapply(knamev, function(ki){
+  which.ki <- grepl(ki, colnames(mr.kd)); rowMeans(mr.kd[,which.ki])
+}))
+colnames(mr.k) <- knamev
+rownames(mr.k) <- rownames(mr.kd)
+dfp.mrk <- reshape::melt(mr.k)
+colnames(dfp.mrk) <- c("gene_name", "cell_type", "mr_k")
+```
 
 ```{r}
 # get violin plots of means
 lmc <- get_lggvp(ct, yaxis.name = "mean_counts", xaxis.text = F) # counts
 lnc <- get_lggvp(nc, yaxis.name ="mean_normcounts", xaxis.text = F) # norm counts
 llc <- get_lggvp(lc, yaxis.name = "mean_logcounts", xaxis.text = F) # log counts
-lmr <- get_lggvp(reshape::melt(mrk), make.dfp = F, 
-                 yaxis.name = "mean_ratio", xaxis.text = T)
+# mr by k,d
+lmrkd <- get_lggvp(dfp.mrkd, make.dfp = F, yaxis.name = "mean_ratio",
+                   xaxis.text = T)
+# mr by k
+lmrk <- get_lggvp(dfp.mrk, make.dfp = F, yaxis.name = "mean_ratio",
+                  xaxis.text = T)
 ```
-
-## Make expression composite plot
 
 Make composite plots with `grid.arrange`.
 
@@ -244,4 +285,9 @@ grid.arrange(lmc$ggvp, lnc$ggvp, llc$ggvp, lmr$ggvp, ncol = 1)
 
 ```{r}
 grid.arrange(llc$ggvp, lmr$ggvp, ncol = 1)
+```
+
+## Heatmap
+
+```{r}
 ```
