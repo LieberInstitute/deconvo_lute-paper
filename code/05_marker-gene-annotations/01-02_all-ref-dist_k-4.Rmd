@@ -40,6 +40,7 @@ glialv <- c("Astro", "MicroOligo", "Micro", "Oligo", "OPC")
 #-----------------
 # helper functions
 #-----------------
+
 get_ggvp <- function(dfp, yaxis.name, xaxis.text){
   colnames(dfp) <- c("gene_name", "cell_type", "value")
   dfp$glial <- ifelse(dfp$cell_type %in% c("Astro", "MicroOligo", "Micro", 
