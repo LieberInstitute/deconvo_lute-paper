@@ -5,7 +5,7 @@
 #
 # example:
 # source("make_example_data.R")
-# source("z_transform.R")
+# source("z_transformations.R")
 # ldecon <- ldecon_example()
 #
 
