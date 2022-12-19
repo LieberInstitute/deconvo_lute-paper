@@ -19,19 +19,25 @@
 #  * snRNAseq data.frame: "df-snrnaseq-all_cell-prop-abund_dlpfc-ro1.rda"
 #
 
-libv <- c("SingleCellExperiment", "SummarizedExperiment")
+libv <- c("SingleCellExperiment", "SummarizedExperiment", "ggplot2")
 sapply(libv, library, character.only = T)
 
 #----------
 # load data
 #----------
+# manage paths
 base.path <- "."
+save.dname <- "06_cellprop-integrated"
+save.dpath <- file.path(base.path, "deconvo_method-paper", "outputs", save.dname)
 
 # load sce
 sce.fname <- "sef_mr-markers-k7-from-sce_dlpfc-ro1.rda"
 sce.fpath <- file.path(base.path, "deconvo_method-paper", "outputs", 
                        "05_marker-gene-annotations", sce.fname)
 sce <- get(load(sce.fpath))
+# set vnames
+donor.vname <- "BrNum"
+ct.vname <- "cellType_broad_hc"
 
 # load rnascope data
 lcsv.fname <- "lcsv_halo.rda"
@@ -50,6 +56,8 @@ if(!file.exists(lcsv.fpath)){
   names(lcsv) <- dirv
   # save binary
   save(lcsv, file = lcsv.fpath)
+} else{
+  lcsv <- get(load(lcsv.fpath))
 }
 
 
@@ -101,46 +109,31 @@ get_lcor <- function(rni, sni, cnv = c("prop_median", "num_median")){
   names(lcor) <- cnv; return(lcor)
 }
 
-#------------------------------
-# get subset of matched samples
-#------------------------------
-colnames(colData(sce))
-# [1] "Sample"                "Barcode"               "key"                  
-# [4] "file_id"               "region_short"          "subject"              
-# [7] "round"                 "region"                "age"                  
-# [10] "sex"                   "diagnosis"             "sum"                  
-# [13] "detected"              "subsets_Mito_sum"      "subsets_Mito_detected"
-# [16] "subsets_Mito_percent"  "total"                 "high_mito"            
-# [19] "low_sum"               "low_detected"          "discard_auto"         
-# [22] "doubletScore"          "prelimCluster"         "kmeans"               
-# [25] "sizeFactor"            "collapsedCluster"      "cellType_k"           
-# [28] "cellType_hc"           "cellType_broad_k"      "cellType_broad_hc" 
-
 #-----------------------------
 # get cell proportions, counts
 #-----------------------------
 # snrnaseq
-sampv.sn <- unique(gsub("Br", "", sce$subject))
+sampv.sn <- unique(gsub("Br", "", sce[[donor.vname]]))
 md <- colData(sce)
 dfsn <- do.call(rbind, lapply(sampv.sn, function(sampi){
-  filt.samp <- which(grepl(paste0("Br", sampi), md$subject))
-  mdi <- md[filt.samp,]; regionv <- unique(mdi$region)
-  dfi <- do.call(rbind, lapply(regionv, function(regioni){
-    dfri <- as.data.frame(table(mdi[mdi$region==regioni,]$cellType_broad_k))
-    dfri$prop <- dfri[,2]/sum(dfri[,2]); dfri$region <- regioni
-    colnames(dfri) <- c("cell_type", "num_cells", "prop_cells", "region"); dfri
-  }))
+  filt.samp <- which(grepl(paste0("Br", sampi), md[,donor.vname]))
+  mdi <- md[filt.samp,]
+  dfi <- as.data.frame(table(mdi[, ct.vname]))
+  dfi$prop <- dfi[,2]/sum(dfi[,2])
+  colnames(dfi) <- c("cell_type", "num_cells", "prop_cells")
   dfi$sample_id <- sampi; dfi
 }))
 dfsn$assay <- "snRNAseq"
 
 # rnascope slides
-sampv.rn <- unique(sapply(names(lcsv[[1]]), function(ni){
-  stri <- strsplit(ni, "_")[[1]][3]; gsub("[A-Z]", "", stri)}))
+sampv <- unique(dfsn$sample_id)
 dfrn <- do.call(rbind, lapply(c("CIRCLE", "STAR"), function(expt){
   lcsve <- lcsv[[expt]]
-  do.call(rbind, lapply(unique(dfsn$sample_id), function(sampi){
-    lcsvi <- lcsve[grepl(paste0("_", sampi, "[A-Z]"), names(lcsve))]
+  do.call(rbind, lapply(sampv, function(sampi){
+    message(sampi)
+    str.patt <- paste0(".*_", sampi, "[A-Z].*")
+    samp.filt <- grepl(str.patt, names(lcsve)) &  grepl("Final", names(lcsve))
+    lcsvi <- lcsve[which(samp.filt)]
     if(length(lcsvi) > 0){
       do.call(rbind, lapply(seq(length(lcsvi)), function(ii){
         # get region string
@@ -156,7 +149,7 @@ dfrn <- do.call(rbind, lapply(c("CIRCLE", "STAR"), function(expt){
 }))
 
 # save datasets
-save.dpath <- "/users/smaden/"
+# save.dpath <- "/users/smaden/"
 rn.fname <- "df-rnascope-all_cell-prop-abund_dlpfc-ro1.rda"
 sn.fname <- "df-snrnaseq-all_cell-prop-abund_dlpfc-ro1.rda"
 save(dfrn, file = file.path(save.dpath, rn.fname))
@@ -179,6 +172,9 @@ dfsn$cell_type <- as.character(dfsn$cell_type)
 dfsn[dfsn$cell_type=="Micro.Oligo",]$cell_type <- "Micro"
 sid.int <- intersect(dfsn$sample_id, dfrn$sample_id)
 ct.int <- intersect(dfsn$cell_type, dfrn$cell_type)
+
+
+
 which.int.sn <- dffsn$sample_id %in% sid.int &
   dffsn$cell_type %in% ct.int
 which.int.rn <- dffrn$sample_id %in% sid.int &
@@ -186,64 +182,91 @@ which.int.rn <- dffrn$sample_id %in% sid.int &
 dffsn <- dffsn[which.int.sn,]
 dffrn <- dffrn[which.int.rn,]
 
+#----------------
+# total estimates
+#----------------
+# overall total est
+ctv <- intersect(dffsn$cell_type, dffrn$cell_type)
+dfm <- do.call(rbind, lapply(ctv, function(cti){
+  rni <- dffrn[dffrn$cell_type==cti,]
+  sni <- dffsn[dffsn$cell_type==cti,]
+  int.sampv <- intersect(rni$sample_id, rni$sample_id)
+  rni <- rni[rni$sample_id %in% int.sampv,]
+  sni <- sni[sni$sample_id %in% int.sampv,]
+  rni <- rni[order(match(rni$sample_id, sni$sample_id)),]
+  cond <- identical(rni$sample_id, sni$sample_id)
+  if(cond){
+    data.frame(celltype = cti,
+               sn.sum.num = sum(sni$num_median),
+               sn.mean.num = mean(sni$num_median),
+               sn.mean.prop = mean(sni$prop_median),
+               rn.sum.num = sum(rni$num_median),
+               rn.mean.num = mean(rni$num_median),
+               rn.mean.prop = mean(rni$prop_median))
+  }
+}))
+# corr across totals
+corr.sum.num <- cor.test(dfm$sn.sum.num, dfm$rn.sum.num, method = "spearman")
+corr.mean.prop <- cor.test(dfm$sn.mean.prop, dfm$rn.mean.prop, method = "spearman")
+corr.mean.num <- cor.test(dfm$sn.mean.num, dfm$rn.mean.num, method = "spearman")
+
+# get means across donors
+ctv <- intersect(dffsn$cell_type, dffrn$cell_type)
+dfmean <- do.call(rbind, lapply(ctv, function(cti){
+  rni <- dffrn[dffrn$cell_type==cti,]
+  sni <- dffsn[dffsn$cell_type==cti,]
+  int.sampv <- intersect(rni$sample_id, rni$sample_id)
+  rni <- rni[rni$sample_id %in% int.sampv,]
+  sni <- sni[sni$sample_id %in% int.sampv,]
+  rni <- rni[order(match(rni$sample_id, sni$sample_id)),]
+  cond <- identical(rni$sample_id, sni$sample_id)
+  if(cond){
+    data.frame(celltype = cti,
+               sn.num = mean(sni$num_median),
+               sn.prop = mean(sni$prop_median),
+               rn.num = mean(rni$num_median),
+               rn.prop = mean(rni$prop_median))
+  }
+}))
+
 #-----------------------------------------
 # corr across cell types -- cell prop, num
 #-----------------------------------------
-sampv <- unique(dffsn$sample_id)
-lcor <- lapply(sampv, function(sampi){
-  rni <- dffrn[dffrn$sample_id==sampi,]
-  sni <- dffsn[dffsn$sample_id==sampi,]
-  rni <- rni[order(match(rni$cell_type, sni$cell_type)),]
-  if(identical(as.character(rni$cell_type), as.character(sni$cell_type))){
-    get_lcor(rni, sni)} else{NULL}
-})
-names(lcor) <- sampv
-
-# get rhos, pvals
-do.call(rbind, lapply(seq(length(lcor)), function(ii){
-  lcori <- lcor[[ii]]
-  data.frame(sample_id = as.character(names(lcor)[ii]),
-             rho_prop = lcori[["prop_median"]]$estimate,
-             pval_prop = lcori[["prop_median"]]$p.value,
-             rho_num = lcori[["num_median"]]$estimate,
-             pval_num = lcori[["num_median"]]$p.value)
-}))
-#      sample_id     rho_prop pval_prop     rho_num   pval_num
-# cor       2720 -0.478227670 0.4151805 -0.46146202 0.43402395
-# cor1      6432  0.009556748 0.9878322 -0.12731174 0.83834062
-# cor2      6471  0.059387701 0.9244297  0.05433445 0.93085329
-# cor3      6522 -0.419322275 0.4821893 -0.40577591 0.49790073
-# cor4      8492  0.093077284 0.8816617  0.08515911 0.89170325
-# cor5      3942  0.839966496 0.0749791  0.82538232 0.08526103
-# cor6      6423 -0.285247042 0.6417993 -0.28503968 0.64205236
-# cor7      8667 -0.419628255 0.4818357 -0.48139704 0.41164003
-# cor8      8325 -0.466244303 0.4286296 -0.45743907 0.43857348
-
-#--------------------------------------
-# corr across samples -- cell prop, num
-#--------------------------------------
-ctv <- unique(as.character(dffsn$cell_type))
-lcor <- lapply(ctv, function(celli){
-  rni <- dffrn[dffrn$cell_type==celli,]
-  sni <- dffsn[dffsn$cell_type==celli,]
+ctv <- intersect(dffsn$cell_type, dffrn$cell_type)
+df.cor <- do.call(rbind, lapply(ctv, function(cti){
+  rni <- dffrn[dffrn$cell_type==cti,]
+  sni <- dffsn[dffsn$cell_type==cti,]
+  int.sampv <- intersect(rni$sample_id, rni$sample_id)
+  rni <- rni[rni$sample_id %in% int.sampv,]
+  sni <- sni[sni$sample_id %in% int.sampv,]
   rni <- rni[order(match(rni$sample_id, sni$sample_id)),]
-  if(identical(as.character(rni$sample_id), as.character(sni$sample_id))){
-    get_lcor(rni, sni)} else{NULL}
-})
-names(lcor) <- ctv
-
-# get rhos, pvals
-do.call(rbind, lapply(seq(length(lcor)), function(ii){
-  lcori <- lcor[[ii]]
-  data.frame(cell_type = as.character(names(lcor)[ii]),
-             rho_prop = lcori[["prop_median"]]$estimate,
-             pval_prop = lcori[["prop_median"]]$p.value,
-             rho_num = lcori[["num_median"]]$estimate,
-             pval_num = lcori[["num_median"]]$p.value)
+  cond <- identical(rni$sample_id, sni$sample_id) &
+    nrow(rni) > 2
+  if(cond){
+    corri.prop <- cor.test(rni$prop_median, sni$prop_median, method = "spearman")
+    corri.num <- cor.test(rni$num_median, sni$num_median, method = "spearman")
+    dfi <- matrix(c(corri.prop$estimate, corri.prop$p.value,
+             corri.num$estimate, corri.num$p.value), nrow = 1)
+    dfi <- as.data.frame(dfi)
+  }
 }))
-#      cell_type    rho_prop pval_prop      rho_num  pval_num
-# cor      Astro  0.14718017 0.7055269  0.139037560 0.7212784
-# cor1     Excit -0.06029309 0.8775434 -0.004724735 0.9903750
-# cor2     Inhib -0.49045882 0.1800898 -0.330408421 0.3851641
-# cor3     Micro -0.48297732 0.1878430 -0.542312005 0.1314370
-# cor4     Oligo -0.50655421 0.1640374 -0.552398176 0.1230011
+colnames(df.cor) <- c("prop.rho", "prop.pval", "num.rho", "num.pval")
+df.cor$prop.pbh <- p.adjust(df.cor$prop.pval, method = "BH")
+df.cor$num.pbh <- p.adjust(df.cor$num.pval, method = "BH")
+
+#---------------
+# plot summaries
+#---------------
+
+
+# violin plots
+ggplot(dfsn, aes(x = cell_type, y = prop_cells)) + geom_violin(draw_quantiles = 0.5)
+ggplot(dfsn, aes(x = cell_type, y = num_cells)) + geom_violin(draw_quantiles = 0.5)
+
+
+
+
+
+
+
+
