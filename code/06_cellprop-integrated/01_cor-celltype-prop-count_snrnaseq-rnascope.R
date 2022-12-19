@@ -257,8 +257,6 @@ df.cor$num.pbh <- p.adjust(df.cor$num.pval, method = "BH")
 #---------------
 # plot summaries
 #---------------
-
-
 # violin plots
 ggplot(dfsn, aes(x = cell_type, y = prop_cells)) + geom_violin(draw_quantiles = 0.5)
 ggplot(dfsn, aes(x = cell_type, y = num_cells)) + geom_violin(draw_quantiles = 0.5)
