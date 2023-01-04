@@ -16,7 +16,9 @@ sce.fpath <- file.path("deconvo_method-paper", "outputs",
 sce <- get(load(sce.fpath))
 
 # out filename stem
-out.dpath <- file.path()
+out.dpath <- file.path("deconvo_method-paper", "outputs", 
+                       "07_cell-size-estimates")
+out.fnstem <- "scef-k7markers"
 
 #----------------------
 # sizes by donor/region
@@ -46,6 +48,11 @@ agg.dr <- do.call(rbind, lapply(dv, function(di){
 }))
 agg.dr$donor <- gsub("\\_.*", "", agg.dr$sample)
 agg.dr$region <- gsub(".*\\_", "", agg.dr$sample)
+
+# save results
+fname <- paste0("df-cellsize_donor-region_", out.fnstem, ".rda")
+fpath <- file.path(out.dpath, fname)
+save(agg.dr, file = fpath)
 
 #----------------
 # sizes by region
@@ -83,6 +90,14 @@ mcor.rgn <- do.call(rbind, lapply(seq(var1v), function(ii){
              punadj = format(cti$p.value, scientific = T, digits = 3))
 }))
 
+# save results
+fname <- paste0("df-cellsize_region_", out.fnstem, ".rda")
+fpath <- file.path(out.dpath, fname)
+save(agg.rgn, file = fpath)
+fname <- paste0("dfcor-cellsize_region_", out.fnstem, ".rda")
+fpath <- file.path(out.dpath, fname)
+save(mcor.rgn, file = fpath)
+
 
 #----------------------------------
 # sizes by donor, binned replicates
@@ -113,7 +128,7 @@ agg.drep <- do.call(rbind, lapply(ddf, function(di){
 }))
 
 # correlations by donor
-mcor <- do.call(rbind, lapply(ddf, function(di){
+mcor.drep <- do.call(rbind, lapply(ddf, function(di){
   message(di)
   ai <- agg.drep[agg.drep$donor==di,]
   riv <- unique(ai$region)
@@ -135,3 +150,10 @@ mcor <- do.call(rbind, lapply(ddf, function(di){
              punadj = format(cti$p.value, scientific = T, digits = 3))
 }))
 
+# save results
+fname <- paste0("df-cellsize_donor_", out.fnstem, ".rda")
+fpath <- file.path(out.dpath, fname)
+save(agg.drep, file = fpath)
+fname <- paste0("dfcor-cellsize_donor_", out.fnstem, ".rda")
+fpath <- file.path(out.dpath, fname)
+save(mcor.drep, file = fpath)
