@@ -3,7 +3,7 @@
 # Get the cell sizes from an SCE object.
 #
 
-libv <- c("SingleCellExperiment", "SummarizedExperiment")
+libv <- c("SingleCellExperiment", "SummarizedExperiment", "dplyr")
 sapply(libv, library, character.only = T)
 
 #----------
