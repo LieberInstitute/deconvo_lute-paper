@@ -37,7 +37,7 @@ agg.all <- data.frame(total_count = colSums(assays(sce)$counts),
 # total counts by donor/region
 agg.dr <- do.call(rbind, lapply(dv, function(di){
   sef <- sce[,sce[[dvarname]]==di] # filter
-  dfi <- data.frame(total_count = colSums(assays(sef)$logcounts),
+  dfi <- data.frame(total_count = colSums(assays(sef)$counts),
                         celltype = sef[[ctvarname]]) %>% 
     group_by(celltype) %>% 
     summarise(mean(total_count), .groups = "drop") %>% 
@@ -56,13 +56,13 @@ save(agg.dr, file = fpath)
 #----------------
 # sizes by region
 #----------------
-cd <- colData(sef)
+cd <- colData(sce)
 cd$region <- gsub(".*\\_", "", cd$Sample)
 rv <- unique(cd$region)
 
 agg.rgn <- do.call(rbind, lapply(rv, function(ri){
-  seff <- sef[,cd$region==ri] # filter
-  dfi <- data.frame(total_count = colSums(assays(seff)$logcounts),
+  seff <- sce[,cd$region==ri] # filter
+  dfi <- data.frame(total_count = colSums(assays(seff)$counts),
                     celltype = seff[[ctvarname]]) %>% 
     group_by(celltype) %>% 
     summarise(mean(total_count), .groups = "drop") %>% 
@@ -81,8 +81,7 @@ mcor.rgn <- do.call(rbind, lapply(seq(var1v), function(ii){
   grp1 <- grp1[order(match(grp1$region, grp2$region)),]
   # get correlations
   cti <- cor.test(grp1[,2], grp2[,2])
-  data.frame(donor = di,
-             region1 = var1v[ii],
+  data.frame(region1 = var1v[ii],
              region2 = var2v[ii],
              celltypes = paste0(unique(grp1$celltype), collapse = ";"),
              est = round(cti$estimate, 2),
@@ -102,19 +101,19 @@ save(mcor.rgn, file = fpath)
 # sizes by donor, binned replicates
 #----------------------------------
 # get donors with replicates
-cd <- colData(sef)
-colData(sef)$region <- gsub(".*\\_", "", cd$Sample)
-colData(sef)$donor <- gsub("_.*", "", cd$Sample)
+cd <- colData(sce)
+colData(sce)$region <- gsub(".*\\_", "", cd$Sample)
+colData(sce)$donor <- gsub("_.*", "", cd$Sample)
 dv <- unique(cd$Sample)
 ddf <- unique(gsub("_.*", "", dv[duplicated(gsub("_.*", "", dv))] ))
 
 # list agg by donor, agg region for each
 agg.drep <- do.call(rbind, lapply(ddf, function(di){
-  sei <- sef[,sef$donor==di]
+  sei <- sce[,sce$donor==di]
   rv <- unique(sei$region)
   dfi <- do.call(rbind, lapply(rv, function(ri){
     seff <- sei[,sei$region==ri] # filter
-    dfi <- data.frame(total_count = colSums(assays(seff)$logcounts),
+    dfi <- data.frame(total_count = colSums(assays(seff)$counts),
                       celltype = seff[[ctvarname]]) %>% 
       group_by(celltype) %>% 
       summarise(mean(total_count), .groups = "drop") %>% 
