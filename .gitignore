@@ -1,3 +1,15 @@
 
 data/lcsv_halo.rda
 data/halo/lcsv_halo.rda
+outputs/07_cell-size-estimates/df-cellsize_all-samples_sce.rda
+outputs/07_cell-size-estimates/df-cellsize_donor-region_sce.rda
+outputs/07_cell-size-estimates/df-cellsize_donor-region_scef-k7markers.rda
+outputs/07_cell-size-estimates/df-cellsize_donor_sce.rda
+outputs/07_cell-size-estimates/df-cellsize_region_sce.rda
+outputs/07_cell-size-estimates/df-cellsize_region_scef-k7markers.rda
+outputs/07_cell-size-estimates/df-merge-cellsize_halo-sce.rda
+outputs/07_cell-size-estimates/dfcor-cellsize_donor_sce.rda
+outputs/07_cell-size-estimates/dfcor-cellsize_region_sce.rda
+outputs/07_cell-size-estimates/dfcor-cellsize_region_scef-k7markers.rda
+*.rda
+*.rda
