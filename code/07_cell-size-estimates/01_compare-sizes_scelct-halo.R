@@ -9,16 +9,21 @@
 # load data
 #----------
 # read output df objects
-read.fnv <- c("dfcellsize_halo.rda", "df-cellsize_donor-region_sce.rda")
+read.fnv <- c("dfcellsize_halo.rda", 
+              "df-cellsize_donor-region_sce-logcounts.rda")
 read.dpath <- out.dpath <- file.path("deconvo_method-paper", "outputs", 
                                      "07_cell-size-estimates")
-ldf <- lapply(read.fnv, function(fni){get(load(file.path(read.dpath, fni)))})
+ldf <- lapply(read.fnv, function(fni){
+  get(load(file.path(read.dpath, fni)))})
 names(ldf) <- read.fnv
+
+# save filename stem
+save.fnstem <- "halo-scelct"
 
 #----------------
 # merge halo, sce
 #----------------
-dfs <- ldf$`df-cellsize_donor-region_sce.rda`
+dfs <- ldf[grepl("sce", names(ldf))][[1]]
 dfh <- ldf$dfcellsize_halo.rda
 # harmonize region variable
 dfh$region <- gsub("[0-9]", "", dfh$donor)
@@ -39,7 +44,7 @@ dffs <- dfs[dfs$sample %in% sampv,]
 ctv <- c("Excit", "Inhib", "Oligo", "Micro", "OPC", "Astro")
 colname.stem <- c("halo.akt3", "halo.cellarea", 
                   "halo.cytoarea", "halo.nucarea", 
-                  "halo.nucparam", "sce.meancount")
+                  "halo.nucparam", "sce.meanlct")
 dfm <- do.call(rbind, lapply(sampv, function(sampi){
   dih <- dffh[dffh$sample == sampi,]
   dis <- dffs[dffs$sample == sampi,]
@@ -70,6 +75,6 @@ dfm <- do.call(rbind, lapply(sampv, function(sampi){
 }))
 
 # save merged df
-save.fname <- "df-merge-cellsize_halo-sce.rda"
+save.fname <- paste0("df-merge-cellsize_",save.fnstem,".rda")
 save.fpath <- file.path(read.dpath, save.fname)
 save(dfm, file = save.fpath)

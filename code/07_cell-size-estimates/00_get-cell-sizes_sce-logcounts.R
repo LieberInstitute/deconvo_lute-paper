@@ -35,7 +35,7 @@ ctvarname <- "cellType_broad_hc"
 ctv <- sce[[ctvarname]]
 
 # get total counts overall
-agg.all <- data.frame(total_count = colSums(assays(sce)$counts),
+agg.all <- data.frame(total_count = colSums(assays(sce)$logcounts),
                       celltype = ctv) %>% group_by(celltype) %>%
   summarise(mean(total_count), .groups = "drop") %>% as.data.frame()
 # save results
@@ -46,7 +46,7 @@ save(agg.all, file = fpath)
 # total counts by donor/region
 agg.dr <- do.call(rbind, lapply(dv, function(di){
   seff <- sce[,sce[[dvarname]]==di] # filter
-  dfi <- data.frame(total_count = colSums(assays(seff)$counts),
+  dfi <- data.frame(total_count = colSums(assays(seff)$logcounts),
                     celltype = seff[[ctvarname]]) %>% 
     group_by(celltype) %>% 
     summarise(mean(total_count), .groups = "drop") %>% 
@@ -70,7 +70,7 @@ rv <- unique(cd$region)
 
 agg.rgn <- do.call(rbind, lapply(rv, function(ri){
   seff <- sce[,cd$region==ri] # filter
-  dfi <- data.frame(total_count = colSums(assays(seff)$counts),
+  dfi <- data.frame(total_count = colSums(assays(seff)$logcounts),
                     celltype = seff[[ctvarname]]) %>% 
     group_by(celltype) %>% 
     summarise(mean(total_count), .groups = "drop") %>% 
@@ -121,7 +121,7 @@ agg.drep <- do.call(rbind, lapply(ddf, function(di){
   rv <- unique(sei$region)
   dfi <- do.call(rbind, lapply(rv, function(ri){
     seff <- sei[,sei$region==ri] # filter
-    dfi <- data.frame(total_count = colSums(assays(seff)$counts),
+    dfi <- data.frame(total_count = colSums(assays(seff)$logcounts),
                       celltype = seff[[ctvarname]]) %>% 
       group_by(celltype) %>% 
       summarise(mean(total_count), .groups = "drop") %>% 

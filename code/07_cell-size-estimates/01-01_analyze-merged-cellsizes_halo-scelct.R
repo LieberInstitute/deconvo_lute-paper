@@ -9,14 +9,14 @@ sapply(libv, library, character.only = T)
 #----------
 # load data
 #----------
+# save filename stem
+save.fnstem <- "halo-scelct"
+
 # read output df objects
-read.fname <- "df-merge-cellsize_halo-scecounts.rda"
+read.fname <- paste0("df-merge-cellsize_",save.fnstem,".rda")
 read.dpath <- out.dpath <- file.path("deconvo_method-paper", "outputs", 
                                      "07_cell-size-estimates")
 dfm <- get(load(file.path(read.dpath, read.fname)))
-
-# save filename stem
-save.fnstem <- "halo-scecounts"
 
 #------------
 # format data
