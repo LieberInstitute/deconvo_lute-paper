@@ -3,7 +3,7 @@
 # Author: Sean Maden
 #
 
-libv <- c("ggplot2")
+libv <- c("ggplot2", "ggcorrplot")
 sapply(libv, library, character.only = T)
 
 #----------
@@ -24,15 +24,32 @@ save.fnstem <- "halo-scecounts"
 # convert to numeric
 for(c in seq(36)){dfm[,c] <- as.numeric(dfm[,c])}
 
-#----------------------
-# analysis by cell type
-#----------------------
+#------------------------------------------
+# correlations by cell type, across samples
+#------------------------------------------
 ctv <- c("Excit", "Inhib", "Oligo")
 lcor <- lapply(ctv, function(cti){
   dffm <- dfm[,grepl(cti, colnames(dfm))]
   for(c in seq(ncol(dffm))){dffm[,c] <- as.numeric(dffm[,c])}
   cor(dffm, use = "pairwise.complete.obs", method = "spearman")
 })
+names(lcor) <- ctv
+
+# make correlation heatmaps
+for(cti in names(lcor)){
+  pdf.fname <- paste0("ggcorrhm-cellsize_",cti,
+                      "_",save.fnstem,".pdf")
+  pdf.fpath <- file.path(read.dpath, pdf.fname)
+  # get plot matrix
+  mcori <- lcor[[cti]]
+  colnames(mcori) <- gsub(paste0(".", cti), "", colnames(mcori))
+  rownames(mcori) <- gsub(paste0(".", cti), "", rownames(mcori))
+  # get plot object
+  ggcor <- ggcorrplot(mcori, type = "lower", lab = T, title = cti)
+  # save new pdf
+  ggsave(pdf.fpath, ggcor, width = 5, height = 4,
+         device = "pdf", units = "in", dpi = 400)
+}
 
 #-----------------------------
 # compare means across samples
