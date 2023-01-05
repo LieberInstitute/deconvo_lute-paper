@@ -3,7 +3,7 @@
 # Get the cell sizes from an SCE object.
 #
 
-libv <- c("SingleCellExperiment", "SummarizedExperiment", "dplyr")
+libv <- c("SingleCellExperiment", "SummarizedExperiment", "dplyr", "scuttle")
 sapply(libv, library, character.only = T)
 
 #----------
@@ -19,9 +19,16 @@ out.dpath <- file.path("deconvo_method-paper", "outputs",
                        "07_cell-size-estimates")
 out.fnstem <- "sce"
 
+#--------------
+# get logcounts
+#--------------
+sce <- logNormCounts(sce)
+
 #----------------------
 # sizes by donor/region
 #----------------------
+
+
 dvarname <- "Sample"
 dv <- unique(sce[[dvarname]])
 
