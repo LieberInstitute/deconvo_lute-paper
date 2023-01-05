@@ -2,8 +2,6 @@
 
 # Author: Sean Maden
 #
-#
-#
 
 #----------
 # load data
@@ -14,6 +12,9 @@ read.dpath <- out.dpath <- file.path("deconvo_method-paper", "outputs",
                                      "07_cell-size-estimates")
 ldf <- lapply(read.fnv, function(fni){get(load(file.path(read.dpath, fni)))})
 names(ldf) <- read.fnv
+
+# save fnstem
+save.fnstem <- "halo-scecounts"
 
 #----------------
 # merge halo, sce
@@ -39,20 +40,20 @@ dffs <- dfs[dfs$sample %in% sampv,]
 ctv <- c("Excit", "Inhib", "Oligo", "Micro", "OPC", "Astro")
 colname.stem <- c("halo.akt3", "halo.cellarea", 
                   "halo.cytoarea", "halo.nucarea", 
-                  "halo.nucparam", "sce.meancount")
+                  "halo.nucperim", "sce.meancount")
 dfm <- do.call(rbind, lapply(sampv, function(sampi){
   dih <- dffh[dffh$sample == sampi,]
   dis <- dffs[dffs$sample == sampi,]
   dfm <- do.call(cbind, lapply(ctv, function(cti){
     # assign var defaults
     halo.akt3 <- halo.cellarea <- halo.cytoarea <- halo.nucarea <- 
-      halo.nucparam <- sce.meancount <- "NA"
+      halo.nucperim <- sce.meancount <- "NA"
     # parse halo
     if(cti %in% dih$type){
       dihf <- dih[dih$type==cti,]
       halo.akt3 <- dihf[1]; halo.cellarea <- dihf[2]
       halo.cytoarea <- dihf[3]; halo.nucarea <- dihf[4];
-      halo.nucparam <- dihf[5]
+      halo.nucperim <- dihf[5]
     }
     # parse sce
     if(cti %in% dis$celltype){
@@ -60,7 +61,7 @@ dfm <- do.call(rbind, lapply(sampv, function(sampi){
       sce.meancount <- disf$`mean(total_count)`[1]
     }
     matrix(unlist(c(halo.akt3, halo.cellarea, halo.cytoarea, halo.nucarea, 
-                          halo.nucparam, sce.meancount)), nrow = 1)
+                          halo.nucperim, sce.meancount)), nrow = 1)
   }))
   dfm <- as.data.frame(dfm)
   colnames(dfm) <- c(paste0(colname.stem, ".", 
@@ -70,6 +71,6 @@ dfm <- do.call(rbind, lapply(sampv, function(sampi){
 }))
 
 # save merged df
-save.fname <- "df-merge-cellsize_halo-sce.rda"
+save.fname <- paste0("df-merge-cellsize_",save.fnstem,".rda")
 save.fpath <- file.path(read.dpath, save.fname)
 save(dfm, file = save.fpath)
