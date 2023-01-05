@@ -25,21 +25,20 @@ out.fnstem <- "scef-k7markers"
 #----------------------
 dvarname <- "Sample"
 dv <- unique(sce[[dvarname]])
-
-# make cell types
 ctvarname <- "cellType_broad_hc"
-ctv <- sef[[ctvarname]]
+ctv <- sce[[ctvarname]]
 
 # get total counts overall
-agg.all <- data.frame(total_count = colSums(assays(sef)$counts),
+agg.all <- data.frame(total_count = colSums(assays(sce)$counts),
                   celltype = ctv) %>% group_by(celltype) %>%
-  summarise(mean(total_count), .groups = "drop") %>% as.data.frame()
+  summarise(mean(total_count), .groups = "drop") %>% 
+  as.data.frame()
 
 # total counts by donor/region
 agg.dr <- do.call(rbind, lapply(dv, function(di){
-  seff <- sef[,sef[[dvarname]]==di] # filter
-  dfi <- data.frame(total_count = colSums(assays(seff)$counts),
-                        celltype = seff[[ctvarname]]) %>% 
+  sef <- sce[,sce[[dvarname]]==di] # filter
+  dfi <- data.frame(total_count = colSums(assays(sef)$logcounts),
+                        celltype = sef[[ctvarname]]) %>% 
     group_by(celltype) %>% 
     summarise(mean(total_count), .groups = "drop") %>% 
     as.data.frame()
@@ -63,7 +62,7 @@ rv <- unique(cd$region)
 
 agg.rgn <- do.call(rbind, lapply(rv, function(ri){
   seff <- sef[,cd$region==ri] # filter
-  dfi <- data.frame(total_count = colSums(assays(seff)$counts),
+  dfi <- data.frame(total_count = colSums(assays(seff)$logcounts),
                     celltype = seff[[ctvarname]]) %>% 
     group_by(celltype) %>% 
     summarise(mean(total_count), .groups = "drop") %>% 
@@ -115,7 +114,7 @@ agg.drep <- do.call(rbind, lapply(ddf, function(di){
   rv <- unique(sei$region)
   dfi <- do.call(rbind, lapply(rv, function(ri){
     seff <- sei[,sei$region==ri] # filter
-    dfi <- data.frame(total_count = colSums(assays(seff)$counts),
+    dfi <- data.frame(total_count = colSums(assays(seff)$logcounts),
                       celltype = seff[[ctvarname]]) %>% 
       group_by(celltype) %>% 
       summarise(mean(total_count), .groups = "drop") %>% 
