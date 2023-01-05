@@ -17,7 +17,7 @@ sce <- get(load(sce.fpath))
 # out filename stem
 out.dpath <- file.path("deconvo_method-paper", "outputs", 
                        "07_cell-size-estimates")
-out.fnstem <- "sce"
+out.fnstem <- "sce-logcounts"
 
 #--------------
 # get logcounts
@@ -27,8 +27,6 @@ sce <- logNormCounts(sce)
 #----------------------
 # sizes by donor/region
 #----------------------
-
-
 dvarname <- "Sample"
 dv <- unique(sce[[dvarname]])
 

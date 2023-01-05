@@ -17,7 +17,7 @@ sce <- get(load(sce.fpath))
 # out filename stem
 out.dpath <- file.path("deconvo_method-paper", "outputs", 
                        "07_cell-size-estimates")
-out.fnstem <- "sce"
+out.fnstem <- "sce-counts"
 
 #----------------------
 # sizes by donor/region
