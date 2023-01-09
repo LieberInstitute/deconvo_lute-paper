@@ -79,11 +79,15 @@ dfp <- rbind(data.frame(prop_true = dfr$prop_k1,
                         expt_type = dfr$zs_transform,
                         celltype = rep("Non-neuron", nrow(dfr))))
 
-# format expt_type variable
-lvlstr.false <- "not scaling by cells f"
-lvlstr.true <- "lute (with scaling by cells f)"
-dfp$expt_type <- ifelse(dfp$expt_type == "TRUE", lvlstr.true, lvlstr.false)
-dfp$expt_type <- factor(dfp$expt_type, levels = c(lvlstr.false, lvlstr.true))
+# get rmse to print
+rmse.false <- sqrt(mean(dfp[dfp$expt_type==FALSE,]$prop_true-
+                          dfp[dfp$expt_type==FALSE,]$prop_pred))
+rmse.true <- sqrt(mean(dfp[dfp$expt_type==TRUE,]$prop_true-
+                          dfp[dfp$expt_type==TRUE,]$prop_pred))
+df.rmse <- data.frame(expt_type = c(lvlstr.false, lvlstr.true),
+                    rmse = c(format(rmse.false, digits = 2), 
+                             format(rmse.true, digits = 2)))
+
 
 # new plot object
 ggpt <- ggplot(dfp, aes(x = prop_true, y = prop_pred, 
@@ -92,7 +96,10 @@ ggpt <- ggplot(dfp, aes(x = prop_true, y = prop_pred,
   geom_abline(intercept = 0, slope = 1) +
   xlim(0.4, 1) + ylim(0.4, 1) +
   scale_color_manual(labels = c("Neuron", "Non-neuron"), 
-                     values = c("blue", "red"))
+                     values = c("blue", "red")) +
+  xlab("True cell composition (cc)") +
+  ylab("Estimated cc") +
+  geom_label()
 
 plot.fnstem <- "k2-n10-markers-perk"
 # make new pdf
