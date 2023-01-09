@@ -4,7 +4,7 @@
 #
 # Show the impact of including cell size adjustments on pseudobulking outcomes.
 
-libv <- c("lute", "scater", "SingleCellExperiment", "SummarizedExperiment", "scater")
+libv <- c("lute", "SingleCellExperiment", "SummarizedExperiment")
 sapply(libv, library, character.only = T)
 
 #----------
