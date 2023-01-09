@@ -65,9 +65,9 @@ save(markers, file = markers.fpath)
 # get sef -- subset top 100 markers by type
 #------------------------------------------
 # num. markers returned by cell type
-table(markers$celltype.target) 
-# Astro EndoMural     Micro     Oligo       OPC     Excit     Inhib
-#   595       719       473       288      1333      4639      3676
+table(markers$cellType.target)
+# Neuron Non-neuron
+# 4245        284
 
 # get top 100 markers by gene
 ctv <- unique(markers$cellType.target)
