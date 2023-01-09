@@ -17,22 +17,18 @@ read.dpath <- save.dpath <- file.path("deconvo_method-paper", "outputs",
 sce.csize.fname <- "df-cellsize_donor-region_sce.rda"
 sce.csize <- get(load(file.path(read.dpath, sce.csize.fname)))
 
-# sce marker data, k2
-sef.fname <- "sef_mr-markers-k2-from-sce_dlpfc-ro1.rda"
+# se marker data, k2
+sef.fname <- "sef_mr-markers_k2_20-per-k_dlpfc-ro1.rda"
 sef.dpath <- file.path("deconvo_method-paper", "outputs", 
                         "05_marker-gene-annotations")
-sef <- get(load(file.path(scef.dpath, scef.fname)))
+sef <- get(load(file.path(sef.dpath, sef.fname)))
 
 #-------------------------
 # simulations -- sce.csize
 #-------------------------
 # get cell sizes, s
 dfs <- aggregate(sce.csize, by = list("celltype"), FUN = mean)
-
 # get signature matrix, z
-sce <- SingleCellExperiment(assays = list(counts = assays(scef)$co),
-                            cd = colData(scef))
-setf <- set_from_sce(scef, groupvar = "donor", method = "mean")
-
-
-
+sef[["donor"]] <- sef[["BrNum"]]
+setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
+                     assayname = "logcounts")

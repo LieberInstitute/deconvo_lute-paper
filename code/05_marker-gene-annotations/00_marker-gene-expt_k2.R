@@ -33,11 +33,11 @@ scef.save.fname <- paste0("scef_mr-markers-",save.fnstem,
 markers.save.fname <- paste0("mr-markers-output_",save.fnstem,
                              "-ctbroadhc_from-sce_dlpfc-ro1.rda")
 # make output filepaths
-sef.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations/",
+sef.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations",
                        sef.save.fname)
-markers.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations/",
+markers.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations",
                            markers.save.fname)
-scef.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations/",
+scef.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations",
                         scef.save.fname)
 
 #---------------------
@@ -94,3 +94,28 @@ save(sef, file = sef.fpath)
 # save new sec
 scef <- scuttle::logNormCounts(scef)
 save(scef, file = scef.fpath)
+
+#------------------------------------------
+# get sef -- subset top 20 markers by type
+#------------------------------------------
+num.markers <- 20
+# get top 100 markers by gene
+ctv <- unique(markers$cellType.target)
+ma <- as.data.frame(markers, stringsAsFactors = F)
+ma[,2] <- as.character(ma[,2])
+markerv <- unique(unlist(lapply(ctv, function(ki){
+  mi <- as.data.frame(ma[ma$cellType.target == ki,])
+  mi <- mi[order(mi$rank_ratio),]; mi[seq(num.markers),1]
+})))
+# make new se
+scef <- sce[markerv,]
+sef <- SummarizedExperiment(assays = list(counts = as.matrix(counts(scef)),
+                                          logcounts = as.matrix(logcounts(scef))),
+                            colData = colData(scef), rowData = rowData(scef))
+# manage new sef path
+sef.save.fname <- paste0("sef_mr-markers_",save.fnstem,"_",
+                         num.markers,"-per-k_dlpfc-ro1.rda")
+sef.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations",
+                       sef.save.fname)
+# save sef
+save(sef, file = sef.fpath)
