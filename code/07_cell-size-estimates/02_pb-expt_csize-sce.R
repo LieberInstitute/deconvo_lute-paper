@@ -56,14 +56,29 @@ lres <- decon_analysis(lgv = lgv, lpv = lpv, lsv = lsv)
 #-------------------------------
 plot.fnstem <- "lutesim-stransform_k2-n20-perk"
 plot.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimates")
+
 # facet scatter plot
 plot.fname <- paste0("ggpt-facet-rmse_",plot.fnstem,".pdf")
-pdf(file.path(plot.dpath, plot.fname), 3, 2)
-lres$lgg$ggpt1
+pdf(file.path(plot.dpath, plot.fname), 5, 3)
+lres$lgg$ggpt1 + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
 dev.off()
 
 # violin plot
-lres$lgg$ggvp
+plot.fname <- paste0("ggvp-rmse_",plot.fnstem,".pdf")
+pdf(file.path(plot.dpath, plot.fname), 2, 2.5)
+lres$lgg$ggvp + theme_bw() +
+  geom_jitter(alpha = 0.1, width = 0.1, size = 0.1,
+              col = "black") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  xlab("Transformation")
+dev.off()
 
 # scatterplot
-lres$lgg$ggpt2
+plot.fname <- paste0("ggpt-rmse_",plot.fnstem,".pdf")
+pdf(file.path(plot.dpath, plot.fname), 5, 5)
+lres$lgg$ggpt2 + geom_point(alpha = 0.5) + 
+  theme_bw() + ggtitle("RMSE") + xlab("FALSE") + ylab("TRUE")
+dev.off()
