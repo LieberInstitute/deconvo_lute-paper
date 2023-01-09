@@ -54,8 +54,13 @@ lres <- decon_analysis(lgv = lgv, lpv = lpv, lsv = lsv)
 #-------------------------------
 # visualizations -- sim outcomes
 #-------------------------------
+plot.fnstem <- "lutesim-stransform_k2-n20-perk"
+plot.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimates")
 # facet scatter plot
+plot.fname <- paste0("ggpt-facet-rmse_",plot.fnstem,".pdf")
+pdf(file.path(plot.dpath, plot.fname), 3, 2)
 lres$lgg$ggpt1
+dev.off()
 
 # violin plot
 lres$lgg$ggvp
