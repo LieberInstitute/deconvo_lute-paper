@@ -88,9 +88,9 @@ dfp$rmse <- ifelse(dfp$expt_type==TRUE, rmse.true, rmse.false)
 df.rmse <- data.frame(expt_type = c(lvlstr.false, lvlstr.true),
                     rmse = c(format(rmse.false, digits = 2), 
                              format(rmse.true, digits = 2)))
-df.rmse$xpos <- 0.1
-df.rmse$ypos <- 0.9
-df.rmse$rmse <- paste0("RMSE: ", df.rmse)
+df.rmse$xpos <- 0.38; df.rmse$ypos <- 0.97
+df.rmse$hjustpos <- df.rmse$vjustpos <- 0
+df.rmse$rmse <- paste0("RMSE: ", df.rmse$rmse)
 
 # format expt_type variable
 lvlstr.false <- "not scaling by cells f"
@@ -98,32 +98,39 @@ lvlstr.true <- "lute (with scaling by cells f)"
 dfp$expt_type <- ifelse(dfp$expt_type == "TRUE", lvlstr.true, lvlstr.false)
 dfp$expt_type <- factor(dfp$expt_type, levels = c(lvlstr.false, lvlstr.true))
 
+#---------------------
+# make new plot object
+#---------------------
 # new plot object
 ggpt <- ggplot() + 
   geom_point(dfp, mapping = aes(x = prop_true, y = prop_pred, 
                       shape = celltype, color = celltype),
              alpha = 0.5, size = 3) + theme_bw() +
+  geom_text(data = df.rmse, alpha = 0.8,
+            mapping = aes(x = xpos, y = ypos, 
+                          hjust = hjustpos, vjust = vjustpos,
+                          label = rmse)) +
   geom_abline(intercept = 0, slope = 1) +
-  xlim(0.4, 1) + ylim(0.4, 1) +
+  xlim(0.38, 1) + ylim(0.43, 1) +
   scale_color_manual(labels = c("Neuron", "Non-neuron"), 
                      values = c("blue", "red")) +
   xlab("True cell composition (cc)") +
-  ylab("Estimated cc") +
-  geom_text(data = df.rmse, 
-            mapping = aes(x = xpos, y = ypos, 
-                          label = rmse))
-
+  ylab("Estimated cc")
+  
 ggpt + facet_wrap(~expt_type)
 
+#---------------
+# save new plots
+#---------------
 plot.fnstem <- "k2-n10-markers-perk"
 # make new pdf
 plot.fname <- paste0("ggpt-facet-byexpttype_", plot.fnstem, ".pdf")
-pdf(file.path(save.dpath, plot.fname), width = 5, height = 2.2)
+pdf(file.path(save.dpath, plot.fname), width = 5.8, height = 2.4)
 ggpt + facet_wrap(~expt_type)
 dev.off()
 # make new jpeg
 plot.fname <- paste0("ggpt-facet-byexpttype_", plot.fnstem, ".jpg")
-jpeg(file.path(save.dpath, plot.fname), width = 5, height = 2.2, 
+jpeg(file.path(save.dpath, plot.fname), width = 5.8, height = 2.4, 
      units = "in", res = 400)
 ggpt + facet_wrap(~expt_type)
 dev.off()
