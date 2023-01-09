@@ -80,26 +80,40 @@ dfp <- rbind(data.frame(prop_true = dfr$prop_k1,
                         celltype = rep("Non-neuron", nrow(dfr))))
 
 # get rmse to print
-rmse.false <- sqrt(mean(dfp[dfp$expt_type==FALSE,]$prop_true-
-                          dfp[dfp$expt_type==FALSE,]$prop_pred))
-rmse.true <- sqrt(mean(dfp[dfp$expt_type==TRUE,]$prop_true-
-                          dfp[dfp$expt_type==TRUE,]$prop_pred))
+rmse.false <- sqrt(mean((dfp[dfp$expt_type==FALSE,]$prop_true-
+                          dfp[dfp$expt_type==FALSE,]$prop_pred)^2))
+rmse.true <- sqrt(mean((dfp[dfp$expt_type==TRUE,]$prop_true-
+                          dfp[dfp$expt_type==TRUE,]$prop_pred)^2))
+dfp$rmse <- ifelse(dfp$expt_type==TRUE, rmse.true, rmse.false)
 df.rmse <- data.frame(expt_type = c(lvlstr.false, lvlstr.true),
                     rmse = c(format(rmse.false, digits = 2), 
                              format(rmse.true, digits = 2)))
+df.rmse$xpos <- 0.1
+df.rmse$ypos <- 0.9
+df.rmse$rmse <- paste0("RMSE: ", df.rmse)
 
+# format expt_type variable
+lvlstr.false <- "not scaling by cells f"
+lvlstr.true <- "lute (with scaling by cells f)"
+dfp$expt_type <- ifelse(dfp$expt_type == "TRUE", lvlstr.true, lvlstr.false)
+dfp$expt_type <- factor(dfp$expt_type, levels = c(lvlstr.false, lvlstr.true))
 
 # new plot object
-ggpt <- ggplot(dfp, aes(x = prop_true, y = prop_pred, 
-                        shape = celltype, color = celltype)) + 
-  geom_point(alpha = 0.5, size = 3) + theme_bw() +
+ggpt <- ggplot() + 
+  geom_point(dfp, mapping = aes(x = prop_true, y = prop_pred, 
+                      shape = celltype, color = celltype),
+             alpha = 0.5, size = 3) + theme_bw() +
   geom_abline(intercept = 0, slope = 1) +
   xlim(0.4, 1) + ylim(0.4, 1) +
   scale_color_manual(labels = c("Neuron", "Non-neuron"), 
                      values = c("blue", "red")) +
   xlab("True cell composition (cc)") +
   ylab("Estimated cc") +
-  geom_label()
+  geom_text(data = df.rmse, 
+            mapping = aes(x = xpos, y = ypos, 
+                          label = rmse))
+
+ggpt + facet_wrap(~expt_type)
 
 plot.fnstem <- "k2-n10-markers-perk"
 # make new pdf
