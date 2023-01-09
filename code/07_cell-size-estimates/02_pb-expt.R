@@ -71,6 +71,10 @@ ggplot(dfp, aes(x = celltype, y = marker, label = mean, fill = mean)) +
 ggplot(dfp, aes(x = celltype, y = mean, fill = celltype)) + 
   geom_violin(draw_quantiles = 0.5) + theme_bw()
 
+#-------------------------------
+# visualizations -- sim outcomes
+#-------------------------------
+
 # facet scatter plot
 lres$lgg$ggpt1
 
