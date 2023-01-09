@@ -6,6 +6,10 @@
 #
 #
 
+libv <- c("lute", "SingleCellExperiment", "SummarizedExperiment",
+          "ComplexHeatmap", "ggplot2", "ggrepel")
+sapply(libv, library, character.only = T)
+
 #----------
 # load data 
 #----------
@@ -14,6 +18,15 @@ sef.fname <- "sef_mr-markers_k2_20-per-k_dlpfc-ro1.rda"
 sef.dpath <- file.path("deconvo_method-paper", "outputs", 
                        "05_marker-gene-annotations")
 sef <- get(load(file.path(sef.dpath, sef.fname)))
+
+#---------------------
+# get types expression
+#---------------------
+# get signature matrix, z
+sef[["donor"]] <- sef[["BrNum"]]
+setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
+                     assayname = "logcounts")
+lct <- assays(setf)$logcounts
 
 #------------------------------------
 # visualizations -- marker expression

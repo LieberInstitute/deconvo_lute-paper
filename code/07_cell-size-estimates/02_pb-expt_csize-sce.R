@@ -4,8 +4,7 @@
 #
 # Show the impact of including cell size adjustments on pseudobulking outcomes.
 
-libv <- c("lute", "SingleCellExperiment", "SummarizedExperiment",
-          "ComplexHeatmap", "ggplot2", "ggrepel")
+libv <- c("lute", "SingleCellExperiment", "SummarizedExperiment", "ggplot2")
 sapply(libv, library, character.only = T)
 
 #----------
@@ -51,38 +50,6 @@ lsv <- lapply(seq(num.sim), function(ii){
 
 # run sims
 lres <- decon_analysis(lgv = lgv, lpv = lpv, lsv = lsv)
-
-#------------------------------------
-# visualizations -- marker expression
-#------------------------------------
-# heatmap of marker logcounts
-Heatmap(assays(setf)$logcounts)
-
-# tile plot
-lct <- assays(setf)$logcounts
-lct$marker <- rownames(lct)
-dfp <- rbind(data.frame(mean = lct$Neuron, marker = lct$marker),
-             data.frame(mean = lct$`Non-neuron`, marker = lct$marker))
-dfp$celltype <- c(rep("Neuron", nrow(lct)), rep("Non-neuron", nrow(lct)))
-dfp$mean <- round(dfp$mean, 2)
-ggplot(dfp, aes(x = celltype, y = marker, label = mean, fill = mean)) + 
-  geom_tile() + geom_text() + theme_bw()
-
-# violin plot
-ggplot(dfp, aes(x = celltype, y = mean, fill = celltype)) + 
-  geom_violin(draw_quantiles = 0.5) + theme_bw()
-
-# violin with scatter
-ggplot(dfp, aes(x = celltype, y = mean, fill = celltype)) + 
-  geom_violin(draw_quantiles = 0.5) + theme_bw() +
-  geom_jitter(alpha = 0.5, width = 0.2, size = 5)
-
-# scatterplot
-ggplot(lct, aes(x = Neuron, y = `Non-neuron`, label = marker)) + 
-  geom_point(alpha = 0.5, size = 5) + 
-  geom_label_repel(box.padding   = 0.35, point.padding = 0.8, 
-                   segment.color = 'grey50') + 
-  theme_bw() + geom_abline(intercept = 0, slope = 1, col = "red")
 
 #-------------------------------
 # visualizations -- sim outcomes
