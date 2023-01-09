@@ -5,7 +5,7 @@
 # Show the impact of including cell size adjustments on pseudobulking outcomes.
 
 libv <- c("lute", "SingleCellExperiment", "SummarizedExperiment",
-          "ComplexHeatmap")
+          "ComplexHeatmap", "ggplot2", "ggrepel")
 sapply(libv, library, character.only = T)
 
 #----------
@@ -70,6 +70,18 @@ ggplot(dfp, aes(x = celltype, y = marker, label = mean, fill = mean)) +
 # violin plot
 ggplot(dfp, aes(x = celltype, y = mean, fill = celltype)) + 
   geom_violin(draw_quantiles = 0.5) + theme_bw()
+
+# violin with scatter
+ggplot(dfp, aes(x = celltype, y = mean, fill = celltype)) + 
+  geom_violin(draw_quantiles = 0.5) + theme_bw() +
+  geom_jitter(alpha = 0.5, width = 0.2, size = 5)
+
+# scatterplot
+ggplot(lct, aes(x = Neuron, y = `Non-neuron`, label = marker)) + 
+  geom_point(alpha = 0.5, size = 5) + 
+  geom_label_repel(box.padding   = 0.35, point.padding = 0.8, 
+                   segment.color = 'grey50') + 
+  theme_bw() + geom_abline(intercept = 0, slope = 1, col = "red")
 
 #-------------------------------
 # visualizations -- sim outcomes
