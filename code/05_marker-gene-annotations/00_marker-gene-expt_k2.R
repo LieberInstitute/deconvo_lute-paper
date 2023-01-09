@@ -5,7 +5,8 @@
 #
 
 # devtools::install_github("https://github.com/LieberInstitute/DeconvoBuddies")
-libv <- c("DeconvoBuddies", "SingleCellExperiment", "SummarizedExperiment")
+libv <- c("DeconvoBuddies", "SingleCellExperiment", "SummarizedExperiment",
+          "scater")
 sapply(libv, library, character.only = T)
 
 #-------
@@ -27,6 +28,8 @@ sce <- get(load(sce.fpath)) # get full singlecellexperiment
 save.fnstem <- "k2"
 sef.save.fname <- paste0("sef_mr-markers-",save.fnstem,
                          "-from-sce_dlpfc-ro1.rda")
+scef.save.fname <- paste0("scef_mr-markers-",save.fnstem,
+                          "-from-sce_dlpfc-ro1.rda")
 markers.save.fname <- paste0("mr-markers-output_",save.fnstem,
                              "-ctbroadhc_from-sce_dlpfc-ro1.rda")
 # make output filepaths
@@ -34,6 +37,8 @@ sef.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations/",
                        sef.save.fname)
 markers.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations/",
                            markers.save.fname)
+scef.fpath <- file.path(proj.dpath, "outputs/05_marker-gene-annotations/",
+                        scef.save.fname)
 
 #---------------------
 # summarize cell types
@@ -78,9 +83,14 @@ markerv <- unique(unlist(lapply(ctv, function(ki){
   mi <- mi[order(mi$rank_ratio),]; mi[seq(100),1]
 })))
 
-# get counts for unique markers
+# make new se
 scef <- sce[markerv,]
-sef <- SummarizedExperiment(assays = list(counts = as.matrix(counts(scef))),
+sef <- SummarizedExperiment(assays = list(counts = as.matrix(counts(scef)),
+                                          logcounts = as.matrix(logcounts(scef))),
                             colData = colData(scef), rowData = rowData(scef))
 # save sef
 save(sef, file = sef.fpath)
+
+# save new sec
+scef <- scuttle::logNormCounts(scef)
+save(scef, file = scef.fpath)
