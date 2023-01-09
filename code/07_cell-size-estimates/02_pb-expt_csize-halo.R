@@ -14,9 +14,10 @@ sapply(libv, library, character.only = T)
 save.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimates")
 
 # cell size data
-read.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimates")
-sce.csize.fname <- "df-cellsize_donor-region_sce.rda"
-dfs <- get(load(file.path(read.dpath, sce.csize.fname)))
+csize.fname <- "dfcellsize_halo.rda"
+csize.fpath <- file.path("deconvo_method-paper", "outputs", 
+                         "07_cell-size-estimates", csize.fname)
+dfs <- get(load(file.path(csize.fpath)))
 
 # se marker data, k2
 sef.fname <- "sef_mr-markers_k2_20-per-k_dlpfc-ro1.rda"
@@ -34,7 +35,8 @@ setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
 lct <- assays(setf)$logcounts
 
 # get cell sizes, s
-dfs <- aggregate(sce.csize, by = list("celltype"), FUN = mean)
+dfs$celltype <- ifelse(dfs$type %in% c("Excit", "Inhib"), "Neuron", "Non-neuron")
+dfs <- aggregate(dfs, by = list("celltype"), FUN = mean)
 
 # run simulations
 num.sim <- 1e3

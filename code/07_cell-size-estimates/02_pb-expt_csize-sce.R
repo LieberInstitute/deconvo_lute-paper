@@ -16,7 +16,7 @@ save.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimat
 # cell size data
 read.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimates")
 sce.csize.fname <- "df-cellsize_donor-region_sce.rda"
-dfs <- get(load(file.path(read.dpath, sce.csize.fname)))
+df.csize <- get(load(file.path(read.dpath, sce.csize.fname)))
 
 # se marker data, k2
 sef.fname <- "sef_mr-markers_k2_20-per-k_dlpfc-ro1.rda"
@@ -34,7 +34,8 @@ setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
 lct <- assays(setf)$logcounts
 
 # get cell sizes, s
-dfs <- aggregate(sce.csize, by = list("celltype"), FUN = mean)
+dfs <- aggregate(df.csize, by = list(df.csize$celltype), FUN = mean)
+dfs <- dfs[,c(1,3)]; colnames(dfs) <- c("celltype", "mean_size")
 
 # run simulations
 num.sim <- 1e3
