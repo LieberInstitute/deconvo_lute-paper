@@ -17,32 +17,34 @@ sapply(libv, library, character.only = T)
 save.fnstem <- "halo-metrics"
 
 # read output df objects
-read.fname <- ""
-read.dpath <- out.dpath <- file.path("deconvo_method-paper", "outputs", 
-                                     "07_cell-size-estimates")
-dfm <- get(load(file.path(read.dpath, read.fname)))
+read.fname <- "dfcellsize_halo.rda"
+read.dpath <- save.dpath <- file.path("deconvo_method-paper", "outputs",
+                                      "07_cell-size-estimates")
+dfc <- get(load(file.path(read.dpath, read.fname)))
 
 #------------
 # format data
 #------------
 # convert to numeric
-for(c in seq(36)){dfm[,c] <- as.numeric(dfm[,c])}
+for(c in seq(5)){dfc[,c] <- as.numeric(dfc[,c])}
+
+# rename cell size variables
+colnames(dfc)[seq(5)] <- c("akt3.copies", "cell.area", "cyto.area", "nuc.area", 
+                           "nuc.perim")
 
 #------------------------------------------
 # correlations by cell type, across samples
 #------------------------------------------
 ctv <- c("Excit", "Inhib", "Oligo")
 lcor <- lapply(ctv, function(cti){
-  dffm <- dfm[,grepl(cti, colnames(dfm))]
-  for(c in seq(ncol(dffm))){dffm[,c] <- as.numeric(dffm[,c])}
-  cor(dffm, use = "pairwise.complete.obs", method = "spearman")
+  dfci <- dfc[dfc$type == cti,]
+  cor(dfci[,seq(5)], use = "pairwise.complete.obs", method = "spearman")
 })
 names(lcor) <- ctv
 
 # make correlation heatmaps
 for(cti in names(lcor)){
-  pdf.fname <- paste0("ggcorrhm-cellsize_",cti,
-                      "_",save.fnstem,".pdf")
+  pdf.fname <- paste0("ggcorrhm-cellsize_",cti,"_",save.fnstem,".pdf")
   pdf.fpath <- file.path(read.dpath, pdf.fname)
   # get plot matrix
   mcori <- lcor[[cti]]
@@ -55,49 +57,54 @@ for(cti in names(lcor)){
          device = "pdf", units = "in", dpi = 400)
 }
 
-#-----------------------------
-# compare means across samples
-#-----------------------------
-ctv <- c("Excit", "Inhib", "Oligo")
-meanv <- colMeans(dfm[,seq(36)], na.rm = T)
-dfp <- do.call(rbind, lapply(ctv, function(cti){
-  mfv <- meanv[grepl(cti, names(meanv))]
-  mfv.halo <- mfv[grepl("^halo\\..*", names(mfv))]
-  dfp <- as.data.frame(matrix(mfv.halo, ncol = 1))
-  dfp$halo.var <- gsub(paste0("\\.", cti, "$"), "", names(mfv.halo))
-  dfp$celltype <- cti
-  dfp$sce.mean.across.samples <- mfv[grepl("^sce\\..*", names(mfv))]
-  return(dfp)
+#------------------------------
+# compare ratios across samples
+#------------------------------
+sampv <- unique(dfc$donor)
+varv <- colnames(dfc)[2:5]
+cnv <- colnames(dfci)[2:5]
+dfr <- do.call(rbind, lapply(sampv, function(si){
+  dfci <- dfc[dfc$donor==si,]
+  # get neuron and glial subsets
+  filt.neur <- dfci$type %in% c("Excit", "Inhib")
+  dfci.neur <- dfci[filt.neur,]; dfci.gli <- dfci[!filt.neur,]
+  # get mean neuron and glial data
+  dfri <- unlist(lapply(cnv, function(ci){
+    c(mean(dfci.gli[,ci]), mean(dfci.neur[,ci]))
+  }))
+  names(dfri) <- paste0(rep(cnv, each = 2), ".", c("glial", "neuron"))
+  # get ratios
+  dfri2 <- data.frame("cell.area.ratio" = dfri[1]/dfri[2],
+                      "cyto.area.ratio" = dfri[3]/dfri[4],
+                      "nuc.area.ratio" = dfri[5]/dfri[6],
+                      "nuc.perim.ratio" = dfri[7]/dfri[8],
+                      "donor" = si)
+  # return results
+  dfr <- cbind(as.data.frame(matrix(dfri, nrow = 1)), dfri2)
+  colnames(dfr)[1:8] <- names(dfri)
+  return(dfr)
 }))
-colnames(dfp)[1] <- "halo.mean.across.samples"
 
-# get ggplot
-# make scatterplot
-ggpt <- ggplot(dfp, aes(x = sce.mean.across.samples, 
-                        y = halo.mean.across.samples,
-                        color = celltype, shape = halo.var)) + 
-  geom_point(size = 5, alpha = 0.5) +
-  geom_abline(intercept = 0, slope = 1, col = "black") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  xlab("SCE") + ylab("HALO") + ggtitle("Mean across samples")
-# save scatterplot
-pdf.fname <- paste0("ggpt-cellsize_", save.fnstem, ".pdf")
+# plot value magnitudes
+dfp <- do.call(rbind, lapply(cnv, function(ci){
+  filt.cnv <- grepl(paste0(ci, ".ratio"), colnames(dfr))
+  dfi <- dfr[,filt.cnv]
+}))
+ggplot(dfr, aes(x = ))
+
+# get correlation matrix
+mcor <- cor(dfr[,seq(4)], use = "pairwise.complete.obs", method = "spearman")
+
+# make new corr figure
+pdf.fname <- paste0("ggcorrhm-cellratio_",save.fnstem,".pdf")
 pdf.fpath <- file.path(read.dpath, pdf.fname)
-ggsave(pdf.fpath, ggpt, width = 5, height = 4, 
+# get plot matrix
+mcori <- lcor[[cti]]
+colnames(mcori) <- gsub(paste0(".", cti), "", colnames(mcori))
+rownames(mcori) <- gsub(paste0(".", cti), "", rownames(mcori))
+# get plot object
+ggcor <- ggcorrplot(mcori, type = "lower", lab = T, 
+                    title = "Ratio (glial/neuron)")
+# save new pdf
+ggsave(pdf.fpath, ggcor, width = 5, height = 4,
        device = "pdf", units = "in", dpi = 400)
-
-# make facet plot
-ggpt <- ggplot(dfp, aes(x = sce.mean.across.samples, 
-                        y = halo.mean.across.samples,
-                        color = celltype)) + geom_point() +
-  geom_abline(intercept = 0, slope = 1, col = "black") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  xlab("SCE") + ylab("HALO") + ggtitle("Mean across samples")
-ggf <- ggpt + facet_wrap(~halo.var)
-# save facet plot
-pdf.fname <- paste0("ggptfacet-cellsize_", save.fnstem, ".pdf")
-pdf.fpath <- file.path(read.dpath, pdf.fname)
-ggsave(pdf.fpath, ggf, width = 6.5, height = 3.5, 
-       device = "pdf", units = "in", dpi = 400)
-
-
