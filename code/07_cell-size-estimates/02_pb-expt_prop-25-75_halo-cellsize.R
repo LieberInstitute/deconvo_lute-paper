@@ -35,7 +35,7 @@ sef <- get(load(file.path(sef.dpath, sef.fname)))
 #-------------------------
 set.seed(0)
 # simulation params
-perc.var <- 0.10 # perc sd for sizes across sims
+perc.var1 <- 0.05 # perc sd for sizes across sims
 num.sim <- 10 # total sims
 
 # get signature matrix, z
@@ -46,7 +46,7 @@ lct <- assays(setf)$logcounts
 
 # get cell sizes, s
 # specify df.csize params
-csize.varname <- "Nucleus.Area..µm.."
+csize.varname <- "Nucleus.Perimeter..µm."
 df.csize$celltype <- df.csize$type
 # make new df.csize variables
 df.csize$celltype <- ifelse(grepl("Excit|Inhib", df.csize$celltype), 
