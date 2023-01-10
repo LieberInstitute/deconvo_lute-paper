@@ -2,6 +2,11 @@
 
 # Author: Sean Maden
 #
+# Perform constrained simulations with lute using the following params:
+# K = 2 types total
+# S: s1 > s2 (with slight random variation)
+# P: p1~0.75; p2~0.25 (with slight random variation)
+#
 #
 
 libv <- c("lute", "SingleCellExperiment", "SummarizedExperiment", "ggplot2")
