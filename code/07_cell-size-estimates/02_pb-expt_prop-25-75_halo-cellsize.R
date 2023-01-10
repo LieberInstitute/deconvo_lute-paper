@@ -14,9 +14,10 @@ save.dpath <- file.path("deconvo_method-paper", "outputs",
                         "07_cell-size-estimates")
 
 # cell size data
-read.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimates")
-halo.csize.fname <- "dfcellsize_halo.rda"
-df.csize <- get(load(file.path(read.dpath, sce.csize.fname)))
+read.dpath <- file.path("deconvo_method-paper", "outputs", 
+                        "07_cell-size-estimates")
+csize.fname <- "dfcellsize_halo.rda"
+df.csize <- get(load(file.path(read.dpath, csize.fname)))
 
 # se marker data, k2
 sef.fname <- "sef_mr-markers_k2_20-per-k_dlpfc-ro1.rda"
@@ -29,7 +30,7 @@ sef <- get(load(file.path(sef.dpath, sef.fname)))
 #-------------------------
 set.seed(0)
 # simulation params
-perc.var <- 0.25 # perc sd for sizes across sims
+perc.var <- 0.10 # perc sd for sizes across sims
 num.sim <- 10 # total sims
 
 # get signature matrix, z
@@ -39,11 +40,19 @@ setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
 lct <- assays(setf)$logcounts
 
 # get cell sizes, s
+# specify df.csize params
+csize.varname <- "Nucleus.Area..µm.."
+df.csize$celltype <- df.csize$type
+# make new df.csize variables
 df.csize$celltype <- ifelse(grepl("Excit|Inhib", df.csize$celltype), 
                             "Neuron", "Non-neuron")
-dfs <- aggregate(df.csize, by = list(df.csize$celltype), FUN = mean)
-dfs <- dfs[,c(1,3)]; colnames(dfs) <- c("celltype", "mean_size")
-dfs$k2 <- dfs[,1]
+filt.cname <- colnames(df.csize) %in% c("celltype", csize.varname)
+dfc <- df.csize[,filt.cname]
+# group df.csize into dfs on params
+dfs <- do.call(rbind, lapply(unique(dfc$celltype), function(ci){
+  data.frame(celltype = ci, mean.cellsize = mean(dfc[dfc[,2]==ci,1]))
+}))
+colnames(dfs) <- c("celltype", "mean_size");dfs$k2 <- dfs$celltype
 # make ls, varying the sizes slightly
 s1 <- dfs[dfs$k2 == "Neuron",2]
 s2 <- dfs[dfs$k2 == "Non-neuron",2]
@@ -66,6 +75,12 @@ lres <- decon_analysis(lgv = lgv, lpv = lpv, lsv = lsv)
 #-----------------
 # make scatterplot
 #-----------------
+# set axis ranges
+xmax <- 0.8
+xmin <- 0.7
+ymax <- 0.9
+ymin <- 0.6
+
 # get plot data
 dfr <- lres$dfres
 dfr$prop_k1_pred <- dfr$bias1 + dfr$prop_k1
@@ -92,13 +107,15 @@ dfp$rmse <- ifelse(dfp$expt_type==TRUE, rmse.true, rmse.false)
 df.rmse <- data.frame(expt_type = c(lvlstr.false, lvlstr.true),
                     rmse = c(format(rmse.false, digits = 2), 
                              format(rmse.true, digits = 2)))
-df.rmse$xpos <- 0.38; df.rmse$ypos <- 0.97
+df.rmse$xpos <- xmin+0.005; df.rmse$ypos <- ymax-0.025
 df.rmse$hjustpos <- df.rmse$vjustpos <- 0
 df.rmse$rmse <- paste0("RMSE: ", df.rmse$rmse)
 
 # format expt_type variable
-dfp$expt_type <- ifelse(dfp$expt_type == "TRUE", lvlstr.true, lvlstr.false)
-dfp$expt_type <- factor(dfp$expt_type, levels = c(lvlstr.false, lvlstr.true))
+dfp$expt_type <- ifelse(dfp$expt_type == "TRUE", 
+                        lvlstr.true, lvlstr.false)
+dfp$expt_type <- factor(dfp$expt_type, 
+                        levels = c(lvlstr.false, lvlstr.true))
 
 #---------------------
 # make new plot object
@@ -113,11 +130,14 @@ ggpt <- ggplot() + theme_bw() +
                       shape = celltype, color = celltype),
              alpha = 0.5, size = 3) + 
   geom_abline(intercept = 0, slope = 1) +
-  xlim(0.38, 1) + ylim(0.43, 1) +
+  xlim(xmin, xmax) + ylim(ymin, ymax) +
   scale_color_manual(labels = c("Neuron", "Non-neuron"), 
                      values = c("blue", "red")) +
   xlab("True cell composition (cc)") +
-  ylab("Estimated cc")
+  ylab("Estimated cc") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_x_continuous(limits = c(xmin, xmax),
+                     breaks = seq(xmin, xmax, 0.05))
   
 ggpt + facet_grid(cols=vars(expt_type))
 
@@ -126,12 +146,12 @@ ggpt + facet_grid(cols=vars(expt_type))
 #---------------
 plot.fnstem <- "k2-n10-markers-perk"
 # make new pdf
-plot.fname <- paste0("ggpt-facet-byexpttype_", plot.fnstem, ".pdf")
+plot.fname <- paste0("ggpt-facet-byexpttype_halo-csize-nucarea_", plot.fnstem, ".pdf")
 pdf(file.path(save.dpath, plot.fname), width = 5.8, height = 2.4)
 ggpt + facet_wrap(~expt_type)
 dev.off()
 # make new jpeg
-plot.fname <- paste0("ggpt-facet-byexpttype_", plot.fnstem, ".jpg")
+plot.fname <- paste0("ggpt-facet-byexpttype_halo-csize-nucarea_", plot.fnstem, ".jpg")
 jpeg(file.path(save.dpath, plot.fname), width = 5.8, height = 2.4, 
      units = "in", res = 400)
 ggpt + facet_wrap(expt_type~.)
