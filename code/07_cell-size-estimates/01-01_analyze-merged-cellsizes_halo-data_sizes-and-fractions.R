@@ -87,10 +87,24 @@ dfr <- do.call(rbind, lapply(sampv, function(si){
 
 # plot value magnitudes
 dfp <- do.call(rbind, lapply(cnv, function(ci){
-  filt.cnv <- grepl(paste0(ci, ".ratio"), colnames(dfr))
-  dfi <- dfr[,filt.cnv]
+  filt.cnv.neur <- grepl(paste0(ci, ".neuron"), colnames(dfr))
+  filt.cnv.glial <- grepl(paste0(ci, ".glial"), colnames(dfr))
+  data.frame(neuron = dfr[,filt.cnv.neur],
+                    glial = dfr[,filt.cnv.glial],
+                    metric = ci, donor = dfr$donor)
 }))
-ggplot(dfr, aes(x = ))
+
+ggpt <- ggplot(dfp, aes(x = neuron, y = glial, col = donor)) + 
+  geom_point(alpha = 0.8, size = 2) +
+  geom_abline(intercept = 0, slope = 1) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none") +
+  ggtitle("Metric mean by donor")
+
+pdf.fname <- paste0("ggpt-facet_neur-vs-glial_", save.fnstem, ".pdf")
+pdf(file.path(save.dpath, pdf.fname), width = 4, height = 4)
+ggpt + facet_wrap(~metric)
+dev.off()
 
 # get correlation matrix
 mcor <- cor(dfr[,seq(4)], use = "pairwise.complete.obs", method = "spearman")
