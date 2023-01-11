@@ -35,6 +35,7 @@ lct <- assays(setf)$logcounts
 # visualizations -- marker expression
 #------------------------------------
 plot.fname.stem <- "markers-k2_n20-perk"
+
 # heatmap of marker logcounts
 plot.fname <- paste0("chm_",plot.fname.stem,".pdf")
 pdf(file.path(plot.dpath, plot.fname), width = 4, height = 8)
@@ -77,5 +78,35 @@ ggplot(lct, aes(x = Neuron, y = `Non-neuron`, label = marker)) +
   geom_label_repel(box.padding   = 0.35, point.padding = 0.8, 
                    segment.color = 'grey50') + 
   theme_bw() + geom_abline(intercept = 0, slope = 1, col = "red")
+dev.off()
+
+#---------------------------------------------
+# visualizations -- marker expression by donor
+#---------------------------------------------
+# get signature matrix, z
+sef[["donor"]] <- sef[["BrNum"]]
+sef[["celltype_donor"]]<- paste0(sef[["celltype"]], ";", sef[["donor"]])
+setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
+                     typevar = "celltype_donor", assayname = "logcounts")
+setf[["donor"]] <- gsub(".*;", "", setf[["type"]])
+setf[["celltype"]] <- gsub(";.*", "", setf[["type"]])
+lct <- assays(setf)$logcounts
+
+# set plot filename stem
+plot.fname.stem <- "markers-k2-bydonor_n20-perk"
+
+# heatmap of marker logcounts
+set.seed(0)
+
+
+topanno <- HeatmapAnnotation(donor = setf[["donor"]], celltype = setf[["celltype"]],
+  annotation_name_side = "left")
+hm <- Heatmap(assays(setf)$logcounts, name = "Logcounts", 
+              show_column_dend = F, top_annotation = ha)
+
+
+plot.fname <- paste0("chm_",plot.fname.stem,".pdf")
+pdf(file.path(plot.dpath, plot.fname), width = 4, height = 8)
+
 dev.off()
 
