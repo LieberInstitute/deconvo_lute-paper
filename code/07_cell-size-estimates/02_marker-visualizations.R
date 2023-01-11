@@ -134,12 +134,15 @@ dfp <- as.data.frame(dfp)
 colnames(dfp) <- c("neuron", "non-neuron", "donor")
 for(c in seq(2)){dfp[,c] <- as.numeric(dfp[,c])}
 # make new plot
-ggpt <- ggplot(dfp, aes(x = neuron, y = `non-neuron`, color = donor)) +
+ggpt <- ggplot(dfp, aes(x = neuron, y = `non-neuron`, 
+                        color = donor, label = donor)) +
   geom_point(size = 3, alpha = 0.8) + 
   geom_abline(intercept = 0, slope = 1, col = "black") +
   ggtitle("Mean marker expression") + 
   xlab(paste0("Neuron (", length(markerv.neuron), " markers)")) +
   ylab(paste0("Non-neuron (", length(markerv.non), " markers)")) +
+  geom_label_repel(box.padding   = 0.35, point.padding = 0.8, 
+                   segment.color = 'grey50') +
   theme_bw()
 # save new pdf
 plot.fname <- paste0("ggpt-neuron-non_",plot.fname.stem,".pdf")
