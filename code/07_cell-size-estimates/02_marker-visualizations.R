@@ -146,11 +146,11 @@ ggpt <- ggplot(dfp, aes(x = neuron, y = `non-neuron`,
   theme(legend.position = "none")
 # save new pdf
 plot.fname <- paste0("ggpt-neuron-non_",plot.fname.stem,".pdf")
-pdf(file.path(plot.dpath, plot.fname), width = 4, height = 4)
+pdf(file.path(plot.dpath, plot.fname), width = 4, height = 3.8)
 ggpt; dev.off()
 # save new jpg
 plot.fname <- paste0("ggpt-neuron-non_",plot.fname.stem,".jpg")
-jpeg(file.path(plot.dpath, plot.fname), width = 4.5, height = 3.5, 
+jpeg(file.path(plot.dpath, plot.fname), width = 4, height = 3.8, 
      units = "in", res = 400)
 ggpt; dev.off()
 
