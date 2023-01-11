@@ -18,6 +18,11 @@ sapply(libv, library, character.only = T)
 save.dpath <- file.path("deconvo_method-paper", "outputs", 
                         "07_cell-size-estimates")
 
+# cell size data
+read.dpath <- file.path("deconvo_method-paper", "outputs", "07_cell-size-estimates")
+sce.csize.fname <- "df-cellsize_donor-region_sce.rda"
+df.csize <- get(load(file.path(read.dpath, sce.csize.fname)))
+
 # se marker data, k2
 sef.fname <- "sef_mr-markers_k2_20-per-k_dlpfc-ro1.rda"
 sef.dpath <- file.path("deconvo_method-paper", "outputs", 
@@ -31,25 +36,36 @@ set.seed(0)
 # simulation params
 perc.var <- 0.25 # perc sd for sizes across sims
 num.sim <- 10 # total sims
+
+# get signature matrix, z
+sef[["donor"]] <- sef[["BrNum"]]
+setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
+                     assayname = "logcounts")
+lct <- assays(setf)$logcounts
+
+# get cell sizes, s
+df.csize$celltype <- ifelse(grepl("Excit|Inhib", df.csize$celltype), 
+                            "Neuron", "Non-neuron")
+dfs <- aggregate(df.csize, by = list(df.csize$celltype), FUN = mean)
+dfs <- dfs[,c(1,3)]; colnames(dfs) <- c("celltype", "mean_size")
+dfs$k2 <- dfs[,1]
 # make ls, varying the sizes slightly
-s1 <- 10 # size of neurons
-s2 <- 2 # size of non-neurons
+s1 <- dfs[dfs$k2 == "Neuron",2]
+s2 <- dfs[dfs$k2 == "Non-neuron",2]
 s1diff <- rnorm(n = 10, sd = perc.var*s1)
 s2diff <- rnorm(n = 10, sd = perc.var*s2)
 lsv <- lapply(seq(num.sim), function(ii){
   c(s1 + s1diff[ii], s2 + s2diff[ii])
 })
-# get signature matrix, z
-sef[["donor"]] <- sef[["BrNum"]]
-setf <- set_from_sce(sef, groupvar = "donor", method = "mean", assayname = "logcounts")
-lct <- assays(setf)$logcounts
+
+# simulations params
 # make lgv
 lgv <- lapply(seq(num.sim), function(ii){list(lct[,1], lct[,2])})
 # make lpv
 p1v <- seq(0.70, 0.80, 0.1/num.sim); p2v <- 1-p1v
 lpv <- lapply(seq(num.sim), function(ii){c(p1v[ii], p2v[ii])})
 
-# run simulations
+# run sims
 lres <- decon_analysis(lgv = lgv, lpv = lpv, lsv = lsv)
 
 #-----------------
