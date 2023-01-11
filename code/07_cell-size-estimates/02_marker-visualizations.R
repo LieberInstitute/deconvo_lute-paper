@@ -31,6 +31,9 @@ setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
                      assayname = "logcounts")
 lct <- assays(setf)$logcounts
 
+# append marker type to sef rowdata
+rowData(sef)$marker.type <- ifelse(lct[,1] > lct[,2], "Neuron", "Non-neuron")
+
 #------------------------------------
 # visualizations -- marker expression
 #------------------------------------
@@ -96,17 +99,26 @@ lct <- assays(setf)$logcounts
 plot.fname.stem <- "markers-k2-bydonor_n20-perk"
 
 # heatmap of marker logcounts
-set.seed(0)
-
-
+set.seed(2)
 topanno <- HeatmapAnnotation(donor = setf[["donor"]], celltype = setf[["celltype"]],
-  annotation_name_side = "left")
+                             annotation_name_side = "left")
+leftanno <- rowAnnotation(marker_type = rowData(sef)$marker.type)
 hm <- Heatmap(assays(setf)$logcounts, name = "Logcounts", 
-              show_column_dend = F, top_annotation = ha)
+              show_column_dend = F, top_annotation = topanno,
+              left_annotation = leftanno)
+hm
 
-
+# save new plots
+# save new pdf
 plot.fname <- paste0("chm_",plot.fname.stem,".pdf")
-pdf(file.path(plot.dpath, plot.fname), width = 4, height = 8)
+pdf(file.path(plot.dpath, plot.fname), width = 7, height = 7)
+hm; dev.off()
+# save new jpg
+plot.fname <- paste0("chm_",plot.fname.stem,".jpg")
+jpeg(file.path(plot.dpath, plot.fname), width = 7, height = 7, 
+    units = "in", res = 400)
+hm; dev.off()
 
-dev.off()
-
+# scatterplot
+expr <- assays(setf)$logcounts
+ggplot()
