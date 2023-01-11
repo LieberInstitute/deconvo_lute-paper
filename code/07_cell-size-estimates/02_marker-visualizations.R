@@ -89,8 +89,7 @@ dev.off()
 # get signature matrix, z
 sef[["donor"]] <- sef[["BrNum"]]
 sef[["celltype_donor"]]<- paste0(sef[["celltype"]], ";", sef[["donor"]])
-setf <- set_from_sce(sef, groupvar = "donor", method = "mean",
-                     typevar = "celltype_donor", assayname = "logcounts")
+setf <- set_from_sce(sef, typevar = "celltype_donor", assayname = "logcounts")
 setf[["donor"]] <- gsub(".*;", "", setf[["type"]])
 setf[["celltype"]] <- gsub(";.*", "", setf[["type"]])
 lct <- assays(setf)$logcounts
@@ -120,5 +119,39 @@ jpeg(file.path(plot.dpath, plot.fname), width = 7, height = 7,
 hm; dev.off()
 
 # scatterplot
+# get plot data
 expr <- assays(setf)$logcounts
-ggplot()
+donorv <- unique(setf[["donor"]])
+markerv.neuron <- rownames(sef[rowData(sef)$marker.type == "Neuron",])
+markerv.non <- rownames(sef[!rownames(sef) %in% markerv.neuron,])
+dfp <- do.call(rbind, lapply(donorv, function(di){
+  exprf <- expr[,grepl(di, colnames(expr))]
+  expr.neuron <- mean(exprf[markerv.neuron, grepl("Neuron", cnvf)])
+  expr.non <- mean(exprf[markerv.non, grepl("Neuron", cnvf)])
+  matrix(c(expr.neuron, expr.non, di), nrow = 1)
+}))
+dfp <- as.data.frame(dfp)
+colnames(dfp) <- c("neuron", "non-neuron", "donor")
+for(c in seq(2)){dfp[,c] <- as.numeric(dfp[,c])}
+# make new plot
+ggpt <- ggplot(dfp, aes(x = neuron, y = `non-neuron`, color = donor)) +
+  geom_point(size = 3, alpha = 0.8) + 
+  geom_abline(intercept = 0, slope = 1, col = "black") +
+  ggtitle("Mean marker expression") + 
+  xlab(paste0("Neuron (", length(markerv.neuron), " markers)")) +
+  ylab(paste0("Non-neuron (", length(markerv.non), " markers)")) +
+  theme_bw()
+# save new pdf
+plot.fname <- paste0("ggpt-neuron-non_",plot.fname.stem,".pdf")
+pdf(file.path(plot.dpath, plot.fname), width = 4, height = 4)
+ggpt; dev.off()
+# save new jpg
+plot.fname <- paste0("ggpt-neuron-non_",plot.fname.stem,".jpg")
+jpeg(file.path(plot.dpath, plot.fname), width = 4.5, height = 3.5, 
+     units = "in", res = 400)
+ggpt; dev.off()
+
+
+
+  
+  
