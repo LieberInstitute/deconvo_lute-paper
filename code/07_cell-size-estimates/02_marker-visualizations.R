@@ -142,8 +142,8 @@ ggpt <- ggplot(dfp, aes(x = neuron, y = `non-neuron`,
   xlab(paste0("Neuron (", length(markerv.neuron), " markers)")) +
   ylab(paste0("Non-neuron (", length(markerv.non), " markers)")) +
   geom_label_repel(box.padding   = 0.35, point.padding = 0.8, 
-                   segment.color = 'grey50') +
-  theme_bw()
+                   segment.color = 'grey50') + theme_bw() +
+  theme(legend.position = "none")
 # save new pdf
 plot.fname <- paste0("ggpt-neuron-non_",plot.fname.stem,".pdf")
 pdf(file.path(plot.dpath, plot.fname), width = 4, height = 4)
