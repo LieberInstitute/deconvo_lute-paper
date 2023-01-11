@@ -29,7 +29,7 @@ sef <- get(load(file.path(sef.dpath, sef.fname)))
 #-------------------------
 set.seed(0)
 # simulation params
-perc.var <- 0.25 # perc sd for sizes across sims
+perc.var <- 0.4 # perc sd for sizes across sims
 num.sim <- 10 # total sims
 # make ls, varying the sizes slightly
 s1 <- 10 # size of neurons
@@ -41,12 +41,13 @@ lsv <- lapply(seq(num.sim), function(ii){
 })
 # get signature matrix, z
 sef[["donor"]] <- sef[["BrNum"]]
-setf <- set_from_sce(sef, groupvar = "donor", method = "mean", assayname = "logcounts")
+setf <- set_from_sce(sef, groupvar = "donor", 
+                     method = "mean", assayname = "logcounts")
 lct <- assays(setf)$logcounts
 # make lgv
 lgv <- lapply(seq(num.sim), function(ii){list(lct[,1], lct[,2])})
 # make lpv
-p1v <- seq(0.70, 0.80, 0.1/num.sim); p2v <- 1-p1v
+p1v <- seq(0.7, 0.8, 0.1/num.sim); p2v <- 1-p1v
 lpv <- lapply(seq(num.sim), function(ii){c(p1v[ii], p2v[ii])})
 
 # run simulations
@@ -81,7 +82,7 @@ dfp$rmse <- ifelse(dfp$expt_type==TRUE, rmse.true, rmse.false)
 df.rmse <- data.frame(expt_type = c(lvlstr.false, lvlstr.true),
                     rmse = c(format(rmse.false, digits = 2), 
                              format(rmse.true, digits = 2)))
-df.rmse$xpos <- 0.38; df.rmse$ypos <- 0.97
+df.rmse$xpos <- 0.25; df.rmse$ypos <- 0.95
 df.rmse$hjustpos <- df.rmse$vjustpos <- 0
 df.rmse$rmse <- paste0("RMSE: ", df.rmse$rmse)
 
@@ -102,7 +103,7 @@ ggpt <- ggplot() + theme_bw() +
                       shape = celltype, color = celltype),
              alpha = 0.5, size = 3) + 
   geom_abline(intercept = 0, slope = 1) +
-  xlim(0.38, 1) + ylim(0.43, 1) +
+  xlim(0.2, 0.8) + ylim(0, 1) +
   scale_color_manual(labels = c("Neuron", "Non-neuron"), 
                      values = c("blue", "red")) +
   xlab("True cell composition (cc)") +
@@ -125,6 +126,3 @@ jpeg(file.path(save.dpath, plot.fname), width = 5.8, height = 2.4,
      units = "in", res = 400)
 ggpt + facet_wrap(expt_type~.)
 dev.off()
-
-
-
