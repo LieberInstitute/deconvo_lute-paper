@@ -20,8 +20,8 @@ celltype.varname <- "cellType_broad_hc"
 proj.dpath <- "deconvo_method-paper"
 
 # path to full singlecellexperiment
-sce.fpath <- file.path("DLPFC_snRNAseq/processed-data/sce",
-                       "sce_DLPFC.Rdata")
+sce.fname <- "sce_DLPFC.Rdata"
+sce.fpath <- file.path("DLPFC_snRNAseq/processed-data/sce", sce.fname)
 sce <- get(load(sce.fpath)) # get full singlecellexperiment
 
 # save filepath
