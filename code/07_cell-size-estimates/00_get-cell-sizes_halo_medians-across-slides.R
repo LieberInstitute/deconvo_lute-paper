@@ -173,7 +173,6 @@ dfcor <- data.frame(akt3_expr = dfp.med[dfp.med[,1]=="akt3_expr",4],
                     nuc_perim = dfp.med[dfp.med[,1]=="nuc_perim",4],
                     slide = dfp.med[dfp.med[,1]=="nuc_perim",3],
                     type = dfp.med[dfp.med[,1]=="nuc_perim",2])
-ggpt <- ggplot(dfp.med, aes(x = ))
 
 # get plot object
 lcor <- lapply(unique(dfcor$type), function(ti){
@@ -190,9 +189,6 @@ jpeg(file.path(save.dpath, plot.fname), width = 10, height = 2.5,
      units = "in", res = 400)
 grid.arrange(lgg[[1]], lgg[[2]], lgg[[3]], nrow = 1)
 dev.off()
-
-# scatterplots
-
 
 #-------------------
 # get size variables
