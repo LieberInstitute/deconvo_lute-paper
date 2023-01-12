@@ -58,7 +58,7 @@ lc <- c(lc1[grepl("Final", names(lc1))], lc2[grepl("Final", names(lc2))])
 #-------------------
 # make a table with one row per cell
 # retain only cell type and size columns, and sample/donor info
-dfsize <- do.call(rbind, lapply(seq(length(lc)), function(ii){
+dfs <- do.call(rbind, lapply(seq(length(lc)), function(ii){
   message(ii)
   csvi <- lc[[ii]]; csv.fname <- names(lc)[ii]
   cnv <- colnames(csvi)
@@ -69,31 +69,34 @@ dfsize <- do.call(rbind, lapply(seq(length(lc)), function(ii){
     message(typei)
     # get filter terms
     which.type <- which(csvi[,typei]==1) # celltype filter
-    which.csize.filt <- grepl(paste0(cnv.size, collapse ="|"), cnv)
-    cnvf <- cnv[which.csize.filt] # size variables filter
+    csvif <- csvi[which.type,]
     # get size variable
-    datv <- csvi[which.type, cnvf, drop = F] 
-    for(c in seq(ncol(datv))){datv[,c] <- as.numeric(datv[,c])}
-    datv <- colMeans(datv) # summarize size variables
-    cnv.size.in <- cnv.size[cnv.size %in% colnames(datv)]
-    cnv.size.out <- cnv.size[!cnv.size %in% colnames(datv)]
-    # append missing variables
-    for(c in cnv.size.out){datv[c] <- "NA"}
-    # use standard order
-    datv <- datv[order(names(datv), cnv.size)]
-    datv["num.cells"] <- length(which.type)
-    datv["type"] <- names(labels[labels==gsub("\\..*", "", typei)])
-    datv["csv.fname"] <- csv.fname; datv
+    new.row <- rep("NA", 8)
+    names(new.row) <- c(names(cnv.size), "num.cells", "type", "csv.fname")
+    for(cni in cnv.size){
+      # message(cni)
+      cni.filt <- grepl(as.character(cni), colnames(csvif))
+      if(length(which(cni.filt))==1){
+        datv <- as.numeric(csvif[,cni.filt])
+        new.row[names(cnv.size[cnv.size==cni])] <- round(mean(datv),3)
+      }
+    }
+    new.row["num.cells"] <- length(which.type)
+    new.row["type"] <- names(labels[labels==gsub("\\..*", "", typei)])
+    new.row["csv.fname"] <- csv.fname; new.row
   }))
 }))
-for(c in seq(5)){dfsize[,c] <- as.numeric(dfsize[,c])}
-dfsize$donor <- unlist(lapply(dfsize$csv.fname, function(fni){
+dfs <- as.data.frame(dfs)
+for(c in seq(5)){dfs[,c] <- as.numeric(dfs[,c])}
+dfs$slide <- unlist(lapply(dfs$csv.fname, function(fni){
   unlist(strsplit(fni, "_"))[3]
 }))
+dfs$position <- gsub("[0-9]", "", dfs$slide)
+dfs$donor <- gsub("[A-Z]", "", dfs$slide)
 
 # save 
-save.fname <- "dfcellsize_halo.rda"
-save(dfsize, file = file.path(save.dpath, save.fname))
+save.fname <- "dfcellsize-byslide_halo.rda"
+save(dfs, file = file.path(save.dpath, save.fname))
 
 #-------------
 # violin plots
