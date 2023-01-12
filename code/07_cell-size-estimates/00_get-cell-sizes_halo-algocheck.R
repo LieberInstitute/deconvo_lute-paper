@@ -117,7 +117,7 @@ dfp$type <- as.factor(dfp$type)
 
 # get plot data
 lgg <- lapply(colnames(dfp)[1:5], function(cni){
-  ylab.str <- ifelse(cni=="akt3_expr", "Copies", "Micrometers")
+  ylab.str <- ifelse(cni=="akt3_expr", "Copies", "Microns")
   dfpi <- dfp[,c(cni, "type")]; dfpi$y = dfpi[,cni]
   ggvp <- ggplot(dfpi, aes(x = type, y = y, color = type)) + 
     geom_violin(draw_quantiles = 0.5) +

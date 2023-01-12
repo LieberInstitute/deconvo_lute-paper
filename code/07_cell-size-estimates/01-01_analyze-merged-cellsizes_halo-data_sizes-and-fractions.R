@@ -10,6 +10,8 @@
 libv <- c("ggplot2", "ggcorrplot")
 sapply(libv, library, character.only = T)
 
+read.fname <- "dfcellsize-byslide_halo.rda"
+
 #----------
 # load data
 #----------
@@ -17,7 +19,6 @@ sapply(libv, library, character.only = T)
 save.fnstem <- "halo-metrics"
 
 # read output df objects
-read.fname <- "dfcellsize_halo.rda"
 read.dpath <- save.dpath <- file.path("deconvo_method-paper", "outputs",
                                       "07_cell-size-estimates")
 dfc <- get(load(file.path(read.dpath, read.fname)))
@@ -29,8 +30,8 @@ dfc <- get(load(file.path(read.dpath, read.fname)))
 for(c in seq(5)){dfc[,c] <- as.numeric(dfc[,c])}
 
 # rename cell size variables
-colnames(dfc)[seq(5)] <- c("akt3.copies", "cell.area", "cyto.area", "nuc.area", 
-                           "nuc.perim")
+colnames(dfc)[seq(5)] <- c("cell.area", "cyto.area", "nuc.area", 
+                           "nuc.perim", "akt3.copies")
 
 #------------------------------------------
 # correlations by cell type, across samples
@@ -80,10 +81,14 @@ dfr <- do.call(rbind, lapply(sampv, function(si){
                       "nuc.perim.ratio" = dfri[7]/dfri[8],
                       "donor" = si)
   # return results
-  dfr <- cbind(as.data.frame(matrix(dfri, nrow = 1)), dfri2)
+  new.colnames <- c(names(dfri), colnames(dfri2))
+  dfr <- cbind(as.data.frame(matrix(dfri, nrow = 1)), 
+               as.data.frame(matrix(dfri2, nrow = 1)))
+  colnames(dfr) <- new.colnames
   colnames(dfr)[1:8] <- names(dfri)
   return(dfr)
 }))
+dfr$donor <- unlist(dfr$donor)
 
 # plot value magnitudes
 dfp <- do.call(rbind, lapply(cnv, function(ci){
@@ -99,11 +104,18 @@ ggpt <- ggplot(dfp, aes(x = neuron, y = glial, col = donor)) +
   geom_abline(intercept = 0, slope = 1) + theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = "none") +
-  ggtitle("Metric mean by donor")
+  ggtitle("Mean microns by slide")
 
+# save new pdf
 pdf.fname <- paste0("ggpt-facet_neur-vs-glial_", save.fnstem, ".pdf")
 pdf(file.path(save.dpath, pdf.fname), width = 4, height = 4)
 ggpt + facet_wrap(~metric)
+dev.off()
+# save new jpeg
+plot.fname <- paste0("ggpt-facet_neur-vs-glial_", save.fnstem, ".jpg")
+jpeg(file.path(save.dpath, plot.fname), width = 4, height = 2.2, 
+     units = "in", res = 400)
+ggpt + facet_wrap(~metric, nrow = 1)
 dev.off()
 
 # get correlation matrix
