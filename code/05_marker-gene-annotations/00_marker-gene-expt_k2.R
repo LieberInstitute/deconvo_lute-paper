@@ -55,6 +55,50 @@ table(sce[["celltype"]])
 # Neuron Non-neuron
 # 35876      41728
 
+# summaries by slide
+cd <- colData(sce)
+cd$donor <- gsub("_.*", "", cd$Sample)
+table(cd$donor, cd[,celltype.varname]) # full celltype variable
+# cells by donor
+df <- as.data.frame(table(cd$donor, cd[,"celltype"]))
+df <- data.frame(donor = df[c(1:length(unique(cd$donor))),1],
+                 neuron = df[df[,2]=="Neuron",3],
+                 non_neuron = df[df[,2]=="Non-neuron",3])
+df$sum <- df$neuron + df$glial
+df$diff_g_minus_n <- df$glial - df$neuron
+df
+# slides by donor
+cdf <- cd[!duplicated(cd$Sample),]
+df <- as.data.frame(table(cdf$donor))
+colnames(df) <- c("donor", "slides")
+dff <- do.call(rbind, lapply(df[,1], function(di){
+  di <- cd[cd$donor == di,]
+  slidev <- unique(di$Sample)
+  cellv <- unlist(lapply(slidev, function(si){
+    nrow(di[di$Sample==si,])
+  }))
+  neuronv <- unlist(lapply(slidev, function(si){
+    nrow(di[di$Sample==si & di$celltype == "Neuron",])
+  }))
+  glialv <- unlist(lapply(slidev, function(si){
+    nrow(di[di$Sample==si & di$celltype == "Non-neuron",])
+  }))
+  num.slide <- length(slidev)
+  return(c(sum(cellv)/num.slide, 
+           sum(neuronv)/num.slide, 
+           sum(glialv)/num.slide))
+}))
+colnames(dff) <- c("cells_per_slide", "neurons_per_slide", "non_neurons_per_slide")
+df <- cbind(df, dff)
+
+
+df$neurons_per_slide <- unlist(lapply(unique(cd$Sample), function(si){
+  nrow(cdf[cdf$Sample==si,])
+}))
+df$glial_per_slide <- unlist(lapply(unique(cd$Sample), function(si){
+  nrow(cdf[cdf$Sample==si,])
+}))
+
 #------------
 # get markers
 #------------
