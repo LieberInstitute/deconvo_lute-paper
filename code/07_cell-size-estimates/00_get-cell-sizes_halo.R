@@ -4,7 +4,8 @@
 #
 #
 
-library(ggplot2)
+libv <- c("ggplot2", "gridExtra", "ggpubr")
+sapply(libv, library, character.only = T)
 
 #----------
 # load data
@@ -101,16 +102,34 @@ save(dfs, file = file.path(save.dpath, save.fname))
 #-------------
 # violin plots
 #-------------
-dfp <- dfsize
-colnames(dfp) <- c("akt3", "cell_area", "cyto_area", "nuc_area", 
-                   "nuc_peri", "type", "fname", "donor")
+dfs <- get(load(file.path(save.dpath, save.fname)))
+dfp <- dfs
+#colnames(dfp) <- c("akt3", "cell_area", "cyto_area", "nuc_area", 
+#                   "nuc_peri", "type", "fname", "donor")
 dfp$type <- as.factor(dfp$type)
 
+# get plot data
 lgg <- lapply(colnames(dfp)[1:5], function(cni){
+  ylab.str <- ifelse(cni=="akt3_expr", "Copies", "Micrometers")
   dfpi <- dfp[,c(cni, "type")]; dfpi$y = dfpi[,cni]
   ggvp <- ggplot(dfpi, aes(x = type, y = y, color = type)) + 
     geom_violin(draw_quantiles = 0.5) +
-    theme_bw() + ylab(cni)
+    geom_jitter(alpha = 0.5, size = 2) +
+    theme_bw() + ylab(ylab.str) +
+    ggtitle(cni) + theme(axis.text.x = element_blank(),
+                         axis.title.x = element_blank())
   ggvp
 })
 names(lgg) <- colnames(dfp)[1:5]
+# extract legend, and remove from other plots
+ggleg <- get_legend(lgg[[1]])
+lgg <- lapply(lgg, function(ii){ii+theme(legend.position="none")})
+
+# make multiplot
+plot.fname <- "ggvp-agg-bytype_halo-cell-sizes.jpg"
+jpeg(file.path(save.dpath, plot.fname), width = 8, height = 4, units = "in",
+     res = 400)
+grid.arrange(lgg$cell_area, lgg$cytoplasm_area, lgg$nucleus_area,
+             lgg$nucleus_perimenter, lgg$akt3_expr, ggleg,
+             nrow = 2, bottom = "Cell type", left = "Size")
+dev.off()
