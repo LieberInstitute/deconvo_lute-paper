@@ -153,8 +153,3 @@ plot.fname <- paste0("ggpt-neuron-non_",plot.fname.stem,".jpg")
 jpeg(file.path(plot.dpath, plot.fname), width = 4, height = 3.8, 
      units = "in", res = 400)
 ggpt; dev.off()
-
-
-
-  
-  

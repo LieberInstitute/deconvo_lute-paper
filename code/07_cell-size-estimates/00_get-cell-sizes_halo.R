@@ -42,8 +42,8 @@ labels = c("Endo" = "CLDN5", "Astro" = "GFAP",
            "Inhib" = "GAD1", "Excit" = "SLC17A7",
            "Micro" = "TMEM119", "Oligo" = "OLIG2")
 
-cnv.size <- c("Cell.Area..µm..", "Cytoplasm.Area..µm..", "Nucleus.Area..µm..",
-              "Nucleus.Perimeter..µm.", "AKT3..Opal.570..Copies")
+cnv.size <- c("Cell.Area.*", "Cytoplasm.Area.*", "Nucleus.Area.*",
+              "Nucleus.Perimeter.*", "AKT3..Opal.570..Copies")
 
 # get flattened, filtered list
 lc1 <- lapply(lcsv[[1]], function(ii){ii})
@@ -56,16 +56,19 @@ lc <- c(lc1[grepl("Final", names(lc1))], lc2[grepl("Final", names(lc2))])
 dfsize <- do.call(rbind, lapply(seq(length(lc)), function(ii){
   message(ii)
   csvi <- lc[[ii]]; csv.fname <- names(lc)[ii]
+  cnv <- colnames(csvi)
   # get cell type label
   cnv.type <- colnames(csvi)[grepl(".*Positive$", colnames(csvi))]
   cnv.type <- cnv.type[grepl(paste0(labels, collapse = "|"), cnv.type)]
   do.call(rbind, lapply(cnv.type, function(typei){
     message(typei)
     which.type <- csvi[,typei]==1
-    cnv.size.in <- cnv.size[cnv.size %in% colnames(csvi)]
-    cnv.size.out <- cnv.size[!cnv.size %in% cnv.size.in]
+    cnvf <- cnv[grepl(paste0(cnv.size,collapse ="|"), cnv)]
+    cnv.size.in <- cnv.size[cnv.size %in% cnvf]
+    cnv.size.out <- cnv.size[!cnv.size %in% cnvf]
     # parse available colnames
-    datv <- colMeans(csvi[which.type, cnv.size.in])
+    datv <- csvi[which.type, cnv.size.in, drop = F]
+    if(ncol(datv) > 1){datv <- colMeans(datv)}
     # parse unavailable colnames
     for(c in cnv.size.out){datv[c] <- "NA"}
     # use standard order
