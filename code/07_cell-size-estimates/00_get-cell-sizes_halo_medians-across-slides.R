@@ -165,13 +165,22 @@ jpeg(file.path(save.dpath, plot.fname),
 ggvp; dev.off()
 
 # medians by slide
-dfp.med <- do.call(rbind, lapply(unique(dfp$slide), function(si){
-  do.call(rbind, lapply(unique(dfp$method), function(mi){
-    data.frame(median.value = median(dfp[dfp$slide==si & 
-                                           dfp$method==mi,]$value),
-               slide = si, method = mi)  
-  }))
-}))
+dfp.med <- aggregate(dfp, list(dfp$method, dfp$type, dfp$slide), 
+                     FUN = median)
+# correlations
+dfcor <- data.frame(akt3_expr = dfp.med[dfp.med[,1]=="akt3_expr",4],
+                    nuc_area = dfp.med[dfp.med[,1]=="nuc_area",4],
+                    nuc_perim = dfp.med[dfp.med[,1]=="nuc_perim",4],
+                    slide = dfp.med[dfp.med[,1]=="nuc_perim",3],
+                    type = dfp.med[dfp.med[,1]=="nuc_perim",2])
+ggpt <- ggplot(dfp.med, aes(x = ))
+
+# get plot object
+ggcor <- ggcorrplot(mcori, type = "lower", lab = T, 
+                    title = "Ratio (glial/neuron)")
+# save new pdf
+ggsave(pdf.fpath, ggcor, width = 5, height = 4,
+       device = "pdf", units = "in", dpi = 400)
 
 #-------------------
 # get size variables
