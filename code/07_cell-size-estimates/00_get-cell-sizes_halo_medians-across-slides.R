@@ -6,7 +6,7 @@
 # adding "." to column names.
 #
 
-libv <- c("ggplot2", "gridExtra", "ggpubr", "data.table")
+libv <- c("ggplot2", "gridExtra", "ggpubr", "data.table", "ggcorrplot")
 sapply(libv, library, character.only = T)
 
 #----------
@@ -176,11 +176,23 @@ dfcor <- data.frame(akt3_expr = dfp.med[dfp.med[,1]=="akt3_expr",4],
 ggpt <- ggplot(dfp.med, aes(x = ))
 
 # get plot object
-ggcor <- ggcorrplot(mcori, type = "lower", lab = T, 
-                    title = "Ratio (glial/neuron)")
-# save new pdf
-ggsave(pdf.fpath, ggcor, width = 5, height = 4,
-       device = "pdf", units = "in", dpi = 400)
+lcor <- lapply(unique(dfcor$type), function(ti){
+  mcor <- cor(dfcor[dfcor$type==ti,seq(3)], method = "spearman")
+})
+names(lcor) <- unique(dfcor$type)
+lgg <- lapply(seq(3), function(ii){
+  ggcorrplot(lcor[[ii]], type = "lower", lab = T, 
+             title = names(lcor)[ii])
+})
+# save new composite jpeg
+plot.fname <- paste0("ggcor-lowertri_bytype_halo_",out.fnstem, ".jpeg")
+jpeg(file.path(save.dpath, plot.fname), width = 10, height = 2.5, 
+     units = "in", res = 400)
+grid.arrange(lgg[[1]], lgg[[2]], lgg[[3]], nrow = 1)
+dev.off()
+
+# scatterplots
+
 
 #-------------------
 # get size variables
