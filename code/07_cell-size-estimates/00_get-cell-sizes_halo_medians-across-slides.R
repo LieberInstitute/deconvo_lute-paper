@@ -15,8 +15,6 @@ sapply(libv, library, character.only = T)
 # manage paths
 base.path <- "."
 save.dname <- "07_cell-size-estimates"
-save.fnstr <- "halo-median-across-slides"
-
 subdir.name <- "Algorithm_Check_20220920"
 out.fnstem <- "algocheck-20220920"
 
@@ -95,7 +93,7 @@ dfs.cell <- do.call(rbind, lapply(seq(length(lc)), function(ii){
 
 for(c in seq(3)){dfs.cell[,c] <- as.numeric(dfs.cell[,c])}
 dfs.cell$slide <- unlist(lapply(dfs.cell$csv.fname, function(fni){
-  unlist(strsplit(fni, "_"))[3]
+  unlist(strsplit(fni, "_"))[2]
 }))
 dfs.cell$position <- gsub("[0-9]", "", dfs.cell$slide)
 dfs.cell$donor <- gsub("[A-Z]", "", dfs.cell$slide)
@@ -104,6 +102,76 @@ dfs.cell$donor <- gsub("[A-Z]", "", dfs.cell$slide)
 save.fname <- "df-csize-cells_halo.rda"
 save(dfs.cell, file = file.path(save.dpath, save.fname))
 
+# get plot data
+# 
+dfsc <- get(load(file.path(save.dpath, save.fname)))
+cnv <- colnames(dfsc)
+datv <- c(dfsc[,1], dfsc[,2], dfsc[,3])
+dfp <- data.frame(value = datv, type = rep(dfsc$type, 3),
+                  method = c(rep("nuc_area", nrow(dfsc)),
+                             rep("nuc_perim", nrow(dfsc)),
+                             rep("akt3_expr", nrow(dfsc))),
+                  slide = c(rep(dfsc$slide, 3)))
+
+# violin plots
+ggvp <- ggplot(dfp, aes(x = type, y = value, color = type)) +
+  geom_violin(draw_quantiles = 0.5) + theme_bw() +
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank())
+ggvp <- ggvp + facet_wrap(~method)
+# save new vp
+plot.fname <- paste0("ggviolin-cells_csize-3vars_halo_",
+                     out.fnstem,".jpg")
+jpeg(file.path(save.dpath, plot.fname), 
+     width = 5, height = 1.8, units = "in", res = 400)
+ggvp; dev.off()
+# new vp with jitter
+plot.fname <- paste0("ggviolin-withjitter-cells_csize-3vars_halo_",
+                     out.fnstem,".jpg")
+jpeg(file.path(save.dpath, plot.fname), 
+     width = 5, height = 1.8, units = "in", res = 400)
+ggvp + geom_jitter(alpha = 0.5, size = 0.1); dev.off()
+
+# plots by slide
+# boxplots of values by slide
+ggbp <- ggplot(dfp, aes(x = slide, y = value, color = type)) + geom_boxplot() +
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggbp <- ggbp + facet_wrap(~method*type, nrow = 3)
+# new boxplots
+plot.fname <- paste0("ggboxplot-cells_csize-3vars_halo_",
+                     out.fnstem,".jpg")
+jpeg(file.path(save.dpath, plot.fname), 
+     width = 9, height = 6.5, units = "in", res = 400)
+ggbp; dev.off()
+# new violin plots
+ggvp <- ggplot(dfp, aes(x = slide, y = value, color = type)) + 
+  geom_violin(draw_quantiles = 0.5) + theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggvp <- ggvp + facet_wrap(~method*type, nrow = 3)
+plot.fname <- paste0("ggviolin-cells_csize-3vars_halo_",
+                     out.fnstem,".jpg")
+jpeg(file.path(save.dpath, plot.fname), 
+     width = 9, height = 6.5, units = "in", res = 400)
+ggvp; dev.off()
+# new violin plots -- with jitter
+ggvp <- ggplot(dfp, aes(x = slide, y = value, color = type)) + 
+  geom_violin(draw_quantiles = 0.5) + geom_jitter(alpha = 0.1) + theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggvp <- ggvp + facet_wrap(~method*type, nrow = 3)
+plot.fname <- paste0("ggviolin-jitter-cells_csize-3vars_halo_",
+                     out.fnstem,".jpg")
+jpeg(file.path(save.dpath, plot.fname), 
+     width = 9, height = 6.5, units = "in", res = 400)
+ggvp; dev.off()
+
+# medians by slide
+dfp.med <- do.call(rbind, lapply(unique(dfp$slide), function(si){
+  do.call(rbind, lapply(unique(dfp$method), function(mi){
+    data.frame(median.value = median(dfp[dfp$slide==si & 
+                                           dfp$method==mi,]$value),
+               slide = si, method = mi)  
+  }))
+}))
 
 #-------------------
 # get size variables
