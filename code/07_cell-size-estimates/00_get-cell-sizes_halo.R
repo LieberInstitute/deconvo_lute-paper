@@ -42,8 +42,11 @@ labels = c("Endo" = "CLDN5", "Astro" = "GFAP",
            "Inhib" = "GAD1", "Excit" = "SLC17A7",
            "Micro" = "TMEM119", "Oligo" = "OLIG2")
 
-cnv.size <- c("Cell.Area.*", "Cytoplasm.Area.*", "Nucleus.Area.*",
-              "Nucleus.Perimeter.*", "AKT3..Opal.570..Copies")
+cnv.size <- c("cell_area" = "Cell.Area..??m..", 
+              "cytoplasm_area" = "Cytoplasm.Area..??m..", 
+              "nucleus_area" = "Nucleus.Area..??m..",
+              "nucleus_perimenter" = "Nucleus.Perimeter..??m.", 
+              "akt3_expr" = "AKT3..Opal.570..Copies")
 
 # get flattened, filtered list
 lc1 <- lapply(lcsv[[1]], function(ii){ii})
@@ -53,6 +56,8 @@ lc <- c(lc1[grepl("Final", names(lc1))], lc2[grepl("Final", names(lc2))])
 #-------------------
 # get size variables
 #-------------------
+# make a table with one row per cell
+# retain only cell type and size columns, and sample/donor info
 dfsize <- do.call(rbind, lapply(seq(length(lc)), function(ii){
   message(ii)
   csvi <- lc[[ii]]; csv.fname <- names(lc)[ii]
@@ -62,17 +67,21 @@ dfsize <- do.call(rbind, lapply(seq(length(lc)), function(ii){
   cnv.type <- cnv.type[grepl(paste0(labels, collapse = "|"), cnv.type)]
   do.call(rbind, lapply(cnv.type, function(typei){
     message(typei)
-    which.type <- csvi[,typei]==1
-    cnvf <- cnv[grepl(paste0(cnv.size,collapse ="|"), cnv)]
-    cnv.size.in <- cnv.size[cnv.size %in% cnvf]
-    cnv.size.out <- cnv.size[!cnv.size %in% cnvf]
-    # parse available colnames
-    datv <- csvi[which.type, cnv.size.in, drop = F]
-    if(ncol(datv) > 1){datv <- colMeans(datv)}
-    # parse unavailable colnames
+    # get filter terms
+    which.type <- which(csvi[,typei]==1) # celltype filter
+    which.csize.filt <- grepl(paste0(cnv.size, collapse ="|"), cnv)
+    cnvf <- cnv[which.csize.filt] # size variables filter
+    # get size variable
+    datv <- csvi[which.type, cnvf, drop = F] 
+    for(c in seq(ncol(datv))){datv[,c] <- as.numeric(datv[,c])}
+    datv <- colMeans(datv) # summarize size variables
+    cnv.size.in <- cnv.size[cnv.size %in% colnames(datv)]
+    cnv.size.out <- cnv.size[!cnv.size %in% colnames(datv)]
+    # append missing variables
     for(c in cnv.size.out){datv[c] <- "NA"}
     # use standard order
     datv <- datv[order(names(datv), cnv.size)]
+    datv["num.cells"] <- length(which.type)
     datv["type"] <- names(labels[labels==gsub("\\..*", "", typei)])
     datv["csv.fname"] <- csv.fname; datv
   }))
