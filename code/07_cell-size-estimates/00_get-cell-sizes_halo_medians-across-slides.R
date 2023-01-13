@@ -148,7 +148,7 @@ ggvp <- ggplot(dfp, aes(x = slide, y = value, color = type)) +
   geom_violin(draw_quantiles = 0.5) + theme_bw() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ggvp <- ggvp + facet_wrap(~method*type, nrow = 3)
-plot.fname <- paste0("ggviolin-cells_csize-3vars_halo_",
+plot.fname <- paste0("ggviolin-cells-and-slides_csize-3vars_halo_",
                      out.fnstem,".jpg")
 jpeg(file.path(save.dpath, plot.fname), 
      width = 9, height = 6.5, units = "in", res = 400)
