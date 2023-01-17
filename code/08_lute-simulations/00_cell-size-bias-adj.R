@@ -34,6 +34,9 @@ dfp <- rand_donor_marker_table(ndonor = ndonor, gindexv = gindexv,
                                sd.offset.pos = offset.high, 
                                sd.offset.neg = offset.high)
 lpca[["high"]] <- pcaplots_donor(dt = dfp, title.append = title.str)
+# save new results object
+save.fname <- "lpca-results_donorvar-low-high_lute-donorsim.rda"
+save(lpca, file = file.path(save.dpath, save.fname))
 
 # get scatterplot objects
 # get scatterplot plot legend
