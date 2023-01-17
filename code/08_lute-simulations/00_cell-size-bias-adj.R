@@ -5,13 +5,66 @@
 # Cell size bias adjustment experiments
 #
 
-libv <- "lute"
+libv <- c("lute", "ggpubr", "gridExtra")
 sapply(libv, library, character.only = TRUE)
+
+# new save dest
+save.dpath <- file.path("deconvo_method-paper", "outputs", "08_lute-simulations")
 
 #------------------------------
 # pca of low and high donor var
 #------------------------------
+# show impact of increasing donor offset
+ndonor <- 10
+gindexv <- c(1, 2)
+offset.low <- 1
+offset.high <- 100
 
+# get pca results
+lpca <- list()
+# pca, low
+title.str <- paste0("Low donor variance (offset = ",1,")\n")
+dfp <- rand_donor_marker_table(ndonor = ndonor, gindexv = gindexv, 
+                               sd.offset.pos = offset.low, 
+                               sd.offset.neg = offset.low)
+lpca[["low"]] <- pcaplots_donor(dt = dfp, title.append = title.str)
+# pca.high
+title.str <- paste0("High donor variance (offset = ",10,")\n")
+dfp <- rand_donor_marker_table(ndonor = ndonor, gindexv = gindexv, 
+                               sd.offset.pos = offset.high, 
+                               sd.offset.neg = offset.high)
+lpca[["high"]] <- pcaplots_donor(dt = dfp, title.append = title.str)
+
+# get scatterplot objects
+# get scatterplot plot legend
+ggpt <- lpca$low$pca.bydonortype$scatterplot.pc1.pc2
+ggleg <- get_legend(ggpt)
+# get final scatterplots
+ggpt1 <- ggpt
+ggpt2 <- lpca$high$pca.bydonortype$scatterplot.pc1.pc2
+
+# save pca scatterplots
+# save composite
+lm <- matrix(c(1,1,2,2,3), nrow = 1)
+plot.fname <- "pca_donorvar-low_lute-sim.jpg"
+jpeg(file.path(save.dpath, plot.fname), width = 7, height = 5, 
+     units = "in", res = 400)
+grid.arrange(ggpt1, ggpt2, ggleg, layout_matrix = lm)
+dev.off()
+# low var
+plot.fname <- "pca_donorvar-low_lute-sim.jpg"
+jpeg(file.path(save.dpath, plot.fname), width = 7, height = 5, 
+    units = "in", res = 400)
+lpca$low$pca.bydonortype$scatterplot.pc1.pc2
+dev.off()
+# high var
+plot.fname <- "pca_donorvar-high_lute-sim.jpg"
+jpeg(file.path(save.dpath, plot.fname), width = 7, height = 5, 
+    units = "in", res = 400)
+lpca$high$pca.bydonortype$scatterplot.pc1.pc2
+dev.off()
+
+# save pca screeplots
 
 
 
