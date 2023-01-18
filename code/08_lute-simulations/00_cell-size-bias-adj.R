@@ -38,21 +38,32 @@ lpca[["high"]] <- pcaplots_donor(dt = dfp, title.append = title.str)
 save.fname <- "lpca-results_donorvar-low-high_lute-donorsim.rda"
 save(lpca, file = file.path(save.dpath, save.fname))
 
+lpca$high$pca.bydonortype$scatterplot.pc1.pc2 +
+  scale_shape_discrete(labels = c("Neuron", "Non-neuron"),
+                       name = "celltype")
+
 # get scatterplot objects
 # get scatterplot plot legend
-ggpt <- lpca$low$pca.bydonortype$scatterplot.pc1.pc2
-ggleg <- get_legend(ggpt)
+ggpt1.leg <- lpca$low$pca.bydonortype$scatterplot.pc1.pc2 +
+  scale_shape_discrete(labels = c("Neuron", "Non-neuron"),
+                       name = "celltype") +
+  ggtitle("Low donor variance")
+ggleg <- get_legend(ggpt1.leg)
 # get final scatterplots
-ggpt1 <- ggpt
-ggpt2 <- lpca$high$pca.bydonortype$scatterplot.pc1.pc2
+ggpt2.leg <- lpca$high$pca.bydonortype$scatterplot.pc1.pc2 +
+  scale_shape_discrete(labels = c("Neuron", "Non-neuron"),
+                       name = "celltype") +
+  ggtitle("High donor variance")
+ggpt2.noleg <- ggpt2.leg + theme(legend.position = 'none')
+ggpt1.noleg <- ggpt1.leg + theme(legend.position = 'none')
 
 # save pca scatterplots
 # save composite
 lm <- matrix(c(1,1,2,2,3), nrow = 1)
 plot.fname <- "pca_donorvar-low_lute-sim.jpg"
-jpeg(file.path(save.dpath, plot.fname), width = 7, height = 5, 
+jpeg(file.path(save.dpath, plot.fname), width = 9.7, height = 4.2, 
      units = "in", res = 400)
-grid.arrange(ggpt1, ggpt2, ggleg, layout_matrix = lm)
+grid.arrange(ggpt1.noleg, ggpt2.noleg, ggleg, layout_matrix = lm)
 dev.off()
 # low var
 plot.fname <- "pca_donorvar-low_lute-sim.jpg"
