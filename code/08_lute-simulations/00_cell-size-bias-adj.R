@@ -100,7 +100,6 @@ lseries <- lapply(seq(pdiffv), function(ii){
                         donor.adj.method = "sd_denom",
                         bounds_thresh = 50)
 })
-
 dfr <- do.call(rbind, lapply(lseries, function(ii){ii$dfres}))
 
 # scatterplots of results
