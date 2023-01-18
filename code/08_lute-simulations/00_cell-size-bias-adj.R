@@ -11,9 +11,9 @@ sapply(libv, library, character.only = TRUE)
 # new save dest
 save.dpath <- file.path("deconvo_method-paper", "outputs", "08_lute-simulations")
 
-#------------------------------
-# pca of low and high donor var
-#------------------------------
+#------------------------------------------
+# simulate low and high variance donor data
+#------------------------------------------
 # show impact of increasing donor offset
 ndonor <- 10
 gindexv <- c(1, 2)
@@ -21,27 +21,34 @@ offset.low <- 1
 offset.high <- 100
 
 # get pca results
-lpca <- list()
-# pca, low
+ldat <- list()
+
+# simulate donor data
+# low variances
 title.str <- paste0("Low donor variance (offset = ",1,")\n")
-dfp <- rand_donor_marker_table(ndonor = ndonor, gindexv = gindexv, 
+ldat[["low"]] <- rand_donor_marker_table(ndonor = ndonor, gindexv = gindexv, 
                                sd.offset.pos = offset.low, 
                                sd.offset.neg = offset.low)
-lpca[["low"]] <- pcaplots_donor(dt = dfp, title.append = title.str)
-# pca.high
-title.str <- paste0("High donor variance (offset = ",10,")\n")
-dfp <- rand_donor_marker_table(ndonor = ndonor, gindexv = gindexv, 
+# high variances
+ldat[["high"]] <- rand_donor_marker_table(ndonor = ndonor, gindexv = gindexv, 
                                sd.offset.pos = offset.high, 
                                sd.offset.neg = offset.high)
-lpca[["high"]] <- pcaplots_donor(dt = dfp, title.append = title.str)
+
+#------------------------------
+# get PCA results of donor expt
+#------------------------------
+lpca <- list()
+lpca[["low"]] <- pcaplots_donor(dt = ldat[["low"]], title.append = title.str)
+lpca[["high"]] <- pcaplots_donor(dt = ldat[["high"]], title.append = title.str)
+
 # save new results object
+ldat[["pca_results"]] <- lpca
 save.fname <- "lpca-results_donorvar-low-high_lute-donorsim.rda"
-save(lpca, file = file.path(save.dpath, save.fname))
+save(ldat, file = file.path(save.dpath, save.fname))
 
-lpca$high$pca.bydonortype$scatterplot.pc1.pc2 +
-  scale_shape_discrete(labels = c("Neuron", "Non-neuron"),
-                       name = "celltype")
-
+#-----------------
+# plot pca results
+#-----------------
 # get scatterplot objects
 # get scatterplot plot legend
 ggpt1.leg <- lpca$low$pca.bydonortype$scatterplot.pc1.pc2 +
