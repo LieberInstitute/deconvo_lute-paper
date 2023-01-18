@@ -67,7 +67,7 @@ ggpt1.noleg <- ggpt1.leg + theme(legend.position = 'none')
 # save pca scatterplots
 # save composite
 lm <- matrix(c(1,1,2,2,3), nrow = 1)
-plot.fname <- "pca_donorvar-low_lute-sim.jpg"
+plot.fname <- "pca-composite_donorvar-low-high_lute-sim.jpg"
 jpeg(file.path(save.dpath, plot.fname), width = 9.7, height = 4.2, 
      units = "in", res = 400)
 grid.arrange(ggpt1.noleg, ggpt2.noleg, ggleg, layout_matrix = lm)
@@ -76,18 +76,14 @@ dev.off()
 plot.fname <- "pca_donorvar-low_lute-sim.jpg"
 jpeg(file.path(save.dpath, plot.fname), width = 7, height = 5, 
     units = "in", res = 400)
-lpca$low$pca.bydonortype$scatterplot.pc1.pc2
+ggpt1.leg
 dev.off()
 # high var
 plot.fname <- "pca_donorvar-high_lute-sim.jpg"
 jpeg(file.path(save.dpath, plot.fname), width = 7, height = 5, 
     units = "in", res = 400)
-lpca$high$pca.bydonortype$scatterplot.pc1.pc2
+ggpt2.leg
 dev.off()
-
-# save pca screeplots
-
-
 
 #--------------------
 # test using sd_denom
