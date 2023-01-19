@@ -100,7 +100,8 @@ Let's generate a series of faceted bias scatterplots for each offset level.
 
 ```{r}
 dfp <- dfres
-dfp$offset <- as.numeric(dfp$offset)
+dfp$prop.type <- ifelse(dfp$prop.type=="padj", "Bias-adjusted", "Unadjusted")
+dfp$offset <- paste0("offset=",dfp$offset)
 dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
 ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
                 color = celltype, shape = celltype)) +
@@ -112,13 +113,23 @@ ggpt + facet_wrap(~prop.type+offset)
 Now let's plot the bias directly for adjusted and unadjusted proportions.
 
 ```{r}
-dfp <- data.frame(unadj = dfres[dfres$prop.type == "punadj",]$bias,
-                  adj = dfres[dfres$prop.type == "padj",]$bias,
-                  offset = dfres[dfres$prop.type == "punadj",]$offset,
-                  type = dfres[dfres$prop.type == "punadj",]$type.index)
+# match results for each expt group/adj type
+df.unadj <- dfres[dfres$prop.type == "punadj",]
+df.adj <- dfres[dfres$prop.type == "padj",]
+df.unadj <- df.unadj[order(df.unadj$prop.true, df.unadj$offset),]
+df.adj <- df.adj[order(df.adj$prop.true, df.unadj$offset),]
+identical(df.unadj$prop.true, df.adj$prop.true)
+# get plot data
+dfp <- data.frame(unadj = df.unadj$bias, adj = df.adj$bias,
+                  offset = df.unadj$offset, type = df.unadj$type.index)
+dfp$offset = paste0("offset=",dfp$offset)
 dfp$celltype <- ifelse(dfp$type==1, "Neuron", "Non-neuron")
+# make new plot
 ggpt <- ggplot(dfp, aes(x = unadj, y = adj, color = celltype)) + theme_bw() +
   geom_point(alpha = 0.5, size = 2) + 
-  geom_abline(slope = 1, intercept = 0, color = "black")
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  geom_hline(yintercept = 0, color = "black") +
+  geom_vline(xintercept = 0, color = "black") +
+  xlab("Unadjusted") + ylab("Bias-adjusted")
 ggpt + facet_wrap(~offset) + ggtitle("Bias by offset amount")
 ```
