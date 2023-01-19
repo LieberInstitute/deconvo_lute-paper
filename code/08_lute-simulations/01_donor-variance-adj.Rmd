@@ -12,6 +12,8 @@ variances.
 knitr::opts_chunk$set(echo = TRUE)
 libv <- c("lute", "ggpubr", "gridExtra")
 sapply(libv, library, character.only = TRUE)
+
+save.dpath <- file.path("deconvo_method-paper", "outputs", "08_lute-simulations")
 ```
 
 # Simulate donor data
@@ -39,6 +41,26 @@ df.adj <- donoradj_combat(df, return.type = "donordf")
 # get pca for adj signals
 lpca.adj <- pcaplots_donor(dt = dfadj)
 lpca.adj$pca.bydonortype$scatterplot.pc1.pc2 + ggtitle("Adj. method: combat")
+```
+
+Make a composite plot of the pca results
+
+```{r}
+pc1 <- lpca.unadj$pca.bydonortype$scatterplot.pc1.pc2
+pc2 <- lpca.adj$pca.bydonortype$scatterplot.pc1.pc2 + 
+  ggtitle("Adj. method: combat")
+pc.leg <- get_legend(pc1)
+pc1 <- pc1 + theme(legend.position = "none")
+pc2 <- pc2 + theme(legend.position = "none")
+lm <- matrix(c(1,1,1,2,2,2,3),nrow = 1)
+
+offsetval <- 5
+plot.fname <- paste0("ggpt-pca_adj-unadj_offset-", offsetval, 
+                     "_lute-sim-donorbias.jpg")
+jpeg(file.path(save.dpath, plot.fname), width = 8, height = 3, 
+     units = "in", res = 400)
+grid.arrange(pc1, pc2, pc.leg, layout_matrix = lm)
+dev.off()
 ```
 
 # Experiments
