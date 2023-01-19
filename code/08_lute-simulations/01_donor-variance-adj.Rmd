@@ -66,81 +66,59 @@ grid.arrange(pc1, pc2, pc.leg, layout_matrix = lm)
 #dev.off()
 ```
 
-# Experiments
+# Impact of offset on bias~proportions
 
-Using the `ComBat` method, vary donor variances using offsets of 5 and 100.
+Evaluate the impact of the offset on the function of bias~proportions. 
+
+First, define a vector of true proportions for type 1.
 
 ```{r}
-p1v <- seq(0.1, 0.4, 5e-3)
-#offsetv <- seq(1e-1,5,1e-2)
-#offsetv <- sample(offsetv, length(p1v))
-offsetv <- rep(1, length(p1v))
-dfres <- do.call(rbind, lapply(seq(length(offsetv)), function(ii){
-  offi <- offsetv[ii]; p1i <- p1v[ii]
-  lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
+p1v <- seq(0.6, 0.9, 1e-3)
+```
+
+Next, define a series of offsets. We'll look at offsets of 1, 10, and 50.
+
+```{r}
+offset.levels <- c(1, 10, 50)
+loff <- lapply(offset.levels, function(offi){rep(offi, length(p1v))})
+```
+
+For each offset series, get the donor bias experiment results.
+
+```{r}
+dfres <- do.call(rbind, lapply(loff, function(ii){
+  do.call(rbind, lapply(seq(length(ii)), function(jj){
+    offi <- ii[jj]; p1i <- p1v[jj]
+    lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
                                donor.adj.method = "combat")
-  lbi$dfres
+    lbi$dfres
+  }))
 }))
 ```
 
-Get bias scatterplot
+Let's generate a series of faceted bias scatterplots for each offset level.
 
 ```{r}
 dfp <- dfres
 dfp$offset <- as.numeric(dfp$offset)
 dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
 ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
-                color = celltype, shape = celltype,
-                size = offset)) +
+                color = celltype, shape = celltype)) +
   theme_bw() + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0, color = "black")
-ggpt + facet_wrap(~prop.type)
+ggpt + facet_wrap(~prop.type+offset)
 ```
 
-Try with increased offset at 10
+Now let's plot the bias directly for adjusted and unadjusted proportions.
 
 ```{r}
-p1v <- seq(0.1, 0.4, 5e-3)
-#offsetv <- seq(1e-1,5,1e-2)
-#offsetv <- sample(offsetv, length(p1v))
-offsetv <- rep(10, length(p1v))
-dfres <- do.call(rbind, lapply(seq(length(offsetv)), function(ii){
-  offi <- offsetv[ii]; p1i <- p1v[ii]
-  lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
-                               donor.adj.method = "combat")
-  lbi$dfres
-}))
-dfp <- dfres
-dfp$offset <- as.numeric(dfp$offset)
-dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
-ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
-                color = celltype, shape = celltype,
-                size = offset)) +
-  theme_bw() + geom_point(alpha = 0.5) +
+dfp <- data.frame(unadj = dfres[dfres$prop.type == "punadj",]$bias,
+                  adj = dfres[dfres$prop.type == "padj",]$bias,
+                  offset = dfres[dfres$prop.type == "punadj",]$offset,
+                  type = dfres[dfres$prop.type == "punadj",]$type.index)
+dfp$celltype <- ifelse(dfp$type==1, "Neuron", "Non-neuron")
+ggpt <- ggplot(dfp, aes(x = unadj, y = adj, color = celltype)) + theme_bw() +
+  geom_point(alpha = 0.5, size = 2) + 
   geom_abline(slope = 1, intercept = 0, color = "black")
-ggpt + facet_wrap(~prop.type)
-```
-
-Try with increased offset at 50
-
-```{r}
-p1v <- seq(0.1, 0.4, 5e-3)
-#offsetv <- seq(1e-1,5,1e-2)
-#offsetv <- sample(offsetv, length(p1v))
-offsetv <- rep(50, length(p1v))
-dfres <- do.call(rbind, lapply(seq(length(offsetv)), function(ii){
-  offi <- offsetv[ii]; p1i <- p1v[ii]
-  lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
-                               donor.adj.method = "combat")
-  lbi$dfres
-}))
-dfp <- dfres
-dfp$offset <- as.numeric(dfp$offset)
-dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
-ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
-                color = celltype, shape = celltype,
-                size = offset)) +
-  theme_bw() + geom_point(alpha = 0.5) +
-  geom_abline(slope = 1, intercept = 0, color = "black")
-ggpt + facet_wrap(~prop.type)
+ggpt + facet_wrap(~offset) + ggtitle("Bias by offset amount")
 ```
