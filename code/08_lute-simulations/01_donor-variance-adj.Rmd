@@ -1,0 +1,24 @@
+---
+title: "Donor variance adjustments"
+author: "Sean Maden"
+date: "2023-01-19"
+output: html_document
+---
+
+Show simulation results of donor variance adjustments across low and high donor 
+variances.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("lute", "ggpubr", "gridExtra")
+sapply(libv, library, character.only = TRUE)
+```
+
+# Experiments
+
+Using the `ComBat` method, vary donor variances using offsets of 5 and 100.
+
+```{r}
+lb <- donor_marker_biasexpt(offsetv = c(5, 100), donor.adj.method = "combat")
+knitr::kable(lb$dfres, align = "c")
+```

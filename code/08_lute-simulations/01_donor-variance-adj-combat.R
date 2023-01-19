@@ -14,4 +14,8 @@ save.dpath <- file.path("deconvo_method-paper", "outputs", "08_lute-simulations"
 #----------------------
 # get bias expt results
 #----------------------
-lb <- donor_marker_biasexpt(donor.adj.method = "combat")
+lb <- donor_marker_biasexpt(offsetv = c(5, 100), 
+                            donor.adj.method = "combat", 
+                            verbose = T)
+
+lb$dfres
