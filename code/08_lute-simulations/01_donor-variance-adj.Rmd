@@ -46,8 +46,8 @@ lpca.adj$pca.bydonortype$scatterplot.pc1.pc2 + ggtitle("Adj. method: combat")
 Using the `ComBat` method, vary donor variances using offsets of 5 and 100.
 
 ```{r}
-lb <- donor_marker_biasexpt(offsetv = c(5, 100), donor.adj.method = "combat")
-knitr::kable(lb$dfres, align = "c")
+offsetv <- seq(1e-2,5,1e-2)
+lb <- donor_marker_biasexpt(offsetv = offsetv, donor.adj.method = "combat")
 ```
 
 
