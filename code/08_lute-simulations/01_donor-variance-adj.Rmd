@@ -14,6 +14,33 @@ libv <- c("lute", "ggpubr", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 ```
 
+# Simulate donor data
+
+Get the data.frame of simulated donor signals.
+
+```{r}
+df <- donordf <- rand_donor_marker_table(ndonor = 10, gindexv = c(1, 2), 
+                              sd.offset.pos = 5, sd.offset.neg = 5)
+```
+
+## Compare PCA results
+
+Compare PCA plots of adjusted and unadjusted data.
+
+First, get PCA plots of the unadjusted data.
+
+```{r}
+lpca.unadj <- pcaplots_donor(dt = df)
+lpca.unadj$pca.bydonortype$scatterplot.pc1.pc2
+```
+
+```{r}
+df.adj <- donoradj_combat(df, return.type = "donordf")
+# get pca for adj signals
+lpca.adj <- pcaplots_donor(dt = dfadj)
+lpca.adj$pca.bydonortype$scatterplot.pc1.pc2 + ggtitle("Adj. method: combat")
+```
+
 # Experiments
 
 Using the `ComBat` method, vary donor variances using offsets of 5 and 100.
@@ -22,3 +49,5 @@ Using the `ComBat` method, vary donor variances using offsets of 5 and 100.
 lb <- donor_marker_biasexpt(offsetv = c(5, 100), donor.adj.method = "combat")
 knitr::kable(lb$dfres, align = "c")
 ```
+
+
