@@ -46,8 +46,76 @@ lpca.adj$pca.bydonortype$scatterplot.pc1.pc2 + ggtitle("Adj. method: combat")
 Using the `ComBat` method, vary donor variances using offsets of 5 and 100.
 
 ```{r}
-offsetv <- seq(1e-2,5,1e-2)
-lb <- donor_marker_biasexpt(offsetv = offsetv, donor.adj.method = "combat")
+p1v <- seq(0.1, 0.4, 5e-3)
+#offsetv <- seq(1e-1,5,1e-2)
+#offsetv <- sample(offsetv, length(p1v))
+offsetv <- rep(1, length(p1v))
+dfres <- do.call(rbind, lapply(seq(length(offsetv)), function(ii){
+  offi <- offsetv[ii]; p1i <- p1v[ii]
+  lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
+                               donor.adj.method = "combat")
+  lbi$dfres
+}))
 ```
 
+Get bias scatterplot
 
+```{r}
+dfp <- dfres
+dfp$offset <- as.numeric(dfp$offset)
+dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
+ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
+                color = celltype, shape = celltype,
+                size = offset)) +
+  theme_bw() + geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "black")
+ggpt + facet_wrap(~prop.type)
+```
+
+Try with increased offset at 10
+
+```{r}
+p1v <- seq(0.1, 0.4, 5e-3)
+#offsetv <- seq(1e-1,5,1e-2)
+#offsetv <- sample(offsetv, length(p1v))
+offsetv <- rep(10, length(p1v))
+dfres <- do.call(rbind, lapply(seq(length(offsetv)), function(ii){
+  offi <- offsetv[ii]; p1i <- p1v[ii]
+  lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
+                               donor.adj.method = "combat")
+  lbi$dfres
+}))
+dfp <- dfres
+dfp$offset <- as.numeric(dfp$offset)
+dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
+ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
+                color = celltype, shape = celltype,
+                size = offset)) +
+  theme_bw() + geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "black")
+ggpt + facet_wrap(~prop.type)
+```
+
+Try with increased offset at 50
+
+```{r}
+p1v <- seq(0.1, 0.4, 5e-3)
+#offsetv <- seq(1e-1,5,1e-2)
+#offsetv <- sample(offsetv, length(p1v))
+offsetv <- rep(50, length(p1v))
+dfres <- do.call(rbind, lapply(seq(length(offsetv)), function(ii){
+  offi <- offsetv[ii]; p1i <- p1v[ii]
+  lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
+                               donor.adj.method = "combat")
+  lbi$dfres
+}))
+dfp <- dfres
+dfp$offset <- as.numeric(dfp$offset)
+dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
+ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
+                color = celltype, shape = celltype,
+                size = offset)) +
+  theme_bw() + geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "black")
+ggpt + facet_wrap(~prop.type)
+```
