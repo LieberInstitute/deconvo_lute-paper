@@ -17,15 +17,58 @@ save.dpath <- file.path("deconvo_method-paper", "outputs",
                         "08_lute-simulations")
 ```
 
-# Simulate donor data
+# Get PCA summaries
 
-Get the data.frame of simulated donor signals.
+This section shows the impact of varying the donor offset/variance on the results
+of PCA performed on each type and donor. We will use a low offset of one and a 
+high offset of 10, 10 donors, and two markers.
+
+Make the initial, unadjusted donor signals `data.frame`'s for each offset as 
+follows.
 
 ```{r}
-offset <- 5
-df <- donordf <- rand_donor_marker_table(ndonor = 10, gindexv = c(1, 2),
-                                         sd.offset.pos = offset, 
-                                         sd.offset.neg = offset)
+offsetv <- c(1, 10)
+df.unadj <- do.call(rbind, lapply(offsetv, function(offi){
+  dfi <- rand_donor_marker_table(ndonor = 10, gindexv = c(1, 2), 
+                                 sd.offset.pos = offi, sd.offset.neg = offi)
+  dfi$offset <- offi; return(dfi)
+}))
+```
+
+Let's also get the adjusted signals, or the signals adjusted on donor-specific
+variances and preserving type-specific variances using the `sva::ComBat` method.
+
+```{r}
+df.adj <- do.call(rbind, lapply(offsetv, function(offi){
+  dfi <- donoradj_combat(df, return.type = "donordf")
+  dfi$offset <- offi; return(dfi)
+}))
+```
+
+Now combine adjusted and unadjusted data.
+
+```{r}
+# add df type
+df.unadj$expt.type <- "unadj"
+df.adj$expt.type <- "adj"
+# order colnames
+order.cnv <- order(match(colnames(df.adj), colnames(df.unadj)))
+df.adj <- df.adj[,order.cnv]
+# bind together
+df <- rbind(df.unadj, df.adj)
+```
+
+Now perform PCA for each experiment group (offset;type)
+
+```{r}
+df$expt.group <- paste0(df$offset, ";", df$expt.type)
+exptv <- unique(df$expt.group)
+lpca <- lapply(exptv, function(ei){
+  message(ei)
+  dti <- df[df$expt.group==ei,]
+  pcai <- pcaplots_donor(dt = dti)
+  pcai$pca.bydonortype$scatterplot.pc1.pc2
+})
 ```
 
 ## Compare PCA results
