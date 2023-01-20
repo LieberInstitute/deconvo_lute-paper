@@ -105,10 +105,8 @@ to make new deconvolution predictions.
 ```{r}
 dfres <- do.call(rbind, lapply(loff, function(ii){
   do.call(rbind, lapply(seq(length(ii)), function(jj){
-    offi <- ii[jj]; p1i <- p1v[jj]
-    lbi <- donor_marker_biasexpt(offsetv = offi, P = c(p1i, 1-p1i), 
-                               donor.adj.method = "combat")
-    lbi$dfres
+    donor_marker_biasexpt(offsetv = ii[jj], P = c(p1v[jj], 1-p1v[jj]),
+                          donor.adj.method = "combat")$dfres
   }))
 }))
 ```
@@ -125,6 +123,10 @@ ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred,
   theme_bw() + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0, color = "black")
 ggpt + facet_wrap(~prop.type+offset)
+
+plot.fname <- "ggpt-bias_donorbias-1-10_lutesim.jpg"
+jpeg(plot.fname, width = 6, height = 4, units = "in", res = 400)
+ggpt + facet_wrap(~prop.type+offset); dev.off()
 ```
 
 Now let's plot the bias directly for adjusted and unadjusted proportions.
@@ -149,4 +151,8 @@ ggpt <- ggplot(dfp, aes(x = unadj, y = adj, color = celltype)) + theme_bw() +
   geom_vline(xintercept = 0, color = "black") +
   xlab("Unadjusted") + ylab("Bias-adjusted")
 ggpt + facet_wrap(~offset) + ggtitle("Bias by offset amount")
+
+plot.fname <- "ggpt-biasamt_donorbias-1-10_lutesim.jpg"
+jpeg(plot.fname, width = 6, height = 2.5, units = "in", res = 400)
+ggpt + facet_wrap(~offset) + ggtitle("Bias by offset amount"); dev.off()
 ```
