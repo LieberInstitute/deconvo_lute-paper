@@ -53,7 +53,9 @@ ggpca.adj.10 <- pcaplots_donor(dt = df.adj.10)$pca.bydonortype$scatterplot.pc1.p
 Make a composite plot
 
 ```{r}
-pca.leg <- get_legend(ggpca.unadj.1)
+pc1 <- ggpca.unadj.1 + scale_shape_discrete(name = "celltype",
+                                            labels = c("Neuron", "Non-neuron"))
+pca.leg <- get_legend(pc1)
 pc1 <- ggpca.unadj.1 + theme(legend.position = "none") +
   ggtitle("Offset = 1; Unadjusted")
 pc2 <- ggpca.unadj.10 + theme(legend.position = "none") + 
