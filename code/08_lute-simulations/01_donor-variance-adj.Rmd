@@ -75,20 +75,32 @@ dev.off()
 
 Evaluate the impact of the offset on the function of bias~proportions. 
 
-First, define a vector of true proportions for type 1.
+First, we define a vector of true proportions for type 1 which is centered on
+0.75, with a minimum of 0.6 and a maximum of 0.9, with steps of 0.001 in-between.
 
 ```{r}
 p1v <- seq(0.6, 0.9, 1e-3)
 ```
 
-Next, define a series of offsets. We'll look at offsets of 1, 10, and 50.
+Next, we define the donor offsets as either low (1) or high (10). In each case,
+we need to repeat the values to equal the true proportions.
 
 ```{r}
-offset.levels <- c(1, 10, 50)
+offset.levels <- c(1, 10)
 loff <- lapply(offset.levels, function(offi){rep(offi, length(p1v))})
 ```
 
-For each offset series, get the donor bias experiment results.
+Now conduct a donor bias experiment. In each experiment, do the following: 
+
+  * (1) Make a single pseudobulked sample without any between-donor bias/variance
+
+  * (2) Get randomized, raw/unadjusted donor signals, and use these to make new 
+deconvolution predictions.
+
+  * (3) Get adjusted signals from unadjusted signals produced in (2) and use these
+to make new deconvolution predictions.
+
+  * (4) Compare deconvolution predictions from (2) and (3).
 
 ```{r}
 dfres <- do.call(rbind, lapply(loff, function(ii){
