@@ -5,6 +5,7 @@
 # Prepping multiregion brain dataset for analysis.
 
 libv <- c("SingleCellExperiment", "SummarizedExperiment")
+sapply(libv, library, character.only = TRUE)
 
 # manage paths
 code.dname <- "08_lute-simulations"
@@ -13,6 +14,10 @@ save.dpath <- file.path(proj.dname, "outputs", code.dname)
 source.dpath <- file.path(proj.dname, "source")
 script.fname <- "helperfun_tran-et-al.R"
 source(file.path(source.dpath, script.fname))
+
+#--------------
+# prep sce data
+#--------------
 
 # get data
 sce.fname <- "sce-mrb_dlpfc.rda"
@@ -28,6 +33,10 @@ table(sce[["k2"]])
 # neuron  other 
 # 3968   7234
 
+#-------------------
+# get marker objects
+#-------------------
+
 # get markers of cell types
 mr <- get_mean_ratio2(sce, "k2", "logcounts")
 mr.fname <- "markers-k2_db-mr2_sce-dlpfc-mrb.rda"
@@ -36,6 +45,6 @@ save(mr, file = mr.fpath)
 
 # get markers of donors
 mrd <- get_mean_ratio2(sce, "donor", "logcounts")
-mrd.fname <- "markers-k2_db-mr2_sce-dlpfc-mrb.rda"
+mrd.fname <- "markers-donor_db-mr2_sce-dlpfc-mrb.rda"
 mrd.fpath <- file.path(save.dpath, mrd.fname)
 save(mrd, file = mrd.fpath)
