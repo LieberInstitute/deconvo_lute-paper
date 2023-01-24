@@ -28,9 +28,12 @@ follows.
 
 ```{r}
 df.unadj.1 <- rand_donor_marker_table(ndonor = 10, gindexv = c(1, 2),
-                                      sd.offset.pos = 1, sd.offset.neg = 1)
+                                      gamma.pos = 20, gamma.neg = 2)
 df.unadj.10 <- rand_donor_marker_table(ndonor = 10, gindexv = c(1, 2),
-                                      sd.offset.pos = 10, sd.offset.neg = 10)
+                                       lambda.sdoff.pos = 5, 
+                                       lambda.sdoff.neg = 5,
+                                       gamma.pos = 10, 
+                                       gamma.neg = 10)
 ```
 
 Let's also get the adjusted signals, or the signals adjusted on donor-specific
@@ -40,6 +43,28 @@ variances and preserving type-specific variances using the `sva::ComBat` method.
 df.adj.1 <- donoradj_combat(df.unadj.1, return.type = "donordf")
 df.adj.10 <- donoradj_combat(df.unadj.10, return.type = "donordf")
 ```
+
+View and compare the heatmaps in each case.
+
+```{r}
+ldf <- list(df1 = df.unadj.1, 
+            df2 = df.unadj.10,
+            df3 = df.adj.1,
+            df4 = df.adj.10)
+
+lhm <- lapply(ldf, function(dfi){
+  mi <- mexpr_from_donordf(dfi)
+  seti <- SummarizedExperimentTypes(assays = list(counts = mi))
+  hmi <- get_set_heatmap(seti, scale.hmdata = F)
+  return(hmi)
+})
+
+plot.fname <- "chm-list_donor-var-low-high_lute-sim.jpg"
+jpeg(plot.fname, width = 8, height = 8, units = "in", res = 400)
+draw(lhm[[1]] + lhm[[2]] + lhm[[3]] + lhm[[4]])
+dev.off()
+```
+
 
 Now perform PCA for each experiment group (offset;type)
 
@@ -146,8 +171,10 @@ dfp <- data.frame(unadj = df.unadj$bias, adj = df.adj$bias,
 dfp$offset = paste0("offset=",dfp$offset)
 dfp$celltype <- ifelse(dfp$type==1, "Neuron", "Non-neuron")
 # make new plot
-ggpt <- ggplot(dfp, aes(x = unadj, y = adj, color = celltype)) + theme_bw() +
+ggpt <- ggplot(dfp, aes(x = unadj, y = adj, color = celltype,
+                        shape = celltype)) + theme_bw() +
   geom_point(alpha = 0.5, size = 2) + 
+  scale_color_manual(values = c("blue", "red")) +
   geom_abline(slope = 1, intercept = 0, color = "black") +
   geom_hline(yintercept = 0, color = "black") +
   geom_vline(xintercept = 0, color = "black") +
@@ -155,6 +182,8 @@ ggpt <- ggplot(dfp, aes(x = unadj, y = adj, color = celltype)) + theme_bw() +
 ggpt + facet_wrap(~offset) + ggtitle("Bias by offset amount")
 
 plot.fname <- "ggpt-biasamt_donorbias-1-10_lutesim.jpg"
-jpeg(plot.fname, width = 6, height = 2.5, units = "in", res = 400)
-ggpt + facet_wrap(~offset) + ggtitle("Bias by offset amount"); dev.off()
+jpeg(plot.fname, width = 4.5, height = 2.2, units = "in", res = 400)
+ggpt + facet_wrap(~offset) + ggtitle("Deconvolution bias") + 
+  ylab("Donor-adjusted") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off()
 ```
