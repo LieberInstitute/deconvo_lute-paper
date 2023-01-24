@@ -106,36 +106,30 @@ First, we define a vector of true proportions for type 1 which is centered on
 0.75, with a minimum of 0.6 and a maximum of 0.9, with steps of 0.001 in-between.
 
 ```{r}
-p1v <- seq(0.6, 0.9, 1e-3)
-```
-
-Next, we define the donor offsets as either low (1) or high (10). In each case,
-we need to repeat the values to equal the true proportions.
-
-```{r}
-offset.levels <- c(1, 10)
-loff <- lapply(offset.levels, function(offi){rep(offi, length(p1v))})
-```
-
-Now conduct a donor bias experiment. In each experiment, do the following: 
-
-  * (1) Make a single pseudobulked sample without any between-donor bias/variance
-
-  * (2) Get randomized, raw/unadjusted donor signals, and use these to make new 
-deconvolution predictions.
-
-  * (3) Get adjusted signals from unadjusted signals produced in (2) and use these
-to make new deconvolution predictions.
-
-  * (4) Compare deconvolution predictions from (2) and (3).
-
-```{r}
-dfres <- do.call(rbind, lapply(loff, function(ii){
-  do.call(rbind, lapply(seq(length(ii)), function(jj){
-    donor_marker_biasexpt(offsetv = ii[jj], P = c(p1v[jj], 1-p1v[jj]),
-                          donor.adj.method = "combat")$dfres
-  }))
+p1v <- seq(0.6, 0.9, 5e-3)
+dfres <- do.call(rbind, lapply(p1v, function(p1i){
+  Pi <- c(p1i, 1-p1i)
+  df1 <- donor_marker_biasexpt(P = Pi,
+                               donor.adj.method = "combat",
+                               ndonor = 10, 
+                               gindexv = c(1, 2),
+                               gamma.pos = 20, 
+                               gamma.neg = 2,
+                               plot.biasadj = F,
+                               plot.pca = F)$dfres
+  df2 <- donor_marker_biasexpt(P = Pi,
+                               donor.adj.method = "combat",
+                               ndonor = 10, gindexv = c(1, 2),
+                               lambda.sdoff.pos = 5,
+                               lambda.sdoff.neg = 5,
+                               gamma.pos = 10,
+                               gamma.neg = 10,
+                               plot.biasadj = F,
+                               plot.pca = F)$dfres
+  df1$expt <- "low.var"; df2$expt <- "high.var"
+  rbind(df1, df2)
 }))
+
 ```
 
 Let's generate a series of faceted bias scatterplots for each offset level.
@@ -143,7 +137,7 @@ Let's generate a series of faceted bias scatterplots for each offset level.
 ```{r}
 dfp <- dfres
 dfp$prop.type <- ifelse(dfp$prop.type=="padj", "Bias-adjusted", "Unadjusted")
-dfp$offset <- paste0("offset=",dfp$offset)
+dfp$offset <- paste0("expt=",dfp$expt)
 dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
 ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
                 color = celltype, shape = celltype)) +
@@ -162,12 +156,12 @@ Now let's plot the bias directly for adjusted and unadjusted proportions.
 # match results for each expt group/adj type
 df.unadj <- dfres[dfres$prop.type == "punadj",]
 df.adj <- dfres[dfres$prop.type == "padj",]
-df.unadj <- df.unadj[order(df.unadj$prop.true, df.unadj$offset),]
-df.adj <- df.adj[order(df.adj$prop.true, df.unadj$offset),]
+df.unadj <- df.unadj[order(df.unadj$prop.true, df.unadj$expt),]
+df.adj <- df.adj[order(df.adj$prop.true, df.unadj$expt),]
 identical(df.unadj$prop.true, df.adj$prop.true)
 # get plot data
 dfp <- data.frame(unadj = df.unadj$bias, adj = df.adj$bias,
-                  offset = df.unadj$offset, type = df.unadj$type.index)
+                  offset = df.unadj$expt, type = df.unadj$type.index)
 dfp$offset = paste0("offset=",dfp$offset)
 dfp$celltype <- ifelse(dfp$type==1, "Neuron", "Non-neuron")
 # make new plot
