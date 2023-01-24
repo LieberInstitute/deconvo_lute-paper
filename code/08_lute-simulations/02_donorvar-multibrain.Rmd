@@ -14,38 +14,39 @@ libv <- c("lute", "ggpubr", "gridExtra", "DeconvoBuddies", "SingleCellExperiment
 sapply(libv, library, character.only = TRUE)
 
 # manage paths
+# source and save paths
 code.dname <- "08_lute-simulations"
 proj.dname <- "deconvo_method-paper"
 save.dpath <- file.path(proj.dname, "outputs", code.dname)
 source.dpath <- file.path(proj.dname, "source")
-
-# get data
+# single cell experiment
 sce.fname <- "sce-mrb_dlpfc.rda"
 sce.fpath <- file.path(save.dpath, sce.fname)
-sce <- get(load(sce.fpath))
+# cell type markers
 mr.fname <- "markers-k2_db-mr2_sce-dlpfc-mrb.rda"
 mr.fpath <- file.path(save.dpath, mr.fname)
+# donor markers
+mrd.fname <- "markers-donor_db-mr2_sce-dlpfc-mrb.rda"
+mrd.fpath <- file.path(save.dpath, mrd.fname)
+```
+
+Load the `SingleCellExperiment` object containing multi-region brain DLPFC data,
+and marker datasets for cell types and donors, respectively.
+
+```{r}
+# get data
+sce <- get(load(sce.fpath))
 mr <- get(load(mr.fpath))
+mrd <- get(load(mrd.fpath))
 ```
 
-# Get multibrain data
-
-Loads the multibrain dataset from Tran et al 2021.
+Get donor-wise summaries using `lute`.
 
 ```{r}
-sce <- get(load("SCE_DLPFC-n3_tran-etal.rda"))
-```
+assays(sce)$logcounts <- as.matrix(assays(sce)$logcounts)
 
-```{r}
-names(assays(sce))
-```
-
-```{r}
-table(sce[["k2"]])
-```
-
-```{r}
-
+set <- set_from_sce(sce, group.variable = "donor", type.variable = "k2",
+                    assayname = "logcounts")
 ```
 
 # Get PCA summaries
