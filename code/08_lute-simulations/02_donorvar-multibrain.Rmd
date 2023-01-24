@@ -10,15 +10,35 @@ appropriate coefficients from observations.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("lute", "ggpubr", "gridExtra")
+libv <- c("lute", "ggpubr", "gridExtra", "DeconvoBuddies", "SingleCellExperiment")
 sapply(libv, library, character.only = TRUE)
-save.dpath <- file.path("deconvo_method-paper", "outputs", 
-                        "08_lute-simulations")
+
+# manage paths
+code.dname <- "08_lute-simulations"
+proj.dname <- "deconvo_method-paper"
+save.dpath <- file.path(proj.dname, "outputs", code.dname)
+source.dpath <- file.path(proj.dname, "source")
+
+#script.fname <- "helperfun_tran-et-al.R"
+# source(file.path(source.dpath, script.fname))
+#source(script.fname)
 ```
 
 # Get multibrain data
 
 Loads the multibrain dataset from Tran et al 2021.
+
+```{r}
+sce <- get(load("SCE_DLPFC-n3_tran-etal.rda"))
+```
+
+```{r}
+names(assays(sce))
+```
+
+```{r}
+table(sce[["k2"]])
+```
 
 ```{r}
 
