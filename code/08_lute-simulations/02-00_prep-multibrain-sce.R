@@ -28,8 +28,14 @@ table(sce[["k2"]])
 # neuron  other 
 # 3968   7234
 
-# get markers
+# get markers of cell types
 mr <- get_mean_ratio2(sce, "k2", "logcounts")
 mr.fname <- "markers-k2_db-mr2_sce-dlpfc-mrb.rda"
 mr.fpath <- file.path(save.dpath, mr.fname)
 save(mr, file = mr.fpath)
+
+# get markers of donors
+mrd <- get_mean_ratio2(sce, "donor", "logcounts")
+mrd.fname <- "markers-k2_db-mr2_sce-dlpfc-mrb.rda"
+mrd.fpath <- file.path(save.dpath, mrd.fname)
+save(mrd, file = mrd.fpath)
