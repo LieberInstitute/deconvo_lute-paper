@@ -16,7 +16,13 @@ save.dpath <- file.path("deconvo_method-paper", "outputs",
                         "08_lute-simulations")
 ```
 
+# Get multibrain data
 
+Loads the multibrain dataset from Tran et al 2021.
+
+```{r}
+
+```
 
 # Get PCA summaries
 
