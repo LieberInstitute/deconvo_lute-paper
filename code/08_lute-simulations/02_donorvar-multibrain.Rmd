@@ -40,176 +40,74 @@ mr <- get(load(mr.fpath))
 mrd <- get(load(mrd.fpath))
 ```
 
+Get top 20 genes per type
+
+```{r}
+library(dplyr)
+type.variable <- "k2"
+ngenes.per.k <- 20
+typev <- unique(sce[["k2"]])
+ma.top <- do.call(rbind, lapply(typev, function(typei){
+    mr %>% filter(cellType.target == typei) %>% arrange(rank_ratio) %>%
+      top_n(n = ngenes.per.k)
+}))
+scef <- sce[ma.top$gene,]
+```
+
+
 Get donor-wise summaries using `lute`.
 
 ```{r}
-assays(sce)$logcounts <- as.matrix(assays(sce)$logcounts)
+assays(scef)$logcounts <- as.matrix(assays(scef)$logcounts)
 
-set <- set_from_sce(sce, group.variable = "donor", type.variable = "k2",
-                    assayname = "logcounts")
+di <- sce_groupstat(scef, group.variable = "k2", 
+                    summarytype = "colData",
+                    assayname = "logcounts", 
+                    return.tall = TRUE)
+
+di <- sce_groupstat(scef, group.variable = "k2", 
+                    summarytype = "rowData",
+                    assayname = "logcounts", 
+                    return.tall = TRUE)
 ```
 
-# Get PCA summaries
-
-This section shows the impact of varying the donor offset/variance on the results
-of PCA performed on each type and donor. We will use a low offset of one and a 
-high offset of 10, 10 donors, and two markers.
-
-Make the initial, unadjusted donor signals `data.frame`'s for each offset as 
-follows.
-
 ```{r}
-df.unadj.1 <- rand_donor_marker_table(ndonor = 10, gindexv = c(1, 2),
-                                      gamma.pos = 20, gamma.neg = 2)
-df.unadj.10 <- rand_donor_marker_table(ndonor = 10, gindexv = c(1, 2),
-                                       lambda.sdoff.pos = 5, 
-                                       lambda.sdoff.neg = 5,
-                                       gamma.pos = 10, 
-                                       gamma.neg = 10)
+set <- set_from_sce(scef, type.variable = "k2", assayname = "logcounts")
 ```
 
-Let's also get the adjusted signals, or the signals adjusted on donor-specific
-variances and preserving type-specific variances using the `sva::ComBat` method.
-
 ```{r}
-df.adj.1 <- donoradj_combat(df.unadj.1, return.type = "donordf")
-df.adj.10 <- donoradj_combat(df.unadj.10, return.type = "donordf")
+ma <- as.matrix(assays(scef)$logcounts)
+groupv.cd <- scef[["donor"]]
+typev.cd <- scef[["k2"]]
+ddf <- donordf_from_mexpr(ma, groupv.cd = groupv.cd, typev.cd = typev.cd)
+
+ddf.fname <- "donordf-sce_dlpfc-mrb.rda"
+save(ddf, file = ddf.fname)
 ```
 
-View and compare the heatmaps in each case.
-
 ```{r}
-ldf <- list(df1 = df.unadj.1, 
-            df2 = df.unadj.10,
-            df3 = df.adj.1,
-            df4 = df.adj.10)
-
-lhm <- lapply(ldf, function(dfi){
-  mi <- mexpr_from_donordf(dfi)
-  seti <- SummarizedExperimentTypes(assays = list(counts = mi))
-  hmi <- get_set_heatmap(seti, scale.hmdata = F)
-  return(hmi)
-})
-
-plot.fname <- "chm-list_donor-var-low-high_lute-sim.jpg"
-jpeg(plot.fname, width = 8, height = 8, units = "in", res = 400)
-draw(lhm[[1]] + lhm[[2]] + lhm[[3]] + lhm[[4]])
-dev.off()
-```
+ddf.fname <- "donordf-sce_dlpfc-mrb.rda"
+ddf <- get(load(ddf.fname))
 
 
-Now perform PCA for each experiment group (offset;type)
 
-```{r}
-ggpca.unadj.1 <- pcaplots_donor(dt = df.unadj.1)$pca.bydonortype$scatterplot.pc1.pc2
-ggpca.unadj.10 <- pcaplots_donor(dt = df.unadj.10)$pca.bydonortype$scatterplot.pc1.pc2
-ggpca.adj.1 <- pcaplots_donor(dt = df.adj.1)$pca.bydonortype$scatterplot.pc1.pc2
-ggpca.adj.10 <- pcaplots_donor(dt = df.adj.10)$pca.bydonortype$scatterplot.pc1.pc2
-```
 
-Make a composite plot
+plot.biasadj <- T
+P <- c(0.75, 0.25)
+verbose = T
+cname.donorsummary <- "donor.mean"
+donor.adj.method = "combat"
+df <- random_donordf(ndonor = 1, gindexv = c(rep(1, 20), rep(2, 20)),
+                     lambda.sdoff.pos = 0, lambda.sdoff.neg = 0)
+ktotal <- length(P)
+Z <- matrix(df[,"donor1"], ncol = ktotal)
+Ypb <- ypb_fromtypes(Z = Z, P = P)
 
-```{r}
-pc1 <- ggpca.unadj.1 + scale_shape_discrete(name = "celltype",
-                                            labels = c("Neuron", "Non-neuron"))
-pca.leg <- get_legend(pc1)
-pc1 <- ggpca.unadj.1 + theme(legend.position = "none") +
-  ggtitle("Offset = 1; Unadjusted")
-pc2 <- ggpca.unadj.10 + theme(legend.position = "none") + 
-  ggtitle("Offset = 10; Unadjusted")
-pc3 <- ggpca.adj.1 + theme(legend.position = "none") +
-  ggtitle("Offset = 1; Bias-adjusted")
-pc4 <- ggpca.adj.10 + theme(legend.position = "none") +
-  ggtitle("Offset = 10; Bias-adjusted")
+type.indexv <- seq(ktotal)
+donor.unadj <- ddf[,cname.donorsummary] # get donor summary datas
+lbias <- biasexpt(df = ddf, Ypb = Ypb, P = P, 
+                  donor.unadj = donor.unadj,
+                  donor.adj.method = donor.adj.method,
+                  plot.biasadj = plot.biasadj, verbose = verbose)
 
-lm <- matrix(c(1, 3, 1, 3, 2, 4, 2, 4, 5, 5, 5, 5), nrow = 2)
-
-plot.fname <- "ggpca-composite_donor-offset-1-10_lutesim.jpg"
-jpeg(plot.fname, width = 8, height = 5, units = "in", res = 400)
-grid.arrange(pc1, pc2, pc3, pc4, pca.leg, layout_matrix = lm)
-dev.off()
-
-```
-# Impact of offset on bias~proportions
-
-Evaluate the impact of the offset on the function of bias~proportions. 
-
-First, we define a vector of true proportions for type 1 which is centered on
-0.75, with a minimum of 0.6 and a maximum of 0.9, with steps of 0.001 in-between.
-
-```{r}
-p1v <- seq(0.6, 0.9, 5e-3)
-dfres <- do.call(rbind, lapply(p1v, function(p1i){
-  Pi <- c(p1i, 1-p1i)
-  df1 <- donor_marker_biasexpt(P = Pi,
-                               donor.adj.method = "combat",
-                               ndonor = 10, 
-                               gindexv = c(1, 2),
-                               gamma.pos = 20, 
-                               gamma.neg = 2,
-                               plot.biasadj = F,
-                               plot.pca = F)$dfres
-  df2 <- donor_marker_biasexpt(P = Pi,
-                               donor.adj.method = "combat",
-                               ndonor = 10, gindexv = c(1, 2),
-                               lambda.sdoff.pos = 5,
-                               lambda.sdoff.neg = 5,
-                               gamma.pos = 10,
-                               gamma.neg = 10,
-                               plot.biasadj = F,
-                               plot.pca = F)$dfres
-  df1$expt <- "low.var"; df2$expt <- "high.var"
-  rbind(df1, df2)
-}))
-
-```
-
-Let's generate a series of faceted bias scatterplots for each offset level.
-
-```{r}
-dfp <- dfres
-dfp$prop.type <- ifelse(dfp$prop.type=="padj", "Bias-adjusted", "Unadjusted")
-dfp$offset <- paste0("expt=",dfp$expt)
-dfp$celltype <- ifelse(dfp$type.index==1, "Neuron", "Non-neuron")
-ggpt <- ggplot(dfp, aes(x = prop.true, y = prop.pred, 
-                color = celltype, shape = celltype)) +
-  theme_bw() + geom_point(alpha = 0.5) +
-  geom_abline(slope = 1, intercept = 0, color = "black")
-ggpt + facet_wrap(~prop.type+offset)
-
-plot.fname <- "ggpt-bias_donorbias-1-10_lutesim.jpg"
-jpeg(plot.fname, width = 6, height = 4, units = "in", res = 400)
-ggpt + facet_wrap(~prop.type+offset); dev.off()
-```
-
-Now let's plot the bias directly for adjusted and unadjusted proportions.
-
-```{r}
-# match results for each expt group/adj type
-df.unadj <- dfres[dfres$prop.type == "punadj",]
-df.adj <- dfres[dfres$prop.type == "padj",]
-df.unadj <- df.unadj[order(df.unadj$prop.true, df.unadj$expt),]
-df.adj <- df.adj[order(df.adj$prop.true, df.unadj$expt),]
-identical(df.unadj$prop.true, df.adj$prop.true)
-# get plot data
-dfp <- data.frame(unadj = df.unadj$bias, adj = df.adj$bias,
-                  offset = df.unadj$expt, type = df.unadj$type.index)
-dfp$offset = paste0("offset=",dfp$offset)
-dfp$celltype <- ifelse(dfp$type==1, "Neuron", "Non-neuron")
-# make new plot
-ggpt <- ggplot(dfp, aes(x = unadj, y = adj, color = celltype,
-                        shape = celltype)) + theme_bw() +
-  geom_point(alpha = 0.5, size = 2) + 
-  scale_color_manual(values = c("blue", "red")) +
-  geom_abline(slope = 1, intercept = 0, color = "black") +
-  geom_hline(yintercept = 0, color = "black") +
-  geom_vline(xintercept = 0, color = "black") +
-  xlab("Unadjusted") + ylab("Bias-adjusted")
-ggpt + facet_wrap(~offset) + ggtitle("Bias by offset amount")
-
-plot.fname <- "ggpt-biasamt_donorbias-1-10_lutesim.jpg"
-jpeg(plot.fname, width = 4.5, height = 2.2, units = "in", res = 400)
-ggpt + facet_wrap(~offset) + ggtitle("Deconvolution bias") + 
-  ylab("Donor-adjusted") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-dev.off()
 ```
