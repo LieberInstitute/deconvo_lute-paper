@@ -5,6 +5,11 @@ date: "2023-01-26"
 output: html_document
 ---
 
+```{r}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
+```
+
 Compare and summarize HALO size estimates by slide.
 
 # Load data
@@ -21,8 +26,8 @@ ha <- get(load(ha.fpath))
 Get the k2 and k3 cell types.
 
 ```{r}
-ha$k2 <- ifelse(ha$cell_type %in% c("Excit|Inhib"), "neuron", "non-neuron")
-ha$k3 <- ifelse(ha$cell_type %in% c("Excit|Inhib"), "neuron",
+ha$k2 <- ifelse(ha$cell_type %in% c("Excit", "Inhib"), "neuron", "non-neuron")
+ha$k3 <- ifelse(ha$cell_type %in% c("Excit", "Inhib"), "neuron",
                 ifelse(ha$cell_type %in% c("Other"), "other", "glial"))
 ```
 
@@ -31,36 +36,74 @@ ha$k3 <- ifelse(ha$cell_type %in% c("Excit|Inhib"), "neuron",
 ## Global summaries
 
 ```{r}
-
-
-
-
+dfp <- ha
+ggbox <- ggplot(dfp, aes(x = SAMPLE_ID, y = Nucleus_Area)) + geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+jpeg("ggbox-sample_nucarea-bycell-bycombo_halo-all.jpg", 
+     width = 12, height = 6, units = "in", res = 400)
+ggbox + facet_wrap(~Combo + cell_type, nrow = 2)
+dev.off()
 ```
 
-## ANOVA
+```{r}
+dfp <- ha
+ggbox <- ggplot(dfp, aes(x = Slide, y = Nucleus_Area)) + geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+jpeg("ggbox-slide_nucarea-bycell-bycombo_halo-all.jpg", 
+     width = 7, height = 4, units = "in", res = 400)
+ggbox + facet_wrap(~Combo + cell_type, nrow = 2)
+dev.off()
+```
+
+## ANOVAs on `Nucleus_Area`
+
+### Basic models
 
 Use `cell_type`
 
 ```{r}
-av1 <- anova(lm(Nucleus_Area ~ Slide + cell_type*SAMPLE_ID, data = ha))
+av1 <- anova(lm(Nucleus_Area ~ cell_type + Slide + SAMPLE_ID, data = ha))
 av1
 ```
 
 Use `k2`
 
 ```{r}
-av2 <- anova(lm(Nucleus_Area ~ Slide + k2*SAMPLE_ID, data = ha))
+av2 <- anova(lm(Nucleus_Area ~ k2 + Slide + SAMPLE_ID, data = ha))
 av2
 ```
 
 Use `k3`
 
 ```{r}
-av3 <- anova(lm(Nucleus_Area ~ Slide + k3*SAMPLE_ID, data = ha))
+av3 <- anova(lm(Nucleus_Area ~ k3 + Slide + SAMPLE_ID, data = ha))
 av3
 ```
 
+### Complex models
+
+```{r}
+av1 <- anova(lm(Nucleus_Area ~ cell_type + Slide + Combo + Position + BrNum, data = ha))
+av1
+```
+
+```{r}
+av2 <- anova(lm(Nucleus_Area ~ k2 + Slide + Combo + Position + BrNum, data = ha))
+av2
+```
+
+```{r}
+av3 <- anova(lm(Nucleus_Area ~ k3 + Slide + Combo + Position + BrNum, data = ha))
+av3
+```
+
+
 ## Summaries by slide
+
+```{r}
+
+```
+
 
 ```{r}
 slidev <- unique(ha$SAMPLE_ID)
