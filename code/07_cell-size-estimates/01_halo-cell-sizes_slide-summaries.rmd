@@ -1,0 +1,23 @@
+---
+title: "01_halo-cell-sizes_slide-summaries"
+author: "Sean Maden"
+date: "2023-01-26"
+output: html_document
+---
+
+Compare and summarize HALO size estimates by slide.
+
+# Load data
+
+Use the results files found at: `~./Human_DLFPC_Deconvolution/processed_data/03_HALO/halo_all.Rdata`
+
+```{r}
+ha.fpath <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
+ha <- get(load(ha.fpath))
+```
+
+# Figures
+
+```{r}
+# ha <- get(load("halo_all.Rdata))
+```
