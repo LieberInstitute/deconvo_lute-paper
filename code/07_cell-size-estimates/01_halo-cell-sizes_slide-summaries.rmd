@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r}
-libv <- c("ggplot2")
+libv <- c("ggplot2", "ggcorrplot", "gridExtra", "ggpubr")
 sapply(libv, library, character.only = T)
 ```
 
@@ -101,11 +101,6 @@ av3
 ## Summaries by slide
 
 ```{r}
-
-```
-
-
-```{r}
 slidev <- unique(ha$SAMPLE_ID)
 dfs <- do.call(rbind, lapply(slidev, function(si){
   hai <- ha[ha$SAMPLE_ID==si,]
@@ -125,6 +120,36 @@ dfs <- do.call(rbind, lapply(slidev, function(si){
                glare = unique(haii$Glare))
   }))
 }))
+```
+
+```{r}
+
+lcor <- list()
+for(cti in unique(dfs$celltype)){
+  dfsi <- dfs[dfs$celltype==cti,]
+  mcori <- dfsi[,c("nuc_area_median", "nuc_perim_median", "akt3_copies_median")]
+  colnames(mcori) <- c("NuclearArea", "NuclearPerim", "AKT3Copies")
+  mcori <- cor(mcori, use = "pairwise.complete.obs", method = "spearman")
+  ggcorri <- ggcorrplot(mcori, type = "lower", lab = T, title = cti)
+  lcor[[cti]] <- ggcorri
+}
+
+lcor[["leg"]] <- get_legend(lcor[[1]])
+lcor[["blank"]] <- ggplot() + geom_blank()
+for(i in seq(7)){lcor[[i]] <- lcor[[i]] + theme(legend.position = "blank")}
+
+
+
+lm <- matrix(c(1,2,3,4,5,6,7,8,9,9), nrow = 2)
+jpeg("ggcor-cellsizes_bycelltype_halo-all.jpg", 
+     width = 10, height = 6, units = "in", res = 400)
+grid.arrange(lcor[[1]], lcor[[2]], lcor[[3]], lcor[[4]], 
+             lcor[[5]], lcor[[6]], lcor[[7]], lcor[["blank"]], 
+             lcor[["leg"]],
+             layout_matrix = lm, nrow = 2)
+dev.off()
+
+
 
 ```
 
