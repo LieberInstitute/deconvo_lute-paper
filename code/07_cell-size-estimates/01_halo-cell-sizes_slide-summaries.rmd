@@ -16,6 +16,75 @@ ha.fpath <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 ha <- get(load(ha.fpath))
 ```
 
+# Process HALO data
+
+Get the k2 and k3 cell types.
+
+```{r}
+ha$k2 <- ifelse(ha$cell_type %in% c("Excit|Inhib"), "neuron", "non-neuron")
+ha$k3 <- ifelse(ha$cell_type %in% c("Excit|Inhib"), "neuron",
+                ifelse(ha$cell_type %in% c("Other"), "other", "glial"))
+```
+
+# Summary statistics
+
+## Global summaries
+
+```{r}
+
+
+
+
+```
+
+## ANOVA
+
+Use `cell_type`
+
+```{r}
+av1 <- anova(lm(Nucleus_Area ~ Slide + cell_type*SAMPLE_ID, data = ha))
+av1
+```
+
+Use `k2`
+
+```{r}
+av2 <- anova(lm(Nucleus_Area ~ Slide + k2*SAMPLE_ID, data = ha))
+av2
+```
+
+Use `k3`
+
+```{r}
+av3 <- anova(lm(Nucleus_Area ~ Slide + k3*SAMPLE_ID, data = ha))
+av3
+```
+
+## Summaries by slide
+
+```{r}
+slidev <- unique(ha$SAMPLE_ID)
+dfs <- do.call(rbind, lapply(slidev, function(si){
+  hai <- ha[ha$SAMPLE_ID==si,]
+  ctv <- unique(hai$cell_type)
+  total_cells <- nrow(hai)
+  dfc <- do.call(rbind, lapply(ctv, function(ci){
+    haii <- hai[hai$cell_type==ci,]
+    data.frame(slide = si,
+               celltype = ci,
+               k2 = ifelse(ci %in% c("Inhib|Excit"), "neuron",
+                           ifelse(ci %in% c("Other"), "other", "glial")),
+               num_cells = nrow(haii),
+               fract_cells_slide = nrow(haii)/total_cells,
+               nuc_area_median = median(haii$Nucleus_Area),
+               nuc_perim_median = median(haii$Nucleus_Perimeter),
+               akt3_copies_median = median(haii$AKT3_Copies),
+               glare = unique(haii$Glare))
+  }))
+}))
+
+```
+
 # Figures
 
 ```{r}
