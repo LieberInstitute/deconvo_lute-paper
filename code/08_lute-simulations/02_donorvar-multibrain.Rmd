@@ -5,12 +5,13 @@ date: "2023-01-19"
 output: html_document
 ---
 
-Evaluate the multibrain DLPFC dataset, and repeat donor variance simulations with
-appropriate coefficients from observations.
+Analyzes data from top markers in DLPFC multi-region brain dataset (Tran et al 2021).
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("lute", "ggpubr", "gridExtra", "DeconvoBuddies", "SingleCellExperiment")
+libv <- c("lute", "ggpubr", "gridExtra", "ggrepel",
+          "SingleCellExperiment", "SummarizedExperiment",
+          "glmGamPoi")
 sapply(libv, library, character.only = TRUE)
 
 # manage paths
@@ -19,95 +20,170 @@ code.dname <- "08_lute-simulations"
 proj.dname <- "deconvo_method-paper"
 save.dpath <- file.path(proj.dname, "outputs", code.dname)
 source.dpath <- file.path(proj.dname, "source")
-# single cell experiment
-sce.fname <- "sce-mrb_dlpfc.rda"
-sce.fpath <- file.path(save.dpath, sce.fname)
-# cell type markers
-mr.fname <- "markers-k2_db-mr2_sce-dlpfc-mrb.rda"
-mr.fpath <- file.path(save.dpath, mr.fname)
-# donor markers
-mrd.fname <- "markers-donor_db-mr2_sce-dlpfc-mrb.rda"
-mrd.fpath <- file.path(save.dpath, mrd.fname)
+
+# load scef
+scef.fname <- "scef-mrb_gmr2-k2-t20_dlpfc.rda"
+scef <- get(load(file.path(save.dpath, scef.fname)))
 ```
 
-Load the `SingleCellExperiment` object containing multi-region brain DLPFC data,
-and marker datasets for cell types and donors, respectively.
+Format the assay matrices.
 
 ```{r}
-# get data
-sce <- get(load(sce.fpath))
-mr <- get(load(mr.fpath))
-mrd <- get(load(mrd.fpath))
+for(ai in names(assays(scef))){
+  assays(scef)[[ai]] <- as.matrix(assays(scef)[[ai]])
+}
 ```
 
-Get top 20 genes per type
+# Get donor-wise summary statistics by cell types.
 
 ```{r}
-library(dplyr)
-type.variable <- "k2"
-ngenes.per.k <- 20
-typev <- unique(sce[["k2"]])
-ma.top <- do.call(rbind, lapply(typev, function(typei){
-    mr %>% filter(cellType.target == typei) %>% arrange(rank_ratio) %>%
-      top_n(n = ngenes.per.k)
+groupstatv <- c("count", "zerocount", "var")
+dfs.short <- sce_groupstat(scef, group.variable = "donor", type.variable = "k2",
+                     groupstat = groupstatv, summarytype = "colData",
+                     return.tall = FALSE, assayname = "logcounts")
+dfs.tall <- sce_groupstat(scef, group.variable = "donor", type.variable = "k2",
+                     groupstat = groupstatv, summarytype = "colData",
+                     return.tall = TRUE, assayname = "logcounts")
+```
+
+# Plot donor variances by cell types
+
+Plot variances by type
+
+```{r}
+# barplot
+ggbp <- ggplot(dfs.tall, aes(x = group, y = var, fill = group)) +
+  geom_bar(stat = "identity") + theme_bw()
+ggbp + facet_wrap(~type, ncol = 1)
+```
+
+```{r}
+# scatterplot
+# prep dfp
+dfp <- as.data.frame(t(dfs.short))
+for(i in seq(2)){dfp[,i] <- as.numeric(dfp[,i])}
+dfp <- dfp[grepl(".*var$", rownames(dfp)),]
+colnames(dfp) <- dfs.short$type
+dfp$group <- gsub(";.*", "", rownames(dfp))
+# make plot object
+ggpt <- ggplot(dfp, aes(x = neuron, y = other, color = group)) +
+  geom_point(alpha = 0.5, size = 3) +  theme_bw() +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  xlim(0, 0.2) + ylim(0, 0.2) +
+  geom_label_repel(aes(label = group), box.padding   = 0.35, 
+                  point.padding = 0.5, segment.color = 'black') +
+  theme(legend.position = "none") +
+  ggtitle("Variance by donor")
+ggpt
+```
+# Donor variances by marker
+
+Get variance summaries by donor, for each marker and type.
+
+## Donor variance summaries by type, across genes
+
+```{r}
+groupstatv <- c("count", "zerocount", "var", "mean")
+dfs.short <- sce_groupstat(scef, group.variable = "donor", type.variable = "k2",
+                     groupstat = groupstatv, summarytype = "rowData",
+                     return.tall = FALSE, assayname = "logcounts")
+dfs.tall <- sce_groupstat(scef, group.variable = "donor", type.variable = "k2",
+                     groupstat = groupstatv, summarytype = "rowData",
+                     return.tall = TRUE, assayname = "logcounts")
+```
+
+## Plot donor variances across genes
+
+Make a violin plot, jittered scatter plot, and boxplot
+
+```{r}
+dfp <- dfs.tall
+
+# get plot objects
+# violin plots
+ggvp <- ggplot(dfp, aes(x = group, y = var, color = group)) +
+  geom_violin(draw_quantiles = 0.5) + theme_bw() +
+  theme(legend.position = "none")
+# jitter plots
+ggbox <- ggplot(dfp, aes(x = group, y = var, color = group)) +
+  geom_boxplot() + theme_bw() +
+  theme(legend.position = "none")
+# boxplots
+dfp.hline <- do.call(rbind, lapply(unique(dfp$group), function(gi){
+  data.frame(group = gi, hline = median(dfp[dfp$group==gi,]$var))
 }))
-scef <- sce[ma.top$gene,]
+ggjp <- ggplot(dfp, aes(x = group, y = var, color = group)) +
+  geom_jitter(alpha = 0.5, position = position_jitter(width = 0.15)) + 
+  theme_bw() +
+  theme(legend.position = "none") +
+  geom_point(data = dfp.hline, aes(x = group, y = hline), 
+             shape=95, size=25, color = "black", alpha = 0.5)
+
+ggvp
+ggbox
+ggjp
 ```
 
-
-Get donor-wise summaries using `lute`.
+Make scatter plot of variances by types.
 
 ```{r}
-assays(scef)$logcounts <- as.matrix(assays(scef)$logcounts)
+# scatterplot
+# prep dfp
+dfp <- data.frame(other = dfs.tall[dfs.tall$type=="other",]$var,
+                  neuron = dfs.tall[dfs.tall$type=="neuron",]$var,
+                  group = dfs.tall[dfs.tall$type=="other",]$group)
 
-di <- sce_groupstat(scef, group.variable = "k2", 
-                    summarytype = "colData",
-                    assayname = "logcounts", 
-                    return.tall = TRUE)
+ggpt <- ggplot(dfp, aes(x = neuron, y = other, color = group)) +
+  geom_point(alpha = 0.5) + theme_bw() +
+  geom_abline(slope = 1, intercept = 0, color = "black")
 
-di <- sce_groupstat(scef, group.variable = "k2", 
-                    summarytype = "rowData",
-                    assayname = "logcounts", 
-                    return.tall = TRUE)
+ggpt 
+ggpt + facet_wrap(~group, nrow = 1)
 ```
 
+Scatter plot of dispersion (mean vs. variance)
+
 ```{r}
-set <- set_from_sce(scef, type.variable = "k2", assayname = "logcounts")
+dfp <- dfs.tall
+
+ggpt <- ggplot(dfp, aes(x = mean, y = var)) + theme_bw() +
+  geom_abline(slope = 1, intercept = 0, color = "black")
+
+ggpt + geom_point(alpha = 0.5)
+
+ggpt + geom_point(data = dfp, alpha = 0.5, aes(color = group))
+
+ggpt.sm <- ggpt + geom_smooth(aes(color = group))
+ggpt.sm
+
+ggpt.sm + facet_wrap(~group) + theme(legend.position = "none")
+
+ggpt.sm + facet_wrap(~type + group) + theme(legend.position = "none")
+
+ggpt.fw <- ggpt + geom_point(data = dfp, alpha = 0.5, aes(color = group)) + 
+  facet_wrap(~type + group, nrow = 2) + theme(legend.position = "none")
+ggpt.fw
+
+ggpt.fw + geom_smooth(color = "purple")
+  
 ```
 
-```{r}
-ma <- as.matrix(assays(scef)$logcounts)
-groupv.cd <- scef[["donor"]]
-typev.cd <- scef[["k2"]]
-ddf <- donordf_from_mexpr(ma, groupv.cd = groupv.cd, typev.cd = typev.cd)
+# Use `gmlGamPoi` to extract distribution information
 
-ddf.fname <- "donordf-sce_dlpfc-mrb.rda"
-save(ddf, file = ddf.fname)
+## Fit NB on cells
+
+```{r}
+fit <- glm_gp(assays(scef)$logcounts, on_disk = FALSE)
+summary(fit)
 ```
 
+## Fit NB on donors
+
 ```{r}
-ddf.fname <- "donordf-sce_dlpfc-mrb.rda"
-ddf <- get(load(ddf.fname))
-
-
-
-
-plot.biasadj <- T
-P <- c(0.75, 0.25)
-verbose = T
-cname.donorsummary <- "donor.mean"
-donor.adj.method = "combat"
-df <- random_donordf(ndonor = 1, gindexv = c(rep(1, 20), rep(2, 20)),
-                     lambda.sdoff.pos = 0, lambda.sdoff.neg = 0)
-ktotal <- length(P)
-Z <- matrix(df[,"donor1"], ncol = ktotal)
-Ypb <- ypb_fromtypes(Z = Z, P = P)
-
-type.indexv <- seq(ktotal)
-donor.unadj <- ddf[,cname.donorsummary] # get donor summary datas
-lbias <- biasexpt(df = ddf, Ypb = Ypb, P = P, 
-                  donor.unadj = donor.unadj,
-                  donor.adj.method = donor.adj.method,
-                  plot.biasadj = plot.biasadj, verbose = verbose)
-
+groupstatv = c("mean")
+scef[["donor"]] <- as.character(scef[["donor"]])
+scef[["k2"]] <- as.character(scef[["k2"]])
+dfs <- sce_groupstat(scef, group.variable = "donor", type.variable = "k2",
+                     groupstat = groupstatv, summarytype = "rowData",
+                     return.tall = FALSE, assayname = "logcounts")
 ```
