@@ -42,11 +42,16 @@ knitr::kable(as.data.frame(table(sce[["ctbroad"]])))
 
 Plot mean vs. variance for counts expression.
 
+```{r}
+assayname <- "counts"
+```
+
 ## Global mean vs. var
 
 Plot global expression means and variances.
 
 ```{r}
+title.str <- paste0("All genes, ", assayname)
 me <- counts(sce)
 df <- data.frame(var = rowVars(me), mean = rowMeans(me))
 ```
@@ -56,7 +61,7 @@ Plot points and smooths of all genes.
 ```{r}
 ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "blue") + theme_bw() + 
-  geom_smooth()
+  geom_smooth() + ggtitle(title.str)
 ```
 
 ## Global mean vs. var -- trimmed
@@ -64,8 +69,9 @@ ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) +
 Plot the trimmed (<= 90th quantile) global means and variances.
 
 ```{r}
+title.str <- paste0("Trimmed (<=Q90) genes, ", assayname)
 filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
-filt <- filt | df$var <= quantile(df$var, seq(0,1,0.1))[10]
+filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1))[10]
 df.trim <- df[filt,]
 ```
 
@@ -74,7 +80,7 @@ Plot points and smooths of all genes.
 ```{r}
 ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "blue") + theme_bw() + 
-  geom_smooth()
+  geom_smooth() + ggtitle(title.str)
 ```
 
 
@@ -83,6 +89,7 @@ ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) +
 Show means and variances by broad cell type.
 
 ```{r}
+title.str <- paste0("All genes, ", assayname)
 ctv <- unique(sce[["ctbroad"]])
 df <- do.call(rbind, lapply(ctv, function(ci){
   me <- counts(sce[,sce[["ctbroad"]]==ci])
@@ -94,12 +101,13 @@ df <- do.call(rbind, lapply(ctv, function(ci){
 ```{r}
 ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth() + facet_wrap(~ct)
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
 ```
 
 ```{r}
 ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
-  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() +
+  ggtitle(title.str)
 ```
 
 ## Dispersion by cell type, trimmed
@@ -107,20 +115,22 @@ ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
 Show trimmed (<= 90th quantile) means and variances by broad cell type.
 
 ```{r}
+title.str <- paste0("Trimmed (<=Q90) genes, ", assayname)
 filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
-filt <- filt | df$var <= quantile(df$var, seq(0,1,0.1))[10]
+filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1))[10]
 df.trim <- df[filt,]
 ```
 
 ```{r}
 ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth() + facet_wrap(~ct)
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
 ```
 
 ```{r}
 ggplot(df.trim, aes(x = mean, y = var, color = ct)) + geom_smooth() +
-  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() +
+  ggtitle(title.str)
 ```
 
 ## Dispersion by cell type, donor
@@ -128,6 +138,7 @@ ggplot(df.trim, aes(x = mean, y = var, color = ct)) + geom_smooth() +
 Plot mean and variance summaries by donor.
 
 ```{r}
+title.str <- paste0("All genes, ", assayname)
 ctv <- unique(sce[["ctbroad"]])
 dv <- unique(sce[["donor"]])
 df <- do.call(rbind, lapply(ctv, function(ci){
@@ -142,13 +153,13 @@ df <- do.call(rbind, lapply(ctv, function(ci){
 ```{r}
 ggplot(df, aes(x = mean, y = var, color = donor)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth() + facet_wrap(~ct)
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
 ```
 
 ```{r}
 ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  facet_wrap(~donor)
+  facet_wrap(~donor) + ggtitle(title.str)
 ```
 
 ## Dispersion by cell type, donor -- trimmed
@@ -156,32 +167,38 @@ ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
 Plot trimmed (<= 90th quantile filtered) means and variances by donor.
 
 ```{r}
+title.str <- paste0("Trimmed (<=Q90) genes, ", title.str)
 filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
-filt <- filt | df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
+filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
 df.trim <- df[filt,]
 ```
 
 ```{r}
 ggplot(df.trim, aes(x = mean, y = var, color = donor)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth() + facet_wrap(~ct)
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
 ```
 
 ```{r}
 ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  facet_wrap(~donor)
+  facet_wrap(~donor) + ggtitle(title.str)
 ```
 
 # Dispersion of logcounts
 
 Show mean and variance summaries for logcounts expression.
 
+```{r}
+assayname <- "logcounts"
+```
+
 ## Global mean vs. var
 
 Plot mean and variance summaries across all cells.
 
 ```{r}
+title.str <- paste0("All genes, ", assayname)
 me <- logcounts(sce)
 df <- data.frame(var = rowVars(me), mean = rowMeans(me))
 ```
@@ -189,7 +206,7 @@ df <- data.frame(var = rowVars(me), mean = rowMeans(me))
 ```{r}
 ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth()
+  geom_smooth() + ggtitle(title.str)
 ```
 
 ## Global mean vs. var -- trimmed
@@ -197,6 +214,7 @@ ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) +
 Plot the trimmed mean and variance summaries across all cells.
 
 ```{r}
+title.str <- paste0("Trimmed (<=Q90) genes, ", assayname)
 filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
 filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
 df.trim <- df[filt,]
@@ -205,7 +223,7 @@ df.trim <- df[filt,]
 ```{r}
 ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth()
+  geom_smooth() + ggtitle(title.str)
 ```
 
 ## Dispersion by cell type
@@ -213,6 +231,7 @@ ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) +
 Plot the mean and variance summaries by cell type.
 
 ```{r}
+title.str <- paste0("All genes, ", assayname)
 ctv <- unique(sce[["ctbroad"]])
 df <- do.call(rbind, lapply(ctv, function(ci){
   me <- logcounts(sce[,sce[["ctbroad"]]==ci])
@@ -223,12 +242,13 @@ df <- do.call(rbind, lapply(ctv, function(ci){
 ```{r}
 ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth() + facet_wrap(~ct)
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
 ```
 
 ```{r}
 ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
-  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() +
+  ggtitle(title.str)
 ```
 
 ## Dispersion by cell type -- trimmed
@@ -236,6 +256,7 @@ ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
 Plot the trimmed mean and variance summaries by cell type.
 
 ```{r}
+title.str <- paste0("Trimmed (<=Q90) genes, ", assayname)
 filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
 filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
 df.trim <- df[filt,]
@@ -244,27 +265,26 @@ df.trim <- df[filt,]
 ```{r}
 ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth() + facet_wrap(~ct)
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
 ```
 
 ```{r}
 ggplot(df.trim, aes(x = mean, y = var, color = ct)) + geom_smooth() +
-  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() +
+  ggtitle(title.str)
 ```
 
 # Dispersion by cell type, donor
 
 ```{r}
+title.str <- paste0("All genes, ", assayname)
 ctv <- unique(sce[["ctbroad"]])
 dv <- unique(sce[["donor"]])
 df <- do.call(rbind, lapply(ctv, function(ci){
   do.call(rbind, lapply(dv, function(di){
-    filt <- sce[["ctbroad"]]==ci & sce[["donor"]]==di
-    me <- logcounts(sce[,filt])
-    df <- data.frame(var = rowVars(me, na.rm = T), 
-                     mean = rowMeans(me, na.rm = T))
-    df$ct <- ci; df$donor <- di
-    df
+    filt <- sce[["ctbroad"]]==ci & sce[["donor"]]==di; me <- logcounts(sce[,filt])
+    df <- data.frame(var = rowVars(me, na.rm = T), mean = rowMeans(me, na.rm = T))
+    df$ct <- ci; df$donor <- di; df
   }))
 }))
 ```
@@ -272,11 +292,32 @@ df <- do.call(rbind, lapply(ctv, function(ci){
 ```{r}
 ggplot(df, aes(x = mean, y = var, color = donor)) + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  geom_smooth() + facet_wrap(~ct)
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
 ```
 
 ```{r}
 ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
   geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
-  facet_wrap(~donor)
+  facet_wrap(~donor) + ggtitle(title.str)
+```
+
+# Dispersion by cell type, donor -- trimmed
+
+```{r}
+title.str <- paste0("Trimmed (<=Q90) genes, ", assayname)
+filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
+filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
+df.trim <- df[filt,]
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = donor)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct) + ggtitle(title.str)
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  facet_wrap(~donor) + ggtitle(title.str)
 ```
