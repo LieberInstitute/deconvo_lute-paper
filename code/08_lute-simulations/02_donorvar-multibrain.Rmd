@@ -34,6 +34,24 @@ for(ai in names(assays(scef))){
 }
 ```
 
+# Plot cell types
+
+Excitatory neurons
+
+```{r}
+typevar <- "is.excit"
+scef[[typevar]] <- ifelse(grepl("^Excit.*", scef[["cellType"]]), TRUE, FALSE)
+groupstatv <- c("count", "zerocount", "var")
+dfs.short <- sce_groupstat(scef, group.variable = "donor", type.variable = typevar,
+                     groupstat = groupstatv, summarytype = "colData",
+                     return.tall = FALSE, assayname = "logcounts")
+dfs.tall <- sce_groupstat(scef, group.variable = "donor", type.variable = typevar,
+                     groupstat = groupstatv, summarytype = "colData",
+                     return.tall = TRUE, assayname = "logcounts")
+```
+
+# Plot k2
+
 # Get donor-wise summary statistics by cell types.
 
 ```{r}

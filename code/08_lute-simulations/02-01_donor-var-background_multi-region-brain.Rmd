@@ -1,0 +1,282 @@
+---
+title: "multiregion brain, donor var background"
+author: "Sean Maden"
+date: "2023-01-30"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("SingleCellExperiment", "SummarizedExperiment", "lute", "ggplot2")
+sapply(libv, library, character.only = TRUE)
+```
+
+# Prepare dataset
+
+Load data
+
+```{r}
+code.dname <- "08_lute-simulations"
+proj.dname <- "deconvo_method-paper"
+save.dpath <- file.path(proj.dname, "outputs", code.dname)
+sce.fname <- "sce-mrb_dlpfc.rda"
+sce.fpath <- file.path(save.dpath, sce.fname)
+sce <- get(load(sce.fpath))
+```
+
+Get broad cell types
+
+```{r}
+ctvarname <- "cellType"
+sce[["cellType"]] <- as.character(sce[["cellType"]])
+sce[["ctbroad"]] <- ifelse(grepl("Excit", sce[[ctvarname]]), "Excit",
+                           ifelse(grepl("Inhib", sce[[ctvarname]]), "Inhib",
+                                  sce[[ctvarname]]))
+```
+
+```{r}
+knitr::kable(as.data.frame(table(sce[["ctbroad"]])))
+```
+
+# Dispersion of counts
+
+Plot mean vs. variance for counts expression.
+
+## Global mean vs. var
+
+Plot global expression means and variances.
+
+```{r}
+me <- counts(sce)
+df <- data.frame(var = rowVars(me), mean = rowMeans(me))
+```
+
+Plot points and smooths of all genes.
+
+```{r}
+ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "blue") + theme_bw() + 
+  geom_smooth()
+```
+
+## Global mean vs. var -- trimmed
+
+Plot the trimmed (<= 90th quantile) global means and variances.
+
+```{r}
+filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
+filt <- filt | df$var <= quantile(df$var, seq(0,1,0.1))[10]
+df.trim <- df[filt,]
+```
+
+Plot points and smooths of all genes.
+
+```{r}
+ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "blue") + theme_bw() + 
+  geom_smooth()
+```
+
+
+## Dispersion by cell type
+
+Show means and variances by broad cell type.
+
+```{r}
+ctv <- unique(sce[["ctbroad"]])
+df <- do.call(rbind, lapply(ctv, function(ci){
+  me <- counts(sce[,sce[["ctbroad"]]==ci])
+  df <- data.frame(var = rowVars(me), mean = rowMeans(me))
+  df$ct <- ci; df
+}))
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct)
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+```
+
+## Dispersion by cell type, trimmed
+
+Show trimmed (<= 90th quantile) means and variances by broad cell type.
+
+```{r}
+filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
+filt <- filt | df$var <= quantile(df$var, seq(0,1,0.1))[10]
+df.trim <- df[filt,]
+```
+
+```{r}
+ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct)
+```
+
+```{r}
+ggplot(df.trim, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+```
+
+## Dispersion by cell type, donor
+
+Plot mean and variance summaries by donor.
+
+```{r}
+ctv <- unique(sce[["ctbroad"]])
+dv <- unique(sce[["donor"]])
+df <- do.call(rbind, lapply(ctv, function(ci){
+  do.call(rbind, lapply(dv, function(di){
+    filt <- sce[["ctbroad"]]==ci & sce[["donor"]]==di; me <- counts(sce[,filt])
+    df <- data.frame(var = rowVars(me, na.rm = T), mean = rowMeans(me, na.rm = T))
+    df$ct <- ci; df$donor <- di; df
+  }))
+}))
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = donor)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct)
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  facet_wrap(~donor)
+```
+
+## Dispersion by cell type, donor -- trimmed
+
+Plot trimmed (<= 90th quantile filtered) means and variances by donor.
+
+```{r}
+filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
+filt <- filt | df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
+df.trim <- df[filt,]
+```
+
+```{r}
+ggplot(df.trim, aes(x = mean, y = var, color = donor)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct)
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  facet_wrap(~donor)
+```
+
+# Dispersion of logcounts
+
+Show mean and variance summaries for logcounts expression.
+
+## Global mean vs. var
+
+Plot mean and variance summaries across all cells.
+
+```{r}
+me <- logcounts(sce)
+df <- data.frame(var = rowVars(me), mean = rowMeans(me))
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth()
+```
+
+## Global mean vs. var -- trimmed
+
+Plot the trimmed mean and variance summaries across all cells.
+
+```{r}
+filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
+filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
+df.trim <- df[filt,]
+```
+
+```{r}
+ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth()
+```
+
+## Dispersion by cell type
+
+Plot the mean and variance summaries by cell type.
+
+```{r}
+ctv <- unique(sce[["ctbroad"]])
+df <- do.call(rbind, lapply(ctv, function(ci){
+  me <- logcounts(sce[,sce[["ctbroad"]]==ci])
+  df <- data.frame(var = rowVars(me), mean = rowMeans(me));df$ct <- ci; df
+}))
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct)
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+```
+
+## Dispersion by cell type -- trimmed
+
+Plot the trimmed mean and variance summaries by cell type.
+
+```{r}
+filt <- df$mean <= quantile(df$mean, seq(0,1,0.1))[10]
+filt <- filt & df$var <= quantile(df$var, seq(0,1,0.1), na.rm = T)[10]
+df.trim <- df[filt,]
+```
+
+```{r}
+ggplot(df.trim, aes(x = mean, y = var)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct)
+```
+
+```{r}
+ggplot(df.trim, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw()
+```
+
+# Dispersion by cell type, donor
+
+```{r}
+ctv <- unique(sce[["ctbroad"]])
+dv <- unique(sce[["donor"]])
+df <- do.call(rbind, lapply(ctv, function(ci){
+  do.call(rbind, lapply(dv, function(di){
+    filt <- sce[["ctbroad"]]==ci & sce[["donor"]]==di
+    me <- logcounts(sce[,filt])
+    df <- data.frame(var = rowVars(me, na.rm = T), 
+                     mean = rowMeans(me, na.rm = T))
+    df$ct <- ci; df$donor <- di
+    df
+  }))
+}))
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = donor)) + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  geom_smooth() + facet_wrap(~ct)
+```
+
+```{r}
+ggplot(df, aes(x = mean, y = var, color = ct)) + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0, color = "red") + theme_bw() + 
+  facet_wrap(~donor)
+```
