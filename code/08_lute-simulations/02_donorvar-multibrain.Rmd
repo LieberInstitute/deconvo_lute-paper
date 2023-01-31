@@ -24,6 +24,7 @@ source.dpath <- file.path(proj.dname, "source")
 # load scef
 scef.fname <- "scef-mrb_gmr2-k2-t20_dlpfc.rda"
 scef <- get(load(file.path(save.dpath, scef.fname)))
+
 ```
 
 Format the assay matrices.
