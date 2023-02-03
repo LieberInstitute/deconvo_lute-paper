@@ -21,9 +21,6 @@ sapply(libv, library, character.only = TRUE)
 code.dname <- "08_lute-simulations"
 proj.dname <- "deconvo_method-paper"
 save.dpath <- file.path(proj.dname, "outputs", code.dname)
-# get marker data
-# dfm.fname <- "markers-k2_db-mr2_sce-dlpfc-mrb.rda"
-# dfm <- get(load(file.path(save.dpath, dfm.fname)))
 # get sce
 sce.fname <- "sce-mrb_dlpfc.rda"
 sce.fpath <- file.path(save.dpath, sce.fname)
@@ -318,3 +315,14 @@ save(sce, file = file.path(save.dpath, sce.fname))
 #-----------------------------
 # get heatmaps and set objects
 #-----------------------------
+sce.fname <- "sce_batch-adj_analysis-results_mrb-dlpfc.rda"
+sce <- get(load(file.path(save.dpath, sce.fname)))
+
+ai <- "counts_adj"
+mexpr <- assays(sce)[[ai]]
+assays(sce)[[ai]] <- as.matrix(mexpr)
+set1 <- set_from_sce(sce, assayname = ai, type.variable = "k2", get.group.stat = FALSE)
+
+
+
+
