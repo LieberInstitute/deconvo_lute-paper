@@ -7,9 +7,10 @@
 #
 #
 
-libv <- c("scuttle", "dplyr", "ggplot2", "ggforce", 
+libv <- c("scuttle", "dplyr", "limma", "ggplot2", "ggforce", 
           "glmGamPoi", "sva", "DeconvoBuddies",
-          "SingleCellExperiment", "SummarizedExperiment")
+          "SingleCellExperiment", "SummarizedExperiment",
+          "limma")
 sapply(libv, library, character.only = TRUE)
 
 
@@ -34,73 +35,66 @@ sce <- get(load(sce.fpath))
 for(ii in names(assays(sce))){
   assays(sce)[[ii]] <- as.matrix(assays(sce)[[ii]])}
 
-#---------------------
-# perform downsampling
-#---------------------
-mct <- assays(sce)[["counts"]]
-# mlc <- assays(sce)[["logcounts"]]
+# do limma removeBatchEffect
+# mexpr <- assays(sce)[["counts"]]
+# pheno <- data.frame(donor = sce[["donor"]], type = sce[["k2"]])
+# mod <- model.matrix(~type, data = pheno)
+# mi.adj <- removeBatchEffect(mexpr, batch = pheno$donor, covariates = mod)
+# mi.adj[mi.adj < 0] <- 0 # convert negative values
 
-# downsample on proportions vector
-# assays(sce)[["counts_ds-mat"]] <- mexpr_downsample(mct)
-# assays(sce)[["logcounts_ds-mat"]] <- mexpr_downsample(mlc)
-# downsample on batches -- donors
-# assays(sce)[["counts_ds-donor"]] <- downsampleBatches(mct, batch = sce[["donor"]])
-# assays(sce)[["logcounts_ds-donor"]] <- downsampleBatches(mlc, batch = sce[["donor"]])
+# do combat-seq adjustment
+# mexpr <- assays(sce)[["counts_ds"]]
+# cnv <- colnames(sce)
+# pheno <- data.frame(donor = sce[["donor"]], 
+#                    type = sce[["k2"]])
+# mod <- model.matrix(~type, data = pheno)
+# mi.adj <- ComBat_seq(counts = mexpr, batch = pheno$donor, group = pheno$type)
+
+# do combat adjustment
+mexpr <- assays(sce)[["counts"]]
+cnv <- colnames(sce)
+pheno <- data.frame(donor = sce[["donor"]], 
+                    type = sce[["k2"]])
+mod <- model.matrix(~type, data = pheno)
+mi.adj <- ComBat(dat = mexpr, batch = pheno$donor, mod = mod)
+mi.adj[mi.adj < 0] <- 0 # convert negative values
+# append to sce
+assays(sce)[["counts_combat"]] <- mi.adj
 
 # downsample on batches -- cell types
 # note: downsample across donors within each time, then aggregate
 assayname <- "counts"; typevar <- "k2"; batchvar <- "donor"
 utypev <- unique(sce[[typevar]])
+
+old.assay.name <- "counts_combat"
+new.assay.name <- "counts_adj"
+# iterate on types; downsample donors, then bind sce subsets/scef
 sce <- do.call(cbind, lapply(utypev, function(ti){
-  sce.filt <- sce[[typevar]]==ti; scef <- sce[,sce.filt]
-  batchv <- scef[[batchvar]]; mexpr <- assays(scef)[[assayname]]
+  # filter sce
+  sce.filt <- sce[[typevar]]==ti
+  scef <- sce[,sce.filt]
+  # get filtered data
+  batchv <- scef[[batchvar]]
+  mexpr <- assays(scef)[[old.assay.name]]
+  # downsample
   mexpr.ds <- downsampleBatches(mexpr, batch = batchv)
-  assays(scef)[[paste0(assayname, "_ds")]] <- mexpr.ds 
+  assays(scef)[[new.assay.name]] <- mexpr.ds 
   scef
 }))
 
-# save
-sce.fname <- "sce_ds-assays_mrb-dlpfc.rda"
-save(sce, file = file.path(save.dpath, sce.fname))
+# append metadata
+assays(sce) <- assays(sce)[names(assays(sce) %in% c("counts", "counts_adj"))]
+metadata(sce)[["adj_method"]] <- "combat"
+metadata(sce)[["ds_method"]] <- list(package = "scuttle",
+                                     funct = "downsampleBatches",
+                                     typevar = "k2", groupvar = "donor")
 
-#---------------
-# perform combat
-#---------------
-assayv <- c("counts", "counts_ds")
-for(ai in assayv){
-  message("Working on assay: ", ai)
-  mi <- assays(sce)[[ai]]; cnv <- colnames(sce)
-  pheno <- data.frame(donor = sce[["donor"]], type = sce[["k2"]])
-  mod <- model.matrix(~type, data = pheno)
-  batch <- pheno$donor
-  mi.adj <- ComBat(dat = mi, batch = batch, mod = mod, 
-                   par.prior = TRUE, prior.plots = FALSE)
-  assays(sce)[[paste0(ai, "_combat")]] <- mi.adj
-}
-
-# convert negative values
-assayname <- "counts_ds_combat"
-me <- assays(sce)[[assayname]]
-me[me < 0] <- 0
-assays(sce)[[assayname]] <- me
-
-# filter sce -- cleanup unused assays
-#assays.remove <- paste0(rep(c("counts", "logcounts"), 2), 
-#                        rep(c("_ds-mat", "_ds-donor"), each = 2))
-assays.remove <- c("logcounts", "counts_ds")
-assays(sce) <- assays(sce)[!names(assays(sce)) %in% assays.remove]
-
-# save
-sce.fname <- "sce_combat-ds-assays_mrb-dlpfc.rda"
-save(sce, file = file.path(save.dpath, sce.fname))
-
-#-------------------
-# get top 20 markers
-#-------------------
+# get top markers
 # get markers with mean ratios
-sce <- logNormCounts(sce, assay.type = "counts_ds_combat")
-mr <- get_mean_ratio2(sce, assay_name = "logcounts", cellType_col = "k2")
-
+celltypevar <- "k2"
+sce <- logNormCounts(sce, assay.type = "counts_adj")
+mr <- get_mean_ratio2(sce, assay_name = "logcounts", 
+                      cellType_col = celltypevar)
 # get top 20 markers from results
 nmarker <- 20
 typev <- unique(mr$cellType.target)
@@ -108,23 +102,93 @@ mr20 <- do.call(rbind, lapply(typev, function(typei){
   mr %>% filter(cellType.target == typei) %>% 
     arrange(rank_ratio) %>% top_n(n = nmarker)
 }))
-
 # store in sce
 metadata(sce)[["k2.markers"]] <- list(all = mr, top20 = mr20)
 
-# save sce with marker data
-sce.fname <- "sce_combat-ds-assays_mrb-dlpfc.rda"
-save(sce, file = file.path(save.dpath, sce.fname))
+#--------------------
+# analyze dispersions
+#--------------------
+# plot dispersions
+ldi <- sce_dispersion(sce, group.data = "k2", 
+                      assayname = "counts_adj",
+                      downsample = FALSE,
+                      highlight.markers = mr20$gene,
+                      hl.color = "red", point.alpha = 0.01,
+                      hl.alpha = 1, ref.linecol = "black")
+ldi$ggplot.dispersion
+# append to sce data
+metadata(sce)[["dispersion.counts_adj"]] <- ldi
 
-#-------------------
-# analysis functions
-#------------------
+# get dispersions by type
+# compare dispersion coefficients from fitted neg binom 
+# parse params
+typevar <- "k2"; marker.name <- "k2_top20"
+assay.name <- "counts_adj"
+# get bg genes
+num.genes.bg <- 1000
+bg.name <- paste0("bg_", num.genes.bg)
+genes.samplev <- sample(seq(nrow(sce)), num.genes.bg)
+# get marker genes
+genes.markerv <- metadata(sce)[["k2.markers"]][["top20"]]$gene
+# define categories
+catv <- c(unique(typev), "all") 
+# get plot data
+dfp <- do.call(rbind, lapply(catv, function(typei){
+  # parse filter
+  type.filt <- seq(ncol(sce))
+  if(!typei == "all"){type.filt <- sce[[typevar]] == typei}
+  scef <- sce[,type.filt]
+  
+  # get dispersions
+  mexpr <- assays(scef)[[assay.name]]
+  lglm.bg <- glm_gp(mexpr[genes.samplev,], on_disk = F)
+  lglm.top20 <- glm_gp(mexpr[genes.markerv,], on_disk = F)
+  
+  # get plot data
+  dfp1 <- data.frame(disp = lglm.bg$overdispersions)
+  dfp1$marker.type <- bg.name
+  dfp2 <- data.frame(disp = lglm.top20$overdispersions)
+  dfp2$marker.type <- marker.name
+  dfp <- rbind(dfp1, dfp2)
+  dfp$celltype <- typei
+  return(dfp)
+}))
+# set return list
+ldisp <- list(dfp = dfp)
 
-library(limma)
+# boxplots at 3 zoom levels
+ldisp[["ggbox"]] <- list()
+ldisp[["ggbox"]][["zoom1"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
+  geom_boxplot() + facet_wrap(~celltype)
+ldisp[["ggbox"]][["zoom2"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
+  geom_boxplot() + facet_wrap(~celltype) + ylim(0, 350)
+ldisp[["ggbox"]][["zoom3"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
+  geom_boxplot() + facet_wrap(~celltype) + ylim(0, 50)
 
+# jitter plots at 3 zoom levels
+ldisp[["ggjitter"]] <- list()
+ldisp[["ggjitter"]][["zoom1"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
+  geom_jitter(alpha = 0.5) + 
+  stat_summary(geom = "crossbar", fun = "median", color = "red") + 
+  facet_wrap(~celltype)
+ldisp[["ggjitter"]][["zoom2"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
+  geom_jitter(alpha = 0.5) + 
+  stat_summary(geom = "crossbar", fun = "median", color = "red") + 
+  facet_wrap(~celltype) + ylim(0, 350)
+ldisp[["ggjitter"]][["zoom3"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
+  geom_jitter(alpha = 0.5) + 
+  stat_summary(geom = "crossbar", fun = "median", color = "red") + 
+  facet_wrap(~celltype) + ylim(0, 50)
+
+# append to sce
+metadata(sce)[["dispersion.comparisons"]] <- ldisp
+
+#---------------
+# analyze anovas
+#---------------
 # ngene.sample = 5000
-get_anova_df <- function(sce, ngene.sample = NULL, seed.num = 0,
-                         assayv = c("counts", "counts_ds_combat")){
+get_anova_df <- function(sce, ngene.sample = 2000, seed.num = 0,
+                         assayv = c("counts", "counts_adj")){
   set.seed(seed.num)
   lr <- lgg <- lggj <- lggpt <- list()
   if(is(ngene.sample, "NULL")){
@@ -175,27 +239,27 @@ get_anova_df <- function(sce, ngene.sample = NULL, seed.num = 0,
   lggj[["celltype"]] <- 
     ggplot(dfa.all, aes(x = assay, y = perc.var.celltype)) +
     geom_jitter(alpha = 0.5) + ggtitle(title.str) +
-    stat_summary(geom = "crossbar", fun = "mean", color = "red") +
+    stat_summary(geom = "crossbar", fun = "median", color = "red") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     facet_zoom(ylim = c(0, 10))
   # plot donor perc var
   lggj[["donor"]] <- ggplot(dfa.all, aes(x = assay, y = perc.var.donor)) +
     geom_jitter(alpha = 0.5) + ggtitle(title.str) +
-    stat_summary(geom = "crossbar", fun = "mean", color = "red") +
+    stat_summary(geom = "crossbar", fun = "median", color = "red") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     facet_zoom(ylim = c(0, 2))
   # plot celltype.donor perc var
   lggj[["celltype.donor"]] <- 
     ggplot(dfa.all, aes(x = assay, y = perc.var.celltype.donor)) +
     geom_jitter(alpha = 0.5) + ggtitle(title.str) +
-    stat_summary(geom = "crossbar", fun = "mean", color = "red") +
+    stat_summary(geom = "crossbar", fun = "median", color = "red") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     facet_zoom(ylim = c(0, 2))
   # plot residuals perc var  
   lggj[["residuals"]] <- 
     ggplot(dfa.all, aes(x = assay, y = perc.var.residuals)) +
     geom_jitter(alpha = 0.5) + ggtitle(title.str) +
-    stat_summary(geom = "crossbar", fun = "mean", color = "red") +
+    stat_summary(geom = "crossbar", fun = "median", color = "red") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     facet_zoom(ylim = c(90, 100))
   
@@ -242,41 +306,15 @@ get_anova_df <- function(sce, ngene.sample = NULL, seed.num = 0,
 # get anova analysis
 lanova <- get_anova_df(sce)
 
-# save
-fname <- paste0("anova-results_mrb-dlpfc.rda")
-save(lanova, file = file.path(save.dpath, fname))
+# append to sce object
+metadata(sce)[["anova.analysis"]] <- lanova
 
-#----------------------------
-# get dispersion test results
-#----------------------------
-mr.hl <- metadata(sce)[["k2.markers"]][["top20"]]
-markerv <- unique(mr.hl$gene)
-assayv <- c("counts", "counts_ds_combat")
+#--------------
+# save sce data
+#--------------
+sce.fname <- "sce_batch-adj_analysis-results_mrb-dlpfc.rda"
+save(sce, file = file.path(save.dpath, sce.fname))
 
-lld <- lapply(assayv, function(ai){
-  message("working on assay: ", ai, "...")
-  ldi <- sce_dispersion(sce, group.data = "k2", assayname = ai,
-                        highlight.markers = mr.hl$gene, downsample = FALSE,
-                        hl.color = "red", point.alpha = 0.01,
-                        hl.alpha = 1, ref.linecol = "black")
-  lf.all <- mexpr_nbcoef(as.matrix(assays(scef)[[ai]]))
-  lf.k2 <- mexpr_nbcoef(as.matrix(assays(sce[mr.hl$gene,])[[ai]]))
-  #ldi[["nb.fit"]] <- list(all.sub = lf.all, markers.k2 = lf.k2)
-  return(ldi)
-})
-names(lld) <- assayv
-
-# save
-fname <- "dispersion-results_mrb-dlpfc.rda"
-save(lld, file = file.path(save.dpath, fname))
-
-#-------------------------
-# get overdispersion plots
-#-------------------------
-# counts
-mct <- assays(sce)[]
-lf.all <- mexpr_nbcoef(mf1)
-
-
-
-
+#-----------------------------
+# get heatmaps and set objects
+#-----------------------------
