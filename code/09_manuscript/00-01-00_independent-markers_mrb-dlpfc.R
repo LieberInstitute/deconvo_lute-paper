@@ -5,7 +5,7 @@
 #
 #
 
-libv <- c("lute", "scuttle", "dplyr", "limma", "ggplot2", "ggforce", 
+libv <- c("lute", "scuttle", "dplyr", "limma", "ggplot2", "ggforce", "gridExtra",
           "glmGamPoi", "sva", "DeconvoBuddies",
           "SingleCellExperiment", "SummarizedExperiment",
           "limma")
@@ -129,9 +129,23 @@ for(markeri in marker.typev){
   message("finished with marker ", markeri)
 }
 
+# returns:
+# working on marker: k2...
+# doing combat adj...
+# Found 7406 genes with uniform expression within a single batch (all zeros); these will not be adjusted for batch.
+# ...
+# working on marker: k3...
+# doing combat adj...
+# Found 7406 genes with uniform expression within a single batch (all zeros); these will not be adjusted for batch.
+# ...
+
+
+
 #------------------------
 # run dispersion analyses
 #------------------------
+set.seed(0) # for sampling from bg
+
 # run workflow
 for(markeri in marker.typev){
   message("loading the data...")
@@ -160,7 +174,9 @@ for(markeri in marker.typev){
                              downsample = FALSE, point.alpha = 0.01,
                              ref.linecol = ref.linecol,
                              smooth.linecol = smooth.linecol)
-  plot.fname <- paste0("ggpt-mean-var_",markeri,"-",assayname.adj,"_ro1-dlpfc.jpg")
+  plot.fname <- paste0("ggpt-mean-var_",markeri,"-",
+                       gsub("_", "-", assayname.adj),
+                       "_ro1-dlpfc.jpg")
   jpeg(file.path(save.dpath, plot.fname), width = 8, height = 3.5, units = "in", res = 400)
   print(disp.adj$ggplot.dispersion); dev.off()
   # append results to metadata
@@ -168,50 +184,109 @@ for(markeri in marker.typev){
   metadata(scei)[["disp_mean-var_adj"]] <- disp.adj
   
   message("analyzing dispersions from nb fits...") 
-  # parse params
-  typevar <- "k2"; marker.name <- "k2_top20"
-  assay.name <- "counts_adj"
-  # get bg genes
-  
+  # labels
+  marker.name <- "top_markers"
   bg.name <- paste0("bg_", num.genes.bg)
+  # get bg genes
   genes.samplev <- sample(seq(nrow(sce)), num.genes.bg)
   # get marker genes
-  genes.markerv <- metadata(sce)[["k2.markers"]][["top20"]]$gene
+  genes.markerv <- metadata(sce)[["markers"]][["top"]]$gene
   # define categories
+  typev <- sce[[markeri]]
   catv <- c(unique(typev), "all") 
   # get plot data
+  assayv <- c(assayname.unadj, assayname.adj)
   dfp <- do.call(rbind, lapply(catv, function(typei){
     # parse filter
-    type.filt <- seq(ncol(sce))
-    if(!typei == "all"){type.filt <- sce[[typevar]] == typei}
-    scef <- sce[,type.filt]
-    # get dispersions
-    mexpr <- assays(scef)[[assay.name]]
-    lglm.bg <- glm_gp(mexpr[genes.samplev,], on_disk = F)
-    lglm.top20 <- glm_gp(mexpr[genes.markerv,], on_disk = F)
-    # get plot data
-    dfp1 <- data.frame(disp = lglm.bg$overdispersions)
-    dfp1$marker.type <- bg.name
-    dfp2 <- data.frame(disp = lglm.top20$overdispersions)
-    dfp2$marker.type <- marker.name
-    dfp <- rbind(dfp1, dfp2)
-    dfp$celltype <- typei
-    return(dfp)
+    type.filt <- seq(ncol(scei))
+    if(!typei == "all"){type.filt <- scei[[markeri]] == typei}
+    scef <- scei[,type.filt]
+    # iterate on assays
+    dfpi <- do.call(rbind, lapply(assayv, function(assayi){
+      # get dispersions
+      mexpr <- assays(scef)[[assayi]]
+      lglm.bg <- glm_gp(mexpr[genes.samplev,], on_disk = F)
+      lglm.top <- glm_gp(mexpr[genes.markerv,], on_disk = F)
+      # get plot data
+      dfp1 <- data.frame(disp = lglm.bg$overdispersions)
+      dfp1$marker.type <- bg.name
+      dfp2 <- data.frame(disp = lglm.top$overdispersions)
+      dfp2$marker.type <- marker.name
+      dfp <- rbind(dfp1, dfp2)
+      dfp$assay <- assayi
+      return(dfp)
+    }))
+    dfpi$celltype <- typei
+    return(dfpi)
   }))
   # set return list
   ldisp <- list(dfp = dfp)
-  # boxplots at 3 zoom levels
-  ldisp[["ggbox"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
-    geom_boxplot() + facet_wrap(~celltype)
-  # jitter plots at 3 zoom levels
-  ldisp[["ggjitter"]] <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
-    geom_jitter(alpha = 0.5) + 
-    stat_summary(geom = "crossbar", fun = "median", color = "red") + 
-    facet_wrap(~celltype)
   # append to sce
   metadata(sce)[["dispersion_fits"]] <- ldisp
   
-  # save
+  message("saving updated sce object...")
   save(sce, file = file.path(save.dpath, sce.fname))
-  
+  message("finished with marker group ", markeri, ".")
 }
+
+# make new dispersion boxplots
+for(markeri in marker.typev){
+  message("working on marker ", markeri, "...")
+  message("loading the data...")
+  sce.fname <- paste0("sce_marker-adj-",markeri,"_mrb-dlpfc.rda")
+  sce.fpath <- file.path(save.dpath, sce.fname)
+  scei <- get(load(sce.fpath))
+  
+  # get plot data
+  dfp <- metadata(scei)[["dispersion_fits"]][["dfp"]]
+  
+  # boxplots with manual ylim, facet on celltype;assay
+  plot1 <- ggplot(dfp, aes(x = marker.type, y = disp)) + 
+    theme_bw() + geom_boxplot() + ylim(0, 100) +
+    facet_wrap(~celltype+assay, nrow = 2) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  fname <- paste0("ggbox_bg1k-vs-topmarkers-",markeri,"_mrb-dlpfc.jpg")
+  jpeg(file.path(save.dpath, fname), width = 8, height = 4, 
+       units = "in", res = 400)
+  print(plot1); dev.off()
+  
+  # boxplots with zooms, use facet zoom
+  for(typei in unique(dfp$celltype)){
+    ymax.zoom <- 15
+    yaxis.title <- paste0(paste0(rep(" ", 15), collapse = ""), "Dispersion")
+    fname <- paste0("ggbox-",typei,
+                    "_bg1k-vs-topmarkers-",markeri,
+                    "_mrb-dlpfc.jpg")
+    title.str <- paste0("Unadj. counts, ", typei)
+    
+    dfp.filt <- dfp$assay=="counts" & dfp$celltype==typei
+    dfpf <- dfp[dfp.filt,]
+    plot2.1 <- ggplot(dfpf, aes(x = marker.type, y = disp)) + 
+      theme_bw() + geom_boxplot() + facet_zoom(ylim = c(0, ymax.zoom)) +
+      ggtitle(title.str) +
+      theme(axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_blank())
+    title.str <- paste0("Adj. counts, ", typei)
+    
+    dfp.filt <- dfp$assay=="counts_adj" & dfp$celltype==typei
+    dfpf <- dfp[dfp.filt,]
+    plot2.2 <- ggplot(dfpf, aes(x = marker.type, y = disp)) + 
+      theme_bw() + geom_boxplot() + facet_zoom(ylim = c(0, ymax.zoom)) +
+      ggtitle(title.str) + 
+      theme(axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1))
+    
+    jpeg(file.path(save.dpath, fname), width = 5, height = 3, 
+         units = "in", res = 400)
+    grid.arrange(plot2.1, plot2.2, nrow = 2, 
+                 bottom = "Genes",
+                 layout_matrix = matrix(c(1,1,2,2,2), ncol = 1),  
+                 left = yaxis.title)
+    dev.off()
+  }
+  message("finished with marker ", markeri, ".")
+}
+
+
