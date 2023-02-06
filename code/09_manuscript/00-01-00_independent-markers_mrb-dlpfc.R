@@ -139,8 +139,6 @@ for(markeri in marker.typev){
 # Found 7406 genes with uniform expression within a single batch (all zeros); these will not be adjusted for batch.
 # ...
 
-
-
 #------------------------
 # run dispersion analyses
 #------------------------
@@ -210,8 +208,10 @@ for(markeri in marker.typev){
       # get plot data
       dfp1 <- data.frame(disp = lglm.bg$overdispersions)
       dfp1$marker.type <- bg.name
+      dfp1$marker <- rownames(mexpr[genes.samplev,])
       dfp2 <- data.frame(disp = lglm.top$overdispersions)
       dfp2$marker.type <- marker.name
+      dfp2$marker <- rownames(mexpr[genes.markerv,])
       dfp <- rbind(dfp1, dfp2)
       dfp$assay <- assayi
       return(dfp)
@@ -286,6 +286,36 @@ for(markeri in marker.typev){
                  left = yaxis.title)
     dev.off()
   }
+  
+  # scatter plots of unadj vs. adj marker disp
+  ymax <- 20; xmax <- 20; ptcol <- "red"
+  for(typei in unique(dfp$celltype)){
+    message("working on scatterplot for type ", typei, "...")
+    dfpi <- dfp[dfp$celltype==typei,]
+    dfpi <- dfpi[dfpi$marker.type=="top_markers",]
+    dfp1 <- dfpi[dfpi$assay=="counts",]
+    dfp2 <- dfpi[dfpi$assay=="counts_adj",]
+    if(cond){
+      dfp.new <- data.frame(unadj = dfp1$disp, adj = dfp2$disp, 
+                            marker = dfp1$marker)
+      title.str <- paste0(typei, " expression at top markers (", 
+                          length(unique(dfp.new$marker)), " genes)")
+      ggpt <- ggplot(dfp.new, aes(x = unadj, y = adj)) + theme_bw() +
+        geom_point(alpha = 0.5, color = ptcol) + 
+        geom_abline(slope = 1, intercept = 0) + 
+        facet_zoom(ylim = c(0, ymax), xlim = c(0, xmax)) +
+        xlab("Unadjusted dispersion") + ylab("Adjusted dispersion") + 
+        ggtitle(title.str)
+      
+      fname <- paste0("ggpt-markers_", markeri, "-", typei,"_mrb-dlpfc.jpg")
+      jpeg(file.path(save.dpath, fname), 
+           width = 5, height = 3, units = "in", res = 400)
+      print(ggpt); dev.off()
+    } else{
+      message("couldn't match markers. Skipping scatterplots...")
+    }
+  }
+  
   message("finished with marker ", markeri, ".")
 }
 
