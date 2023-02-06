@@ -6,9 +6,8 @@
 #
 
 libv <- c("lute", "scuttle", "dplyr", "limma", "ggplot2", "ggforce", "gridExtra",
-          "glmGamPoi", "sva", "DeconvoBuddies",
-          "SingleCellExperiment", "SummarizedExperiment",
-          "limma")
+          "glmGamPoi", "sva", "DeconvoBuddies", "SingleCellExperiment", "limma",
+          "SummarizedExperiment")
 sapply(libv, library, character.only = TRUE)
 
 
