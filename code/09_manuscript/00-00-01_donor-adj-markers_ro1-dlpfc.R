@@ -5,7 +5,7 @@
 #
 #
 
-libv <- c("scuttle", "dplyr", "limma", "ggplot2", "ggforce", "gridExtra",
+libv <- c("lute", "scuttle", "dplyr", "limma", "ggplot2", "ggforce", "gridExtra",
           "glmGamPoi", "sva", "DeconvoBuddies", "SingleCellExperiment", "limma",
           "SummarizedExperiment")
 sapply(libv, library, character.only = TRUE)
@@ -23,7 +23,7 @@ save.dpath <- file.path(proj.dname, "outputs", code.dname)
 #----------------------------------
 # coldata
 celltypevar <- "cellType_broad_hc"
-batchvar <- "BrNum"
+batchvar <- "Sample"
 marker.typev <- c("k2", "k3", "k4") # for iterations
 
 # assays for adjustments
@@ -185,7 +185,7 @@ for(markeri in marker.typev){
                                        typevar = markeri, groupvar = "donor")
   
   # save
-  fname <- paste0("sce_marker-adj-",markeri,"_mrb-dlpfc.rda")
+  fname <- paste0("sce_marker-adj-",markeri,"_ro1-dlpfc.rda")
   save(sce, file = file.path(save.dpath, fname))
   message("finished with marker ", markeri)
 }
@@ -347,25 +347,21 @@ for(markeri in marker.typev){
     dfpi <- dfpi[dfpi$marker.type=="top_markers",]
     dfp1 <- dfpi[dfpi$assay=="counts",]
     dfp2 <- dfpi[dfpi$assay=="counts_adj",]
-    if(cond){
-      dfp.new <- data.frame(unadj = dfp1$disp, adj = dfp2$disp, 
-                            marker = dfp1$marker)
-      title.str <- paste0(typei, " expression at top markers (", 
-                          length(unique(dfp.new$marker)), " genes)")
-      ggpt <- ggplot(dfp.new, aes(x = unadj, y = adj)) + theme_bw() +
-        geom_point(alpha = 0.5, color = ptcol) + 
-        geom_abline(slope = 1, intercept = 0) + 
-        facet_zoom(ylim = c(0, ymax), xlim = c(0, xmax)) +
-        xlab("Unadjusted dispersion") + ylab("Adjusted dispersion") + 
-        ggtitle(title.str)
-      
-      fname <- paste0("ggpt-markers_", markeri, "-", typei,"_mrb-dlpfc.jpg")
-      jpeg(file.path(save.dpath, fname), 
-           width = 5, height = 3, units = "in", res = 400)
-      print(ggpt); dev.off()
-    } else{
-      message("couldn't match markers. Skipping scatterplots...")
-    }
+    dfp.new <- data.frame(unadj = dfp1$disp, adj = dfp2$disp, 
+                          marker = dfp1$marker)
+    title.str <- paste0(typei, " expression at top markers (", 
+                        length(unique(dfp.new$marker)), " genes)")
+    ggpt <- ggplot(dfp.new, aes(x = unadj, y = adj)) + theme_bw() +
+      geom_point(alpha = 0.5, color = ptcol) + 
+      geom_abline(slope = 1, intercept = 0) + 
+      facet_zoom(ylim = c(0, ymax), xlim = c(0, xmax)) +
+      xlab("Unadjusted dispersion") + ylab("Adjusted dispersion") + 
+      ggtitle(title.str)
+    
+    fname <- paste0("ggpt-markers_", markeri, "-", typei,"_mrb-dlpfc.jpg")
+    jpeg(file.path(save.dpath, fname), 
+         width = 5, height = 3, units = "in", res = 400)
+    print(ggpt); dev.off()
   }
   
   message("finished with marker ", markeri, ".")
