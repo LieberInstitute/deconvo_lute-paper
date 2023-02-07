@@ -294,6 +294,10 @@ for(markeri in marker.typev){
     dfpi <- dfpi[dfpi$marker.type=="top_markers",]
     dfp1 <- dfpi[dfpi$assay=="counts",]
     dfp2 <- dfpi[dfpi$assay=="counts_adj",]
+    matchv1 <- paste0(dfp1$celltype, ";", dfp1$marker)
+    matchv2 <- paste0(dfp2$celltype, ";", dfp2$marker)
+    dfp1 <- dfp1[order(match(matchv1, matchv2)),]
+    cond <- identical(dfp1$marker, dfp2$marker)
     if(cond){
       dfp.new <- data.frame(unadj = dfp1$disp, adj = dfp2$disp, 
                             marker = dfp1$marker)

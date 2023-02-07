@@ -22,6 +22,7 @@ save.dpath <- file.path(proj.dname, "outputs", code.dname)
 # global params for plots, analyses
 #----------------------------------
 # coldata
+celltypevar <- "cellType_broad_hc"
 batchvar <- "BrNum"
 marker.typev <- c("k2", "k3", "k4") # for iterations
 
@@ -97,25 +98,33 @@ sample.filtv
 # [1] "Br2720_post" "Br6471_ant"  "Br8492_mid"  "Br2743_ant"  "Br3942_ant"
 # [6] "Br6423_ant"  "Br8325_ant"
 
-sce.filt <- sce[["Sample"]] %in% sample.filtv
+# sce.filt <- sce[["Sample"]] %in% sample.filtv
+# sce <- sce[,sce.filt]
+# dim(sce) # [1] 36601 30791
+
+#------------------
+# filter cell types
+#------------------
+sce.filt <- sce[[celltypevar]] %in% c("Excit", "Inhib", "OPC", "Oligo", "Micro", "Astro")
 sce <- sce[,sce.filt]
-dim(sce) # [1] 36601 30791
+
+table(sce[[celltypevar]])
+# Astro EndoMural     Micro     Oligo       OPC     Excit     Inhib Ambiguous
+# 3394         0      1344      7953      1422     20612      8761         0
 
 #-----------------------------------
 # assign marker labels at variable k
 #-----------------------------------
-celltypevar <- "cellType_broad_hc"
-table(sce[[celltypevar]])
-# Astro EndoMural     Micro     Oligo       OPC     Excit     Inhib Ambiguous
-# 1711       994       718      3677       516     11021      4571      7583
-
 # define marker categories
-sce[["k2"]] <- ifelse(grepl("^Excit.*|^Inhib.*", sce[[celltypevar]]), "neuron", "other")
+sce[["k2"]] <- ifelse(grepl("^Excit.*|^Inhib.*", sce[[celltypevar]]), 
+                      "neuron", "glial")
 sce[["k3"]] <- ifelse(grepl("^Excit.*", sce[[celltypevar]]), "Excit", 
-                      ifelse(grepl("^Inhib.*", sce[[celltypevar]]), "Inhib", "other"))
+                      ifelse(grepl("^Inhib.*", sce[[celltypevar]]), 
+                             "Inhib", "glial"))
 sce[["k4"]] <- ifelse(grepl("^Excit.*", sce[[celltypevar]]), "Excit", 
                       ifelse(grepl("^Inhib.*", sce[[celltypevar]]), "Inhib", 
-                             ifelse(grepl("^Oligo$", sce[[celltypevar]]), "Oligo", "other")))
+                             ifelse(grepl("^Oligo$", sce[[celltypevar]]), "Oligo", 
+                                    "non_oligo_glial")))
 
 #------------------------
 # run adjustment workflow
@@ -210,7 +219,7 @@ for(markeri in marker.typev){
   # adj
   disp.adj <- sce_dispersion(scei, group.data = markeri, 
                              assayname = assayname.adj,
-                             highlight.markers = mrtop$gene, 
+                             highlight.markers = markerv, 
                              hl.color = hl.color,
                              downsample = FALSE, point.alpha = 0.01,
                              ref.linecol = ref.linecol,
