@@ -70,9 +70,9 @@ quantile_normalisation <- function(df){
   return(df_final)
 }
 
-#-------------------
-# plot distributions
-#-------------------
+#-----------------------------------------------------
+# plot distributions, before and after transformations
+#-----------------------------------------------------
 dfp1 <- data.frame(untransformed = dfh$Nucleus_Area,
                   transformed = dfh$nuc.area.log10,
                   variable = "Nucleus_Area")

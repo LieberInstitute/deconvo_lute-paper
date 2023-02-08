@@ -5,9 +5,9 @@
 #
 #
 
+handle.str <- "mrb-dlpfc"
 
-libv <- c("lute", "scuttle", "dplyr", "limma", "ggplot2", "ggforce", "gridExtra",
-          "glmGamPoi", "sva", "DeconvoBuddies", "SingleCellExperiment", "limma",
+libv <- c('lute', "ggplot2", "SingleCellExperiment", "limma",
           "SummarizedExperiment")
 sapply(libv, library, character.only = TRUE)
 
@@ -26,7 +26,8 @@ marker.typev <- c("k2", "k3", "k4")
 
 lscef <- lapply(marker.typev, function(markeri){
   message("loading the data...")
-  sce.fname <- paste0("sce_marker-adj-",markeri,"_mrb-dlpfc.rda")
+  sce.fname <- paste0("sce_marker-adj-",markeri,"_",
+                      handle.str,".rda")
   sce.fpath <- file.path(save.dpath, sce.fname)
   scei <- get(load(sce.fpath))
   
@@ -38,7 +39,7 @@ lscef <- lapply(marker.typev, function(markeri){
 names(lscef) <- marker.typev
 
 # save
-fname <- "list-scef_markers-k2-k3-k4_mrb-dlpfc.rda"
+fname <- paste0("list-scef_markers-k2-k3-k4_",handle.str,".rda")
 save(lscef, file = file.path(save.dpath, fname))
 
 #------------------------------
