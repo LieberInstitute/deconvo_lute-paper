@@ -34,6 +34,9 @@ assayname.adj <- "counts_adj"
 # number of top markers per type
 nmarker <- 20
 
+# scale filter
+scale.thresh <- -0.9
+
 # dispersion mean-var plots
 smooth.linecol <- "cornflowerblue"
 hl.color <- "red"
@@ -135,6 +138,25 @@ assays(sce)[[assayname.unadj]] <- as.matrix(assays(sce)[[assayname.unadj]])
 # run the workflow
 for(markeri in marker.typev){
   message("working on marker: ", markeri, "...")
+  message("filtering low-abundance donors by type...l")
+  cd <- colData(sce)
+  dfm <- as.data.frame(table(cd[,markeri]))
+  type.filt <- as.character(dfm[dfm[,2]==min(dfm[,2]),1])
+  cdf <- cd[cd[,markeri] == type.filt,]
+  dft <- as.data.frame(table(cdf[,batchvar], cdf[,markeri]))
+  scalev <- scale(dft$Freq)[,1]
+  which.filt <- which(scalev <= scale.thresh)
+  sample.filt <- as.character(dft[which.filt,1])
+  cells.remove <- rownames(cd[cd[,batchvar] %in% sample.filt,])
+  sce <- sce[,!colnames(sce) %in% cells.remove]
+  md.rm <- list(type.filt = type.filt,
+                scale.thresh = scale.thresh,
+                num.cells = length(cells.remove),
+                batch.id = sample.filt)
+  message("Removed ", length(cells.remove),
+          " from ", length(sample.filt),
+          " batches for type ", type.filt, ".")
+  
   message("doing combat adj...")
   mexpr <- assays(sce)[[assayname.unadj]]
   cnv <- colnames(sce)
@@ -179,6 +201,7 @@ for(markeri in marker.typev){
   assays(sce) <- assays(sce)[sce.filt]
   
   # append metadata
+  metadata(sce)[["scale_filter"]] <- md.rm
   metadata(sce)[["adj_method"]] <- "combat"
   metadata(sce)[["ds_method"]] <- list(package = "scuttle",
                                        funct = "downsampleBatches",
