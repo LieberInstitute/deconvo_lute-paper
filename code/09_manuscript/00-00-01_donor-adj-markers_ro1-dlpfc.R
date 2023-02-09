@@ -21,6 +21,8 @@ save.dpath <- file.path(proj.dname, "outputs", code.dname)
 #----------------------------------
 # global params for plots, analyses
 #----------------------------------
+proj.stem <- "ro1-dlpfc"
+
 # coldata
 celltypevar <- "cellType_broad_hc"
 batchvar <- "Sample"
@@ -70,41 +72,6 @@ sce.filt <- sce[["BrNum"]] %in% trainv
 sce <- sce[,sce.filt]
 dim(sce) # [1] 36601 56369
 
-#-----------------------
-# parse donor replicates
-#-----------------------
-table(gsub("_.*", "", sce[["Sample"]]), gsub(".*_", "", sce[["Sample"]]))
-#         ant  mid post
-# Br2720    0 3101 5911
-# Br2743 2861 2723    0
-# Br3942 5205 4282    0
-# Br6423 3898    0 4067
-# Br6471 3212 4724    0
-# Br8325 4707 4020    0
-# Br8492    0 4997 2661
-
-# get random subset, excluding replicates
-set.seed(0)
-brnumv <- unique(sce[["BrNum"]])
-sampv <- unique(sce[["Sample"]])
-cd <- colData(sce)
-sample.filtv <- unlist(lapply(brnumv, function(bi){
-  sampiv <- unique(cd[cd$BrNum == bi,]$Sample)
-  if(length(sampiv) > 1){
-    return(sample(sampiv, 1))
-  } else{
-    return(sampiv)
-  }
-}))
-sample.filtv
-# samples we include for training:
-# [1] "Br2720_post" "Br6471_ant"  "Br8492_mid"  "Br2743_ant"  "Br3942_ant"
-# [6] "Br6423_ant"  "Br8325_ant"
-
-# sce.filt <- sce[["Sample"]] %in% sample.filtv
-# sce <- sce[,sce.filt]
-# dim(sce) # [1] 36601 30791
-
 #------------------
 # filter cell types
 #------------------
@@ -129,16 +96,18 @@ sce[["k4"]] <- ifelse(grepl("^Excit.*", sce[[celltypevar]]), "Excit",
                              ifelse(grepl("^Oligo$", sce[[celltypevar]]), "Oligo", 
                                     "non_oligo_glial")))
 
+#--------------
+# format assays
+#--------------
+assays(sce)[[assayname.unadj]] <- as.matrix(assays(sce)[[assayname.unadj]])
+
 #------------------------
 # run adjustment workflow
 #------------------------
-# format assay
-assays(sce)[[assayname.unadj]] <- as.matrix(assays(sce)[[assayname.unadj]])
-
 # run the workflow
 for(markeri in marker.typev){
   message("working on marker: ", markeri, "...")
-  message("filtering low-abundance donors by type...l")
+  message("filtering low-abundance donors by type...")
   cd <- colData(sce)
   dfm <- as.data.frame(table(cd[,markeri]))
   type.filt <- as.character(dfm[dfm[,2]==min(dfm[,2]),1])
@@ -153,9 +122,9 @@ for(markeri in marker.typev){
                 scale.thresh = scale.thresh,
                 num.cells = length(cells.remove),
                 batch.id = sample.filt)
-  message("Removed ", length(cells.remove),
-          " from ", length(sample.filt),
-          " batches for type ", type.filt, ".")
+  message("removed ", length(cells.remove),
+          " cells from ", length(sample.filt),
+          " batches for cell type: '", type.filt, "'.")
   
   message("doing combat adj...")
   mexpr <- assays(sce)[[assayname.unadj]]
@@ -208,7 +177,7 @@ for(markeri in marker.typev){
                                        typevar = markeri, groupvar = "donor")
   
   # save
-  fname <- paste0("sce_marker-adj-",markeri,"_ro1-dlpfc.rda")
+  fname <- paste0("sce_marker-adj-",markeri,"_",proj.stem,".rda")
   save(sce, file = file.path(save.dpath, fname))
   message("finished with marker ", markeri)
 }
@@ -222,7 +191,7 @@ set.seed(0) # for sampling from bg
 # run workflow
 for(markeri in marker.typev){
   message("loading the data...")
-  sce.fname <- paste0("sce_marker-adj-",markeri,"_mrb-dlpfc.rda")
+  sce.fname <- paste0("sce_marker-adj-",markeri,"_",proj.stem,".rda")
   sce.fpath <- file.path(save.dpath, sce.fname)
   scei <- get(load(sce.fpath))
   
@@ -236,7 +205,7 @@ for(markeri in marker.typev){
                                downsample = FALSE, point.alpha = 0.01,
                                ref.linecol = ref.linecol,
                                smooth.linecol = smooth.linecol)
-  plot.fname <- paste0("ggpt-mean-var_",markeri,"-",assayname.unadj,"_ro1-dlpfc.jpg")
+  plot.fname <- paste0("ggpt-mean-var_",markeri,"-",assayname.unadj,"_",proj.stem,".jpg")
   jpeg(file.path(save.dpath, plot.fname), width = 8, height = 3.5, units = "in", res = 400)
   print(disp.unadj$ggplot.dispersion); dev.off()
   # adj
@@ -308,7 +277,7 @@ for(markeri in marker.typev){
 for(markeri in marker.typev){
   message("working on marker ", markeri, "...")
   message("loading the data...")
-  sce.fname <- paste0("sce_marker-adj-",markeri,"_mrb-dlpfc.rda")
+  sce.fname <- paste0("sce_marker-adj-",markeri,"_",proj.stem,".rda")
   sce.fpath <- file.path(save.dpath, sce.fname)
   scei <- get(load(sce.fpath))
   
@@ -320,7 +289,7 @@ for(markeri in marker.typev){
     theme_bw() + geom_boxplot() + ylim(0, 100) +
     facet_wrap(~celltype+assay, nrow = 2) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  fname <- paste0("ggbox_bg1k-vs-topmarkers-",markeri,"_mrb-dlpfc.jpg")
+  fname <- paste0("ggbox_bg1k-vs-topmarkers-",markeri,"_",proj.stem,".jpg")
   jpeg(file.path(save.dpath, fname), width = 8, height = 4, 
        units = "in", res = 400)
   print(plot1); dev.off()
@@ -331,7 +300,7 @@ for(markeri in marker.typev){
     yaxis.title <- paste0(paste0(rep(" ", 15), collapse = ""), "Dispersion")
     fname <- paste0("ggbox-",typei,
                     "_bg1k-vs-topmarkers-",markeri,
-                    "_mrb-dlpfc.jpg")
+                    "_",proj.stem,".jpg")
     title.str <- paste0("Unadj. counts, ", typei)
     
     dfp.filt <- dfp$assay=="counts" & dfp$celltype==typei
@@ -381,7 +350,7 @@ for(markeri in marker.typev){
       xlab("Unadjusted dispersion") + ylab("Adjusted dispersion") + 
       ggtitle(title.str)
     
-    fname <- paste0("ggpt-markers_", markeri, "-", typei,"_mrb-dlpfc.jpg")
+    fname <- paste0("ggpt-markers_", markeri, "-", typei,"_",proj.stem,".jpg")
     jpeg(file.path(save.dpath, fname), 
          width = 5, height = 3, units = "in", res = 400)
     print(ggpt); dev.off()
