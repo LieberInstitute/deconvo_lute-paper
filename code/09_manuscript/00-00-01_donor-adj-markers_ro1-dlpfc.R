@@ -182,6 +182,28 @@ for(markeri in marker.typev){
   message("finished with marker ", markeri)
 }
 
+#----------------------
+# get marker expression
+#----------------------
+marker.typev <- c("k2", "k3", "k4")
+
+lscef <- lapply(marker.typev, function(markeri){
+  message("loading the data...")
+  sce.fname <- paste0("sce_marker-adj-",markeri,"_",
+                      proj.stem,".rda")
+  sce.fpath <- file.path(save.dpath, sce.fname)
+  scei <- get(load(sce.fpath))
+  
+  # get marker expr
+  mr <- metadata(sce)[["markers"]][["top"]] # top markers
+  scef <- scei[mr$gene,]
+  return(scef)
+})
+names(lscef) <- marker.typev
+
+# save
+fname <- paste0("list-scef_markers-k2-k3-k4_",proj.stem,".rda")
+save(lscef, file = file.path(save.dpath, fname))
 
 #------------------------
 # run dispersion analyses
