@@ -47,7 +47,7 @@ for(mi in markerv){
 # overlap data
 #-------------
 
-markerv <- names(lscef1)
+mv <- names(lscef1)
 
 # get full gene set
 all.genes <- unique(unlist(lapply(mv, function(mi){
