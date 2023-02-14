@@ -64,7 +64,9 @@ save(sce.var, file = file.path(save.dpath, fname))
 fname <- paste0("matrix-donor-type_means_",markeri, "_", handle.str,".rda")
 save(sce.mean, file = file.path(save.dpath, fname))
 
-# plots
+#-------------------
+# plot mean-variance
+#-------------------
 genev <- rownames(sce.mean)
 groupv <- colnames(sce.mean)
 dfp <- do.call(rbind, lapply(seq(ncol(sce.mean)), function(ii){
@@ -85,5 +87,9 @@ fname <- "ggsmooth-composite_k2-types-by-donor_ro1-dlpfc.jpg"
 jpeg(file = file.path(save.dpath, fname), width = 8, height = 4, 
      units = "in", res = 400)
 print(ggsm); dev.off()
+
+#---------------------------------
+# get random background dispersion
+#---------------------------------
 
 
