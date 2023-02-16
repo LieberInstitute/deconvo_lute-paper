@@ -53,27 +53,36 @@ ld$ggsmooth + facet_wrap(~donor.coeff)
 #------------------------------------------------
 # main params
 set.seed(0)
-num.genes <- 1000
-num.neuron <- 1000
-num.glial <- 1000
+# mean vector
+num.mean.bin <- 100
+max.mean.neuron <- 40
+max.mean.glial <- 30
+# iteration params
+num.genes.iter <- 10
+num.neuron <- num.glial <- 1000
+# donor coeff params
 dc.sd.neuron <- 30
 dc.mean.neuron <- 100
 dc.sd.glial <- 80
 dc.mean.glial <- 500
 
 # neurons 
-mean.vector <- seq(1, 40, 1e-3)
-mean.vector <- sample(seq(length(mean.vector)), size = num.genes)
+mean.vector <- seq(1, max.mean.neuron, 1e-3)
+mean.sample <- sample(seq(length(mean.vector)), size = num.genes)
+mean.vector <- mean.vector[mean.sample]
 donor.coeff.vector <- rnorm(n = num.neuron, mean = dc.mean.neuron, sd = dc.sd.neuron)
 ld.neuron <- simulate_sce_donor_bias(donor.coeff.vector = donor.coeff.vector,
-                                     mean.vector = mean.vector)
+                                     mean.vector = mean.vector, 
+                                     num.genes.iter = num.genes.iter)
 
 # glial cells
-mean.vector <- seq(1, 30, 1e-3)
-mean.vector <- sample(seq(length(mean.vector)), size = num.genes)
+mean.vector <- seq(1, max.mean.glial, 1e-3)
+mean.sample <- sample(seq(length(mean.vector)), size = num.genes)
+mean.vector <- mean.vector[mean.sample]
 donor.coeff.vector <- rnorm(n = num.glial, mean = dc.mean.glial, sd = dc.sd.glial)
 ld.glial <- simulate_sce_donor_bias(donor.coeff.vector = donor.coeff.vector,
-                                     mean.vector = mean.vector)
+                                    mean.vector = mean.vector, 
+                                    num.genes.iter = num.genes.iter)
 
 #--------------------------------
 # setup : test donor bias effects
