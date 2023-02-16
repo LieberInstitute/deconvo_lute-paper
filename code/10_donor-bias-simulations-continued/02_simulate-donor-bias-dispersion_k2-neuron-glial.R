@@ -11,21 +11,38 @@ sapply(libv, library, character.only = TRUE)
 #-------------------------
 # simulate multiple donors
 #-------------------------
-simulate_sce_donor_bias <- function(donor.coeff.vector = NULL, ...){
-  require(ggplot2)
-  require(SummarizedExperiment)
-  require(SingleCellExperiment)
+
+get_sce_donor_bias <- function(donor.bias.coeff = 1, mean.vector = NULL,
+                               total.cells = 10, num.genes.iter = 10,
+                               num.types = 1, seed.num = 0){
+  set.seed(seed.num)
+  if(is(mean.vector, "NULL")){mean.vector = seq(1, 30, 1)}
+  sce <- do.call(rbind, lapply(mean.vector, function(meani){
+    d <- donor.bias.coeff*(meani/(meani^2))
+    scei <- random_sce(num.types = num.types, num.cells = total.cells, 
+                       expr.mean = meani, num.genes = num.genes.iter, 
+                       dispersion = d)
+    # as(scei, "SummarizedExperiment")
+    return(scei)
+  }))
+  return(as(sce, "SingleCellExperiment"))
+}
+
+simulate_sce_donor_bias <- function(donor.coeff.vector = NULL,
+                                    mean.vector = NULL, 
+                                    cells.per.donor = 1000,
+                                    num.genes.iter = 10){
   lr <- list()
   if(is(donor.coeff.vector, "NULL")){
     donor.coeff.vector <- rnorm(10, mean = 200, sd = 30)
   }
   sce <- do.call(cbind, lapply(donor.coeff.vector, function(ii){
-    scei <- get_sce_donor_bias(ii, ...)
+    scei <- get_sce_donor_bias(donor.bias.coeff = ii, 
+                               mean.vector = mean.vector, 
+                               total.cells = cells.per.donor,
+                               num.genes.iter = num.genes.iter)
     scei[["donor.coeff"]] <- ii; scei
-    # as(scei, "SummarizedExperiment")
-  })) 
-  # sce <- as(sce, "SingleCellExperiment")
-  # plot
+  }))
   dfp <- do.call(rbind, lapply(donor.coeff.vector, function(ii){
     ctf <- counts(sce[,sce[["donor.coeff"]]==ii])
     dfi <- data.frame(mean = rowMeans(ctf), var = rowVars(ctf))
@@ -37,7 +54,6 @@ simulate_sce_donor_bias <- function(donor.coeff.vector = NULL, ...){
     scale_x_log10() + scale_y_log10() + geom_smooth() +
     theme(legend.position = 'none') +
     xlab('Mean (log10)') + ylab("Var (log10)")
-  # get the return object
   lr[["sce"]] <- sce; lr[["dfp"]] <- dfp; lr[["ggsmooth"]] <- ggsm
   return(lr)
 }
@@ -54,35 +70,61 @@ ld$ggsmooth + facet_wrap(~donor.coeff)
 # main params
 set.seed(0)
 # mean vector
-num.mean.bin <- 100
-max.mean.neuron <- 40
-max.mean.glial <- 30
+num.mean.bin <- 200
 # iteration params
 num.genes.iter <- 10
-num.neuron <- num.glial <- 1000
+cells.per.donor <- 1000
 # donor coeff params
-dc.sd.neuron <- 30
-dc.mean.neuron <- 100
-dc.sd.glial <- 80
-dc.mean.glial <- 500
+num.donor <- 10
 
 # neurons 
+dc.sd.neuron <- 30
+dc.mean.neuron <- 100
+max.mean.neuron <- 40
 mean.vector <- seq(1, max.mean.neuron, 1e-3)
-mean.sample <- sample(seq(length(mean.vector)), size = num.genes)
+mean.sample <- sample(seq(length(mean.vector)), size = num.mean.bin)
 mean.vector <- mean.vector[mean.sample]
-donor.coeff.vector <- rnorm(n = num.neuron, mean = dc.mean.neuron, sd = dc.sd.neuron)
+donor.coeff.vector <- rnorm(n = num.donor, mean = dc.mean.neuron, 
+                            sd = dc.sd.neuron)
 ld.neuron <- simulate_sce_donor_bias(donor.coeff.vector = donor.coeff.vector,
                                      mean.vector = mean.vector, 
+                                     cells.per.donor = cells.per.donor,
                                      num.genes.iter = num.genes.iter)
 
+ld.neuron$ggsmooth
+ld.neuron$ggsmooth + facet_wrap(~donor.coeff)
+
 # glial cells
+max.mean.glial <- 30
+dc.sd.glial <- 80
+dc.mean.glial <- 500
 mean.vector <- seq(1, max.mean.glial, 1e-3)
-mean.sample <- sample(seq(length(mean.vector)), size = num.genes)
+mean.sample <- sample(seq(length(mean.vector)), size = num.mean.bin)
 mean.vector <- mean.vector[mean.sample]
-donor.coeff.vector <- rnorm(n = num.glial, mean = dc.mean.glial, sd = dc.sd.glial)
+donor.coeff.vector <- rnorm(n = num.donor, mean = dc.mean.glial, sd = dc.sd.glial)
 ld.glial <- simulate_sce_donor_bias(donor.coeff.vector = donor.coeff.vector,
-                                    mean.vector = mean.vector, 
+                                    mean.vector = mean.vector,
+                                    num.cells.iter = num.cell.iter,
                                     num.genes.iter = num.genes.iter)
+
+ld.glial$ggsmooth
+ld.glial$ggsmooth + facet_wrap(~donor.coeff)
+
+# save composite plot
+dfp1 <- ld.neuron$dfp
+dfp1$type <- "neuron"
+dfp2 <- ld.glial$dfp
+dfp2$type <- "glial"
+dfp <- rbind(dfp1, dfp2)
+ggsm <- ggplot(dfp, aes(x = mean, y = var, color = donor.coeff)) + 
+  geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  scale_x_log10() + scale_y_log10() + geom_smooth() +
+  theme(legend.position = 'none') +
+  xlab('Mean (log10)') + ylab("Var (log10)")
+# save jpg
+fname <- "ggsm-composite_k2-mean-var_ro1-dlpfc.jpg"
+jpeg(file = fname, width = 6, height = 3, units = "in", res = 400)
+ggsm + facet_wrap(~type); dev.off()
 
 #--------------------------------
 # setup : test donor bias effects
