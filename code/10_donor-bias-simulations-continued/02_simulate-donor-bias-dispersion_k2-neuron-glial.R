@@ -70,17 +70,17 @@ ld$ggsmooth + facet_wrap(~donor.coeff)
 # main params
 set.seed(0)
 # mean vector
-num.mean.bin <- 200
+num.mean.bin <- 100
 # iteration params
 num.genes.iter <- 10
-cells.per.donor <- 1000
+cells.per.donor <- 500
 # donor coeff params
 num.donor <- 10
 
 # neurons 
-dc.sd.neuron <- 30
-dc.mean.neuron <- 100
-max.mean.neuron <- 40
+dc.sd.neuron <- 25
+dc.mean.neuron <- 80
+max.mean.neuron <- 100
 mean.vector <- seq(1, max.mean.neuron, 1e-3)
 mean.sample <- sample(seq(length(mean.vector)), size = num.mean.bin)
 mean.vector <- mean.vector[mean.sample]
@@ -95,16 +95,16 @@ ld.neuron$ggsmooth
 ld.neuron$ggsmooth + facet_wrap(~donor.coeff)
 
 # glial cells
-max.mean.glial <- 30
+max.mean.glial <- 35
 dc.sd.glial <- 80
-dc.mean.glial <- 500
+dc.mean.glial <- 300
 mean.vector <- seq(1, max.mean.glial, 1e-3)
 mean.sample <- sample(seq(length(mean.vector)), size = num.mean.bin)
 mean.vector <- mean.vector[mean.sample]
 donor.coeff.vector <- rnorm(n = num.donor, mean = dc.mean.glial, sd = dc.sd.glial)
 ld.glial <- simulate_sce_donor_bias(donor.coeff.vector = donor.coeff.vector,
                                     mean.vector = mean.vector,
-                                    num.cells.iter = num.cell.iter,
+                                    cells.per.donor = cells.per.donor,
                                     num.genes.iter = num.genes.iter)
 
 ld.glial$ggsmooth
@@ -122,9 +122,21 @@ ggsm <- ggplot(dfp, aes(x = mean, y = var, color = donor.coeff)) +
   theme(legend.position = 'none') +
   xlab('Mean (log10)') + ylab("Var (log10)")
 # save jpg
-fname <- "ggsm-composite_k2-mean-var_ro1-dlpfc.jpg"
+fname <- "ggsm-composite_lute-sim-donorbias_k2-mean-var_ro1-dlpfc.jpg"
 jpeg(file = fname, width = 6, height = 3, units = "in", res = 400)
 ggsm + facet_wrap(~type); dev.off()
+
+# save results
+ld <- list(neuron = ld.neuron, glial = ld.glial)
+fname <- "lute-sim-donorbias_k2-sce-sim_ro1-dlpfc.rda"
+save(ld, file = fname)
+
+#-------------------------------------------
+# get composite with empirical/observed data
+#-------------------------------------------
+
+
+
 
 #--------------------------------
 # setup : test donor bias effects
