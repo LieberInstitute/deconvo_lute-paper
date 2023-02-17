@@ -6,6 +6,12 @@
 #
 #
 
+libv <- c("ggplot2", "gridExtra", "ComplexHeatmap")
+sapply(libv, library, character.only = TRUE)
+
+# manage params
+handle.str <- "ro1-dlpfc"
+
 # manage paths
 code.dname <- "09_manuscript"
 proj.dname <- "deconvo_method-paper"
@@ -14,9 +20,10 @@ save.dpath <- file.path(proj.dname, "outputs", code.dname)
 #-------------------------
 # get marker scale factors
 #-------------------------
+
+# get scale factors from snrnaseq data
 handle.str <- "ro1-dlpfc"
 marker.typev <- c("k2", "k3", "k4")
-
 # get scale factors
 lscale <- lapply(marker.typev, function(markeri){
   message("loading the data...")
@@ -47,7 +54,140 @@ lscale <- lapply(marker.typev, function(markeri){
   return(lr)
 })
 names(lscale) <- marker.typev
-
 # save
 fname <- paste0("lscale_total-counts-exprgene_",handle.str,".rda")
 save(lscale, file = file.path(save.dpath, fname))
+
+# get scale factors from halo data
+halo.fname <- "halo_all.Rdata"
+halo.fpath <- file.path("Human_DLPFC_Deconvolution", 
+                   "processed-data", "03_HALO", halo.fname)
+dfh <- get(load(halo.fpath))
+
+#--------------------------------
+# plot scale factor distributions
+#--------------------------------
+set.seed(0)
+
+# total mrna counts
+variable.name <- "total.counts"
+variable.str <- "total.count"
+title.str <- "Total mRNA counts"
+dfp <- do.call(rbind, lapply(seq(3), function(ii){
+  lscale[[ii]][[variable.name]]}))
+dfp$label <- paste0(dfp$type, ";", dfp$marker.type)
+dfp$value <- dfp[,variable.str]
+# downsample by label
+dft <- as.data.frame(table(dfp$label))
+min.cells <- min(dft[,2])
+unique.labels <- unique(dfp$label)
+dfp <- do.call(rbind, lapply(unique.labels, function(labeli){
+  dfi <- dfp[dfp$label == labeli,]
+  dfi[sample(seq(nrow(dfi)), min.cells),]
+}))
+dfp$total.count <- as.numeric(dfp$value)
+# order labels
+medianv <- unlist(lapply(unique.labels, function(ui){
+  median(dfp[dfp$label==ui,]$value)}))
+labv.order <- rev(order(medianv))
+dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
+# get plot object
+ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+  geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggvp
+
+# total expressed genes
+variable.name <- "total.expr.genes"
+variable.str <- "total.expr.genes"
+title.str <- "Total expr. genes"
+dfp <- do.call(rbind, lapply(seq(3), function(ii){
+  lscale[[ii]][[variable.name]]}))
+dfp$label <- paste0(dfp$type, ";", dfp$marker.type)
+dfp$value <- as.numeric(dfp[,variable.str])
+# downsample by label
+dft <- as.data.frame(table(dfp$label))
+min.cells <- min(dft[,2])
+unique.labels <- unique(dfp$label)
+dfp <- do.call(rbind, lapply(unique.labels, function(labeli){
+  dfi <- dfp[dfp$label == labeli,]
+  dfi[sample(seq(nrow(dfi)), min.cells),]
+}))
+dfp$total.expr.genes <- as.numeric(dfp$value)
+# order labels
+medianv <- unlist(lapply(unique.labels, function(ui){
+  median(dfp[dfp$label==ui,]$value)}))
+labv.order <- rev(order(medianv))
+dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
+# get plot object
+ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+  geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggvp
+
+# nucleus areas
+variable.name <- "Nucleus_Area"
+title.str <- paste0("Nucleus area")
+dfp <- data.frame(value = dfh[,variable.name],
+                  cell.type = dfh$cell_type)
+dfp$label <- dfp$cell.type
+# downsample by label
+dft <- as.data.frame(table(dfp$label))
+min.cells <- min(dft[,2])
+unique.labels <- unique(dfp$label)
+dfp <- do.call(rbind, lapply(unique.labels, function(labeli){
+  dfi <- dfp[dfp$label == labeli,]
+  dfi[sample(seq(nrow(dfi)), min.cells),]
+}))
+# order labels
+medianv <- unlist(lapply(unique.labels, function(ui){
+  median(dfp[dfp$label==ui,]$value)}))
+labv.order <- rev(order(medianv))
+dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
+# get plot object
+ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+  geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggvp
+
+# nucleus areas
+variable.name <- "AKT3_Copies"
+title.str <- paste0("AKT3 copies")
+dfp <- data.frame(value = dfh[,variable.name],
+                  cell.type = dfh$cell_type)
+dfp$label <- dfp$cell.type
+# downsample by label
+dft <- as.data.frame(table(dfp$label))
+min.cells <- min(dft[,2])
+unique.labels <- unique(dfp$label)
+dfp <- do.call(rbind, lapply(unique.labels, function(labeli){
+  dfi <- dfp[dfp$label == labeli,]
+  dfi[sample(seq(nrow(dfi)), min.cells),]
+}))
+# order labels
+medianv <- unlist(lapply(unique.labels, function(ui){
+  median(dfp[dfp$label==ui,]$value)}))
+labv.order <- rev(order(medianv))
+dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
+# get plot object
+ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+  geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggvp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
