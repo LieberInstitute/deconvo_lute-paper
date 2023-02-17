@@ -17,7 +17,8 @@ save.dpath <- file.path(proj.dname, "outputs", code.dname)
 handle.str <- "ro1-dlpfc"
 marker.typev <- c("k2", "k3", "k4")
 
-lscef <- lapply(marker.typev, function(markeri){
+# get scale factors
+lscale <- lapply(marker.typev, function(markeri){
   message("loading the data...")
   sce.fname <- paste0("sce_marker-adj-",markeri,"_",
                       handle.str,".rda")
@@ -26,24 +27,27 @@ lscef <- lapply(marker.typev, function(markeri){
   
   # get cell size scale factors
   type.vector <- scei[[markeri]]
-  unique.types <- unique(typev)
+  unique.types <- unique(type.vector)
   # get tall table of total mrna by type
   df.tc <- do.call(rbind, lapply(unique.types, function(typei){
     ctf <- counts(scei[,scei[[markeri]]==typei])
-    dfi <- data.frame(total.count = colSums(ctf))
-    dfi$type <- typei; return(dfi)
+    dfi <- data.frame(total.count = as.character(unlist(colSums(ctf))))
+    dfi$type <- typei; dfi$marker.type <- markeri; return(dfi)
   }))
+  
   # get tall table of total expressed genes by type
   df.eg <- do.call(rbind, lapply(unique.types, function(typei){
     ctf <- counts(scei[,scei[[markeri]]==typei])
     m.eg <- apply(ctf,2,function(ci){length(ci[ci>0])})
     dfi <- data.frame(total.expr.genes = as.numeric(unlist(m.eg)))
-    dfi$type <- typei; return(dfi)
+    dfi$type <- typei; dfi$marker.type <- markeri; return(dfi)
   }))
   
-  # get marker expr
-  mr <- metadata(sce)[["markers"]][["top"]] # top markers
-  scef <- scei[mr$gene,]
-  return(scef)
+  lr <- list(total.counts = df.tc, total.expr.genes = df.eg)
+  return(lr)
 })
-names(lscef) <- marker.typev
+names(lscale) <- marker.typev
+
+# save
+fname <- paste0("lscale_total-counts-exprgene_",handle.str,".rda")
+save(lscale, file = file.path(save.dpath, fname))
