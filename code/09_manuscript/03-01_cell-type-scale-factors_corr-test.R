@@ -198,18 +198,63 @@ grid.arrange(lgg[[1]], lgg[[2]], lgg[[3]], lgg[[4]],
              ncol = 1, bottom = "Label", left = "Value")
 dev.off()
 
-
 #---------------------
 # harmonize scale data
 #---------------------
+# coerce snrnaseq data
+namev <- names(lscale[[1]])
+dfp.sn <- do.call(rbind, lapply(namev, function(namei){
+  dfi <- do.call(rbind, lapply(lscale, function(si){si[[namei]]}))
+  dfi <- data.frame(value = dfi[,1], 
+                    type.label = paste0(dfi$type, ";", dfi$marker.type))
+  dfi$metric <- namei; return(dfi)
+}))
+# coerce halo data
+cnv <- c("Nucleus_Area", "AKT3_Copies")
+dfp.img <- do.call(rbind, lapply(cnv, function(cni){
+  dfi <- data.frame(value = dfh[,cni], type.label = dfh$cell_type)
+  dfi$metric <- tolower(cni); return(dfi)
+}))
 
+#------------------
+# analyze k4 labels
+#------------------
+# corr1 -- use k4 type labels from sn data
+labelv <- unique(dfp.sn$type.label[grepl("k4", dfp.sn$type.label)])
+dfp.sn.filt <- dfp.sn[dfp.sn$type.label %in% labelv,]
+dfp.sn.filt$type.label <- tolower(dfp.sn.filt$type.label)
+# get img data, mapping labels to k4 from snrnaseqs
+dfp.img.filt <- dfp.img[!dfp.img$type.label %in% c("Endo", "Other"),]
+which.label <- which(dfp.img.filt$type.label %in% c("Astro", "Micro"))
+dfp.img.filt[which.label,]$type.label <- "non_oligo_glial"
+dfp.img.filt$type.label <- paste0(tolower(dfp.img.filt$type.label), ";k4")
 
+get_ggcorr_from_stat <- function(dfp.all, stat = "mean"){
+  # means by label --- k4 labels
+  dfp.all <- rbind(dfp.sn.filt, dfp.img.filt)
+  labv <- unique(dfp.all$type.label)
+  metricv <- unique(dfp.all$metric)
+  dfp.cor <- do.call(cbind, lapply(metricv, function(metrici){
+    do.call(rbind, lapply(labv, function(labi){
+      filt <- dfp.all$metric == metrici
+      filt <- filt & dfp.all$type.label == labi
+      datv <- as.numeric(dfp.all[filt,]$value)
+      eval(parse(text = paste0(stat, "(datv)")))
+    }))
+  }))
+  colnames(dfp.cor) <- paste0(metricv)
+  mcor <- cor(dfp.cor, method = "pearson")
+  ggcorrplot::ggcorrplot(mcor, type = "lower", lab = TRUE, title = stat)
+}
 
+get_ggcorr_from_stat(dfp.all, "mean")
+get_ggcorr_from_stat(dfp.all, "median")
+get_ggcorr_from_stat(dfp.all, "var")
+get_ggcorr_from_stat(dfp.all, "sd")
 
-
-
-
-
+#--------------------------
+# analyze k2, k3, k4 labels
+#--------------------------
 
 
 
