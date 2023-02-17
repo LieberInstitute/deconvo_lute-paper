@@ -255,6 +255,32 @@ get_ggcorr_from_stat(dfp.all, "sd")
 #--------------------------
 # analyze k2, k3, k4 labels
 #--------------------------
+# get term mappings
+type.labelv <- c("neuron", "glial", "oligo", "excit", "inhib", "non_oligo_glial")
+lmap <- lapply(type.labelv, function(labeli){
+  if(grepl("neuron", labeli)){
+    c("excit", "inhib")
+  } else if(grepl("glial", labeli)){
+    c("astro", "micro", "oligo")
+  } else if(grepl("non_oligo_glial", labeli)){
+    c("astro", "micro")
+  } else{
+    labeli
+  }
+})
+names(lmap) <- type.labelv
+# bind image label data
+
+
+dfp.img2 <- dfp.img
+dfp.img2$label <- dfp.img2$type.label
+dfp.img2[,]
+
+dfp.img.filt <- dfp.img[!dfp.img$type.label %in% c("Endo", "Other"),]
+which.label <- which(dfp.img.filt$type.label %in% c("Astro", "Micro"))
+dfp.img.filt[which.label,]$type.label <- "non_oligo_glial"
+
+
 
 
 
