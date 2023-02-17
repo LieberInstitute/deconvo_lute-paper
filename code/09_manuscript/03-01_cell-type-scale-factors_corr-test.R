@@ -277,6 +277,7 @@ dfp.img2$label <- tolower(dfp.img2$type.label)
 dfr.img <- aggregate(dfp.img2$value, 
                  list(dfp.img2$label, dfp.img2$metric), 
                  mean, na.rm = T)
+colnames(dfr.img) <- c("label", "metric", "mean")
 # sn data
 dfsn <- dfp.sn
 dfsn$label <- tolower(dfsn$type.label)
@@ -290,10 +291,16 @@ dfr.sn <- aggregate(dfsn$value,
                     mean, na.rm = T)
 colnames(dfr.sn) <- c("label", "metric", "mean")
 
+dfr <- rbind(dfr.img, dfr.sn)
 
+metricv <- unique(dfr$metric)
+df.cor <- do.call(cbind, lapply(metricv, function(metrici){
+  dfr[dfr$metric==metrici,]$mean
+}))
+colnames(df.cor) <- metricv
+mcor <- cor(df.cor)
 
-
-
+ggcorrplot::ggcorrplot(mcor, type = "lower", lab = TRUE, title = "mean")
 
 
 
