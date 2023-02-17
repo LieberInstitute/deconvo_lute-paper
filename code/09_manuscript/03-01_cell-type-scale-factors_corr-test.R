@@ -290,17 +290,20 @@ dfr.sn <- aggregate(dfsn$value,
                     list(dfsn$label, dfsn$metric), 
                     mean, na.rm = T)
 colnames(dfr.sn) <- c("label", "metric", "mean")
-
 dfr <- rbind(dfr.img, dfr.sn)
-
 metricv <- unique(dfr$metric)
+
+# get correlation results
 df.cor <- do.call(cbind, lapply(metricv, function(metrici){
   dfr[dfr$metric==metrici,]$mean
 }))
 colnames(df.cor) <- metricv
 mcor <- cor(df.cor)
 
+# correlation heatmap
 ggcorrplot::ggcorrplot(mcor, type = "lower", lab = TRUE, title = "mean")
 
-
-
+# try various pairs plot
+df.cor <- as.data.frame(df.cor)
+GGally::ggpairs(df.cor) + geom_abline(slope = 1, intercept = 0)
+pairs(df.cor)
