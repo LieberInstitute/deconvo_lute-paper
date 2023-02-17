@@ -256,7 +256,8 @@ get_ggcorr_from_stat(dfp.all, "sd")
 # analyze k2, k3, k4 labels
 #--------------------------
 # get term mappings
-type.labelv <- c("neuron", "glial", "oligo", "excit", "inhib", "non_oligo_glial")
+type.labelv <- c("neuron", "glial", "oligo", 
+                 "excit", "inhib", "non_oligo_glial")
 lmap <- lapply(type.labelv, function(labeli){
   if(grepl("neuron", labeli)){
     c("excit", "inhib")
@@ -270,15 +271,26 @@ lmap <- lapply(type.labelv, function(labeli){
 })
 names(lmap) <- type.labelv
 # bind image label data
-
-
+metricv <- unique(dfp.img2$metric)
 dfp.img2 <- dfp.img
-dfp.img2$label <- dfp.img2$type.label
-dfp.img2[,]
+dfp.img2$label <- tolower(dfp.img2$type.label)
+dfr.img <- aggregate(dfp.img2$value, 
+                 list(dfp.img2$label, dfp.img2$metric), 
+                 mean, na.rm = T)
+# sn data
+dfsn <- dfp.sn
+dfsn$label <- tolower(dfsn$type.label)
+filt <- grepl("k3", dfsn$label)
+dfsn <- dfsn[!filt,]
+table(dfsn$label)
+dfsn$label <- gsub(";.*", "", dfsn$label)
+dfsn$value <- as.numeric(dfsn$value)
+dfr.sn <- aggregate(dfsn$value, 
+                    list(dfsn$label, dfsn$metric), 
+                    mean, na.rm = T)
+colnames(dfr.sn) <- c("label", "metric", "mean")
 
-dfp.img.filt <- dfp.img[!dfp.img$type.label %in% c("Endo", "Other"),]
-which.label <- which(dfp.img.filt$type.label %in% c("Astro", "Micro"))
-dfp.img.filt[which.label,]$type.label <- "non_oligo_glial"
+
 
 
 
