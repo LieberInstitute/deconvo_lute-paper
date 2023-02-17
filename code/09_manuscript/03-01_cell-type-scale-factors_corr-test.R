@@ -55,8 +55,8 @@ lscale <- lapply(marker.typev, function(markeri){
 })
 names(lscale) <- marker.typev
 # save
-fname <- paste0("lscale_total-counts-exprgene_",handle.str,".rda")
-save(lscale, file = file.path(save.dpath, fname))
+lscale.fname <- paste0("lscale_total-counts-exprgene_",handle.str,".rda")
+save(lscale, file = file.path(save.dpath, lscale.fname))
 
 # get scale factors from halo data
 halo.fname <- "halo_all.Rdata"
@@ -69,6 +69,9 @@ dfh <- get(load(halo.fpath))
 #--------------------------------
 set.seed(0)
 
+lscale.fname <- paste0("lscale_total-counts-exprgene_",handle.str,".rda")
+lscale <- get(load(file.path(save.dpath, lscale.fname)))
+
 # total mrna counts
 variable.name <- "total.counts"
 variable.str <- "total.count"
@@ -76,7 +79,7 @@ title.str <- "Total mRNA counts"
 dfp <- do.call(rbind, lapply(seq(3), function(ii){
   lscale[[ii]][[variable.name]]}))
 dfp$label <- paste0(dfp$type, ";", dfp$marker.type)
-dfp$value <- dfp[,variable.str]
+dfp$value <- as.numeric(dfp[,variable.str])
 # downsample by label
 dft <- as.data.frame(table(dfp$label))
 min.cells <- min(dft[,2])
@@ -85,17 +88,16 @@ dfp <- do.call(rbind, lapply(unique.labels, function(labeli){
   dfi <- dfp[dfp$label == labeli,]
   dfi[sample(seq(nrow(dfi)), min.cells),]
 }))
-dfp$total.count <- as.numeric(dfp$value)
 # order labels
 medianv <- unlist(lapply(unique.labels, function(ui){
   median(dfp[dfp$label==ui,]$value)}))
 labv.order <- rev(order(medianv))
 dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
 # get plot object
-ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+ggvp.sn.rna <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
   geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggvp
+ggvp.sn.rna
 
 # total expressed genes
 variable.name <- "total.expr.genes"
@@ -113,17 +115,16 @@ dfp <- do.call(rbind, lapply(unique.labels, function(labeli){
   dfi <- dfp[dfp$label == labeli,]
   dfi[sample(seq(nrow(dfi)), min.cells),]
 }))
-dfp$total.expr.genes <- as.numeric(dfp$value)
 # order labels
 medianv <- unlist(lapply(unique.labels, function(ui){
   median(dfp[dfp$label==ui,]$value)}))
 labv.order <- rev(order(medianv))
 dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
 # get plot object
-ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+ggvp.sn.expr <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
   geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggvp
+ggvp.sn.expr
 
 # nucleus areas
 variable.name <- "Nucleus_Area"
@@ -145,10 +146,10 @@ medianv <- unlist(lapply(unique.labels, function(ui){
 labv.order <- rev(order(medianv))
 dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
 # get plot object
-ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+ggvp.img.nuc <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
   geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggvp
+ggvp.img.nuc
 
 # nucleus areas
 variable.name <- "AKT3_Copies"
@@ -170,15 +171,37 @@ medianv <- unlist(lapply(unique.labels, function(ui){
 labv.order <- rev(order(medianv))
 dfp$label <- factor(dfp$label, levels = unique.labels[labv.order])
 # get plot object
-ggvp <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
+ggvp.img.akt3 <- ggplot(dfp, aes(x = label, y = value)) + theme_bw() +
   geom_violin(draw_quantiles = 0.5) + ggtitle(title.str) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggvp
+ggvp.img.akt3
+
+# save composite plot
+# get formatted plots list
+lgg <- list(plot1 = ggvp.sn.rna + 
+              theme(axis.title.x = element_blank(),
+                    axis.title.y = element_blank()),
+            plot2 = ggvp.sn.expr +
+              theme(axis.title.x = element_blank(),
+                    axis.title.y = element_blank()),
+            plot3 = ggvp.img.nuc +
+              theme(axis.title.x = element_blank(),
+                    axis.title.y = element_blank()),
+            plot4 = ggvp.img.akt3 +
+              theme(axis.title.x = element_blank(),
+                    axis.title.y = element_blank()))
+# save jpg
+jpg.fname <- "ggvp-comp_cell-scale-sn-img_ro1-dlpfc.jpg"
+jpeg(file = file.path(save.dpath, jpg.fname), width = 5, height = 8,
+     units = "in", res = 400)
+grid.arrange(lgg[[1]], lgg[[2]], lgg[[3]], lgg[[4]],
+             ncol = 1, bottom = "Label", left = "Value")
+dev.off()
 
 
-
-
-
+#---------------------
+# harmonize scale data
+#---------------------
 
 
 
