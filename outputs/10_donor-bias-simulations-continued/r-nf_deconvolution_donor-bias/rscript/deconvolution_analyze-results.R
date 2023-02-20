@@ -9,6 +9,21 @@
 libv <- c("argparse")
 sapply(libv, library, character.only = T)
 
+#--------------
+# manage parser
+#--------------
+parser <- ArgumentParser() # create parser object
+
+# data arguments
+parser$add_argument("-r", "--results_data", type="character",
+                    help = paste0("Results output data"))
+parser$add_argument("-t", "--true_proportions", type="character", 
+                    default="./data/true_proportions.rda",
+                    help = paste0("The filepath to the true proportions data."))
+
+# get parser object
+args <- parser$parse_args()
+
 #-------------
 # parse params
 #-------------
@@ -48,21 +63,6 @@ rmse_types <- function(true.proportions, pred.proportions){
   rmse <- sqrt(mean(error)^2)
   return(rmse)
 }
-
-#--------------
-# manage parser
-#--------------
-parser <- ArgumentParser() # create parser object
-
-# data arguments
-parser$add_argument("-r", "--results_data", type="character",
-                    help = paste0("Results output data"))
-parser$add_argument("-t", "--true_proportions", type="character", 
-                    default="./data/true-proportions.rda",
-                    help = paste0("The filepath to the true proportions data."))
-
-# get parser object
-args <- parser$parse_args()
 
 #----------
 # load data

@@ -8,6 +8,8 @@ nextflow.enable.dsl=2
 process predict_proportions {
     publishDir("$params.results_folder", mode: "copy", overwrite: false)
 
+    maxForks 2
+
     input:
         val sce_filepath
         val bulk_filepath
@@ -21,6 +23,6 @@ process predict_proportions {
 
     script:
     """
-    Rscript $params.predict_proportions_script -r $sce_filepath -d $deconvolution_method -a $assay_name -c $celltype_variable
+    Rscript $params.predict_proportions_script -r $sce_filepath -b $bulk_filepath -m $index_matrix_filepath -i $iterations_index -d $deconvolution_method -a $assay_name -c $celltype_variable
     """
 }

@@ -3,9 +3,9 @@ sce_filepath,param,char,Filepath to SCE object to read
 method,param,nnls;music,Name of the deconvolution method to use.
 decon_args,param,NA,Additional deconvolution method arguments
 assay_name,param,counts;logcounts;counts_adj,Name of assay in SCE object to use
-true-proportions_filepath,param,char,RDA object containing a vector of true cell type proportions
+true_proportions_filepath,param,char,RDA object containing a vector of true cell type proportions
 celltype_variable,param,char,Name of variable in sce colData containing cell type labels
-index,metadata,int,Simulation iteration index.
+iterations_index,metadata,int,Simulation iteration index.
 sample_id,metadata,char,Identifier of the sample(s) whose data was used.
 bulk_filepath,param ,char,Path to the bulk expression dataset
 index_matrix_filepath,param,char,Path to the matrix of indices for sims/iters by celltype

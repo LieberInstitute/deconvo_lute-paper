@@ -84,8 +84,11 @@ num.neuron.select <- round(num.neuron * fract.cells.iter/100, 0)
 num.glial.select <- round(num.neuron * fract.cells.iter/100, 0)
 mi <- do.call(rbind, lapply(seq(num.iter.intra), function(ii){
   set.seed(ii)
-  datv <- sample(seq(num.neuron), num.neuron.select)
-  datv <- c(datv, sample(seq(num.glial), num.glial.select))
+  which.neuron.iter <- which(scef[[celltype.variable]] == "neuron")
+  which.neuron.iter <- which.neuron.iter[sample(seq(num.neuron), num.neuron.select)]
+  which.glial.iter <- which(scef[[celltype.variable]] == "glial")
+  which.glial.iter <- which.glial.iter[sample(seq(num.glial), num.glial.select)]
+  c(which.neuron.iter, which.glial.iter)
 }))
 colnames(mi) <- c(rep("neuron", num.neuron.select), rep("glial", num.glial.select))
 dim(mi) # [1] 1000 1398
@@ -111,20 +114,22 @@ ypb <- t(t(P) %*% t(ZS))
 # save 
 save(ypb, file = ypb.intra.fpath)
 
+#---------------------
 # write workflow table
+#---------------------
 wt <- data.frame(iterations_index = seq(num.iter.intra))
 wt$method <- "nnls"
 wt$sample_id <- largest.donor.id
 wt$celltype_variable <- celltype.variable
 wt$assay_name <- assay.name
 # manage filepaths
-cnamev <- c("sce_filepath", "true-proportions_filepath", 
+cnamev <- c("sce_filepath", "true_proportions_filepath", 
             "bulk_filepath", "index_matrix_filepath")
 fpathv <- c(file.path("data", sce.intra.fname),
             file.path("data", tp.intra.fname),
             file.path("data", ypb.intra.fname),
             file.path("data", mi.intra.fname))
-for(ii in seq(3)){wt[,cnamev[ii]] <- paste0('"$launchDir/', fpathv[ii], '"')}
+for(ii in seq(length(cnamev))){wt[,cnamev[ii]] <- paste0('"$launchDir/', fpathv[ii], '"')}
 # save
 write.csv(wt, file = wt.intra.fpath, row.names = F)
 

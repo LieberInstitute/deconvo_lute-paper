@@ -52,7 +52,7 @@ predict_proportions <- function(Z, Y, strict.method = "nnls",
     if(verbose){message("Using method MuSiC...")}
     if(method.args == ""){
       if(verbose){message("Getting mean library sizes by type...")}
-      S <- unlist(lapply(unique.celltypes, function(ci){
+      S <- unlist(lapply(unique.types, function(ci){
         mean(colSums(mexpr[,cd[,celltype.variable]==ci]))
       }))
       if(verbose){message("Setting variances by gene...")}
@@ -91,7 +91,7 @@ parser$add_argument("-m", "--index_matrix_filepath", type="character", default="
                     help = "Matrix of indices for the cells to use.")
 
 # iterations index
-parser$add_argument("-i", "--iterations_index", type="int", default="1",
+parser$add_argument("-i", "--iterations_index", type="character", default="1",
                     help = "Index of current run.")
 
 # deconvolution parameters
@@ -131,9 +131,9 @@ if(file.exists(sce.filepath)){
 # load index matrix
 if(file.exists(mi.filepath)){
   mi <- get(load(mi.filepath))
-  message("Reference data successfully loaded.")
+  message("index matrix data successfully loaded.")
 } else{
-  stop("Error, reference data not found at ",sce.filepath)
+  stop("Error, index matrix data not found at ",mi.filepath)
 }
 
 #-----------------------
@@ -142,20 +142,20 @@ if(file.exists(mi.filepath)){
 # get celltype metadata
 cd <- colData(sce)
 if(celltype.variable %in% colnames(cd)){
-  celltype.vector <- sce[[celltype.variable]]
-  unique.celltypes <- unique(celltype.vector)
+  celltype.vector <- cd[,celltype.variable]
+  unique.types <- unique(celltype.vector)
 } else{
   stop("Error, didn't find ", celltype.variable," in reference colData.")
 }
 
 # subset types
 indexv <- mi[index,] # get index
-sce.filt.index <- unlist(lapply(unique.types, function(typei){
-  index.filt <- as.integer(indexv[names(indexv)==typei])
-  which(cd[,celltype.variable]==typei)[index.filt]
-}))
-sce <- sce[,sce.filt.index]
+sce <- sce[,indexv]
 message("After index filter, retained ", ncol(sce), " cells.")
+
+# overwrite new celltype data
+celltype.vector <- sce[[celltype.variable]]
+unique.types <- unique(celltype.vector)
 
 #-------------------------------
 # get deconvolution data objects
@@ -187,11 +187,10 @@ if(bulk.filepath == "NA"|is.na(bulk.filepath)|is(bulk.filepath, "NULL")){
 #------------------
 t1 <- Sys.time()
 if(deconvolution.method=='music'){
-  unique.celltypes <- unique(sce[[celltype.variable]])
   pred.proportions <- predict_proportions(Z = Z, Y = Y, 
                                           strict.method = deconvolution.method,
-                                          method.args = method.args,
-                                          unique.celltypes = unique.celltypes)
+                                          method.args = "NA",
+                                          unique.celltypes = unique.types)
 } else{
   pred.proportions <- predict_proportions(Z = Z, Y = Y, 
                                           strict.method = deconvolution.method,
@@ -208,12 +207,13 @@ names(time.run) <- "time.run.sec"
 results.vector <- c()
 
 # append params
-results.vector["sce_filepath"] <- sce.filepath
-results.vector["bulk_filepath"] <- bulk.filepath
-results.vector["mi_filepath"] <- mi.filepath
-results.vector["iteration_index"] <- index
+results.vector["launch_dir"] <- getwd()
+results.vector["sce_filepath"] <- basename(sce.filepath)
+results.vector["bulk_filepath"] <- basename(bulk.filepath)
+results.vector["mi_filepath"] <- basename(mi.filepath)
+results.vector["iterations_index"] <- index
 results.vector["deconvolution_method"] <- tolower(deconvolution.method)
-results.vector["method_arguments"] <- method.args
+results.vector["method_arguments"] <- "NA"
 results.vector["assay_name"] <- assay.name
 results.vector["type_labels"] <- paste0(unique.types, collapse = ";")
 results.vector["celltype_variable"] <- celltype.variable

@@ -29,7 +29,7 @@ workflow {
     
     celltype_variable = channel.fromList( params.celltype_variable ) // name of celltype variable
     
-    tp_filepath = channel.fromList( params.true-proportions_filepath ) // true proportions data
+    tp_filepath = channel.fromList( params.true_proportions_filepath ) // true proportions data
     
     
     // run workflow
