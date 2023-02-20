@@ -7,10 +7,13 @@
 #
 
 # params
+# directories
 data_dir=data
+rscript_dir=rscript
+# workflow table path
 wt_fname=workflow-table_intra.csv
 wt_fpath=$data_dir/$wt_fname
-rscript_dir=rscript
+# rscript paths
 write_param_script=r-nf_write-params.R
 gather_script=r-nf_gather-results.R
 

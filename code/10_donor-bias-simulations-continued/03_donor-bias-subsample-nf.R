@@ -40,8 +40,8 @@ donor.variable <- "Sample"
 assay.name <- "counts_adj"
 
 # set number of iterations
-num.iter.intra <- 1000
-num.iter.inter <- 1000
+num.iter.intra <- 10
+num.iter.inter <- 10
 
 # set fract cells per iter
 fract.cells.iter <- 20
@@ -112,7 +112,7 @@ ypb <- t(t(P) %*% t(ZS))
 save(ypb, file = ypb.intra.fpath)
 
 # write workflow table
-wt <- data.frame(iterations_index = seq(1000))
+wt <- data.frame(iterations_index = seq(num.iter.intra))
 wt$method <- "nnls"
 wt$sample_id <- largest.donor.id
 wt$celltype_variable <- celltype.variable

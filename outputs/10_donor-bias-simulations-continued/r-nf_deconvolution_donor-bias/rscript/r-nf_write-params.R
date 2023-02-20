@@ -58,7 +58,7 @@ if(file.exists(pc.fpath)){
 # get new param lines
 #--------------------
 # get data to write
-which.param <- which(md$type=="param")
+which.param <- which(grepl("param", md$type))
 variable.names <- md[which.param,]$variable
 wt.colnames <- colnames(wt)
 variables.provided <- intersect(variable.names, wt.colnames)
