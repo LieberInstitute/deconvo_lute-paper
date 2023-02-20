@@ -14,7 +14,7 @@ sapply(libv, library, character.only = T)
 parser <- ArgumentParser() # create parser object
 # data arguments
 parser$add_argument("-f", "--workflow_table_filepath", type="character", 
-                    default="workflow-table.csv",
+                    default="/data/workflow-table.csv",
                     help = "Path to the workflow .csv table.")
 parser$add_argument("-m", "--parameters_metadata", type="character", 
                     default="params-metadata.csv",
@@ -48,7 +48,8 @@ if(file.exists(pm.fpath)){
 }
 # parameters config
 if(file.exists(pc.fpath)){
-  lp <- readLines(pc.fpath)
+  con <- file(pc.fpath)
+  lp <- readLines(con)
 } else{
   stop("Error, didn't find parameters .config table at: ", pc.fpath)
 }

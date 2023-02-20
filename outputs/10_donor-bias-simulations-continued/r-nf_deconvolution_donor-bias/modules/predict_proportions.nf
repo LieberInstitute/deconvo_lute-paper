@@ -10,11 +10,14 @@ process predict_proportions {
 
     input:
         val sce_filepath
+        val bulk_filepath
+        val index_matrix_filepath
+        val iterations_index
         val deconvolution_method
         val assay_name
         val celltype_variable
     output:
-        path("deconvolution_results_*")
+        path("deconvolution-results_*")
 
     script:
     """

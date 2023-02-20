@@ -66,57 +66,61 @@ predict_proportions <- function(Z, Y, strict.method = "nnls",
   
   # get proportion predictions
   p <- eval(parse(text = command.string))
+  if(sum(p) > 1){p <- p/sum(p)} # coerce point scale
   if(verbose){message("Completed proportion predictions.")}
   return(p)
 }
-
 
 #--------------
 # manage parser
 #--------------
 parser <- ArgumentParser() # create parser object
 
-# data arguments
+# single-cell expression dataset
 parser$add_argument("-r", "--sce_filepath", type="character", 
                     default="./data/sce-example.rda",
                     help = paste0("Expression reference dataset, ",
                                   "either an SCE or SE object."))
-parser$add_argument("-b", "--bulkse", type="character", default="NA",
-                    help = paste0("Bulk expression dataset, in SE format. ",
-                                  "If NA, makes a pseudobulk from ",
-                                  "provided SCE/SE reference expression data."))
+
+# bulk expression dataset
+parser$add_argument("-b", "--bulk_filepath", type="character", default="NA",
+                    help = "Bulk expression dataset. If NA, use means from sce")
+
+# path to the iterations matrix
+parser$add_argument("-m", "--index_matrix_filepath", type="character", default="NA",
+                    help = "Matrix of indices for the cells to use.")
+
+# iterations index
+parser$add_argument("-i", "--iterations_index", type="int", default="1",
+                    help = "Index of current run.")
 
 # deconvolution parameters
 parser$add_argument("-d", "--deconvolution_method", type="character", default="nnls",
-                    help="Deconvolution method to use. Can be either of 'nnls' or 'music'.")
-parser$add_argument("-t", "--time_run", type="logical", default=TRUE,
-                    help="Whether to time the operation for benchmarking.")
+                    help="Deconvolution method to use.")
+
+# name of assay data in sce to use
 parser$add_argument("-a", "--assay_name", type="character", default="counts",
                     help="Name of assay in reference expression data to use.")
+
+# name of the celltype variable in sce coldata
 parser$add_argument("-c", "--celltype_variable", type="character", default="celltype",
                     help="Reference ColData variable containing cell type labels.")
-parser$add_argument("-f", "--method_args", type="character", default="NA",
-                    help="Additional arguments for deconvolution functions.")
 
-#-----------------------
 # get flags as variables
-#-----------------------
-# get parser object
-args <- parser$parse_args()
-
+args <- parser$parse_args() # get parser object
 # parse provided arguments
 sce.filepath <- args$sce_filepath
-bulk.filepath <- args$bulkse
+bulk.filepath <- args$bulk_filepath
+mi.filepath <- args$index_matrix_filepath
+index <- args$iterations_index
 deconvolution.method <- args$deconvolution_method
-# time.run <- args$time_run
 assay.name <- args$assay_name
 celltype.variable <- args$celltype_variable
-method.args <- args$method_args
 
 #-----------------------
 # load data, with checks
 #-----------------------
-# get reference expression data
+# load single-cell expression data
 if(file.exists(sce.filepath)){
   sce <- get(load(sce.filepath))
   message("Reference data successfully loaded.")
@@ -124,6 +128,17 @@ if(file.exists(sce.filepath)){
   stop("Error, reference data not found at ",sce.filepath)
 }
 
+# load index matrix
+if(file.exists(mi.filepath)){
+  mi <- get(load(mi.filepath))
+  message("Reference data successfully loaded.")
+} else{
+  stop("Error, reference data not found at ",sce.filepath)
+}
+
+#-----------------------
+# parse iterations index
+#-----------------------
 # get celltype metadata
 cd <- colData(sce)
 if(celltype.variable %in% colnames(cd)){
@@ -133,24 +148,38 @@ if(celltype.variable %in% colnames(cd)){
   stop("Error, didn't find ", celltype.variable," in reference colData.")
 }
 
+# subset types
+indexv <- mi[index,] # get index
+sce.filt.index <- unlist(lapply(unique.types, function(typei){
+  index.filt <- as.integer(indexv[names(indexv)==typei])
+  which(cd[,celltype.variable]==typei)[index.filt]
+}))
+sce <- sce[,sce.filt.index]
+message("After index filter, retained ", ncol(sce), " cells.")
+
+#-------------------------------
+# get deconvolution data objects
+#-------------------------------
 # get signature matrix
 if(assay.name %in% names(assays(sce))){
   mexpr <- assays(sce)[[assay.name]]
-  Z <- do.call(cbind, lapply(unique.celltypes, function(ci){
+  Z <- do.call(cbind, lapply(unique.types, function(ci){
     rowMeans(mexpr[,celltype.vector==ci])
   }))
+  colnames(Z) <- unique.types
 } else{
   stop("Error, assay not found in reference data.")
 }
 
+# load bulk expression data
 # get bulk data
-if(bulk.filepath == "NA"|is.na(bulk.filepath)){
+if(bulk.filepath == "NA"|is.na(bulk.filepath)|is(bulk.filepath, "NULL")){
   message("Making pseudobulk from reference data...")
   Y <- matrix(rowMeans(mexpr), ncol = 1)
 } else if(file.exists(bulk.filepath)){
   Y <- get(load(bulk.filepath))
 } else{
-  stop("Error, couldn't get bulk data.")
+  stop("Error, bulk data not found at path: ", bulk.filepath)
 }
 
 #------------------
@@ -166,7 +195,7 @@ if(deconvolution.method=='music'){
 } else{
   pred.proportions <- predict_proportions(Z = Z, Y = Y, 
                                           strict.method = deconvolution.method,
-                                          method.args = method.args)
+                                          method.args = "NA")
 }
 
 time.run <- Sys.time() - t1
@@ -180,10 +209,13 @@ results.vector <- c()
 
 # append params
 results.vector["sce_filepath"] <- sce.filepath
+results.vector["bulk_filepath"] <- bulk.filepath
+results.vector["mi_filepath"] <- mi.filepath
+results.vector["iteration_index"] <- index
 results.vector["deconvolution_method"] <- tolower(deconvolution.method)
 results.vector["method_arguments"] <- method.args
 results.vector["assay_name"] <- assay.name
-results.vector["type_labels"] <- paste0(unique.celltypes, collapse = ";")
+results.vector["type_labels"] <- paste0(unique.types, collapse = ";")
 results.vector["celltype_variable"] <- celltype.variable
 
 # append proportions
@@ -198,7 +230,6 @@ results.vector <- c(results.vector, time.run, "timestamp" = as.numeric(t1))
 results.table <- t(as.data.frame(results.vector, nrow = 1))
 
 # save new results
-ts <- as.character(as.numeric(t1))
-new.filename <- paste0("deconvolution_results_", as.numeric(t1), ".csv")
+ts <- as.character(as.numeric(t1)) # get timestamp
+new.filename <- paste0("deconvolution-results_", as.numeric(t1), ".csv")
 write.csv(results.table, file = new.filename, row.names = FALSE)
-

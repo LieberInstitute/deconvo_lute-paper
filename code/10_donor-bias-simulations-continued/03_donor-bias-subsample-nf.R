@@ -54,8 +54,8 @@ rnf.data.fpath <- file.path("r-nf_deconvolution_donor-bias", "data")
 sce.intra.fname <- "sce_largest-donor.rda"
 sce.intra.fpath <- file.path(save.dpath, rnf.data.fpath, sce.intra.fname)
 # mindex intra
-mi.fname <- "mindex_intra.rda"
-mi.fpath <- file.path(save.dpath, rnf.data.fpath, mi.fname)
+mi.intra.fname <- "mindex_intra.rda"
+mi.intra.fpath <- file.path(save.dpath, rnf.data.fpath, mi.intra.fname)
 # true proportions
 tp.intra.fname <- "true-proportions_intra.rda"
 tp.intra.fpath <- file.path(save.dpath, rnf.data.fpath, tp.intra.fname)
@@ -87,8 +87,9 @@ mi <- do.call(rbind, lapply(seq(num.iter.intra), function(ii){
   datv <- sample(seq(num.neuron), num.neuron.select)
   datv <- c(datv, sample(seq(num.glial), num.glial.select))
 }))
+colnames(mi) <- c(rep("neuron", num.neuron.select), rep("glial", num.glial.select))
 dim(mi) # [1] 1000 1398
-save(mi, file = mi.fpath)
+save(mi, file = mi.intra.fpath)
 
 # true proportions
 dft <- as.data.frame(table(scef[[celltype.variable]]))
@@ -111,17 +112,19 @@ ypb <- t(t(P) %*% t(ZS))
 save(ypb, file = ypb.intra.fpath)
 
 # write workflow table
-wt <- data.frame(index = seq(1000))
+wt <- data.frame(iterations_index = seq(1000))
 wt$method <- "nnls"
 wt$sample_id <- largest.donor.id
 wt$celltype_variable <- celltype.variable
 wt$assay_name <- assay.name
 # manage filepaths
-cnamev <- c("sce_filepath", "tp_filepath", "ypb_filepath")
+cnamev <- c("sce_filepath", "true-proportions_filepath", 
+            "bulk_filepath", "index_matrix_filepath")
 fpathv <- c(file.path("data", sce.intra.fname),
             file.path("data", tp.intra.fname),
-            file.path("data", ypb.intra.fname))
-for(ci in seq(3)){wt[,cnamev[ci]] <- paste0('"$launchDir/', fpathv[ci], '"')}
+            file.path("data", ypb.intra.fname),
+            file.path("data", mi.intra.fname))
+for(ii in seq(3)){wt[,cnamev[ii]] <- paste0('"$launchDir/', fpathv[ii], '"')}
 # save
 write.csv(wt, file = wt.intra.fpath, row.names = F)
 

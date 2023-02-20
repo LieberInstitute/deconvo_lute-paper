@@ -1,4 +1,4 @@
-"index","method","sample_id","celltype_variable","assay_name","sce_filepath","tp_filepath","ypb_filepath"
+"index","method","sample_id","celltype_variable","assay_name","sce_filepath","true-proportions_filepath","bulk_filepath"
 1,"nnls","Br3942_ant","k2","counts_adj","""$launchDir/data/sce_largest-donor.rda""","""$launchDir/data/true-proportions_intra.rda""","""$launchDir/data/ypb_intra.rda"""
 2,"nnls","Br3942_ant","k2","counts_adj","""$launchDir/data/sce_largest-donor.rda""","""$launchDir/data/true-proportions_intra.rda""","""$launchDir/data/ypb_intra.rda"""
 3,"nnls","Br3942_ant","k2","counts_adj","""$launchDir/data/sce_largest-donor.rda""","""$launchDir/data/true-proportions_intra.rda""","""$launchDir/data/ypb_intra.rda"""

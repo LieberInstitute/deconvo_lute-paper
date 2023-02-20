@@ -14,16 +14,36 @@ include { analyze_results as analyze_res } from "$launchDir/modules/analyze_resu
 workflow {
     
     // parse channels
-    sce = channel.fromList( params.sce_filepath )
-    method = channel.fromList( params.decon_method )
-    assay = channel.fromList( params.assay_name )
-    typevar = channel.fromList( params.celltype_variable ) // name of celltype variable
-    true_proportions_path = channel.fromList( params.true_proportions_path )
+    
+    sce_filepath = channel.fromList( params.sce_filepath ) // single-cell expression data
+    
+    bulk_filepath = channel.fromList( params.bulk_filepath ) // pseudo-bulk expression data
+    
+    mi_filepath = channel.fromList( params.index_matrix_filepath ) // indices matrix filepath
+    
+    iterations_index = channel.fromList( params.iterations_index ) // index of the current run
+    
+    method = channel.fromList( params.method ) // deconvolution method name
+    
+    assay_name = channel.fromList( params.assay_name ) // name of the assay type to use
+    
+    celltype_variable = channel.fromList( params.celltype_variable ) // name of celltype variable
+    
+    tp_filepath = channel.fromList( params.true-proportions_filepath ) // true proportions data
+    
     
     // run workflow
-    predict_prop( sce, method, assay, typevar )
+    predict_prop(   
+                    sce_filepath, 
+                    bulk_filepath, 
+                    mi_filepath, 
+                    iterations_index, 
+                    method, 
+                    assay_name, 
+                    celltype_variable
+                )
     predict_prop.out.view()
-    analyze_res( predict_prop.out, true_proportions_path )
+    analyze_res( predict_prop.out, tp_filepath )
 }
 
 workflow.onComplete {
