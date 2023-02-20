@@ -1,0 +1,9 @@
+﻿variable,type,description,possible_values_or_class
+sce_filepath,param,Filepath to SCE object to read,char
+method,param,Name of the deconvolution method to use.,nnls;music
+decon_args,param,Additional deconvolution method arguments,NA
+assay_name,param,Name of assay in SCE object to use,counts;logcounts;counts_adj
+true_proportions_path,param,RDA object containing a vector of true cell type proportions,char
+celltype_variable,param,Name of variable in sce colData containing cell type labels,char
+index,metadata,Simulation iteration index.,int
+sample_id,metadata,Identifier of the sample(s) whose data was used.,char

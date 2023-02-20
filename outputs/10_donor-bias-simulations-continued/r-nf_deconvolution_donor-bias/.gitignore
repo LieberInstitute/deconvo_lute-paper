@@ -1,0 +1,60 @@
+#--------------------
+# nextflow .gitignore
+#--------------------
+*nextflow.log*
+*.nextflow
+work
+results
+results_table*
+
+#-------------
+# R .gitignore
+#-------------
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+
+# User-specific files
+.Ruserdata
+
+# Example code in package build process
+*-Ex.R
+
+# Output files from R CMD build
+/*.tar.gz
+
+# Output files from R CMD check
+/*.Rcheck/
+
+# RStudio files
+.Rproj.user/
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+.httr-oauth
+
+# knitr and R markdown default cache directories
+*_cache/
+/cache/
+
+# Temporary files created by R markdown
+*.utf8.md
+*.knit.md
+
+# R Environment Variables
+.Renviron
+data/sincell_with_class.RData
+data/true_proportions_sce_sc_Dropseq_qc.rda
+data/true_proportions_sce_sc_CELseq2_qc.rda
+data/true_proportions_sce_sc_10x_qc.rda
+data/sce_sc_Dropseq_qc.rda
+data/sce_sc_CELseq2_qc.rda
+data/sce_sc_10x_qc.rda
+workflow_table.csv
+params.config
