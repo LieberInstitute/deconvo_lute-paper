@@ -6,7 +6,7 @@
 #
 #
 
-libv <- c("SummarizedExperiment", "SingleCellExperiment")
+libv <- c("SummarizedExperiment", "SingleCellExperiment", "ggplot2", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 
 #------
@@ -40,14 +40,14 @@ donor.variable <- "Sample"
 assay.name <- "counts_adj"
 
 # set number of iterations
-num.iter.intra <- 10
-num.iter.inter <- 10
+num.iter.intra <- num.iter.inter <- 100
 
 # set fract cells per iter
 fract.cells.iter <- 20
 
 # filepaths
-rnf.data.fpath <- file.path("r-nf_deconvolution_donor-bias", "data")
+rnf.fpath <- "r-nf_deconvolution_donor-bias"
+rnf.data.fpath <- file.path(rnf.fpath, "data")
 
 # intra data filepaths
 # sce intra
@@ -117,21 +117,43 @@ save(ypb, file = ypb.intra.fpath)
 #---------------------
 # write workflow table
 #---------------------
-wt <- data.frame(iterations_index = seq(num.iter.intra))
-wt$method <- "nnls"
-wt$sample_id <- largest.donor.id
-wt$celltype_variable <- celltype.variable
-wt$assay_name <- assay.name
-# manage filepaths
-cnamev <- c("sce_filepath", "true_proportions_filepath", 
-            "bulk_filepath", "index_matrix_filepath")
-fpathv <- c(file.path("data", sce.intra.fname),
-            file.path("data", tp.intra.fname),
-            file.path("data", ypb.intra.fname),
-            file.path("data", mi.intra.fname))
-for(ii in seq(length(cnamev))){wt[,cnamev[ii]] <- paste0('"$launchDir/', fpathv[ii], '"')}
+# note: make table around number of methods to try
+methodv <- c("nnls", "music")
+wt <- do.call(rbind, lapply(methodv, function(methodi){
+  wti <- data.frame(iterations_index = seq(num.iter.intra))
+  wti$method <- methodi
+  wti$sample_id <- largest.donor.id
+  wti$celltype_variable <- celltype.variable
+  wti$assay_name <- assay.name
+  # manage filepaths
+  cnamev <- c("sce_filepath", "true_proportions_filepath", 
+              "bulk_filepath", "index_matrix_filepath")
+  fpathv <- c(file.path("data", sce.intra.fname),
+              file.path("data", tp.intra.fname),
+              file.path("data", ypb.intra.fname),
+              file.path("data", mi.intra.fname))
+  for(ii in seq(length(cnamev))){
+    wti[,cnamev[ii]] <- paste0('"$launchDir/', fpathv[ii], '"')}
+  wti
+}))
+
 # save
 write.csv(wt, file = wt.intra.fpath, row.names = F)
+
+#----------------------
+# analyze results table
+#----------------------
+results.fpath <- "results_table_intra.csv"
+dfr <- read.csv(file.path(save.dpath, rnf.fpath, results.fpath))
+
+# scatter plots
+# bias by type
+dfp <- data.frame(neuron = dfr$bias.type1, glial = dfr$bias.type2, 
+                  method = dfr$deconvolution_method)
+ggpt <- ggplot(dfp, aes(x = neuron, y = glial)) + theme_bw() +
+  geom_point(alpha = 0.5, size = 2) + geom_abline(intercept = 0, slope = 1) + 
+  xlim(-0.04, 0.04) + ylim(-0.04, 0.04)
+ggpt + facet_wrap(~method)
 
 
 

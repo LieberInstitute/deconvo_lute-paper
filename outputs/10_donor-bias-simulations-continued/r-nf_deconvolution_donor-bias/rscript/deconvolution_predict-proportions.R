@@ -23,12 +23,13 @@ sapply(libv, library, character.only = T)
 #------------------
 # helper functions
 #------------------
-predict_proportions <- function(Z, Y, strict.method = "nnls", 
+predict_proportions <- function(Z, Y, S = NULL, strict.method = "nnls", 
                                 method.args = "", verbose = FALSE, ...){
   # predict_proportions
   #
   # Z : signature matrix
   # Y : bulk matrix
+  # S : cell scale factors
   # strict_method : deconvolution method
   # method.args : additional method arguments
   # verbose : whether to show verbose messages
@@ -49,16 +50,11 @@ predict_proportions <- function(Z, Y, strict.method = "nnls",
     if(verbose){message("Using method nnls...")}
     command.string <- paste0("nnls::nnls(Z, Y",method.args,")$x")
   } else if(method == "music"){
+    if(is(S, "NULL")){stop("Error, need mexpr to run method: ", method)}
     if(verbose){message("Using method MuSiC...")}
-    if(method.args == ""){
-      if(verbose){message("Getting mean library sizes by type...")}
-      S <- unlist(lapply(unique.types, function(ci){
-        mean(colSums(mexpr[,cd[,celltype.variable]==ci]))
-      }))
-      if(verbose){message("Setting variances by gene...")}
-      Sigma <- matrix(0, ncol = 1, nrow = nrow(Z))
-      method.args <- ",S = S, Sigma = Sigma, nu = 1e-10, iter.max = 100, eps = 0"
-    }
+    if(verbose){message("Setting variances by gene...")}
+    Sigma <- matrix(0, ncol = 1, nrow = nrow(Z))
+    method.args <- ",S = S, Sigma = Sigma, nu = 1e-10, iter.max = 100, eps = 0"
     command.string <- paste0("music.basic(Y = Y, X = Z",method.args,")$p.weight")
   } else{
     if(verbose){message("Returning unmodified point prediction outputs.")}
@@ -149,12 +145,14 @@ if(celltype.variable %in% colnames(cd)){
 }
 
 # subset types
+index <- as.numeric(index)
 indexv <- mi[index,] # get index
 sce <- sce[,indexv]
 message("After index filter, retained ", ncol(sce), " cells.")
 
 # overwrite new celltype data
-celltype.vector <- sce[[celltype.variable]]
+cd <- colData(sce)
+celltype.vector <- cd[,celltype.variable]
 unique.types <- unique(celltype.vector)
 
 #-------------------------------
@@ -187,14 +185,18 @@ if(bulk.filepath == "NA"|is.na(bulk.filepath)|is(bulk.filepath, "NULL")){
 #------------------
 t1 <- Sys.time()
 if(deconvolution.method=='music'){
-  pred.proportions <- predict_proportions(Z = Z, Y = Y, 
+
+  S <- unlist(lapply(unique.types, function(typei){
+    type.filter <- celltype.variable==typei
+    mean(colSums(mexpr[,type.filter]))
+  }))
+
+  pred.proportions <- predict_proportions(Z = Z, Y = Y, S = S,
                                           strict.method = deconvolution.method,
-                                          method.args = "NA",
                                           unique.celltypes = unique.types)
 } else{
   pred.proportions <- predict_proportions(Z = Z, Y = Y, 
-                                          strict.method = deconvolution.method,
-                                          method.args = "NA")
+                                          strict.method = deconvolution.method,)
 }
 
 time.run <- Sys.time() - t1

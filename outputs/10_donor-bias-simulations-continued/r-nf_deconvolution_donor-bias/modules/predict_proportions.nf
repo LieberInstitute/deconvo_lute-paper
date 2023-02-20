@@ -8,7 +8,7 @@ nextflow.enable.dsl=2
 process predict_proportions {
     publishDir("$params.results_folder", mode: "copy", overwrite: false)
 
-    maxForks 2
+    maxForks 40
 
     input:
         val sce_filepath
