@@ -7,6 +7,32 @@
 install.packages("BisqueRNA")
 library(BisqueRNA)
 
+# append data to meet minimum sample requirements
+# use overlaps
+# use original data
+cd <- colData(sce)
+cdf <- cdf2 <- as.data.frame(cd)
+# force order
+var.lvl <- unique(cdf[,celltype.variable])
+cdf[,celltype.variable] <- factor(cdf[,celltype.variable], 
+                                  levels=var.lvl[order(var.lvl)])
+cdf2[,subject.variable] <- "rep"
+rownames(cdf2) <- paste0(rownames(cdf2), "_2")
+cdf <- rbind(cdf, cdf2)
+adf <- AnnotatedDataFrame(cdf)
+sc.mexpr <- sc.mexpr2 <- as.matrix(assays(sce)[[assay.name]])
+colnames(sc.mexpr2) <- paste0(colnames(sc.mexpr2), "_2")
+sc.mexpr <- cbind(sc.mexpr, sc.mexpr2)
+sc.eset <- ExpressionSet(assayData = sc.mexpr, phenoData = adf)
+bulk.mexpr <- cbind(ypb, ypb, ypb)
+colnames(bulk.mexpr) <- c(unique(cdf[,subject.variable]), "2")
+bulk.eset <- ExpressionSet(assayData = bulk.mexpr)
+res <- ReferenceBasedDecomposition(bulk.eset, sc.eset, 
+                                   cell.types = celltype.variable,
+                                   subject.names = subject.variable,
+                                   use.overlap = TRUE)$bulk.props[,"2"]
+
+# append data to meet minimum sample requirements
 # parse sce data
 subject.variable <- "Sample"
 # parse sce metadata
@@ -33,6 +59,10 @@ if(length(unique.subjects)==1){
 adf <- AnnotatedDataFrame(cdf)
 sc.eset <- ExpressionSet(assayData = sc.mexpr, phenoData = adf)
 bulk.eset <- ExpressionSet(assayData = bulk.mexpr)
-res <- BisqueRNA::ReferenceBasedDecomposition(bulk.eset, sc.eset,
-                                              cell.types = celltype.variable,
-                                              subject.names = subject.variable)
+res <- ReferenceBasedDecomposition(bulk.eset, sc.eset, 
+                                   cell.types = celltype.variable,
+                                   subject.names = subject.variable,
+                                   use.overlap = FALSE)
+
+
+
