@@ -32,7 +32,7 @@ sample.variable <- "Sample"
 assay.name <- "counts_adj"
 
 # set number of iterations
-num.iter <- 10
+num.iter <- 1000
 # set fract cells per iter
 fract.cells.iter <- 20
 # number of samples to select per iteration
@@ -94,7 +94,6 @@ S <- S[order(match(names(S), unique.types))]
 num.cellsv <- c("glial" = num.cells.glial, "neuron" = num.cells.neuron)
 lindex <- lapply(seq(num.iter), function(ii){
   set.seed(ii)
-  
   # get filtered sce data as scef
   random.samples <-  sample(unique.samples, num.sample.iter)
   filt <- cd[,sample.variable] %in% random.samples
@@ -102,28 +101,23 @@ lindex <- lapply(seq(num.iter), function(ii){
   vindex <- which(colnames(sce) %in% unlist(lapply(unique.types, function(typei){
     sample(rownames(cdf[cdf[,celltype.variable]==typei,]), num.cellsv[typei])
   })))
-  scef <- sce[,vindex]
-  
-  # get true proportions vector
-  tp <- as.data.frame(table(scef[[celltype.variable]]))
-  tp.prop <- tp[,2]; names(tp.prop) <- tp[,1]
-  tp.prop <- tp.prop/sum(tp[,2])
-  
   # return results
-  list(vindex = vindex, tp = tp.prop, ypb = ypb, samples = random.samples)
+  list(vindex = vindex, samples = random.samples)
 })
-# save indices
-save(lindex, file = lindex.fpath)
 
 # get pseudobulk data
 tp <- as.data.frame(table(sce[[celltype.variable]]))
 tp.prop <- tp[,2]; names(tp.prop) <- tp[,1]
 P <- tp.prop/sum(tp.prop)
 Z <- do.call(cbind, lapply(unique.types, function(typei){
-  rowMeans(assays(scef)[[assay.name]])
+  rowMeans(assays(sce)[[assay.name]])
 }))
 ZS <- sweep(Z, 2, S, "*")
 ypb <- t(t(P) %*% t(ZS))
+
+# save new data
+# save indices
+save(lindex, file = lindex.fpath)
 # save pseudobulk
 save(ypb, file = ypb.fpath)
 # save tp
@@ -200,4 +194,4 @@ dfs <- dfs[,c("method", cnv[!cnv=="method"])]
 
 # save
 fname <- "df-sstat-rnf_inter-donor-subsample_ro1-dlpfc.csv"
-write.csv(dfs, file = file.path(save.dpath, fname))
+write.csv(dfs, file = file.path(save.dpath, fname), row.names = F)
