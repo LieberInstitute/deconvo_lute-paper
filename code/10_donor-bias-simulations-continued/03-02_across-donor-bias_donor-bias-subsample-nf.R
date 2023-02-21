@@ -51,6 +51,9 @@ lindex.fpath <- file.path(save.dpath, rnf.data.fpath, lindex.fname)
 # ypb
 ypb.fname <- "ypb_inter.rda"
 ypb.fpath <- file.path(save.dpath, rnf.data.fpath, ypb.fname)
+# tp
+tp.fname <- "true-proportions_inter.rda"
+tp.fpath <- file.path(save.dpath, rnf.data.fpath, tp.fname)
 
 # workflow table
 wt.fname <- "workflow-table_inter-sample.csv"
@@ -115,6 +118,8 @@ ZS <- sweep(Z, 2, S, "*")
 ypb <- t(t(P) %*% t(ZS))
 # save pseudobulk
 save(ypb, file = ypb.fpath)
+# save tp
+save(P, file = tp.fpath)
 
 #---------------------
 # write workflow table
@@ -128,10 +133,12 @@ wt <- do.call(rbind, lapply(methodv, function(methodi){
   wti$celltype_variable <- celltype.variable
   wti$assay_name <- assay.name
   # manage filepaths
-  cnamev <- c("sce_filepath", "bulk_filepath", "list_index_fpath")
+  cnamev <- c("sce_filepath", "bulk_filepath", "list_index_filepath",
+              "true_proportions_filepath")
   fpathv <- c(file.path("data", sce.fname),
               file.path("data", ypb.fname),
-              file.path("data", lindex.fname))
+              file.path("data", lindex.fname),
+              file.path("data", tp.fname))
   for(ii in seq(length(cnamev))){
     wti[,cnamev[ii]] <- paste0('"$launchDir/', fpathv[ii], '"')}
   wti
@@ -139,12 +146,3 @@ wt <- do.call(rbind, lapply(methodv, function(methodi){
 
 # save
 write.csv(wt, file = wt.fpath, row.names = F)
-
-
-
-
-
-
-
-
-

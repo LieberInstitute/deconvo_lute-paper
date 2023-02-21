@@ -10,3 +10,4 @@ sample_id,metadata,char,Identifier of the sample(s) whose data was used.
 bulk_filepath,param ,char,Path to the bulk expression dataset
 index_matrix_filepath,param,char,Path to the matrix of indices for sims/iters by celltype
 iterations_index,param,int,"Index of current run, or the iterations/simulations index."
+list_index_filepath,param,char,Filepath to list of simulations metadata for each iteration
