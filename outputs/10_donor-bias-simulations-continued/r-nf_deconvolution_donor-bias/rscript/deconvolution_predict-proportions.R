@@ -193,6 +193,7 @@ message("After index filter, retained ", ncol(sce), " cells.")
 cd <- colData(sce)
 celltype.vector <- cd[,celltype.variable]
 unique.types <- unique(celltype.vector)
+unique.types <- unique.types[order(unique.types)]
 
 #-------------------------------
 # get deconvolution data objects
