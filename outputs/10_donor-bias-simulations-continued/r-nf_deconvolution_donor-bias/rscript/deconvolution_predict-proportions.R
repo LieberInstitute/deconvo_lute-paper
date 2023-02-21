@@ -214,6 +214,8 @@ results.vector["sce_filepath"] <- basename(sce.filepath)
 results.vector["bulk_filepath"] <- basename(bulk.filepath)
 results.vector["mi_filepath"] <- basename(mi.filepath)
 results.vector["iterations_index"] <- index
+results.vector["num_cells"] <- ncol(sce)
+results.vector["num_genes"] <- nrow(sce)
 results.vector["deconvolution_method"] <- tolower(deconvolution.method)
 results.vector["method_arguments"] <- "NA"
 results.vector["assay_name"] <- assay.name
