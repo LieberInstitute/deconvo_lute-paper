@@ -151,15 +151,19 @@ metricv <- c("bias", "rmse.types")
 dfrs1 <- dfr
 # add type label
 cnv <- colnames(dfrs1)
-typev <- unique(unlist(strsplit(dfr$type_labels, ";")))
-for(typei in typev){
-  cn.filt <- grepl(paste0("type", which(typev==typei)), cnv)
+unique.types <- unique(unlist(strsplit(dfr$type_labels, ";")))
+unique.types <- unique.types[order(unique.types)]
+for(typei in unique.types){
+  cn.filt <- grepl(paste0("type", which(unique.types==typei)), cnv)
   colnames(dfrs1)[cn.filt] <- paste0(colnames(dfrs1)[cn.filt], ".", typei)
 }
 # get all method category
 dfrs2 <- dfrs1; dfrs2$deconvolution_method <- "all"
 dfrs3 <- rbind(dfrs1, dfrs2) # append all category
-lvar <- list(method = dfrs3$deconvolution_method)
+methods.vector <- dfrs3$deconvolution_method
+lvar <- list(method = methods.vector)
+unique.methods <- unique(methods.vector)
+unique.methods <- unique.methods[order(unique.methods)]
 # get new colnames for aggregate
 cnv <- colnames(dfrs3)
 grepl.str <- paste0(metricv, collapse = "|")
@@ -171,12 +175,16 @@ dfs <- do.call(cbind, lapply(funv, function(fi){
   fi.str <- fi; if(fi=="length"){fi.str <- "count"}
   colnames(dfai) <- paste0(fi.str, "_", colnames(dfai)); return(dfai)
 }))
-dfs$method <- methodv; cnv <- colnames(dfs)
+dfs$method <- unique.methods; cnv <- colnames(dfs)
 dfs <- dfs[,c("method", cnv[!cnv=="method"])]
 
-#----------------------
-# analyze results table
-#----------------------
+# save
+fname <- "df-sstat-rnf_intra-donor-subsample_ro1-dlpfc.csv"
+write.csv(dfs, file = file.path(save.dpath, fname))
+
+#------------------------
+# plot results table data
+#------------------------
 results.fpath <- "results_table_intra.csv"
 dfr <- read.csv(file.path(save.dpath, rnf.fpath, results.fpath))
 
