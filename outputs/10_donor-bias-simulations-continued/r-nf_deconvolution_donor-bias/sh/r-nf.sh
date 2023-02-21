@@ -11,7 +11,7 @@
 data_dir=data
 rscript_dir=rscript
 # workflow table path
-wt_fname=workflow-table_intra.csv
+wt_fname=workflow-table_inter-sample.csv
 wt_fpath=$data_dir/$wt_fname
 # rscript paths
 write_param_script=r-nf_write-params.R

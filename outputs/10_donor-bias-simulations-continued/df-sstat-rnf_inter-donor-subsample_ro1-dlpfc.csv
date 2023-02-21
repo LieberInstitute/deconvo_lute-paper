@@ -1,0 +1,4 @@
+"","method","median_rmse.types","median_bias.type1.glial","median_bias.type2.neuron","sd_rmse.types","sd_bias.type1.glial","sd_bias.type2.neuron","count_rmse.types","count_bias.type1.glial","count_bias.type2.neuron"
+"1","all",3.47e-17,0.08527975,-0.08527975,9.29073974449828e-17,0.170405061119571,0.170405061119571,20,20,20
+"2","music",4.16e-17,0.075563312,-0.075563312,1.30196123854233e-16,0.16806393642438,0.16806393642438,10,10,10
+"3","nnls",2.78e-17,0.086923744,-0.086923744,1.75994602189954e-17,0.181769969795607,0.181769969795607,10,10,10

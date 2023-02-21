@@ -40,7 +40,8 @@ num.sample.iter <- 3
 # set the cell size factors for pseudobulk
 S <- c("glial" = 3, "neuron" = 10)
 # filepaths
-rnf.data.fpath <- file.path("r-nf_deconvolution_donor-bias", "data")
+rnf.dname <- "r-nf_deconvolution_donor-bias"
+rnf.data.fpath <- file.path(rnf.dname, "data")
 
 # save paths
 sce.fname <- "sce_all-samples.rda"
@@ -59,6 +60,10 @@ tp.fpath <- file.path(save.dpath, rnf.data.fpath, tp.fname)
 wt.fname <- "workflow-table_inter-sample.csv"
 wt.fpath <- file.path(save.dpath, rnf.data.fpath, wt.fname)
 
+# results table
+dfr.fname <- "results_table_inter.csv"
+dfr.fpath <- file.path(save.dpath, rnf.dname, dfr.fname)
+
 #----------
 # load data
 #----------
@@ -66,6 +71,9 @@ fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
 fpath <- file.path(load.dpath, fname)
 lscef <- get(load(fpath))
 sce <- lscef[[celltype.variable]]
+
+# save sce at r-nf.../data/
+save(sce, file = sce.fpath)
 
 #-------------------
 # get random indices
@@ -146,3 +154,50 @@ wt <- do.call(rbind, lapply(methodv, function(methodi){
 
 # save
 write.csv(wt, file = wt.fpath, row.names = F)
+
+#------------------------------
+# load final results table data
+#------------------------------
+dfr <- read.csv(dfr.fpath)
+
+#------------------------------------------------
+# get final summary statistics from results table
+#------------------------------------------------
+methodv <- c(unique(dfr$deconvolution_method), "all")
+funv <- c("median", "sd", "length")
+metricv <- c("bias", "rmse.types")
+
+# prepare results data
+dfrs1 <- dfr
+# add type label
+cnv <- colnames(dfrs1)
+unique.types <- unique(unlist(strsplit(dfr$type_labels, ";")))
+unique.types <- unique.types[order(unique.types)]
+for(typei in unique.types){
+  cn.filt <- grepl(paste0("type", which(unique.types==typei)), cnv)
+  colnames(dfrs1)[cn.filt] <- paste0(colnames(dfrs1)[cn.filt], ".", typei)
+}
+# get all method category
+dfrs2 <- dfrs1; dfrs2$deconvolution_method <- "all"
+dfrs3 <- rbind(dfrs1, dfrs2) # append all category
+methods.vector <- dfrs3$deconvolution_method
+lvar <- list(method = methods.vector)
+unique.methods <- unique(methods.vector)
+unique.methods <- unique.methods[order(unique.methods)]
+# get new colnames for aggregate
+cnv <- colnames(dfrs3)
+grepl.str <- paste0(metricv, collapse = "|")
+cnvf <- cnv[grepl(grepl.str, cnv)]
+
+# get aggregate statistics
+dfs <- do.call(cbind, lapply(funv, function(fi){
+  dfai <- aggregate(dfrs3[,cnvf], lvar, FUN = fi); dfai <- dfai[,2:ncol(dfai)]
+  fi.str <- fi; if(fi=="length"){fi.str <- "count"}
+  colnames(dfai) <- paste0(fi.str, "_", colnames(dfai)); return(dfai)
+}))
+dfs$method <- unique.methods; cnv <- colnames(dfs)
+dfs <- dfs[,c("method", cnv[!cnv=="method"])]
+
+# save
+fname <- "df-sstat-rnf_inter-donor-subsample_ro1-dlpfc.csv"
+write.csv(dfs, file = file.path(save.dpath, fname))
