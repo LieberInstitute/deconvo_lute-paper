@@ -22,22 +22,13 @@ code.dname <- "10_donor-bias-simulations-continued"
 proj.dname <- "deconvo_method-paper"
 save.dpath <- file.path(proj.dname, "outputs", code.dname)
 
-#--------------
-# load data
-#--------------
-celltype.variable <- "k2"
-proj.handle <- "ro1-dlpfc"
-fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
-fpath <- file.path(load.dpath, fname)
-lscef <- get(load(fpath))
-sce <- lscef[[celltype.variable]]
-
-#---------------
+#-----------
 # set params
-#---------------
+#-----------
 set.seed(0)
 celltype.variable <- "k2"
-donor.variable <- "Sample"
+proj.handle <- "ro1-dlpfc"
+sample.variable <- "Sample"
 assay.name <- "counts_adj"
 
 # set number of iterations
@@ -54,9 +45,9 @@ rnf.data.fpath <- file.path("r-nf_deconvolution_donor-bias", "data")
 # sce intra
 sce.intra.fname <- "sce_largest-donor.rda"
 sce.intra.fpath <- file.path(save.dpath, rnf.data.fpath, sce.intra.fname)
-# mindex intra
-mi.intra.fname <- "mindex_intra.rda"
-mi.intra.fpath <- file.path(save.dpath, rnf.data.fpath, mi.intra.fname)
+# lindex intra
+lindex.fname <- "lindex_inter.rda"
+lindex.fpath <- file.path(save.dpath, rnf.data.fpath, lindex.fname)
 # true proportions
 tp.intra.fname <- "true-proportions_intra.rda"
 tp.intra.fpath <- file.path(save.dpath, rnf.data.fpath, tp.intra.fname)
@@ -67,33 +58,40 @@ ypb.intra.fpath <- file.path(save.dpath, rnf.data.fpath, ypb.intra.fname)
 wt.fname <- "workflow-table_intra.csv"
 wt.intra.fpath <- file.path(save.dpath, rnf.data.fpath, wt.fname)
 
-#------------------------------------
-# subsample, save within-donor biases
-#------------------------------------
-# get largest donor
-dft <- as.data.frame(table(sce[[donor.variable]]))
-largest.donor.id <- dft[dft[,2]==max(dft[,2]),1]
-scef <- sce[,sce[[donor.variable]]==largest.donor.id]
-# save
-save(scef, file = sce.intra.fpath)
+#----------
+# load data
+#----------
+fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
+fpath <- file.path(load.dpath, fname)
+lscef <- get(load(fpath))
+sce <- lscef[[celltype.variable]]
 
-# save indices
-celltype.variable.vector <- scef[[celltype.variable]]
-num.neuron <- length(which(celltype.variable.vector == "neuron"))
-num.glial <- length(which(celltype.variable.vector == "glial"))
-num.neuron.select <- round(num.neuron * fract.cells.iter/100, 0)
-num.glial.select <- round(num.neuron * fract.cells.iter/100, 0)
-mi <- do.call(rbind, lapply(seq(num.iter.intra), function(ii){
+#-------------------
+# get random indices
+#-------------------
+# randomly take cells from 3 donors at a time
+# get the exact numbers of cells of each type to sample
+dft <- as.data.frame(table(sce[[celltype.variable]], 
+                           sce[[sample.variable]]))
+num.cells.glial <- round(min(dft[dft[,1]=="glial",3])*0.3, 0)
+num.cells.neuron <- round(min(dft[dft[,1]=="neuron",3])*0.3, 0)
+# get random cell indices as a list
+num.donor.iter <- 3
+cd <- colData(sce)
+unique.samples <- unique(cd[,sample.variable])
+unique.types <- unique(cd[,celltype.variable])
+num.cellsv <- c("glial" = num.cells.glial, "neuron" = num.cells.neuron)
+lindex <- lapply(seq(num.iter.inter), function(ii){
   set.seed(ii)
-  which.neuron.iter <- which(scef[[celltype.variable]] == "neuron")
-  which.neuron.iter <- which.neuron.iter[sample(seq(num.neuron), num.neuron.select)]
-  which.glial.iter <- which(scef[[celltype.variable]] == "glial")
-  which.glial.iter <- which.glial.iter[sample(seq(num.glial), num.glial.select)]
-  c(which.neuron.iter, which.glial.iter)
-}))
-colnames(mi) <- c(rep("neuron", num.neuron.select), rep("glial", num.glial.select))
-dim(mi) # [1] 1000 1398
-save(mi, file = mi.intra.fpath)
+  random.samples <-  sample(unique.samples, num.donor.iter)
+  filt <- cd[,sample.variable] %in% random.samples
+  cdf <- cd[filt,]
+  which(colnames(sce) %in% unlist(lapply(unique.types, function(typei){
+    sample(rownames(cdf[cdf[,celltype.variable]==typei,]), num.cellsv[typei])
+  })))
+})
+# save indices
+save(lindex, file = lindex.fpath)
 
 # true proportions
 dft <- as.data.frame(table(scef[[celltype.variable]]))

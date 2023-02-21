@@ -22,9 +22,9 @@ code.dname <- "10_donor-bias-simulations-continued"
 proj.dname <- "deconvo_method-paper"
 save.dpath <- file.path(proj.dname, "outputs", code.dname)
 
-#--------------
+#----------
 # load data
-#--------------
+#----------
 celltype.variable <- "k2"
 proj.handle <- "ro1-dlpfc"
 fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
@@ -32,9 +32,9 @@ fpath <- file.path(load.dpath, fname)
 lscef <- get(load(fpath))
 sce <- lscef[[celltype.variable]]
 
-#---------------
+#-----------
 # set params
-#---------------
+#-----------
 set.seed(0)
 celltype.variable <- "k2"
 donor.variable <- "Sample"
