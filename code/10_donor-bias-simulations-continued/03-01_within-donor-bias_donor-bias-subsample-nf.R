@@ -25,11 +25,12 @@ save.dpath <- file.path(proj.dname, "outputs", code.dname)
 #--------------
 # load data
 #--------------
+celltype.variable <- "k2"
 proj.handle <- "ro1-dlpfc"
 fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
 fpath <- file.path(load.dpath, fname)
 lscef <- get(load(fpath))
-sce <- lscef[["k2"]]
+sce <- lscef[[celltype.variable]]
 
 #---------------
 # set params
