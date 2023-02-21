@@ -147,7 +147,7 @@ results.fpath <- "results_table_intra.csv"
 dfr <- read.csv(file.path(save.dpath, rnf.fpath, results.fpath))
 
 # scatter plots
-# bias by type
+# type bias by method
 dfp <- data.frame(neuron = dfr$bias.type1, glial = dfr$bias.type2, 
                   method = dfr$deconvolution_method)
 ggpt <- ggplot(dfp, aes(x = neuron, y = glial)) + theme_bw() +
@@ -155,11 +155,69 @@ ggpt <- ggplot(dfp, aes(x = neuron, y = glial)) + theme_bw() +
   xlim(-0.04, 0.04) + ylim(-0.04, 0.04)
 ggpt + facet_wrap(~method)
 
+# scatter plot -- bias
+metric.plot <- title.str <- 'bias'
+# type predictions by method
+dfp1 <- dfr[dfr$deconvolution_method=="nnls",]
+dfp2 <- dfr[dfr$deconvolution_method=="music",]
+row1.orderv <- order(match(dfp1$iterations_index, dfp2$iterations_index))
+dfp1 <- dfp1[row1.orderv,]
+cond <- identical(dfp1$iterations_index, dfp2$iterations_index)
+# get plot data
+typev <- c(".type1", ".type2")
+names(typev) <- unique(unlist(strsplit(dfp1$type_labels, ";")))
+dfp <- do.call(rbind, lapply(c(".type1", ".type2"), function(typei){
+  var.str <- paste0(metric.plot, typei)
+  dfpi <- data.frame(nnls = dfp1[,var.str], music = dfp2[,var.str])
+  dfpi$type <- names(typev[typev==typei]); dfpi
+}))
+# get plot object1
+ggpt1 <- ggplot(dfp, aes(x = nnls, y = music)) + geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0) + theme_bw() + 
+  geom_smooth() + ggtitle(title.str)
+ggpt1 + facet_wrap(~type)
+# get plot object2
+ggpt2 <- ggplot(dfp, aes(x = nnls, y = music, color = type, shape = type)) + 
+  geom_point(alpha = 0.5, size = 2) + geom_abline(slope = 1, intercept = 0) + 
+  theme_bw() + geom_smooth() + ggtitle(title.str)
+ggpt2
 
+# scatter plot -- proportions
+metric.plot <- title.str <- 'prop.pred'
+# type predictions by method
+dfp1 <- dfr[dfr$deconvolution_method=="nnls",]
+dfp2 <- dfr[dfr$deconvolution_method=="music",]
+row1.orderv <- order(match(dfp1$iterations_index, dfp2$iterations_index))
+dfp1 <- dfp1[row1.orderv,]
+cond <- identical(dfp1$iterations_index, dfp2$iterations_index)
+# get plot data
+typev <- c(".type1", ".type2")
+names(typev) <- unique(unlist(strsplit(dfp1$type_labels, ";")))
+dfp <- do.call(rbind, lapply(c(".type1", ".type2"), function(typei){
+  var.str <- paste0(metric.plot, typei)
+  dfpi <- data.frame(nnls = dfp1[,var.str], music = dfp2[,var.str])
+  dfpi$type <- names(typev[typev==typei]); dfpi
+}))
+# get plot object1
+ggpt1 <- ggplot(dfp, aes(x = nnls, y = music)) + geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0) + theme_bw() + 
+  geom_smooth() + ggtitle(title.str)
+ggpt1 + facet_wrap(~type)
+# get plot object2
+ggpt2 <- ggplot(dfp, aes(x = nnls, y = music, color = type, shape = type)) + 
+  geom_point(alpha = 0.5, size = 2) + geom_abline(slope = 1, intercept = 0) + 
+  theme_bw() + geom_smooth() + ggtitle(title.str)
+ggpt2
 
+# plots of bias, rmse distributions by method
+# violin plots
+ggvp1 <- ggplot(dfr, aes(x = deconvolution_method, y = rmse.types)) + 
+  geom_violin(draw_quantiles = 0.5) + theme_bw()
+# jitter plots
+ggjt1 <- ggplot(dfr, aes(x = deconvolution_method, y = rmse.types)) + 
+  geom_jitter(alpha = 0.5) + stat_summary() + theme_bw()
 
-
-
-
-
+#-----------------------------
+# get final summary statistics
+#-----------------------------
 

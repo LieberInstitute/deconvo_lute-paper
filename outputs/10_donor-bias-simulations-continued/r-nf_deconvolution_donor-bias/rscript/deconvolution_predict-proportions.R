@@ -187,7 +187,7 @@ t1 <- Sys.time()
 if(deconvolution.method=='music'){
 
   S <- unlist(lapply(unique.types, function(typei){
-    type.filter <- celltype.variable==typei
+    type.filter <- celltype.vector==typei
     mean(colSums(mexpr[,type.filter]))
   }))
 
