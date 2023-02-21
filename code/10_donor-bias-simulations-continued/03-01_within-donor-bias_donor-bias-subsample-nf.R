@@ -147,8 +147,7 @@ methodv <- c(unique(dfr$deconvolution_method), "all")
 funv <- c("median", "sd", "length")
 metricv <- c("bias", "rmse.types")
 
-
-
+# prepare results data
 dfrs1 <- dfr
 # add type label
 cnv <- colnames(dfrs1)
@@ -157,13 +156,16 @@ for(typei in typev){
   cn.filt <- grepl(paste0("type", which(typev==typei)), cnv)
   colnames(dfrs1)[cn.filt] <- paste0(colnames(dfrs1)[cn.filt], ".", typei)
 }
+# get all method category
 dfrs2 <- dfrs1; dfrs2$deconvolution_method <- "all"
-dfrs3 <- rbind(dfrs1, dfrs2)
+dfrs3 <- rbind(dfrs1, dfrs2) # append all category
 lvar <- list(method = dfrs3$deconvolution_method)
 # get new colnames for aggregate
 cnv <- colnames(dfrs3)
 grepl.str <- paste0(metricv, collapse = "|")
 cnvf <- cnv[grepl(grepl.str, cnv)]
+
+# get aggregate statistics
 dfs <- do.call(cbind, lapply(funv, function(fi){
   dfai <- aggregate(dfrs3[,cnvf], lvar, FUN = fi); dfai <- dfai[,2:ncol(dfai)]
   fi.str <- fi; if(fi=="length"){fi.str <- "count"}

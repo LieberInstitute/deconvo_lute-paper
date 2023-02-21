@@ -5,7 +5,7 @@
 # Run deconvolution functions on an SCE object, from command line.
 #
 
-libv <- c("nnls", "MuSiC", "SingleCellExperiment", "SummarizedExperiment", "argparse")
+libv <- c("SingleCellExperiment", "SummarizedExperiment", "argparse")
 sapply(libv, library, character.only = T)
 
 #-----------------
@@ -47,23 +47,59 @@ predict_proportions <- function(Z, Y, S = NULL, strict.method = "nnls",
   
   # parse methods
   if(method == "nnls"){
+    require(nnls)
     if(verbose){message("Using method nnls...")}
     command.string <- paste0("nnls::nnls(Z, Y",method.args,")$x")
+  
   } else if(method == "music"){
+    require(MuSiC)
     if(is(S, "NULL")){stop("Error, need mexpr to run method: ", method)}
     if(verbose){message("Using method MuSiC...")}
     if(verbose){message("Setting variances by gene...")}
     Sigma <- matrix(0, ncol = 1, nrow = nrow(Z))
     method.args <- ",S = S, Sigma = Sigma, nu = 1e-10, iter.max = 100, eps = 0"
     command.string <- paste0("music.basic(Y = Y, X = Z",method.args,")$p.weight")
+  
+    } else if(method == "bisque"){
+    require(BisqueRNA)
+    # parse sce data
+    subject.variable <- "Sample"
+    # parse sce metadata
+    cd <- colData(sce)
+    cdf <- as.data.frame(cd)
+    sc.mexpr <- as.matrix(assays(sce)[[assay.name]])
+    unique.subjects <- unique(sce[[subject.variable]])
+    if(length(unique.subjects)==1){
+      # append expr
+      sc.mexpr1 <- sc.mexpr
+      colnames(sc.mexpr1) <- paste0(colnames(sc.mexpr1), "_rep")
+      sc.mexpr <- cbind(sc.mexpr, sc.mexpr1)
+      # append coldata
+      cdf[,subject.variable] <- "1"
+      cdf1 <- cdf
+      rownames(cdf1) <- colnames(sc.mexpr1)
+      cdf1[,subject.variable] <- "2"
+      cdf <- rbind(cdf, cdf1)
+      # parse bulk data
+      bulk.mexpr <- cbind(ypb, ypb, ypb)
+      colnames(bulk.mexpr) <- c(unique.subjects, "1", "2")
+    }
+    adf <- AnnotatedDataFrame(cdf)
+    sc.eset <- ExpressionSet(assayData = sc.mexpr, phenoData = adf)
+    bulk.eset <- ExpressionSet(assayData = bulk.mexpr)
+    command.str <- paste0("ReferenceBasedDecomposition(bulk.eset, sc.eset,",
+                          "cell.types = celltype.variable,",
+                          "subject.names = subject.variable)",
+                          "$bulk.props[,1]")
   } else{
     if(verbose){message("Returning unmodified point prediction outputs.")}
+    
   }
-  
   # get proportion predictions
   p <- eval(parse(text = command.string))
   if(sum(p) > 1){p <- p/sum(p)} # coerce point scale
   if(verbose){message("Completed proportion predictions.")}
+  
   return(p)
 }
 
