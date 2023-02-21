@@ -48,12 +48,7 @@ sce.intra.fpath <- file.path(save.dpath, rnf.data.fpath, sce.intra.fname)
 # lindex intra
 lindex.fname <- "lindex_inter.rda"
 lindex.fpath <- file.path(save.dpath, rnf.data.fpath, lindex.fname)
-# true proportions
-tp.intra.fname <- "true-proportions_intra.rda"
-tp.intra.fpath <- file.path(save.dpath, rnf.data.fpath, tp.intra.fname)
-# pseudobulk
-ypb.intra.fname <- "ypb_intra.rda"
-ypb.intra.fpath <- file.path(save.dpath, rnf.data.fpath, ypb.intra.fname)
+
 # workflow table
 wt.fname <- "workflow-table_intra.csv"
 wt.intra.fpath <- file.path(save.dpath, rnf.data.fpath, wt.fname)
@@ -80,15 +75,36 @@ num.donor.iter <- 3
 cd <- colData(sce)
 unique.samples <- unique(cd[,sample.variable])
 unique.types <- unique(cd[,celltype.variable])
+unique.types <- unique.types[order(unique.types)]
+S <- c("glial" = 3, "neuron" = 10)
+S <- S[order(match(names(S), unique.types))]
 num.cellsv <- c("glial" = num.cells.glial, "neuron" = num.cells.neuron)
 lindex <- lapply(seq(num.iter.inter), function(ii){
   set.seed(ii)
   random.samples <-  sample(unique.samples, num.donor.iter)
   filt <- cd[,sample.variable] %in% random.samples
   cdf <- cd[filt,]
-  which(colnames(sce) %in% unlist(lapply(unique.types, function(typei){
+  vindex <- which(colnames(sce) %in% unlist(lapply(unique.types, function(typei){
     sample(rownames(cdf[cdf[,celltype.variable]==typei,]), num.cellsv[typei])
   })))
+  scef <- sce[,vindex]
+  
+  # get true proportions vector
+  tp <- as.data.frame(table(scef[[celltype.variable]]))
+  tp.prop <- tp[,2]; names(tp.prop) <- tp[,1]
+  tp.prop <- tp.prop/sum(tp[,2])
+  
+  # get pseudobulk matrix
+  P <- tp.prop
+  # get signature matrix
+  Z <- do.call(cbind, lapply(unique.types, function(typei){
+    rowMeans(assays(scef)[[assay.name]])
+  }))
+  ZS <- sweep(Z, 2, S, "*")
+  ypb <- t(t(P) %*% t(ZS))
+  
+  # return results
+  list(vindex = vindex, tp = tp.prop, ypb = ypb, samples = random.samples)
 })
 # save indices
 save(lindex, file = lindex.fpath)
