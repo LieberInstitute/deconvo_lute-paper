@@ -140,6 +140,38 @@ wt <- do.call(rbind, lapply(methodv, function(methodi){
 # save
 write.csv(wt, file = wt.intra.fpath, row.names = F)
 
+#------------------------------------------------
+# get final summary statistics from results table
+#------------------------------------------------
+methodv <- c(unique(dfr$deconvolution_method), "all")
+funv <- c("median", "sd", "length")
+metricv <- c("bias", "rmse.types")
+
+
+
+dfrs1 <- dfr
+# add type label
+cnv <- colnames(dfrs1)
+typev <- unique(unlist(strsplit(dfr$type_labels, ";")))
+for(typei in typev){
+  cn.filt <- grepl(paste0("type", which(typev==typei)), cnv)
+  colnames(dfrs1)[cn.filt] <- paste0(colnames(dfrs1)[cn.filt], ".", typei)
+}
+dfrs2 <- dfrs1; dfrs2$deconvolution_method <- "all"
+dfrs3 <- rbind(dfrs1, dfrs2)
+lvar <- list(method = dfrs3$deconvolution_method)
+# get new colnames for aggregate
+cnv <- colnames(dfrs3)
+grepl.str <- paste0(metricv, collapse = "|")
+cnvf <- cnv[grepl(grepl.str, cnv)]
+dfs <- do.call(cbind, lapply(funv, function(fi){
+  dfai <- aggregate(dfrs3[,cnvf], lvar, FUN = fi); dfai <- dfai[,2:ncol(dfai)]
+  fi.str <- fi; if(fi=="length"){fi.str <- "count"}
+  colnames(dfai) <- paste0(fi.str, "_", colnames(dfai)); return(dfai)
+}))
+dfs$method <- methodv; cnv <- colnames(dfs)
+dfs <- dfs[,c("method", cnv[!cnv=="method"])]
+
 #----------------------
 # analyze results table
 #----------------------
@@ -267,12 +299,3 @@ lgg$neuron$violin
 lgg$glial$violin
 lgg$neuron$jitter
 lgg$glial$jitter
-
-
-
-
-
-#-----------------------------
-# get final summary statistics
-#-----------------------------
-
