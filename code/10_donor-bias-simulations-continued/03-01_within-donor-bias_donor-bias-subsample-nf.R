@@ -209,13 +209,68 @@ ggpt2 <- ggplot(dfp, aes(x = nnls, y = music, color = type, shape = type)) +
   theme_bw() + geom_smooth() + ggtitle(title.str)
 ggpt2
 
-# plots of bias, rmse distributions by method
+# plots of rmse across types
+title.str <- ""
+variable.str <- ylab.str <- "rmse.types"
+dfp <- dfr; dfp$value <- dfp[,variable.str]
 # violin plots
-ggvp1 <- ggplot(dfr, aes(x = deconvolution_method, y = rmse.types)) + 
-  geom_violin(draw_quantiles = 0.5) + theme_bw()
+ggvp1 <- ggplot(dfp, aes(x = deconvolution_method, y = value)) + 
+  geom_violin(draw_quantiles = 0.5) + theme_bw() +
+  ggtitle(title.str) + ylab(ylab.str)
 # jitter plots
-ggjt1 <- ggplot(dfr, aes(x = deconvolution_method, y = rmse.types)) + 
-  geom_jitter(alpha = 0.5) + stat_summary() + theme_bw()
+ggjt1 <- ggplot(dfp, aes(x = deconvolution_method, y = value)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "purple", lwd = 1) + 
+  theme_bw() + facet_zoom(ylim = c(0, 3e-17)) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle(title.str) + ylab(ylab.str)
+
+# plot of rmse by type
+get_rmse_type <- function(prop.true, prop.pred){
+  unlist(lapply(seq(length(prop.true)), function(ii){
+    sqrt(mean((prop.pred[ii]-prop.true[ii])^2))
+  }))
+}
+typev <- unique(unlist(strsplit(dfr$type_labels, ";")))
+dfp <- do.call(rbind, lapply(c("nnls", "music"), function(methodi){
+  dfri <- dfr[dfr$deconvolution_method==methodi,]
+  dfpi <- do.call(cbind, lapply(typev, function(typei){
+    type.index <- which(typev==typei)
+    varname <- paste0("type", type.index)
+    varname.pred <- paste0("prop.pred.", varname)
+    varname.true <- paste0("prop.true.", varname)
+    get_rmse_type(dfri[,varname.true], dfri[,varname.pred])
+  }))
+  dfpi <- as.data.frame(dfpi)
+  colnames(dfpi) <- typev
+  dfpi$method = methodi; dfpi
+}))
+
+ylab.str <- "RMSE"
+lgg <- lapply(typev, function(typei){
+  variable.name <- title.str <- typei
+  dfp$value <- dfp[,variable.name]
+  # violin plots 
+  ggvp1 <- ggplot(dfp, aes(x = method, y = value)) + 
+    geom_violin(draw_quantiles = 0.5) + theme_bw() +
+    ggtitle(title.str) + ylab(ylab.str)
+  # jitter plots
+  ggjt1 <- ggplot(dfp, aes(x = method, y = value)) + 
+    geom_jitter(alpha = 0.5) + 
+    geom_boxplot(alpha = 0, color = "purple", lwd = 1) + 
+    theme_bw() + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle(title.str) + ylab(ylab.str)
+  list(violin = ggvp1, jitter = ggjt1)
+})
+names(lgg) <- typev
+lgg$neuron$violin
+lgg$glial$violin
+lgg$neuron$jitter
+lgg$glial$jitter
+
+
+
+
 
 #-----------------------------
 # get final summary statistics
