@@ -78,19 +78,22 @@ echo 'Found '$run_count' runs. Parsing in '$batch_count' batches...'
 #------------
 # handle runs
 #------------
+batches_remaining=$batch_count
+read_start=1
+read_end=$(echo "$read_start + $runs_per_batch - 1" | bc)
+while batches_remaining>0:
+	echo $batches_remaining" batches remaining to be processed..."
+	echo "updating params.config..."
+	Rscript $write_param_script_path -f $workflow_table_path -s $read_start -e $read_end
+	echo "running workflow..."
+	nextflow run main.nf
+	echo "gathering results table..."
+	Rscript ./$rscript_dir/$gather_script
+	echo "finished with batch "$batches_remaining
+	batches_remaining=$(echo "$batches_remaining-1" | bc)
+	read_start=$(echo "$read_start + $runs_per_batch" | bc)
+	read_end=$(echo "$read_start + $runs_per_batch - 1" | bc)
 
 #------------------
 # aggregate results
 #------------------
-
-# update param.config
-echo "updating params.config..."
-Rscript ./$rscript_dir/$write_param_script -f $wt_fpath
-
-# run main workflow
-echo "running workflow..."
-nextflow run main.nf
-
-# gather results into table
-echo "gathering results table..."
-Rscript ./$rscript_dir/$gather_script

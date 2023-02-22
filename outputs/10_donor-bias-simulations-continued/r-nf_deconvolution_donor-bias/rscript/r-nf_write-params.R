@@ -64,10 +64,11 @@ if(file.exists(pc.fpath)){
 # parse workflow table row indices
 #---------------------------------
 max.row <- nrow(wt)
+end.index <- ifelse(end.index > max.row, max.row, end.index)
 cond <- is(start.index, "NULL")|is(end.index, "NULL")
 cond <- cond|start.index=="NULL"|end.index=="NULL"
-cond <- !cond & (start.index <= max.row & end.index <= max.row)
-cond <- cond & (start.index < end.index)
+cond <- !cond & (start.index <= max.row)
+cond <- cond & (start.index <= end.index)
 if(cond){wt <- wt[start.index:end.index,]}
 num.runs <- nrow(wt)
 message("After parsing start and end row indices, found ", num.runs, " runs.")
