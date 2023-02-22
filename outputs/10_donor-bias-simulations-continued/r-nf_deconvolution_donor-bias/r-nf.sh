@@ -48,8 +48,8 @@ done
 # manage arguments
 #-----------------
 workflow_table_path=./$data_directory/$workflow_table_filename
-write_param_script_path=./$rscript_directory/'$params_write_rscript_filename'
-results_gather_script_path=./$rscript_directory/'$results_gather_rscript_filename'
+write_param_script_path=./$rscript_directory/$params_write_rscript_filename
+results_gather_script_path=./$rscript_directory/$results_gather_rscript_filename
 
 #------------
 # check paths
@@ -83,7 +83,8 @@ echo 'Found '$run_count' runs. Parsing in '$batch_count' batches...'
 batches_remaining=$batch_count
 read_start=1
 read_end=$(echo "$read_start + $runs_per_batch - 1" | bc)
-while batches_remaining>0:
+while (( $batches_remaining > 0 ));
+do
 	echo $batches_remaining" batches remaining to be processed..."
 	echo "updating params.config..."
 	Rscript $write_param_script_path -f $workflow_table_path -s $read_start -e $read_end
@@ -95,7 +96,4 @@ while batches_remaining>0:
 	batches_remaining=$(echo "$batches_remaining-1" | bc)
 	read_start=$(echo "$read_start + $runs_per_batch" | bc)
 	read_end=$(echo "$read_start + $runs_per_batch - 1" | bc)
-
-#------------------
-# aggregate results
-#------------------
+done
