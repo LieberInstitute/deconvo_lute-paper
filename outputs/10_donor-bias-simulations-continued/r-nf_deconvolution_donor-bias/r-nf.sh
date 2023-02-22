@@ -28,6 +28,7 @@ results_gather_rscript_filename=r-nf_gather-results.R
 data_directory=data
 rscript_directory=rscript
 results_directory=results
+results_table=results_table_*
 runs_per_batch=200
 cleanup=T
 
@@ -42,6 +43,7 @@ while getopts wpgdrenc: name; do
 		'd')	data_directory=$OPTARG;;
 		'r')	rscript_directory=$OPTARG;;
 		'e')	results_directory=$OPTARG;;
+		't')	results_table=$OPTARG;;
 		'n')	runs_per_batch=$OPTARG;;
 		'c')	cleanup=$OPTARG;;
         \?)     echo "Invalid option provided: -$OPTARG" >&2;;
@@ -73,20 +75,27 @@ if ! test -f "$results_gather_script_path"; then
     exit 1
 fi
 
-#--------------------------------
-# parse results directory options
-#--------------------------------
+#----------------------------------
+# parse preliminary cleanup options
+#----------------------------------
 if test -d "$results_directory"; then
     echo 'Removing existing results directory...'
     rm -r $results_directory
 fi
 
+echo 'Removing any existing results tables...'
+find . -name 'results_table_*' -delete
+
 #-----------------
 # check runs count
 #-----------------
+# get total runs
 run_count=$(cat $workflow_table_path | wc -l)
 run_count=$(echo "$run_count-1" | bc)
-batch_count=$(echo "$run_count/$runs_per_batch" | bc)
+
+# use generalized algebraic notation to round up batch count
+batch_count=$(echo "$run_count+$runs_per_batch-1" | bc)
+batch_count=$(echo "$batch_count/$runs_per_batch" | bc)
 echo 'Found '$run_count' runs. Parsing in '$batch_count' batches...'
 
 #------------
@@ -112,17 +121,17 @@ done
 # gather new results
 #-------------------
 echo "gathering results table..."
-Rscript ./$rscript_dir/$gather_script
+Rscript $results_gather_script_path
 
 #-------------------
 # clean up run files
 #-------------------
 if [ $cleanup == T ]; then
 	echo "Performing cleanup..."
-	find . -name '*.nextflow.log.*' -delete
 	rm -r 'work'
-	find . -name '.nextflow' -delete
 	rm -r '.nextflow'
+	find . -name '*.nextflow.log.*' -delete
+	find . -name '.nextflow' -delete
 	# find . -name 'results' -delete
 else
 	echo "Skipping cleanup."
