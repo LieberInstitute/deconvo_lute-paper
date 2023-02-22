@@ -57,6 +57,8 @@ if(file.exists(pc.fpath)){
 #--------------------
 # get new param lines
 #--------------------
+num.runs <- nrow(wt)
+
 # get data to write
 which.param <- which(grepl("param", md$type))
 variable.names <- md[which.param,]$variable
@@ -67,10 +69,11 @@ message("In workflow table at ",wt.fpath,", found ", length(variables.provided),
 
 # make new lines
 variable.lines <- lapply(variables.provided, function(variable.iter){
+  message("working on provided variable '", variable.iter, "' ...")
   append.str <- md[variable.iter,]$append_string
   append.str <- ifelse(is.na(append.str)|append.str=="NA", "", append.str)
   values <- paste0(append.str, wt[,variable.iter])
-  values <- paste0('"', gsub('"', '', values), '"', collapse = ", ")
+  values <- paste0('"', gsub('"', '', values), '"', collapse = ",\n")
   paste0("    ", variable.iter, " = [", values, "]")
 })
 
@@ -85,3 +88,5 @@ which.start <- which(grepl(line.start.str, lp))
 new.lines <- lp[1:(which.start+1)]
 new.lines <- c(new.lines, unlist(variable.lines), "}")
 writeLines(text = new.lines, con = con)
+message("Successfully wrote data for ", num.runs, 
+        " runs to params file at ", pc.fpath, ".")
