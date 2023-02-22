@@ -6,77 +6,60 @@
 #
 #
 
-libv <- c("SummarizedExperiment", "SingleCellExperiment", "ggplot2", "gridExtra")
+libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", "ggplot2", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 
-#------
-# paths
-#------
+#------------------
+# experiment params
+#------------------
 # get load path
 code.dname <- "09_manuscript"
 proj.dname <- "deconvo_method-paper"
 load.dpath <- file.path(proj.dname, "outputs", code.dname)
-
 # get save path
 code.dname <- "10_donor-bias-simulations-continued"
 proj.dname <- "deconvo_method-paper"
 save.dpath <- file.path(proj.dname, "outputs", code.dname)
-
-#-----------
-# set params
-#-----------
-set.seed(0)
+# get params for experiment
+seed.num <- 0
 celltype.variable <- "k2"
 proj.handle <- "ro1-dlpfc"
-sample.variable <- "Sample"
+save.fnstem <- paste0("inter-sample_", proj.handle)
+group.variable <- "Sample"
 assay.name <- "counts_adj"
-
-# deconvolution methods to test
-methodv <- c("nnls")
-
-# set number of iterations
-num.iter <- 300
-# set fract cells per iter
-fract.cells.iter <- 20
-# number of samples to select per iteration
+methodv <- c("nnls", "music")
+iterations <- 300
+fraction.cells <- 25
 num.sample.iter <- 3
-# set the cell size factors for pseudobulk
-S <- c("glial" = 3, "neuron" = 10)
-# filepaths
+scale.factor <- c("glial" = 3, "neuron" = 10)
 rnf.dname <- "r-nf_deconvolution_donor-bias"
-rnf.data.fpath <- file.path(rnf.dname, "data")
+base.path <- "data"
+base.path <- file.path(save.dpath, rnf.dname, base.path)
 
-# save paths
-sce.fname <- "sce_all-samples.rda"
-sce.fpath <- file.path(save.dpath, rnf.data.fpath, sce.fname)
-# lindex
-lindex.fname <- "lindex_inter.rda"
-lindex.fpath <- file.path(save.dpath, rnf.data.fpath, lindex.fname)
-# ypb
-ypb.fname <- "ypb_inter.rda"
-ypb.fpath <- file.path(save.dpath, rnf.data.fpath, ypb.fname)
-# tp
-tp.fname <- "true-proportions_inter.rda"
-tp.fpath <- file.path(save.dpath, rnf.data.fpath, tp.fname)
-
-# workflow table
-wt.fname <- "workflow-table_inter-sample.csv"
-wt.fpath <- file.path(save.dpath, rnf.data.fpath, wt.fname)
-
-# results table
-dfr.fname <- "results_table_inter.csv"
-dfr.fpath <- file.path(save.dpath, rnf.dname, dfr.fname)
-
-#----------
+#----------------------------------
+# set up a new subsample experiment
+#----------------------------------
 # load data
-#----------
 fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
 fpath <- file.path(load.dpath, fname)
 lscef <- get(load(fpath))
 sce <- lscef[[celltype.variable]]
+rm(lscef)
 
-# save sce at r-nf.../data/
-save(sce, file = sce.fpath)
+# save new experiment data
+lindex <- prepare_subsample_experiment(sce,
+                                       scale.factor = scale.factor,
+                                       iterations = iterations,
+                                       groups.per.iteration = 3,
+                                       method.vector = methods,
+                                       celltype.variable = celltype.variable,
+                                       group.variable = group.variable,
+                                       assay.name = assay.name,
+                                       fraction.cells = fraction.cells,
+                                       seed.num = seed.num,
+                                       save.fnstem = save.fnstem,
+                                       base.path = base.path,
+                                       verbose = TRUE)
 
 #-------------------
 # get random indices
