@@ -62,6 +62,8 @@ which.param <- which(grepl("param", md$type))
 variable.names <- md[which.param,]$variable
 wt.colnames <- colnames(wt)
 variables.provided <- intersect(variable.names, wt.colnames)
+message("In workflow table at ",wt.fpath,", found ", length(variables.provided), 
+        " columns with annotations in params-metadata.csv.")
 
 # make new lines
 variable.lines <- lapply(variables.provided, function(variable.iter){

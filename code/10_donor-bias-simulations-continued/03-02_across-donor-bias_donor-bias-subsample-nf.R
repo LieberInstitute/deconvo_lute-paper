@@ -31,8 +31,11 @@ proj.handle <- "ro1-dlpfc"
 sample.variable <- "Sample"
 assay.name <- "counts_adj"
 
+# deconvolution methods to test
+methodv <- c("nnls")
+
 # set number of iterations
-num.iter <- 10
+num.iter <- 1000
 # set fract cells per iter
 fract.cells.iter <- 20
 # number of samples to select per iteration
@@ -126,7 +129,6 @@ save(P, file = tp.fpath)
 #---------------------
 # write workflow table
 #---------------------
-methodv <- c("nnls", "music", "bisque")
 wt <- do.call(rbind, lapply(methodv, function(methodi){
   wti <- data.frame(iterations_index = seq(num.iter))
   wti$method <- methodi
