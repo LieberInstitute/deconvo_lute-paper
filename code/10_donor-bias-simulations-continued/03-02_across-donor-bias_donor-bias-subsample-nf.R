@@ -35,7 +35,7 @@ assay.name <- "counts_adj"
 methodv <- c("nnls")
 
 # set number of iterations
-num.iter <- 600
+num.iter <- 400
 # set fract cells per iter
 fract.cells.iter <- 20
 # number of samples to select per iteration

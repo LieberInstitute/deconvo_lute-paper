@@ -68,12 +68,13 @@ message("In workflow table at ",wt.fpath,", found ", length(variables.provided),
         " columns with annotations in params-metadata.csv.")
 
 # make new lines
+collapse.str <- ","
 variable.lines <- lapply(variables.provided, function(variable.iter){
   message("working on provided variable '", variable.iter, "' ...")
   append.str <- md[variable.iter,]$append_string
   append.str <- ifelse(is.na(append.str)|append.str=="NA", "", append.str)
   values <- paste0(append.str, wt[,variable.iter])
-  values <- paste0('"', gsub('"', '', values), '"', collapse = ",\n")
+  values <- paste0('"', gsub('"', '', values), '"', collapse = collapse.str)
   paste0("    ", variable.iter, " = [", values, "]")
 })
 
