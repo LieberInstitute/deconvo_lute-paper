@@ -48,25 +48,41 @@ parser$add_argument("-r", "--string_true_proportions",
 args <- parser$parse_args() # get parser object
 
 # parse provided arguments
-timestamp <- args$min_timestamp_filter
+timestamp.min <- args$min_timestamp_filter
 identifier <- args$string_identifier
 publish.dir <- args$results_directory
-method.cname <- args$deconvolution_method_cname
-type.labels.cname <- args$celltype_labels_cname
+method.cname <- args$deconvolution_method_colname
+type.labels.cname <- args$celltype_labels_colname
 filt.str.pred <- args$string_predicted_proportions
 filt.str.true <- args$string_true_proportions
-
-#----------------
-# parse filenames
-#----------------
-lfv <- list.files(publish.dir)
-lfv.filt <- lfv[grepl(fname.str, lfv)]
 
 #-------------------
 # load and bind data
 #-------------------
+# parse filenames
+lfv <- list.files(publish.dir)
+lfv.filt <- lfv[grepl(identifier, lfv)]
+message("Found ",length(lfv.filt), " results files.")
+
+# parse timestamp filter
+cond <- is(timestamp.min, "NULL")|timestamp.min=="NULL"
+if(!cond){
+  message("Filtering results files on timestamp.")
+  pattern.filter <- gsub("\\.\\*", "", identifier)
+  pattern.filter <- paste0("^", pattern.filter, "|\\.csv$")
+  # parse timestamp.min
+  timestamp.min <- gsub(pattern.filter, "", timestamp.min)
+  # parse results filenames
+  timestampv <- gsub(pattern.filter, "", lfv.filt)
+  timestamp.filter <- as.numeric(timestampv) >= as.numeric(timestamp.min)
+  lfv.filt <- lfv.filt[timestamp.filter]
+  message("After parsing timestamp filter, found ",
+          length(lfv.filt), " results files.")
+}
+
+# load results data
 dfres <- do.call(rbind, lapply(lfv.filt, function(fni){
-  message(fni)
+  # message(fni)
   dfi <- read.csv(file.path(publish.dir, fni))
   dfi[,2:ncol(dfi)]
 }))

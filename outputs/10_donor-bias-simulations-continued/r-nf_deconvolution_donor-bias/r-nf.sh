@@ -27,19 +27,23 @@ params_write_rscript_filename=r-nf_write-params.R
 results_gather_rscript_filename=r-nf_gather-results.R
 data_directory=data
 rscript_directory=rscript
+results_directory=results
 runs_per_batch=200
+cleanup=T
 
 #---------------------
 # parse provided flags
 #---------------------
-while getopts wpgdrn: name; do
+while getopts wpgdrenc: name; do
     case "$name" in
         'w')    workflow_table_filename=$OPTARG;;
         'p')    params_write_rscript_filename=$OPTARG;;
 		'g')    results_gather_rscript_filename=$OPTARG;;
 		'd')	data_directory=$OPTARG;;
 		'r')	rscript_directory=$OPTARG;;
+		'e')	results_directory=$OPTARG;;
 		'n')	runs_per_batch=$OPTARG;;
+		'c')	cleanup=$OPTARG;;
         \?)     echo "Invalid option provided: -$OPTARG" >&2;;
     esac
 done
@@ -69,6 +73,14 @@ if ! test -f "$results_gather_script_path"; then
     exit 1
 fi
 
+#--------------------------------
+# parse results directory options
+#--------------------------------
+if test -d "$results_directory"; then
+    echo 'Removing existing results directory...'
+    rm -r $results_directory
+fi
+
 #-----------------
 # check runs count
 #-----------------
@@ -90,10 +102,33 @@ do
 	Rscript $write_param_script_path -f $workflow_table_path -s $read_start -e $read_end
 	echo "running workflow..."
 	nextflow run main.nf
-	echo "gathering results table..."
-	Rscript ./$rscript_dir/$gather_script
 	echo "finished with batch "$batches_remaining
 	batches_remaining=$(echo "$batches_remaining-1" | bc)
 	read_start=$(echo "$read_start + $runs_per_batch" | bc)
 	read_end=$(echo "$read_start + $runs_per_batch - 1" | bc)
 done
+
+#-------------------
+# gather new results
+#-------------------
+echo "gathering results table..."
+Rscript ./$rscript_dir/$gather_script
+
+#-------------------
+# clean up run files
+#-------------------
+if [ $cleanup == T ]; then
+	echo "Performing cleanup..."
+	find . -name '*.nextflow.log.*' -delete
+	rm -r 'work'
+	find . -name '.nextflow' -delete
+	rm -r '.nextflow'
+	# find . -name 'results' -delete
+else
+	echo "Skipping cleanup."
+fi
+
+#-------------
+# end messages
+#-------------
+echo "Workflow run success. Returning."
