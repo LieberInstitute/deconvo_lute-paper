@@ -115,7 +115,7 @@ do
 	Rscript $write_param_script_path -f $workflow_table_path -s $read_start -e $read_end
 	echo "running workflow..."
 	nextflow run main.nf
-	echo "finished with batch "$batches_remaining
+	echo "Finished batch. Batches left: "$batches_remaining
 	batches_remaining=$(echo "$batches_remaining-1" | bc)
 	read_start=$(echo "$read_start + $runs_per_batch" | bc)
 	read_end=$(echo "$read_start + $runs_per_batch - 1" | bc)
