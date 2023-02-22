@@ -32,7 +32,7 @@ sample.variable <- "Sample"
 assay.name <- "counts_adj"
 
 # set number of iterations
-num.iter <- 100
+num.iter <- 10
 # set fract cells per iter
 fract.cells.iter <- 20
 # number of samples to select per iteration
@@ -126,7 +126,7 @@ save(P, file = tp.fpath)
 #---------------------
 # write workflow table
 #---------------------
-methodv <- c("nnls", "music")
+methodv <- c("nnls", "music", "bisque")
 wt <- do.call(rbind, lapply(methodv, function(methodi){
   wti <- data.frame(iterations_index = seq(num.iter))
   wti$method <- methodi
