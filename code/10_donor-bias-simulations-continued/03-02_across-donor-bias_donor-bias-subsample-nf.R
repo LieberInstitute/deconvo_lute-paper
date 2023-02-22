@@ -61,6 +61,13 @@ lindex <- prepare_subsample_experiment(sce,
                                        base.path = base.path,
                                        verbose = TRUE)
 
+#---------------------
+# running the workflow
+#---------------------
+# path = /deconvo_method-paper/outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_donor-bias
+# cd $path
+# bash ./sh/r-nf.sh workflow-table_inter-sample_ro1-dlpfc.csv
+
 #-------------------
 # get random indices
 #-------------------
