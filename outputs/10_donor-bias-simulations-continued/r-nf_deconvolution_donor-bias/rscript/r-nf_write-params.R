@@ -16,6 +16,10 @@ parser <- ArgumentParser() # create parser object
 parser$add_argument("-f", "--workflow_table_filepath", type="character", 
                     default="/data/workflow-table.csv",
                     help = "Path to the workflow .csv table.")
+parser$add_argument("-s", "--start_index", type="character", default="NULL",
+                    help = "Index of start row to read from workflow table.")
+parser$add_argument("-e", "--end_index", type="character", default="NULL",
+                    help = "Index of final row to read from workflow table.")
 parser$add_argument("-m", "--parameters_metadata", type="character", 
                     default="params-metadata.csv",
                     help = "Path to the parameters metadata .csv table.")
@@ -29,6 +33,8 @@ args <- parser$parse_args() # get parser object
 wt.fpath <- args$workflow_table_filepath
 pm.fpath <- args$parameters_metadata
 pc.fpath <- args$parameters_config
+start.index <- args$start_index
+end.index <- args$end_index
 
 #------------
 # load data
@@ -54,11 +60,21 @@ if(file.exists(pc.fpath)){
   stop("Error, didn't find parameters .config table at: ", pc.fpath)
 }
 
+#---------------------------------
+# parse workflow table row indices
+#---------------------------------
+max.row <- nrow(wt)
+cond <- is(start.index, "NULL")|is(end.index, "NULL")
+cond <- cond|start.index=="NULL"|end.index=="NULL"
+cond <- !cond & (start.index <= max.row & end.index <= max.row)
+cond <- cond & (start.index < end.index)
+if(cond){wt <- wt[start.index:end.index,]}
+num.runs <- nrow(wt)
+message("After parsing start and end row indices, found ", num.runs, " runs.")
+
 #--------------------
 # get new param lines
 #--------------------
-num.runs <- nrow(wt)
-
 # get data to write
 which.param <- which(grepl("param", md$type))
 variable.names <- md[which.param,]$variable

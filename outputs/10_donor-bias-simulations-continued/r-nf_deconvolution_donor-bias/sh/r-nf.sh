@@ -72,9 +72,8 @@ fi
 #-----------------
 run_count=$(cat $workflow_table_path | wc -l)
 run_count=$(echo "$run_count-1" | bc)
-batch_count=$(echo "$run_count/$num_batch" | bc)
-echo 'Found '$run_count' runs.'
-echo 'Parsing in '$batch_count' batches.'
+batch_count=$(echo "$run_count/$runs_per_batch" | bc)
+echo 'Found '$run_count' runs. Parsing in '$batch_count' batches...'
 
 #------------
 # handle runs
