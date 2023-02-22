@@ -58,7 +58,7 @@ lindex <- prepare_subsample_experiment(sce,
                                        fraction.cells = fraction.cells,
                                        seed.num = seed.num,
                                        save.fnstem = save.fnstem,
-                                       base.path = base.path,
+                                       base.path = "data",
                                        verbose = TRUE)
 
 #---------------------

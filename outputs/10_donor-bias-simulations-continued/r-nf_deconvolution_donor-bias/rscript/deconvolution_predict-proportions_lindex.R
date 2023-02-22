@@ -166,9 +166,9 @@ if(file.exists(sce.filepath)){
 # load index matrix
 if(file.exists(li.filepath)){
   li <- get(load(li.filepath))
-  message("index matrix data successfully loaded.")
+  message("index list data successfully loaded.")
 } else{
-  stop("Error, index matrix data not found at ",mi.filepath)
+  stop("Error, index list data not found at ",li.filepath)
 }
 
 #-----------------------
