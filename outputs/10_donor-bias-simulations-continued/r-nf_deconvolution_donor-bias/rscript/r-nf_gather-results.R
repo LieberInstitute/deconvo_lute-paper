@@ -6,20 +6,55 @@
 #
 #
 
-#--------------
-# manage params
-#--------------
-type.labels.cname <- "type_labels"
-filt.str.pred <- "^prop\\.pred\\."
-filt.str.true <- "^prop\\.true\\."
 
-# filenames
-fname.str <- 'deconvolution_analysis_.*'
+libv <- c("argparse")
+sapply(libv, library, character.only = T)
 
-# publish directory path
-publish.dir <- "results"
+#----------------
+# parse arguments
+#----------------
+parser <- ArgumentParser() # create parser object
+# data arguments
+parser$add_argument("-t", "--min_timestamp_filter", type="character", 
+                    default="NULL",
+                    help = paste0("Filter for latest timestamp. ",
+                                  "If provided, only use results ",
+                                  "after specified time. If NULL, use all ",
+                                  "identified results"))
+parser$add_argument("-s", "--string_identifier", type="character", 
+                    default='deconvolution_analysis_.*',
+                    help = paste0("Regex char string for identifying ",
+                                  "results to gather."))
+parser$add_argument("-d", "--results_directory", 
+                    type="character", default='results',
+                    help = paste0("Name of the publish directory ",
+                                  "containing results"))
+parser$add_argument("-m", "--deconvolution_method_colname", 
+                    type="character", default='deconvolution_method',
+                    help = paste0("Column name containing deconvolution method"))
+parser$add_argument("-l", "--celltype_labels_colname", 
+                    type="character", default='type_labels',
+                    help = paste0("Column name containing celltype labels."))
+parser$add_argument("-p", "--string_predicted_proportions", 
+                    type="character", default='^prop\\.pred\\.',
+                    help = paste0("Regex char string for predicted ",
+                                  "cell type proportions column names."))
+parser$add_argument("-r", "--string_true_proportions", 
+                    type="character", default='^prop\\.true\\.',
+                    help = paste0("Regex char string for true ",
+                                  "cell type proportions column names."))
+                    
 
-method.cname <- "deconvolution_method"
+args <- parser$parse_args() # get parser object
+
+# parse provided arguments
+timestamp <- args$min_timestamp_filter
+identifier <- args$string_identifier
+publish.dir <- args$results_directory
+method.cname <- args$deconvolution_method_cname
+type.labels.cname <- args$celltype_labels_cname
+filt.str.pred <- args$string_predicted_proportions
+filt.str.true <- args$string_true_proportions
 
 #----------------
 # parse filenames
