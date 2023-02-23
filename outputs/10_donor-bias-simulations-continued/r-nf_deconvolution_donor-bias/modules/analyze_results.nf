@@ -8,7 +8,7 @@ nextflow.enable.dsl=2
 process analyze_results {
     publishDir("$params.results_folder", mode: "copy", overwrite: false)
 
-    maxForks 100
+    // maxForks 100
 
     input:
         val results_filepath

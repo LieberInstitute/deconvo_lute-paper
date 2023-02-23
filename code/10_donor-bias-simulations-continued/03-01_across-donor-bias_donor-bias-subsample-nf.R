@@ -28,7 +28,7 @@ save.fnstem <- paste0("inter-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
 methodv <- c("nnls", "music")
-iterations <- 1000
+iterations <- 500
 fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)
@@ -51,7 +51,7 @@ lindex <- prepare_subsample_experiment(sce,
                                        scale.factor = scale.factor,
                                        iterations = iterations,
                                        groups.per.iteration = 3,
-                                       method.vector = methods,
+                                       method.vector = methodv,
                                        celltype.variable = celltype.variable,
                                        group.variable = group.variable,
                                        assay.name = assay.name,
