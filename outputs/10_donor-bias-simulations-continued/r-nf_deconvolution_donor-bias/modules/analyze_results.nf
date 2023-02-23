@@ -14,7 +14,7 @@ process analyze_results {
         val results_filepath
         val true_proportions_path
     output:
-        path("deconvolution_analysis_*")
+        path("deconvolution-analysis_*")
 
     script:
     """

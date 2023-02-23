@@ -37,7 +37,7 @@ rmse.types.cname.str <- "rmse.types"
 cname.prop.true.str <- "prop.true.type"
 
 # return file params
-fname.stem <- "deconvolution_analysis_"
+fname.stem <- "deconvolution-analysis_"
 fname.ext <- ".csv"
 
 # rscript paths

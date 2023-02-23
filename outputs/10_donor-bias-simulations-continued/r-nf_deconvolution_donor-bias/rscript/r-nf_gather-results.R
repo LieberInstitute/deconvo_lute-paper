@@ -21,7 +21,7 @@ parser$add_argument("-t", "--min_timestamp_filter", type="character",
                                   "after specified time. If NULL, use all ",
                                   "identified results"))
 parser$add_argument("-s", "--string_identifier", type="character", 
-                    default='deconvolution_analysis_.*',
+                    default='deconvolution-analysis_.*',
                     help = paste0("Regex char string for identifying ",
                                   "results to gather."))
 parser$add_argument("-d", "--results_directory", 
