@@ -4,6 +4,8 @@
 #
 # Run donor bias subsampling experiments.
 #
+# Note: run after script before 03-02 to use the same across-sample bulk 
+# reference across the two experiments.
 #
 
 libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", "ggplot2", "gridExtra")
@@ -28,7 +30,7 @@ save.fnstem <- paste0("inter-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
 methodv <- c("nnls", "music")
-iterations <- 500
+iterations <- 100
 fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)

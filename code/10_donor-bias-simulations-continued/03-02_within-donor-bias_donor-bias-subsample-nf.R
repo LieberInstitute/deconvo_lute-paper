@@ -29,7 +29,7 @@ save.fnstem <- paste0("intra-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
 methodv <- c("nnls", "music")
-iterations <- 500
+iterations <- 100
 fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)
@@ -39,7 +39,6 @@ base.path <- file.path(save.dpath, rnf.dname, base.path)
 # save data
 which.save = c("li", "sce")
 save.names = list(sce.name = "sce.rda",
-                  wt.name = "workflow-table.csv",
                   li.name = "lindex.rda")
 
 #----------------------------------
@@ -78,6 +77,19 @@ list.iter <- prepare_subsample_experiment(scef,
 wt <- list.iter[["wt"]]
 wt$true_proportions_filepath <- "$launchDir/data/true-proportions_inter-sample_ro1-dlpfc.rda"
 wt$bulk_filepath <- "$launchDir/data/ypb_inter-sample_ro1-dlpfc.rda"
+wt$list_index_filepath <- "$launchDir/data/lindex_intra-sample_ro1-dlpfc.rda"
+wt.fpath <- file.path("data", "workflow-table_intra-sample_ro1-dlpfc.csv")
+write.csv(wt, file = wt.fpath, row.names = F)
+
+#---------------------
+# running the workflow
+#---------------------
+## navigate to r-nf dir
+# path = /deconvo_method-paper/outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_donor-bias
+# cd $path
+#
+## run the workflow:
+# bash ./sh/r-nf.sh -w workflow-table_intra-sample_ro1-dlpfc.csv
 
 #------------------------------------------------
 # get final summary statistics from results table

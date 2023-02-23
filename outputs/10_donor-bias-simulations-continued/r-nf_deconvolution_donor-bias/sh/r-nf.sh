@@ -112,6 +112,7 @@ while (( $batches_remaining > 0 ));
 do
 	echo $batches_remaining" batches remaining to be processed..."
 	echo "updating params.config..."
+	echo "read index end is "$read_end
 	Rscript $write_param_script_path -f $workflow_table_path -s $read_start -e $read_end
 	echo "running workflow..."
 	nextflow run main.nf
