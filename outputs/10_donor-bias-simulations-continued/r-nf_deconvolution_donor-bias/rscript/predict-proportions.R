@@ -5,106 +5,8 @@
 # Run deconvolution functions on an SCE object, from command line.
 #
 
-libv <- c("SingleCellExperiment", "SummarizedExperiment", "argparse")
+libv <- c("lute", "SingleCellExperiment", "SummarizedExperiment", "argparse")
 sapply(libv, library, character.only = T)
-
-#-----------------
-# parse parameters
-#-----------------
-# rscript.dir <- "$launchDir/rscript"
-# decon.utils.scriptfname = "deconvolution_utilities.R"
-# decon.utils.rscriptpath <- file.path(rscript.dir, decon.utils.scriptfname)
-
-#-----------------
-# source utilities
-#-----------------
-# source(decon.utils.rscriptpath)
-
-#------------------
-# helper functions
-#------------------
-predict_proportions <- function(Z, Y, Ybias = NULL, S = NULL, 
-                                strict.method = "nnls", method.args = "", 
-                                verbose = FALSE, ...){
-  # predict_proportions
-  #
-  # Z : signature matrix
-  # Y : bulk matrix
-  # S : cell scale factors
-  # strict_method : deconvolution method
-  # method.args : additional method arguments
-  # verbose : whether to show verbose messages
-  #
-  if(verbose){message("Getting cell type proportion predictions...")}
-  
-  # format string arguments
-  cond <- method.args %in% c("", "NA")|is.na(method.args)
-  if(!cond){
-    method.args <- paste0(",",method.args)
-  } else{
-    method.args <- ""
-  }
-  method <- tolower(strict.method)
-  
-  # parse methods
-  if(method == "nnls"){
-    require(nnls)
-    if(verbose){message("Using method nnls...")}
-    command.string <- paste0("nnls::nnls(Z, Y",method.args,")$x")
-  
-  } else if(method == "music"){
-    require(MuSiC)
-    if(is(S, "NULL")){stop("Error, need mexpr to run method: ", method)}
-    if(verbose){message("Using method MuSiC...")}
-    if(verbose){message("Setting variances by gene...")}
-    Sigma <- matrix(0, ncol = 1, nrow = nrow(Z))
-    method.args <- ",S = S, Sigma = Sigma, nu = 1e-10, iter.max = 100, eps = 0"
-    command.string <- paste0("music.basic(Y = Y, X = Z",method.args,")$p.weight")
-  
-    } else if(method == "bisque"){
-      require(BisqueRNA)
-      subject.variable <- "Sample"
-      run.mode <- "default"
-      if(run.mode == "default"){
-        # append data to meet minimum sample requirements
-        # use overlaps
-        # use original data
-        cd <- colData(sce)
-        cdf <- cdf2 <- as.data.frame(cd)
-        # force order
-        var.lvl <- unique(cdf[,celltype.variable])
-        cdf[,celltype.variable] <- factor(cdf[,celltype.variable], 
-                                          levels=var.lvl[order(var.lvl)])
-        cdf2[,subject.variable] <- "rep"
-        rownames(cdf2) <- paste0(rownames(cdf2), "_2")
-        cdf <- rbind(cdf, cdf2)
-        adf <- AnnotatedDataFrame(cdf)
-        sc.mexpr <- sc.mexpr2 <- as.matrix(assays(sce)[[assay.name]])
-        colnames(sc.mexpr2) <- paste0(colnames(sc.mexpr2), "_2")
-        sc.mexpr <- cbind(sc.mexpr, sc.mexpr2)
-        sc.eset <- ExpressionSet(assayData = sc.mexpr, phenoData = adf)
-        bulk.mexpr <- cbind(ypb, ypb, ypb)
-        colnames(bulk.mexpr) <- c(unique(cdf[,subject.variable]), "2")
-        bulk.eset <- ExpressionSet(assayData = bulk.mexpr)
-        command.str <- paste0("ReferenceBasedDecomposition(",
-                              "bulk.eset, sc.eset,",
-                              "cell.types = celltype.variable,",
-                              "subject.names = subject.variable,",
-                              "use.overlap = TRUE",
-                              ")$bulk.props[,'2']")
-      } else{
-        stop("Didn't recognize run mode.")
-      }
-  } else{
-    if(verbose){message("Returning unmodified point prediction outputs.")}
-  }
-  # get proportion predictions
-  p <- eval(parse(text = command.string))
-  if(sum(p) > 1){p <- p/sum(p)} # coerce point scale
-  if(verbose){message("Completed proportion predictions.")}
-  
-  return(p)
-}
 
 #--------------
 # manage parser
@@ -224,31 +126,14 @@ if(bulk.filepath == "NA"|is.na(bulk.filepath)|is(bulk.filepath, "NULL")){
 #------------------
 # run deconvolution
 #------------------
-t1 <- Sys.time()
-if(deconvolution.method=='music'){
-
-  # get cell size factors for music method
-  S <- unlist(lapply(unique.types, function(typei){
-    type.filter <- celltype.vector==typei
-    mean(colSums(mexpr[,type.filter]))
-  }))
-  pred.proportions <- predict_proportions(Z = Z, Y = Y, S = S,
-                                          strict.method = deconvolution.method,
-                                          unique.celltypes = unique.types)
-} else{
-  pred.proportions <- predict_proportions(Z = Z, Y = Y, strict.method = deconvolution.method,)
-}
-
-time.run <- Sys.time() - t1
-time.run <- as.numeric(time.run)
-names(time.run) <- "time.run.sec"
+deconvolution.results <- run_deconvolution(Z = Z, Y = Y, 
+                                           method = deconvolution.method)
 
 #---------------
 # return results
 #---------------
+# begin new results table row
 results.vector <- c()
-
-# append params
 results.vector["launch_dir"] <- getwd()
 results.vector["sce_filepath"] <- basename(sce.filepath)
 results.vector["bulk_filepath"] <- basename(bulk.filepath)
@@ -262,18 +147,22 @@ results.vector["assay_name"] <- assay.name
 results.vector["type_labels"] <- paste0(unique.types, collapse = ";")
 results.vector["celltype_variable"] <- celltype.variable
 
+# get results values
+# get timestamp
+timestamp <- as.numeric(Sys.time())
 # append proportions
-names(pred.proportions) <- paste0("prop.pred.type", 
-                                  seq(length(pred.proportions)))
-results.vector <- c(results.vector, pred.proportions)
-
+propvalues <- deconvolution.results$predictions
+names(propvalues) <- paste0("prop.pred.type",seq(length(propvalues)))
+results.vector <- c(results.vector, propvalues)
 # append time, timestamp
-results.vector <- c(results.vector, time.run, "timestamp" = as.numeric(t1))
+time.run <- as.numeric(proportions$benchmark[[1]][[1]])
+time.run <- as.character(time.run)
+results.vector <- c(results.vector, time.run, "timestamp" = timestamp)
 
 # coerce to matrix
 results.table <- t(as.data.frame(results.vector, nrow = 1))
+colnames(results.table) <- names(results.vector)
 
 # save new results
-ts <- as.character(as.numeric(t1)) # get timestamp
 new.filename <- paste0("deconvolution-results_", as.numeric(t1), ".csv")
 write.csv(results.table, file = new.filename, row.names = FALSE)
