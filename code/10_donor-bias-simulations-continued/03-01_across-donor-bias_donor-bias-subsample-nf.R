@@ -8,7 +8,8 @@
 # reference across the two experiments.
 #
 
-libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", "ggplot2", "gridExtra")
+libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", 
+          "ggplot2", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 
 #------------------
@@ -30,7 +31,7 @@ save.fnstem <- paste0("inter-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
 methodv <- c("nnls", "music")
-iterations <- 100
+iterations <- 1000
 fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)
@@ -59,9 +60,35 @@ lindex <- prepare_subsample_experiment(sce,
                                        assay.name = assay.name,
                                        fraction.cells = fraction.cells,
                                        seed.num = seed.num,
+                                       which.save = c("sce", "tp", "ypb", "li"),
                                        save.fnstem = save.fnstem,
-                                       base.path = "data",
+                                       base.path = base.path,
                                        verbose = TRUE)
+
+#---------------------
+# manage workflow runs
+#---------------------
+# change wd
+setwd(file.path(save.dpath, rnf.dname))
+wt <- lindex$wt
+num.batch <- 500
+indexv <- seq(1, nrow(wt), num.batch)
+wt.fnamei <- paste0("workflow-table_",save.fnstem,".csv")
+command.str <- paste0("bash ./sh/r-nf.sh -w ",
+                      "workflow-table_inter-sample_ro1-dlpfc.csv")
+lresults <- lapply(indexv, function(indexi){
+  wti <- wt[indexi:(indexi+num.batch-1),]
+  write.csv(wti, file = file.path("data", wt.fnamei))
+  system(command.str)
+  res.fname <- list.files()
+  res.fname <- res.fname[grepl("results-table.*", res.fname)[1]]
+  read.csv(res.fname)
+})
+
+for(indexi in indexv){
+  
+}
+
 
 #---------------------
 # running the workflow
