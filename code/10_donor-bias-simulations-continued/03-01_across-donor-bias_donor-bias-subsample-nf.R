@@ -71,15 +71,25 @@ lindex <- prepare_subsample_experiment(sce,
 # change wd
 setwd(file.path(save.dpath, rnf.dname))
 wt <- lindex$wt
+# save full table
+proj.handle <- "ro1-dlpfc"
+save.fnstem <- paste0("inter-sample_", proj.handle)
+wt.fnamei <- paste0("workflow-table-all_",save.fnstem,".csv")
+write.csv(wt, file = file.path("data", wt.fnamei))
+
+# from conda env with nextflow setup, run:
 num.batch <- 500
 indexv <- seq(1, nrow(wt), num.batch)
 wt.fnamei <- paste0("workflow-table_",save.fnstem,".csv")
 command.str <- paste0("bash ./sh/r-nf.sh -w ",
                       "workflow-table_inter-sample_ro1-dlpfc.csv")
 lresults <- lapply(indexv, function(indexi){
+  wt.path <- file.path("data", 
+                       paste0("workflow-table-all_",save.fnstem,".csv"))
+  wt <- read.csv(wt.path)
   wti <- wt[indexi:(indexi+num.batch-1),]
   write.csv(wti, file = file.path("data", wt.fnamei))
-  system(command.str)
+  system2(command.str)
   res.fname <- list.files()
   res.fname <- res.fname[grepl("results-table.*", res.fname)[1]]
   read.csv(res.fname)

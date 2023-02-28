@@ -26,7 +26,7 @@
 # parse flags
 #------------
 # initialize flag variables
-workflow_table_filename=
+workflow_table_filename=wt.csv
 params_write_rscript_filename=r-nf_write-params.R
 results_gather_rscript_filename=r-nf_gather-results.R
 data_directory=data
@@ -54,16 +54,9 @@ while getopts ":w:p:g:d:r:e:n:c": name; do
     esac
 done
 
-#-----------------------------
-# parse workflow table options
-#-----------------------------
-workflow_table_filename=`find data -type f | grep 'workflow-table-iter*'`
-
-if [ -z "$workflow_table_filename" ]
-then
-	workflow_table_filename=`find /data/ -name 'workflow-table_*'`
-fi
-
+#-----------------
+# manage arguments
+#-----------------
 workflow_table_path=./$data_directory/$workflow_table_filename
 write_param_script_path=./$rscript_directory/$params_write_rscript_filename
 results_gather_script_path=./$rscript_directory/$results_gather_rscript_filename
@@ -136,7 +129,8 @@ echo "gathering results table..."
 Rscript $results_gather_script_path
 
 echo "copying results table to results folder..."
-rfilename=`find . -name 'results_table_*'`
+rfilename=$(find . -name 'results_table_*')
+mv $rfilename ./data/$rfilename
 
 #-------------------
 # clean up run files
