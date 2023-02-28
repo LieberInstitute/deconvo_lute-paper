@@ -169,5 +169,5 @@ results.table <- t(as.data.frame(results.vector, nrow = 1))
 colnames(results.table) <- names(results.vector)
 
 # save new results
-new.filename <- paste0("deconvolution-results_", as.numeric(t1), ".csv")
+new.filename <- paste0("deconvolution-results_", timestamp, ".csv")
 write.csv(results.table, file = new.filename, row.names = FALSE)
