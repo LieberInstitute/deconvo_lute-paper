@@ -1,0 +1,3 @@
+"","iterations_index","sample_id","celltype_variable","assay_name","sce_filepath","bulk_filepath","list_index_filepath","true_proportions_filepath","method"
+"501",501,"Br2743_ant;Br2743_mid;Br8492_post","k2","counts_adj","""$launchDir/data/sce_inter-sample_ro1-dlpfc.rda""","""$launchDir/data/ypb_inter-sample_ro1-dlpfc.rda""","""$launchDir/data/lindex_inter-sample_ro1-dlpfc.rda""","""$launchDir/data/true-proportions_inter-sample_ro1-dlpfc.rda""","nnls"
+"500",500,"Br6423_ant;Br2743_mid;Br2720_mid","k2","counts_adj","""$launchDir/data/sce_inter-sample_ro1-dlpfc.rda""","""$launchDir/data/ypb_inter-sample_ro1-dlpfc.rda""","""$launchDir/data/lindex_inter-sample_ro1-dlpfc.rda""","""$launchDir/data/true-proportions_inter-sample_ro1-dlpfc.rda""","nnls"

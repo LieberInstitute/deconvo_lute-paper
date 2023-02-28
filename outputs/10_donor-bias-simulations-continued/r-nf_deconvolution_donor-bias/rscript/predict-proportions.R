@@ -126,8 +126,13 @@ if(bulk.filepath == "NA"|is.na(bulk.filepath)|is(bulk.filepath, "NULL")){
 #------------------
 # run deconvolution
 #------------------
+arguments <- list()
+if(deconvolution.method == "music"){
+  arguments = list("S" = c("neuron" = 10, "glial" = 3))
+}
 deconvolution.results <- run_deconvolution(Z = Z, Y = Y, 
-                                           method = deconvolution.method)
+                                           method = deconvolution.method,
+                                           arguments = arguments)
 
 #---------------
 # return results
@@ -155,7 +160,7 @@ propvalues <- deconvolution.results$predictions
 names(propvalues) <- paste0("prop.pred.type",seq(length(propvalues)))
 results.vector <- c(results.vector, propvalues)
 # append time, timestamp
-time.run <- as.numeric(proportions$benchmark[[1]][[1]])
+time.run <- as.numeric(deconvolution.results$benchmark[[1]][[1]])
 time.run <- as.character(time.run)
 results.vector <- c(results.vector, time.run, "timestamp" = timestamp)
 
