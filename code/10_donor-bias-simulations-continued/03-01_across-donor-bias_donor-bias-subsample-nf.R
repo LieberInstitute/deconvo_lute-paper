@@ -30,7 +30,7 @@ proj.handle <- "ro1-dlpfc"
 save.fnstem <- paste0("inter-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
-methodv <- c("nnls", "music")
+methodv <- c("nnls", "music", "epic", "deconrnaseq")
 iterations <- 1000
 fraction.cells <- 25
 num.sample.iter <- 3
@@ -88,7 +88,7 @@ for(iter.num in seq(length(indexv))){
   wti <- wt[indexv.iter,]
   wt.fname.iter <- wt.fnamei <- paste0("workflow-table-iter", 
                                        iter.num, "_", save.fnstem,".csv")
-  write.csv(wti, file = file.path("data", wt.fname.iter))
+  write.csv(wti, file = file.path("data", wt.fname.iter), row.names = F)
   message("finished with iter ", iter.num)
 }
 
