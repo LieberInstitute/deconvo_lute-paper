@@ -128,7 +128,7 @@ if(bulk.filepath == "NA"|is.na(bulk.filepath)|is(bulk.filepath, "NULL")){
 #------------------
 arguments <- list()
 if(deconvolution.method == "music"){
-  arguments = list("S" = c("neuron" = 10, "glial" = 3))
+  arguments = list("S" = c("glial" = 3, "neuron" = 10))
 }
 deconvolution.results <- run_deconvolution(Z = Z, Y = Y, 
                                            method = deconvolution.method,
