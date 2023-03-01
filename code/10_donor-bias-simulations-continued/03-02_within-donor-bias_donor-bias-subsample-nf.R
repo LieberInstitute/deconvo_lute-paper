@@ -7,7 +7,8 @@
 # Note: run after script 03-01 to use the same across-sample bulk reference.
 #
 
-libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", "ggplot2", "gridExtra")
+libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", 
+          "ggplot2", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 
 #------------------
@@ -28,8 +29,8 @@ proj.handle <- "ro1-dlpfc"
 save.fnstem <- paste0("intra-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
-methodv <- c("nnls", "music")
-iterations <- 100
+methodv <- c("nnls", "music", "epic", "deconrnaseq")
+iterations <- 1000
 fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)
@@ -57,29 +58,56 @@ largest.donor.id <- dft[dft[,2]==max(dft[,2]),1]
 scef <- sce[,sce[[group.variable]]==largest.donor.id]
 
 # save new experiment data
-list.iter <- prepare_subsample_experiment(scef, 
-                                          scale.factor = scale.factor,
-                                          iterations = iterations,
-                                          groups.per.iteration = 1,
-                                          method.vector = methodv,
-                                          celltype.variable = celltype.variable,
-                                          group.variable = group.variable,
-                                          assay.name = assay.name,
-                                          fraction.cells = fraction.cells,
-                                          seed.num = seed.num,
-                                          save.fnstem = save.fnstem,
-                                          base.path = "data",
-                                          which.save = which.save,
-                                          save.names = save.names,
-                                          verbose = TRUE)
+lsub <- prepare_subsample_experiment(scef,
+                                     scale.factor = scale.factor,
+                                     iterations = iterations,
+                                     groups.per.iteration = 1,
+                                     method.vector = methodv,
+                                     celltype.variable = celltype.variable,
+                                     group.variable = group.variable,
+                                     assay.name = assay.name,
+                                     fraction.cells = fraction.cells,
+                                     seed.num = seed.num,
+                                     which.save = c("sce", "tp", "ypb", "li"),
+                                     save.fnstem = save.fnstem,
+                                     base.path = "data",
+                                     verbose = TRUE)
 
-# resave workflow table with new filepaths
-wt <- list.iter[["wt"]]
-wt$true_proportions_filepath <- "$launchDir/data/true-proportions_inter-sample_ro1-dlpfc.rda"
-wt$bulk_filepath <- "$launchDir/data/ypb_inter-sample_ro1-dlpfc.rda"
-wt$list_index_filepath <- "$launchDir/data/lindex_intra-sample_ro1-dlpfc.rda"
-wt.fpath <- file.path("data", "workflow-table_intra-sample_ro1-dlpfc.csv")
-write.csv(wt, file = wt.fpath, row.names = F)
+#---------------------
+# manage workflow runs
+#---------------------
+# get main starting workflow table
+wt <- lsub$wt
+# save full table
+proj.handle <- "ro1-dlpfc"
+save.fnstem <- paste0("intra-sample_", proj.handle)
+wt.fnamei <- paste0("workflow-table-all_",save.fnstem,".csv")
+wt.fpath <- file.path(save.dpath, rnf.dname, "data", wt.fnamei)
+write.csv(wt, file = wt.fpath)
+
+# save table iterations
+num.batch <- 200
+indexv <- seq(1, nrow(wt), num.batch)
+wt.fnamei <- paste0("workflow-table_",save.fnstem,".csv")
+for(iter.num in seq(length(indexv))){
+  indexv.iter <- indexv[iter.num]
+  indexv.iter <- indexv.iter:(indexv.iter+num.batch-1)
+  wti <- wt[indexv.iter,]
+  wti.fname.iter <- wt.fnamei <- paste0("workflow-table-iter", 
+                                        iter.num, "_", save.fnstem,".csv")
+  wti.fpath <- file.path(save.dpath, rnf.dname, "data", wti.fname.iter)
+  write.csv(wti, file = wti.fpath, row.names = F)
+  message("finished with iter ", iter.num)
+}
+
+#-----------------
+# run the workflow
+#-----------------
+# navigate to:
+# /deconvo_method-paper/outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_donor-bias
+#
+# run:
+# bash ./sh/r-nf_run_wt-iter.sh
 
 #---------------------
 # running the workflow

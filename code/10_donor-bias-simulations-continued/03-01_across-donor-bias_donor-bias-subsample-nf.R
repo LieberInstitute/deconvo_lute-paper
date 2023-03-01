@@ -95,6 +95,15 @@ for(iter.num in seq(length(indexv))){
   message("finished with iter ", iter.num)
 }
 
+#-----------------
+# run the workflow
+#-----------------
+# navigate to:
+# /deconvo_method-paper/outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_donor-bias
+#
+# run:
+# bash ./sh/r-nf_run_wt-iter.sh
+
 #-----------------------
 # analyze results table
 #-----------------------
