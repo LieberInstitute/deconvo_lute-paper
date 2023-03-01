@@ -80,10 +80,16 @@ if(!cond){
 }
 
 # load results data
-dfres <- do.call(rbind, lapply(lfv.filt, function(fni){
-  # message(fni)
-  dfi <- read.csv(file.path(publish.dir, fni))
-  dfi[,2:ncol(dfi)]
+ldf <- lapply(lfv.filt, function(fni){read.csv(file.path(publish.dir, fni))})
+# get dfres, filtering results for additional unlabeled cell types 
+# (e.g. "other" returned by epic)
+dfres <- do.call(rbind, lapply(ldf, function(dfi){
+  type.vector <- unlist(strsplit(dfi$type_labels, ";"))
+  typev <- paste0("type", seq(length(type.vector)))
+  cnv.type <- colnames(dfi)[grepl(".*\\.type[0-9]$", colnames(dfi))]
+  cnv.filt <- cnv.type[!grepl(paste0(typev, collapse = "|"), cnv.type)]
+  if(length(cnv.filt)>0){dfi <- dfi[,!colnames(dfi) %in% cnv.filt]}
+  dfi[,c(2:ncol(dfi))]
 }))
 
 #--------------------

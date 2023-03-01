@@ -82,13 +82,13 @@ fi
 #----------------------------------
 # parse preliminary cleanup options
 #----------------------------------
-if test -d "$results_directory"; then
-    echo 'Removing existing results directory...'
-    rm -r $results_directory
-fi
+#if test -d "$results_directory"; then
+#    echo 'Removing existing results directory...'
+#    rm -r $results_directory
+#fi
 
-echo 'Removing any existing results tables...'
-find . -name 'results_table_*' -delete
+# echo 'Removing any existing results tables...'
+# find . -name 'results_table_*' -delete
 
 #-----------------
 # check runs count
@@ -121,32 +121,4 @@ do
 	read_start=$(echo "$read_start + $runs_per_batch" | bc)
 	read_end=$(echo "$read_start + $runs_per_batch - 1" | bc)
 done
-
-#-------------------
-# gather new results
-#-------------------
-echo "gathering results table..."
-Rscript $results_gather_script_path
-
-echo "copying results table to results folder..."
-rfilename=$(find . -name 'results_table_*')
-mv $rfilename ./data/$rfilename
-
-#-------------------
-# clean up run files
-#-------------------
-if [ $cleanup == T ]; then
-	echo "Performing cleanup..."
-	rm -r 'work'
-	rm -r '.nextflow'
-	find . -name '*.nextflow.log.*' -delete
-	find . -name '.nextflow' -delete
-	# find . -name 'results' -delete
-else
-	echo "Skipping cleanup."
-fi
-
-#-------------
-# end messages
-#-------------
-echo "Workflow run success. Returning."
+echo "Finished processing workflow iterations."
