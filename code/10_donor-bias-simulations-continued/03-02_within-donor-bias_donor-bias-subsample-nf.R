@@ -110,6 +110,29 @@ for(iter.num in seq(length(indexv))){
   message("finished with iter ", iter.num)
 }
 
+#---------------------------------------
+# get the point estimate of bias by type
+#---------------------------------------
+base.path <- "data"
+base.path <- file.path(save.dpath, rnf.dname, base.path)
+# get ypb
+ypb.path <- file.path(base.path, "ypb_intra-sample_ro1-dlpfc.rda")
+ypb <- get(load(ypb.path))
+ypb <- as.data.frame(ypb)
+# get signature matrix
+unique.types <- unique(scef[["k2"]])
+unique.types <- unique.types[order(unique.types)]
+mexpr <- assays(scef)[["counts_adj"]]
+Z <- do.call(cbind, lapply(unique.types, function(typei){
+  filt <- scef[["k2"]]==typei; rowMeans(mexpr[,filt])}))
+colnames(Z) <- unique.types
+Z <- as.data.frame(Z)
+# get pred
+
+ld <- run_deconvolution(Z = Z, Y = ypb, method = "epic")
+ld <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), method = "music")
+ld <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), method = "nnls")
+
 #-----------------
 # run the workflow
 #-----------------
