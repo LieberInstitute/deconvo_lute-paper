@@ -108,6 +108,8 @@ if(assay.name %in% names(assays(sce))){
     rowMeans(mexpr[,celltype.vector==ci])
   }))
   colnames(Z) <- unique.types
+  S <- c("glial" = 3, "neuron" = 10)
+  Z <- sweep(Z, 2, S, "*")
 } else{
   stop("Error, assay not found in reference data.")
 }
