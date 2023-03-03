@@ -30,17 +30,16 @@ save.fnstem <- paste0("intra-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
 methodv <- c("nnls", "music", "epic", "deconrnaseq")
-iterations <- 100
+iterations <- 2000
 # fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)
-rnf.dname <- "r-nf_deconvolution_donor-bias"
+rnf.dname <- "r-nf_deconvolution_intra-sample-bias"
 base.path <- "data"
 base.path <- file.path(save.dpath, rnf.dname, base.path)
 # save data
 which.save = c("li", "sce")
-save.names = list(sce.name = "sce.rda",
-                  li.name = "lindex.rda")
+save.names = list(sce.name = "sce.rda", li.name = "lindex.rda")
 
 #----------------------------------
 # set up a new subsample experiment
@@ -85,13 +84,14 @@ lsub <- prepare_subsample_experiment(scef,
 #---------------------
 # manage workflow runs
 #---------------------
+base.path <- "data" # file.path(save.dpath, rnf.dname, "data")
 # get main starting workflow table
 wt <- lsub$wt
 # save full table
 proj.handle <- "ro1-dlpfc"
 save.fnstem <- paste0("intra-sample_", proj.handle)
 wt.fnamei <- paste0("workflow-table-all_",save.fnstem,".csv")
-wt.fpath <- file.path(save.dpath, rnf.dname, "data", wt.fnamei)
+wt.fpath <- file.path(base.path, wt.fnamei)
 write.csv(wt, file = wt.fpath)
 
 # save table iterations
@@ -105,7 +105,7 @@ for(iter.num in seq(length(indexv))){
   wti <- wt[index.start:index.end,]
   wti.fname.iter <- wt.fnamei <- paste0("workflow-table-iter", 
                                         iter.num, "_", save.fnstem,".csv")
-  wti.fpath <- file.path(save.dpath, rnf.dname, "data", wti.fname.iter)
+  wti.fpath <- file.path(base.path, wti.fname.iter)
   write.csv(wti, file = wti.fpath, row.names = F)
   message("finished with iter ", iter.num)
 }

@@ -31,11 +31,11 @@ save.fnstem <- paste0("inter-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
 methodv <- c("nnls", "music", "epic", "deconrnaseq")
-iterations <- 1000
+iterations <- 2000
 fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)
-rnf.dname <- "r-nf_deconvolution_donor-bias"
+rnf.dname <- "r-nf_deconvolution_inter-sample-bias"
 base.path <- "data"
 base.path <- file.path(save.dpath, rnf.dname, base.path)
 
@@ -49,6 +49,13 @@ lscef <- get(load(fpath))
 sce <- lscef[[celltype.variable]]
 rm(lscef)
 
+# set count min
+count.min <- 200
+# get proportions
+proportions <- prop.table(table(sce[["k2"]]))
+# glial    neuron 
+# 0.3518927 0.6481073 
+
 # save new experiment data
 lsub <- prepare_subsample_experiment(sce,
                                        scale.factor = scale.factor,
@@ -58,7 +65,8 @@ lsub <- prepare_subsample_experiment(sce,
                                        celltype.variable = celltype.variable,
                                        group.variable = group.variable,
                                        assay.name = assay.name,
-                                       fraction.cells = fraction.cells,
+                                       cell.proportions = proportions,
+                                       count.minimum = count.min,
                                        seed.num = seed.num,
                                        which.save = c("sce", "tp", "ypb", "li"),
                                        save.fnstem = save.fnstem,
@@ -68,16 +76,14 @@ lsub <- prepare_subsample_experiment(sce,
 #---------------------
 # manage workflow runs
 #---------------------
-# change wd
-# setwd(file.path(save.dpath, rnf.dname))
-
+base.path <- "data" # file.path(save.dpath, rnf.dname, "data")
 # get main starting workflow table
 wt <- lsub$wt
 # save full table
 proj.handle <- "ro1-dlpfc"
 save.fnstem <- paste0("inter-sample_", proj.handle)
 wt.fnamei <- paste0("workflow-table-all_",save.fnstem,".csv")
-wt.fpath <- file.path(save.dpath, rnf.dname, "data", wt.fnamei)
+wt.fpath <- file.path(base.path, wt.fnamei)
 write.csv(wt, file = wt.fpath)
 
 # save table iterations
@@ -85,12 +91,13 @@ num.batch <- 200
 indexv <- seq(1, nrow(wt), num.batch)
 wt.fnamei <- paste0("workflow-table_",save.fnstem,".csv")
 for(iter.num in seq(length(indexv))){
-  indexv.iter <- indexv[iter.num]
-  indexv.iter <- indexv.iter:(indexv.iter+num.batch-1)
-  wti <- wt[indexv.iter,]
+  index.start <- indexv[iter.num]
+  index.end <- (index.start+num.batch-1)
+  if(index.end > nrow(wt)){index.end <- nrow(wt)}
+  wti <- wt[index.start:index.end,]
   wti.fname.iter <- wt.fnamei <- paste0("workflow-table-iter", 
-                                       iter.num, "_", save.fnstem,".csv")
-  wti.fpath <- file.path(save.dpath, rnf.dname, "data", wti.fname.iter)
+                                        iter.num, "_", save.fnstem,".csv")
+  wti.fpath <- file.path(base.path, wti.fname.iter)
   write.csv(wti, file = wti.fpath, row.names = F)
   message("finished with iter ", iter.num)
 }
