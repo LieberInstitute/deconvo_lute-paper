@@ -63,12 +63,14 @@ proportions
 # glial    neuron 
 # 0.2489252 0.7510748
 
-#---------------------------------------
+#---------------------------------------------------------------
 # get the point estimate of bias by type -- no cell size factors
-#---------------------------------------
+#---------------------------------------------------------------
 base.path <- "data"
 base.path <- file.path(save.dpath, rnf.dname, base.path)
 
+# set cell scale factors
+S <- c("glial" = 3, "neuron" = 10)
 # get true proportions
 P <- prop.table(table(scef[[celltype.variable]]))
 # get signature matrix
@@ -84,9 +86,10 @@ Z <- as.data.frame(Z)
 ypb <- t(t(P) %*% t(Z))
 # get pred
 arg <- list()
-ld2 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), method = "music", arguments = arg)
-ld3 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), method = "nnls", arguments = arg)
-ld1$predictions
+ld2 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), 
+                         method = "music", arguments = arg)
+ld3 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), 
+                         method = "nnls", arguments = arg)
 ld2$predictions
 ld3$predictions
 
@@ -95,10 +98,10 @@ ZS <- sweep(Z, 2, S, "*")
 ypb <- t(t(P) %*% t(ZS))
 # get pred
 arg <- list()
-ld1 <- run_deconvolution(Z = Z, Y = ypb, method = "epic", arguments = arg)
-ld2 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), method = "music", arguments = arg)
-ld3 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), method = "nnls", arguments = arg)
-ld1$predictions
+ld2 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), 
+                         method = "music", arguments = arg)
+ld3 <- run_deconvolution(Z = as.matrix(Z), Y = as.matrix(ypb), 
+                         method = "nnls", arguments = arg)
 ld2$predictions
 ld3$predictions
 
