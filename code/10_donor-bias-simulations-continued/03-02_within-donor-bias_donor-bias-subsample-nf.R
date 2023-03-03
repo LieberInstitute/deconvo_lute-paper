@@ -30,7 +30,7 @@ save.fnstem <- paste0("intra-sample_", proj.handle)
 group.variable <- "Sample"
 assay.name <- "counts_adj"
 methodv <- c("nnls", "music", "epic", "deconrnaseq")
-iterations <- 2000
+iterations <- 1000
 # fraction.cells <- 25
 num.sample.iter <- 3
 scale.factor <- c("glial" = 3, "neuron" = 10)
@@ -84,6 +84,7 @@ lsub <- prepare_subsample_experiment(scef,
 #---------------------
 # manage workflow runs
 #---------------------
+setwd(file.path(save.dpath, rnf.dname))
 base.path <- "data" # file.path(save.dpath, rnf.dname, "data")
 # get main starting workflow table
 wt <- lsub$wt
