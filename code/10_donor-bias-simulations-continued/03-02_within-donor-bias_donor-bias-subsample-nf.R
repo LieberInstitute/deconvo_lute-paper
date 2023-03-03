@@ -167,11 +167,6 @@ lgg <- lapply(varv, function(varname){
   ggplot(dfp, aes(x = deconvolution_method, y = value)) +
     geom_violin(draw_quantiles = 0.5) + ggtitle(varname)
 })
-jpeg("ggvp-comp_intra-sample-bias.jpg", width = 5, height = 4,
-     units = "in", res = 400)
-grid.arrange(lgg[[1]], lgg[[2]], lgg[[3]], lgg[[4]], lgg[[5]],
-             layout_matrix = matrix(c(1,2,3,4,5), nrow = 2))
-dev.off()
 # bias plots
 plot1 <- lgg[[3]] + theme_bw() +
   theme(axis.text.x = element_blank(),
