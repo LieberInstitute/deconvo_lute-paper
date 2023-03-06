@@ -8,7 +8,7 @@
 #
 
 libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", 
-          "ggplot2", "gridExtra")
+          "ggplot2", "gridExtra", "GGally")
 sapply(libv, library, character.only = TRUE)
 
 #------------------
@@ -129,11 +129,6 @@ lfv <- list.files(data.dpath)
 rt.fname <- lfv[grepl(results.filt, lfv)]
 rt.fpath <- file.path(save.dpath, rnf.dname, "data", rt.fname)
 rt <- read.csv(rt.fpath)
-
-
-library(ggplot2)
-library(gridExtra)
-library(GGally)
 
 method.varname <- "deconvolution_method"
 # iterate on plot variables
