@@ -17,3 +17,5 @@ outputs/07_cell-size-estimates/dfcor-cellsize_region_scef-k7markers.rda
 outputs/10_donor-bias-simulations-continued/.Rhistory
 outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_intra-sample-bias/data/workflow-table-iter*
 outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_inter-sample-bias/data/workflow-table-iter*
+outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_inter-sample-bias/rscript/predict-proportions_no-transform.R
+outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_intra-sample-bias/rscript/predict-proportions_no-transform.R
