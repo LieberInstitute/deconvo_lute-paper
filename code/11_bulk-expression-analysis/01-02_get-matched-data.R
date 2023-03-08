@@ -4,6 +4,9 @@
 #
 #
 
+libv <- c("SingleCellExperiment", "SummarizedExperiment")
+sapply(libv, library, character.only = T)
+
 #----------
 # load data
 #----------
@@ -19,3 +22,12 @@ rse <- get(load(file.path(path, rse.filename)))
 # get save directory path
 save.path <- file.path("deconvo_method-paper", "outputs", 
                        "11_bulk-expression-analysis")
+
+# load marker data
+sce.markers.path <- file.path("deconvo_method-paper", "outputs", "09_manuscript", 
+                              "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+lsce <- get(load(sce.markers.path))
+
+#----------------------------
+# marker gene bulk expression
+#----------------------------

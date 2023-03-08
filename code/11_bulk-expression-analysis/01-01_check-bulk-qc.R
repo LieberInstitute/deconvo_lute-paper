@@ -4,6 +4,9 @@
 #
 #
 
+libv <- c("SummarizedExperiment")
+sapply(libv, library, character.only = T)
+
 #----------
 # load data
 #----------
@@ -19,3 +22,15 @@ rse <- get(load(file.path(path, rse.filename)))
 # get save directory path
 save.path <- file.path("deconvo_method-paper", "outputs", 
                        "11_bulk-expression-analysis")
+
+#---------------------------
+# total expression summaries
+#---------------------------
+
+#-----------------------------------
+# missing/unexpressed gene summaries
+#-----------------------------------
+
+#------------------------
+# mean-variance summaries
+#------------------------
