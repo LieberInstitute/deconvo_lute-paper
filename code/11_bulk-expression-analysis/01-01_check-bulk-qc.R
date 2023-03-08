@@ -44,7 +44,8 @@ group_jitter <- function(variable.name, cd, counts,
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")
       filter <- cd[,variable.name]==gi; cf <- counts[,filter]
-      dfi <- data.frame(value = apply(cf,2,function(ci){length(ci[ci==0])}))
+      dfi <- data.frame(value = apply(cf,2,function(ci){
+        length(which(ci==0))}))
       dfi$group <- gi; return(dfi)
     }))
   } else if(type == "variance"){
@@ -102,7 +103,7 @@ group_jitter <- function(variable.name, cd, counts,
 get_summary_list <- function(type, plot.fname, variable.vector, cd, counts){
   # get plot data
   ljitter <- lapply(variable.vector, function(variable){
-    group_jitter(variable, cd, counts, variable, type)
+    group_jitter(variable, cd, counts, type)
   })
   
   # save composite plot
@@ -141,30 +142,23 @@ variable.vector <- c(batch.variable, "library_prep", "library_type",
 type <- "total.counts"
 plot.fname <- paste0("ggjitter-composite_", type, "_ro1-dlpfc.jpg")
 
-# get plot data
-ljitter <- lapply(variable.vector, function(variable){
-  group_jitter(variable, cd, counts, variable, type)
-})
-
-# save composite plot
-jpeg(file.path(save.path, plot.fname), width = 10, height = 8, 
-     units = "in", res = 400)
-grid.arrange(ljitter[[1]][[2]], 
-             ljitter[[2]][[2]], 
-             ljitter[[3]][[2]], 
-             ljitter[[4]][[2]],
-             nrow = 2, bottom = "group", left = "value")
-dev.off()
-
+# get summary series
+ljitter <- get_summary_list(type = type, plot.fname = plot.fname, 
+                            variable.vector = variable.vector, cd = cd, 
+                            counts = counts)
 
 #-----------------------------------
 # missing/unexpressed gene summaries
 #-----------------------------------
-variable.vector <- c(batch.variable, "library_prep", "library_type", 
-                     condition.variable)
-ljitter <- lapply(variable.vector, function(variable){
-  group_jitter(variable, cd, counts, variable, "zero.count")
-})
+# summary params
+type <- "zero.count"
+plot.fname <- paste0("ggjitter-composite_", gsub("\\.", "-", type), 
+                     "_ro1-dlpfc.jpg")
+
+# get summary series
+ljitter <- get_summary_list(type = type, plot.fname = plot.fname, 
+                            variable.vector = variable.vector, cd = cd, 
+                            counts = counts)
 
 #------------------------
 # mean-variance summaries
