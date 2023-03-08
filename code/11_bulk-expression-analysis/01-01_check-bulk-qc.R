@@ -71,7 +71,6 @@ group_jitter <- function(variable.name, cd, counts,
     set.seed(0)
     num.gene <- 500
     cf <- counts[sample(seq(nrow(counts)), num.gene),]
-    value.string <- "Variance"
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")
       filter <- cd[,variable.name]==gi; cff <- cf[,filter]
