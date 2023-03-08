@@ -29,8 +29,10 @@ save.path <- file.path("deconvo_method-paper", "outputs",
 group_jitter <- function(variable.name, cd, counts,
                          type = c("total.counts", "zero.count",
                                   "mean", "variance", "dispersion")){
-  # get plot data
+  # define summary groups
   group.vector <- unique(cd[,variable.name])
+  # get plot data
+  message("Calculating summary data...")
   if(type == "total.counts"){
     value.string <- "Total counts"
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
@@ -83,7 +85,7 @@ group_jitter <- function(variable.name, cd, counts,
     stop("Error, unrecognized type argument.")
   }
   
-  
+  message("Formatting plot data...")
   # order group as factor
   labels.vector <- unique(dfp$group)
   levels.vector <- unlist(sapply(labels.vector, function(li){
@@ -92,6 +94,7 @@ group_jitter <- function(variable.name, cd, counts,
                       levels = labels.vector[order(levels.vector)])
   
   # make new plot object
+  message("Getting new plot object...")
   new.plot <- ggplot(dfp, aes(x = group, y = value)) + theme_bw() +
     geom_jitter() + geom_boxplot(color = "cyan", alpha = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -100,19 +103,20 @@ group_jitter <- function(variable.name, cd, counts,
   return(list(dfp = dfp, new.plot = new.plot))
 }
 
-get_summary_list <- function(type, plot.fname, variable.vector, cd, counts){
+get_summary_list <- function(type, plot.fname, variable.vector, cd, counts, save.path){
   # get plot data
+  
   ljitter <- lapply(variable.vector, function(variable){
     group_jitter(variable, cd, counts, type)
   })
   
   # save composite plot
-  jpeg(file.path(save.path, plot.fname), width = 10, height = 8, 
-       units = "in", res = 400)
-  grid.arrange(ljitter[[1]][[2]], 
-               ljitter[[2]][[2]], 
-               ljitter[[3]][[2]], 
-               ljitter[[4]][[2]],
+  plot.fname <-  paste0("ggjitter-composite_", gsub("\\.", "-", type), 
+                        "_ro1-dlpfc.jpg")
+  plot.path <- file.path(save.path, plot.fname)
+  message("Saving new plot: ", plot.path, "...")
+  jpeg(plot.path, width = 10, height = 8, units = "in", res = 400)
+  grid.arrange(ljitter[[1]][[2]], ljitter[[2]][[2]], ljitter[[3]][[2]], ljitter[[4]][[2]],
                nrow = 2, bottom = "group", left = "value")
   dev.off()
   return(ljitter)
@@ -135,31 +139,16 @@ cd[,condition.variable] <- paste0(cd$library_prep,"_",cd$library_type)
 variable.vector <- c(batch.variable, "library_prep", "library_type", 
                      condition.variable)
 
-#---------------------------
-# total expression summaries
-#---------------------------
-# summary params
-type <- "total.counts"
-plot.fname <- paste0("ggjitter-composite_", type, "_ro1-dlpfc.jpg")
-
-# get summary series
-ljitter <- get_summary_list(type = type, plot.fname = plot.fname, 
-                            variable.vector = variable.vector, cd = cd, 
-                            counts = counts)
-
-#-----------------------------------
-# missing/unexpressed gene summaries
-#-----------------------------------
-# summary params
-type <- "zero.count"
-plot.fname <- paste0("ggjitter-composite_", gsub("\\.", "-", type), 
-                     "_ro1-dlpfc.jpg")
-
-# get summary series
-ljitter <- get_summary_list(type = type, plot.fname = plot.fname, 
-                            variable.vector = variable.vector, cd = cd, 
-                            counts = counts)
-
-#------------------------
-# mean-variance summaries
-#------------------------
+#----------------------
+# save new summary data
+#----------------------
+# define summary types
+type.vector <- c("total.counts", "dispersion", "zero.count", "mean", "variance")
+for(type in type.vector){
+  message("Working on summary type ", type, "...")
+  get_summary_list(type = type, plot.fname = plot.fname, 
+                   variable.vector = variable.vector, cd = cd, 
+                   counts = counts, save.path = save.path)
+  message("Finished with summary type ", type, ".")
+}
+message("Done with all summary  types.")
