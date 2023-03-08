@@ -27,7 +27,6 @@ save.path <- file.path("deconvo_method-paper", "outputs",
 # helper functions
 #-----------------
 group_jitter <- function(variable.name, cd, counts,
-                         ggtitle.string = "Total counts by group",
                          type = c("total.counts", "zero.count",
                                   "mean", "variance", "dispersion")){
   # get plot data
@@ -95,9 +94,27 @@ group_jitter <- function(variable.name, cd, counts,
   new.plot <- ggplot(dfp, aes(x = group, y = value)) + theme_bw() +
     geom_jitter() + geom_boxplot(color = "cyan", alpha = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle(ggtitle.string) + xlab(value.string)
+    ylab(value.string) + xlab(variable.name)
   
   return(list(dfp = dfp, new.plot = new.plot))
+}
+
+get_summary_list <- function(type, plot.fname, variable.vector, cd, counts){
+  # get plot data
+  ljitter <- lapply(variable.vector, function(variable){
+    group_jitter(variable, cd, counts, variable, type)
+  })
+  
+  # save composite plot
+  jpeg(file.path(save.path, plot.fname), width = 10, height = 8, 
+       units = "in", res = 400)
+  grid.arrange(ljitter[[1]][[2]], 
+               ljitter[[2]][[2]], 
+               ljitter[[3]][[2]], 
+               ljitter[[4]][[2]],
+               nrow = 2, bottom = "group", left = "value")
+  dev.off()
+  return(ljitter)
 }
 
 #----------------------
@@ -120,7 +137,9 @@ variable.vector <- c(batch.variable, "library_prep", "library_type",
 #---------------------------
 # total expression summaries
 #---------------------------
+# summary params
 type <- "total.counts"
+plot.fname <- paste0("ggjitter-composite_", type, "_ro1-dlpfc.jpg")
 
 # get plot data
 ljitter <- lapply(variable.vector, function(variable){
@@ -128,9 +147,14 @@ ljitter <- lapply(variable.vector, function(variable){
 })
 
 # save composite plot
-plot.fname <- paste0("ggjitter-composite_", type, "_ro1-dlpfc.jpg")
-jpeg(file.path(save.path, plot.fname), width = 10, height = 8, units = "in", res = 400)
-grid.arrange(ljitter[[1]], ljitter[[2]], ljitter[[3]], ljitter[[4]], ljitter[[5]])
+jpeg(file.path(save.path, plot.fname), width = 10, height = 8, 
+     units = "in", res = 400)
+grid.arrange(ljitter[[1]][[2]], 
+             ljitter[[2]][[2]], 
+             ljitter[[3]][[2]], 
+             ljitter[[4]][[2]],
+             nrow = 2, bottom = "group", left = "value")
+dev.off()
 
 
 #-----------------------------------
