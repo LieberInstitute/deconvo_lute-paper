@@ -48,22 +48,9 @@ save(rsef, file = save.path)
 # qc at markers versus background
 #--------------------------------
 
-#------------------------------------------------
-# correlate bulk and pseudobulk marker expression
-#------------------------------------------------
-# counts
 
-# mean expression
 
-# expression variance
 
-#--------------------------------------------
-# correlation bulk and halo marker expression
-#--------------------------------------------
-
-#-------------------------------
-# marker degs among bulk samples
-#-------------------------------
 
 
 
