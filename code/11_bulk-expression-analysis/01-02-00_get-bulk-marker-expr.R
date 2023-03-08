@@ -39,6 +39,11 @@ filter <- which(rowData(rse)$Symbol %in% overlapping.markers)
 rsef <- rse[filter,]
 dim(rsef)
 
+# save bulk marker expr
+rsef.filename <- "rsef_k2-marker-expr_ro1-dlpfc.rda"
+save.path <- file.path(save.path, rsef.filename)
+save(rsef, file = save.path)
+
 #--------------------------------
 # qc at markers versus background
 #--------------------------------
