@@ -151,6 +151,16 @@ type.vector <- c("total.counts", "zero.count", "mean", "variance")
 #---------------
 # compare counts
 #---------------
+counts.bg <- assays(rse)[["counts"]]
+counts.marker <- assays(rsef)[["counts"]]
+
+lcomp.counts <- get_comparison_data(expr.bg = counts.bg, expr.marker = counts.marker,
+                                    plot.fname = plot.fname, type.vector = type.vector,
+                                    cd = cd, save.path = save.path)
+
+#-----------------------
+# compare lognorm counts
+#-----------------------
 se <- SummarizedExperiment(assays = assays(rse))
 sef <- SummarizedExperiment(assays = assays(rsef))
 lc.bg <- logNormCounts(se)
