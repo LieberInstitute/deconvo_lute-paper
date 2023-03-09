@@ -121,6 +121,12 @@ get_summary_list <- function(type, plot.fname, variable.vector, cd, counts, save
   return(ljitter)
 }
 
+# export helper functions
+group.jitter.filename <- "group-jitter_helper.rda"
+get.summary.filename <- "get-summary_helper.rda"
+save(group_jitter, file = file.path(save.path, group.jitter.filename))
+save(get_summary_list, file = file.path(save.path, get.summary.filename))
+
 #----------------------
 # set up data summaries
 #----------------------
