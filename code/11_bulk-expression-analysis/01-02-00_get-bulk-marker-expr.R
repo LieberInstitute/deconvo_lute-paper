@@ -4,7 +4,7 @@
 #
 #
 
-libv <- c("SingleCellExperiment", "SummarizedExperiment")
+libv <- c("SingleCellExperiment", "SummarizedExperiment", "scuttle")
 sapply(libv, library, character.only = T)
 
 #----------
@@ -151,36 +151,16 @@ type.vector <- c("total.counts", "zero.count", "mean", "variance")
 #---------------
 # compare counts
 #---------------
-counts.bg <- assays(rse)[["counts"]]
-counts.marker <- assays(rsef)[["counts"]]
+se <- SummarizedExperiment(assays = assays(rse))
+sef <- SummarizedExperiment(assays = assays(rsef))
+lc.bg <- logNormCounts(se)
+lc.marker <- logNormCounts(sef)
+lc.bg <- assays(lc.bg)[["logcounts"]]
+lc.marker <- assays(lc.marker)[["logcounts"]]
 
-lcomp <- get_comparison_data(expr.bg = counts.bg, 
-                             expr.marker = counts.marker, 
-                             plot.fname = plot.fname,
-                             type.vector = type.vector, 
+lcomp.lc <- get_comparison_data(expr.bg = lc.bg, expr.marker = lc.marker, 
+                             plot.fname = plot.fname, type.vector = type.vector, 
                              cd = cd, save.path = save.path)
-
-
-#--------------------------
-# compare normalized counts
-#--------------------------
-
-#------------
-# compare tpm
-#------------
-
-#-------------
-# compare fpkm
-#-------------
-
-#--------------------------------
-# qc at markers versus background
-#--------------------------------
-
-
-
-
-
 
 
 
