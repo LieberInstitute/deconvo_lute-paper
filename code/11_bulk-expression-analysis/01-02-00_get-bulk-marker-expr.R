@@ -100,7 +100,7 @@ get_comparison_data <- function(expr.bg, expr.marker, plot.fname,
   # get boxplots
   lbox <- lapply(seq(length(ldfp)), function(i){
     dfp <- ldfp[[i]]; dfp$category <- dfp$marker.type
-    ggplot_from_dfp(dfp, type.vector[i], "color", "box")
+    ggplot_from_dfp(dfp, type.vector[i], "color", "box", scale = "normal")
   })
   # get boxplots -- log scale yaxis
   lbox.logscale <- lapply(seq(length(ldfp)), function(i){
@@ -146,7 +146,7 @@ cd[,condition.variable] <- paste0(cd$library_prep,"_",cd$library_type)
 variable.vector <- c(batch.variable, "library_prep", "library_type", 
                      condition.variable)
 # define summary types
-type.vector <- c("total.counts", "dispersion", "zero.count", "mean", "variance")
+type.vector <- c("total.counts", "zero.count", "mean", "variance")
 
 #---------------
 # compare counts
@@ -158,8 +158,7 @@ lcomp <- get_comparison_data(expr.bg = counts.bg,
                              expr.marker = counts.marker, 
                              plot.fname = plot.fname,
                              type.vector = type.vector, 
-                             cd = cd, 
-                             save.path = save.path)
+                             cd = cd, save.path = save.path)
 
 
 #--------------------------
