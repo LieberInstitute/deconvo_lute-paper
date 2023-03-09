@@ -39,7 +39,8 @@ get_summary_list <- get(load(file.path(save.path, get.summary.filename)))
 
 ggplot_from_dfp <- function(dfp, variable.name,
                             category.type = c("group", "color", "fill"),
-                            plot.type = c("box", "jitter", "both")){
+                            plot.type = c("box", "jitter", "both"),
+                            scale = c("normal", "log")){
   # make new plot object
   message("Getting new plot object...")
   
@@ -64,11 +65,51 @@ ggplot_from_dfp <- function(dfp, variable.name,
     new.plot <- new.plot + geom_jitter() + geom_boxplot()
   }
   
+  if(scale == "log"){new.plot <- new.plot + scale_y_log10()}
+  
   # parse theme and axes
   new.plot <- new.plot + theme_bw() + ylab(variable.name) + xlab(variable.name) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
   return(new.plot)
+}
+
+get_comparison_data <- function(expr.bg, expr.marker, plot.fname,
+                                type.vector, cd, save.path){
+  for(type in type.vector){
+    message("Working on summary type ", type, "...")
+    message("Working on background expression...")
+    lbg <- get_summary_list(type = type, plot.fname = plot.fname, 
+                            variable.vector = variable.vector, cd = cd, 
+                            counts = expr.bg, save.path = save.path)
+    message("Working on marker expression...")
+    lmarker <- get_summary_list(type = type, plot.fname = plot.fname, 
+                                variable.vector = variable.vector, cd = cd, 
+                                counts = expr.marker, save.path = save.path)
+    message("Getting new expression data...")
+    ldfp <- lapply(seq(length(lbg)), function(i){
+      dfp.bg <- lbg[[i]][[1]]; dfp.marker <- lmarker[[i]][[1]]
+      dfp.bg$marker.type <- "background"; dfp.marker$marker.type <- "marker"
+      return(rbind(dfp.bg, dfp.marker))
+    })
+    message("Finished with summary type ", type, ".")
+    
+  }
+  message("Done with all summary  types.")
+  message("Getting plots...")
+  # get boxplots
+  lbox <- lapply(seq(length(ldfp)), function(i){
+    dfp <- ldfp[[i]]; dfp$category <- dfp$marker.type
+    ggplot_from_dfp(dfp, type.vector[i], "color", "box")
+  })
+  # get boxplots -- log scale yaxis
+  lbox.logscale <- lapply(seq(length(ldfp)), function(i){
+    dfp <- ldfp[[i]]; dfp$category <- dfp$marker.type
+    ggplot_from_dfp(dfp, type.vector[i], "color", "box", scale = "log")
+  })
+  message("Getting return list...")
+  lr <- list(dfp = ldfp, lgg = list(box = lbox, box.log = lbox.logscale))
+  return(lr)
 }
 
 #--------------------------------
@@ -88,9 +129,9 @@ rsef.filename <- "rsef_k2-marker-expr_ro1-dlpfc.rda"
 save.path <- file.path(save.path, rsef.filename)
 save(rsef, file = save.path)
 
-#--------------------------------
-# qc at markers versus background
-#--------------------------------
+#--------------------------
+# prepare comparison params
+#--------------------------
 # set up data summaries
 # params
 assay.name <- "counts"
@@ -98,8 +139,6 @@ batch.variable <- "batch.id"
 condition.variable <- "expt_condition"
 # rse data
 cd <- colData(rse)
-counts.bg <- assays(rse)[["counts"]]
-counts.marker <- assays(rsef)[["counts"]]
 # get new cd variables
 cd[,batch.variable] <- paste0(cd$BrNum,"_",cd$location)
 cd[,condition.variable] <- paste0(cd$library_prep,"_",cd$library_type)
@@ -109,36 +148,37 @@ variable.vector <- c(batch.variable, "library_prep", "library_type",
 # define summary types
 type.vector <- c("total.counts", "dispersion", "zero.count", "mean", "variance")
 
-for(type in type.vector){
-  message("Working on summary type ", type, "...")
-  
-  message("Working on background expression...")
-  lbg <- get_summary_list(type = type, plot.fname = plot.fname, 
-                          variable.vector = variable.vector, cd = cd, 
-                          counts = counts.bg, save.path = save.path)
-  message("Working on marker expression...")
-  lmarker <- get_summary_list(type = type, plot.fname = plot.fname, 
-                              variable.vector = variable.vector, cd = cd, 
-                              counts = counts.marker, save.path = save.path)
-  
-  message("Getting new expression data...")
-  ldfp <- lapply(seq(length(lbg)), function(i){
-    dfp.bg <- lbg[[i]][[1]]; dfp.marker <- lmarker[[i]][[1]]
-    dfp.bg$marker.type <- "background"; dfp.marker$marker.type <- "marker"
-    return(rbind(dfp.bg, dfp.marker))
-  })
-  
-  
-  message("Finished with summary type ", type, ".")
-  
-}
-message("Done with all summary  types.")
+#---------------
+# compare counts
+#---------------
+counts.bg <- assays(rse)[["counts"]]
+counts.marker <- assays(rsef)[["counts"]]
 
-# get boxplots
-lbox <- lapply(seq(length(ldfp)), function(i){
-  dfp <- ldfp[[i]]; dfp$category <- dfp$marker.type
-  ggplot_from_dfp(dfp, type.vector[i], "color", "box")
-})
+lcomp <- get_comparison_data(expr.bg = counts.bg, 
+                             expr.marker = counts.marker, 
+                             plot.fname = plot.fname,
+                             type.vector = type.vector, 
+                             cd = cd, 
+                             save.path = save.path)
+
+
+#--------------------------
+# compare normalized counts
+#--------------------------
+
+#------------
+# compare tpm
+#------------
+
+#-------------
+# compare fpkm
+#-------------
+
+#--------------------------------
+# qc at markers versus background
+#--------------------------------
+
+
 
 
 
