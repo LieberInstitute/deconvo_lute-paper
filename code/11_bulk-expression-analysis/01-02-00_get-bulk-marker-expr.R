@@ -37,6 +37,40 @@ get_summary_list <- get(load(file.path(save.path, get.summary.filename)))
 # manage helper functions
 #------------------------
 
+ggplot_from_dfp <- function(dfp, variable.name,
+                            category.type = c("group", "color", "fill"),
+                            plot.type = c("box", "jitter", "both")){
+  # make new plot object
+  message("Getting new plot object...")
+  
+  # parse plot formatting
+  if(category.type == "group"){
+    new.plot <- ggplot(dfp, aes(x = group, y = value, group = category))
+  } else if(category.type == "color"){
+    new.plot <- ggplot(dfp, aes(x = group, y = value, color = category))
+  } else if(category == "fill"){
+    new.plot <- ggplot(dfp, aes(x = group, y = value, fill = category))
+  } else if(category == "fill;color"){
+    new.plot <- ggplot(dfp, aes(x = group, y = value, 
+                                fill = category, color = category))
+  } else{}
+  
+  # parse plot options
+  if(plot.type == "box"){
+    new.plot <- new.plot + geom_boxplot()
+  } else if(plot.type == "jitter"){
+    new.plot <- new.plot + geom_jitter()
+  } else{
+    new.plot <- new.plot + geom_jitter() + geom_boxplot()
+  }
+  
+  # parse theme and axes
+  new.plot <- new.plot + theme_bw() + ylab(variable.name) + xlab(variable.name) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+  return(new.plot)
+}
+
 #--------------------------------
 # get marker gene bulk expression
 #--------------------------------
@@ -79,20 +113,32 @@ for(type in type.vector){
   message("Working on summary type ", type, "...")
   
   message("Working on background expression...")
-  
+  lbg <- get_summary_list(type = type, plot.fname = plot.fname, 
+                          variable.vector = variable.vector, cd = cd, 
+                          counts = counts.bg, save.path = save.path)
   message("Working on marker expression...")
+  lmarker <- get_summary_list(type = type, plot.fname = plot.fname, 
+                              variable.vector = variable.vector, cd = cd, 
+                              counts = counts.marker, save.path = save.path)
   
   message("Getting new expression data...")
+  ldfp <- lapply(seq(length(lbg)), function(i){
+    dfp.bg <- lbg[[i]][[1]]; dfp.marker <- lmarker[[i]][[1]]
+    dfp.bg$marker.type <- "background"; dfp.marker$marker.type <- "marker"
+    return(rbind(dfp.bg, dfp.marker))
+  })
   
-  get_summary_list(type = type, plot.fname = plot.fname, 
-                   variable.vector = variable.vector, cd = cd, 
-                   counts = counts, save.path = save.path)
+  
   message("Finished with summary type ", type, ".")
   
 }
 message("Done with all summary  types.")
 
-
+# get boxplots
+lbox <- lapply(seq(length(ldfp)), function(i){
+  dfp <- ldfp[[i]]; dfp$category <- dfp$marker.type
+  ggplot_from_dfp(dfp, type.vector[i], "color", "box")
+})
 
 
 
