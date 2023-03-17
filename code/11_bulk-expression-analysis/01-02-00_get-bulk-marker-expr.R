@@ -4,7 +4,7 @@
 #
 #
 
-libv <- c("SingleCellExperiment", "SummarizedExperiment", "scuttle")
+libv <- c("SingleCellExperiment", "SummarizedExperiment", "scuttle", "ggplot2", "gridExtra")
 sapply(libv, library, character.only = T)
 
 #----------

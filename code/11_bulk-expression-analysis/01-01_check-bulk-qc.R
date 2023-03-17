@@ -70,6 +70,7 @@ group_jitter <- function(variable.name, cd, counts,
     value.string <- "Dispersion"
     set.seed(0)
     num.gene <- 500
+    # filter on protein-coding
     cf <- counts[sample(seq(nrow(counts)), num.gene),]
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")

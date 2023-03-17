@@ -17,7 +17,7 @@ load.path <- file.path("Human_DLPFC_Deconvolution",
                        "01_SPEAQeasy",
                        "round2_v40_2022-07-06",
                        "rse")
-rse <- get(load(file.path(path, rse.filename)))
+rse <- get(load(file.path(load.path, rse.filename)))
 
 # get save directory path
 save.path <- file.path("deconvo_method-paper", "outputs", 
