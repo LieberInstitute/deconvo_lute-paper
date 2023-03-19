@@ -128,8 +128,7 @@ ggplot_from_dfp <- function(dfp, variable.name,
   } else if(category == "fill"){
     new.plot <- ggplot(dfp, aes(x = group, y = value, fill = category))
   } else if(category == "fill;color"){
-    new.plot <- ggplot(dfp, aes(x = group, y = value, 
-                                fill = category, color = category))
+    new.plot <- ggplot(dfp, aes(x = group, y = value, fill = category, color = category))
   } else{}
   
   # parse plot options
@@ -141,27 +140,30 @@ ggplot_from_dfp <- function(dfp, variable.name,
     new.plot <- new.plot + geom_jitter() + geom_boxplot()
   }
   
-  if(scale == "log"){new.plot <- new.plot + scale_y_log10()}
-  
   # parse theme and axes
-  new.plot <- new.plot + theme_bw() + ylab(variable.name) + xlab(variable.name) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
+  if(scale == "log"){
+    new.plot <- new.plot + scale_y_log10() + theme_bw() + 
+      ylab(paste0(variable.name, " (log-scale)")) + xlab(variable.name) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  } else{
+    new.plot <- new.plot + theme_bw() + ylab(variable.name) + xlab(variable.name) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  }
   return(new.plot)
 }
 
-get_comparison_data <- function(expr.bg, expr.marker, plot.fname,
+get_comparison_data <- function(expr.bg, expr.marker, plot.filename,
                                 type.vector, cd, save.path){
   for(type in type.vector){
     message("Working on summary type ", type, "...")
     message("Working on background expression...")
-    lbg <- get_summary_list(type = type, plot.fname = plot.fname, 
+    lbg <- get_summary_list(type = type, plot.filename = plot.filename, 
                             variable.vector = variable.vector, cd = cd, 
-                            counts = expr.bg, save.path = save.path)
+                            expression = expr.bg, save.path = save.path)
     message("Working on marker expression...")
-    lmarker <- get_summary_list(type = type, plot.fname = plot.fname, 
+    lmarker <- get_summary_list(type = type, plot.filename = plot.filename, 
                                 variable.vector = variable.vector, cd = cd, 
-                                counts = expr.marker, save.path = save.path)
+                                expression = expr.marker, save.path = save.path)
     message("Getting new expression data...")
     ldfp <- lapply(seq(length(lbg)), function(i){
       dfp.bg <- lbg[[i]][[1]]; dfp.marker <- lmarker[[i]][[1]]
@@ -238,7 +240,7 @@ batch.variable <- "batch.id"
 # params for marker expression (05)
 #----------------------------------
 assay.name <- "counts"
-assays <- c("counts", "tpm")
+assays <- c("counts")
 batch.variable <- "batch.id"
 condition.variable <- "expt_condition"
 # vector of group variables to summarize
