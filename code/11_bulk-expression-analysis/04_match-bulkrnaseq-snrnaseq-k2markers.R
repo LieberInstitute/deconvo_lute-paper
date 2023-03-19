@@ -34,13 +34,12 @@ if(!identical(rownames(pseudobulk.ordered), rownames(rse.filter.markers))){
     pseudobulk <- pseudobulk.ordered
   }
 colnames(pseudobulk) <- "pseudobulk"
+# save
+save(pseudobulk, file = pseudobulk.path)
 
 # correlate bulk and pseudobulk marker expression
 # get correlation matrix
 rse.marker.expression <- assays(rse.filter.markers)[[assay.name]]
-# get bulk marker expression by experiment group
-colData(rse.filter.markers)[[condition.variable]] <- paste0(rse.filter.markers[[experiment.condition1]], "_",
-                                                   rse.filter.markers[[experiment.condition2]])
 rse.experiment.groups <- unique(rse.filter.markers[[condition.variable]])
 correlation.matrix <- do.call(cbind, lapply(rse.experiment.groups, function(groupi){
   message(groupi)
@@ -56,9 +55,3 @@ ggplot.correlation.heatmap <- ggcorrplot(plot.data.frame, type = "lower", lab = 
                                          title = paste0(correlation.method.markers))
 jpeg(correlation.heatmap.jpg.path, width = 10, height = 10, units = "in", res = 400)
 print(ggplot.correlation.heatmap); dev.off()
-
-# qc at markers versus background -- jitter/boxplots
-# mean expression
-# expression variance
-# correlation bulk and halo marker expression
-# marker degs among bulk samples

@@ -9,32 +9,8 @@
 # libraries
 libv <- c("here", "SummarizedExperiment", "SingleCellExperiment", "DESeq2", "ggplot2", "ggcorrplot", "glmGamPoi", "gridExtra")
 sapply(libv, library, character.only = T)
-
-#----------
-# paths
-#---------- 
 # save path, outputs
 save.path <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis")
-
-# load path, bulk expression
-rse.bulk.filename <- "rse_gene.Rdata"
-rse.bulk.filepath <- here("Human_DLPFC_Deconvolution", "processed-data", "01_SPEAQeasy", "round2_v40_2022-07-06", "rse", rse.bulk.filename)
-
-#----------
-# paths
-#---------- 
-# filenames
-# filtered genes
-rse.gene.filter.filename <- "rse_gene.Rdata"
-# bulk k2 marker expression
-rse.k2markers.filename <- "rse_k2-marker-expression_ro1-dlpfc.rda"
-# single nucleus markers list with k2 data 
-sce.markers.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
-
-# as paths
-rse.k2markers.filepath <- here(save.path, rse.k2markers.filename)
-rse.gene.filter.filepath <- here(save.path, rse.gene.filter.filename)
-sce.markers.list.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.markers.filename)
 
 #-----------------
 # helper functions
@@ -229,6 +205,31 @@ get_pseudobulk <- function(sce, sce.assay.name, S){
   return(pseudobulk)
 }
 
+#------------
+# params (01)
+#------------
+# gene type variables
+types.protein <- c("protein_coding")
+types.nonpolya <- c("lncRNA", "Mt_rRNA", "rRNA", "Mt_tRNA")
+types.include <- c(types.protein, types.nonpolya)
+
+# paths
+rse.bulk.filename <- "rse_gene.Rdata"
+rse.bulk.filepath <- here("Human_DLPFC_Deconvolution", "processed-data", "01_SPEAQeasy", "round2_v40_2022-07-06", "rse", rse.bulk.filename)
+rse.bulk.filename.new <- "rse-bulk-resave.rda"
+rse.bulk.path.new <- here(save.path, rse.bulk.filename.new)
+rse.k2markers.filename <- "rse_k2-marker-expression_ro1-dlpfc.rda"
+rse.k2markers.filepath <- here(save.path, rse.k2markers.filename)
+rse.gene.filter.filename <- "rse-gene-filter.rda"
+rse.gene.filter.filepath <- here(save.path, rse.gene.filter.filename)
+sce.markers.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
+sce.markers.list.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.markers.filename)
+
+# variable names
+experiment.condition1 <- "library_prep"
+experiment.condition2 <- "library_type"
+condition.variable <- "expt_condition"
+
 #----------------------------------
 # params for marker expression (05)
 #----------------------------------
@@ -248,10 +249,10 @@ correlation.method.markers <- "spearman"
 # params
 donor.id <- "BrNum"
 brain.location.id <- "location"
-experiment.condition1 <- "library_prep"
-experiment.condition2 <- "library_type"
 assay.name.qc <- "counts"
 batch.variable.qc <- "batch.id"
+experiment.condition1 <- "library_prep"
+experiment.condition2 <- "library_type"
 condition.variable.qc <- "expt_condition"
 # vector of group variables to summarize
 variable.vector <- c(batch.variable, "library_prep", "library_type", condition.variable)
@@ -267,4 +268,16 @@ K <- c("neuron", "glial")
 S <- c("neuron" = 10,"glial" = 3)
 correlation.heatmap.jpg.file.name <- "ggcorrheatmap_k2markers-rsegroup-pseudobulk.jpg"
 correlation.heatmap.jpg.path <- here(save.path, correlation.heatmap.jpg.file.name)
+pseudobulk.file.name <- "sce-pseudobulk.rda"
+pseudobulk.path <- here(save.path, pseudobulk.file.name)
+
+#-------------------------------------------------
+# params for marker expression vs. background (05)
+#-------------------------------------------------
+
+
+
+
+
+
 
