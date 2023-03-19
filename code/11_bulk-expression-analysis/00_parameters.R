@@ -16,26 +16,26 @@ save.path <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysi
 # helper functions
 #-----------------
 # summary/qc plots
-group_jitter <- function(variable.name, cd, counts,
+group_jitter <- function(variable, cd, expression,
                          type = c("total.counts", "zero.count",
                                   "mean", "variance", "dispersion")){
   # define summary groups
-  group.vector <- unique(cd[,variable.name])
+  group.vector <- unique(cd[,variable])
   # get plot data
   message("Calculating summary data...")
   if(type == "total.counts"){
     value.string <- "Total counts"
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")
-      filter <- cd[,variable.name]==gi
-      dfi <- data.frame(value = colSums(counts[,filter]))
+      filter <- cd[,variable]==gi
+      dfi <- data.frame(value = colSums(expression[,filter]))
       dfi$group <- gi; return(dfi)
     }))
   } else if(type == "zero.count"){
     value.string <- "Zero count"
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")
-      filter <- cd[,variable.name]==gi; cf <- counts[,filter]
+      filter <- cd[,variable]==gi; cf <- expression[,filter]
       dfi <- data.frame(value = apply(cf,2,function(ci){
         length(which(ci==0))}))
       dfi$group <- gi; return(dfi)
@@ -44,16 +44,16 @@ group_jitter <- function(variable.name, cd, counts,
     value.string <- "Variance"
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")
-      filter <- cd[,variable.name]==gi
-      dfi <- data.frame(value = colVars(counts[,filter]))
+      filter <- cd[,variable]==gi
+      dfi <- data.frame(value = colVars(expression[,filter]))
       dfi$group <- gi; return(dfi)
     }))
   } else if(type == "mean"){
     value.string <- "Mean"
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")
-      filter <- cd[,variable.name]==gi
-      dfi <- data.frame(value = colMeans(counts[,filter]))
+      filter <- cd[,variable]==gi
+      dfi <- data.frame(value = colMeans(expression[,filter]))
       dfi$group <- gi; return(dfi)
     }))
   } else if(type == "dispersion"){
@@ -61,10 +61,10 @@ group_jitter <- function(variable.name, cd, counts,
     set.seed(0)
     num.gene <- 500
     # filter on protein-coding
-    cf <- counts[sample(seq(nrow(counts)), num.gene),]
+    cf <- expression[sample(seq(nrow(expression)), num.gene),]
     dfp <- do.call(rbind, lapply(group.vector, function(gi){
       message("Getting value ", type, " for group ", gi, "...")
-      filter <- cd[,variable.name]==gi; cff <- cf[,filter]
+      filter <- cd[,variable]==gi; cff <- cf[,filter]
       dispersion.vector <- apply(cff, 1, function(ri){
         glmGamPoi::glm_gp(ri)$overdispersions})
       dispersion.vector <- as.numeric(dispersion.vector)
@@ -88,16 +88,16 @@ group_jitter <- function(variable.name, cd, counts,
   new.plot <- ggplot(dfp, aes(x = group, y = value)) + theme_bw() +
     geom_jitter() + geom_boxplot(color = "cyan", alpha = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ylab(value.string) + xlab(variable.name)
+    ylab(value.string) + xlab(variable)
   
   return(list(dfp = dfp, new.plot = new.plot))
 }
 
-get_summary_list <- function(type, plot.fname, variable.vector, cd, counts, save.path){
+get_summary_list <- function(type, plot.filename, variable.vector, cd, expression, save.path){
   # get plot data
   
   ljitter <- lapply(variable.vector, function(variable){
-    group_jitter(variable, cd, counts, type)
+    group_jitter(variable, cd, expression, type)
   })
   
   # save composite plot
@@ -229,6 +229,10 @@ sce.markers.list.path <- here("deconvo_method-paper", "outputs", "09_manuscript"
 experiment.condition1 <- "library_prep"
 experiment.condition2 <- "library_type"
 condition.variable <- "expt_condition"
+donor.variable <- "BrNum"
+location.variable <- "location"
+batch.variable <- "batch.id"
+
 
 #----------------------------------
 # params for marker expression (05)
@@ -251,8 +255,6 @@ donor.id <- "BrNum"
 brain.location.id <- "location"
 assay.name.qc <- "counts"
 batch.variable.qc <- "batch.id"
-experiment.condition1 <- "library_prep"
-experiment.condition2 <- "library_type"
 condition.variable.qc <- "expt_condition"
 # vector of group variables to summarize
 variable.vector <- c(batch.variable, "library_prep", "library_type", condition.variable)

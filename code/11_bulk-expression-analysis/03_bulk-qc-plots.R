@@ -18,9 +18,12 @@ if(!assay.name %in% names(assays.rse)){
 # save new qc summary plots
 for(type in type.vector){
   message("Working on summary type ", type, "...")
-  get_summary_list(type = type, plot.fname = plot.fname, 
-                   variable.vector = variable.vector, cd = cd, 
-                   counts = expression, save.path = save.path)
+  plot.filename <- paste0("ggjitter-composite_qc-rse_",
+                          gsub("\\.", "-", type),".jpg")
+  get_summary_list(type = type, plot.filename = plot.filename, 
+                   variable.vector = variable.vector, 
+                   cd = cd, expression = expression, 
+                   save.path = save.path)
   message("Finished with summary type ", type, ".")
 }
 message("Done with all summary  types.")
