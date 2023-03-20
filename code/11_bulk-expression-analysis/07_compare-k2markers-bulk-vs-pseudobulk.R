@@ -9,16 +9,16 @@
 source("deconvo_method-paper/code/11_bulk-expression-analysis/00_parameters.R")
 sapply(libv, library, character.only = T)
 rse.markers <- get(load(rse.k2markers.filepath))
-sce.markers <- get(load(sce.markers.list.path))[["k2"]]
+pseudobulk <- get(load(pseudobulk.path))
+# get bulk experiment groups
+rse.marker.expression <- assays(rse.filter.markers)[[assay.name]]
+rse.experiment.groups <- unique(rse.filter.markers[[condition.variable]])
 
-# get pseudobulk from sce.markers
-S <- c(3, 10)
-P <- as.numeric(table(sce.markers[,"k2"]))
+# compare expression
+# means
+# variances
+# dispersion
 
-# compare expression -- counts
-
-# compare expression -- means
-
-# compare expression -- variances
-
-# compare expression -- dispersion
+# save plots
+jpeg(correlation.heatmap.jpg.path, width = 10, height = 10, units = "in", res = 400)
+print(ggplot.correlation.heatmap); dev.off()

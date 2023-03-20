@@ -36,22 +36,3 @@ if(!identical(rownames(pseudobulk.ordered), rownames(rse.filter.markers))){
 colnames(pseudobulk) <- "pseudobulk"
 # save
 save(pseudobulk, file = pseudobulk.path)
-
-# correlate bulk and pseudobulk marker expression
-# get correlation matrix
-rse.marker.expression <- assays(rse.filter.markers)[[assay.name]]
-rse.experiment.groups <- unique(rse.filter.markers[[condition.variable]])
-correlation.matrix <- do.call(cbind, lapply(rse.experiment.groups, function(groupi){
-  message(groupi)
-  filter <- colData(rse.filter.markers)[[condition.variable]] == groupi
-  rowMeans(assays(rse.filter.markers)[[assay.name]][,filter])
-}))
-colnames(correlation.matrix) <- rse.experiment.groups
-# get correlation matrix
-correlation.matrix <- cbind(pseudobulk, correlation.matrix)
-plot.data.frame <- cor(correlation.matrix, method = correlation.method.markers)
-# get correlation ggplot
-ggplot.correlation.heatmap <- ggcorrplot(plot.data.frame, type = "lower", lab = T, 
-                                         title = paste0(correlation.method.markers))
-jpeg(correlation.heatmap.jpg.path, width = 10, height = 10, units = "in", res = 400)
-print(ggplot.correlation.heatmap); dev.off()
