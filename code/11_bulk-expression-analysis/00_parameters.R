@@ -7,7 +7,7 @@
 
 
 # libraries
-libv <- c("here", "SummarizedExperiment", "SingleCellExperiment", "DESeq2", "ggplot2", "ggcorrplot", "glmGamPoi", "gridExtra")
+libv <- c("here", "SummarizedExperiment", "SingleCellExperiment", "dplyr", "data.table", "DESeq2", "ggplot2", "ggcorrplot", "glmGamPoi", "gridExtra")
 sapply(libv, library, character.only = T)
 # save path, outputs
 save.path <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis")
