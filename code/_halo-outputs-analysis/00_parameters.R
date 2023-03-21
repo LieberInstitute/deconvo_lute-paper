@@ -12,6 +12,17 @@ halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data",
 labels <- c("Endo" = "CLDN5", "Astro" = "GFAP", "Inhib" = "GAD1", 
             "Excit" = "SLC17A7", "Micro" = "TMEM119", "Oligo" = "OLIG2")
 
+# helper functions
+
+transformation1 <- function(variable){
+  # marker transformation 1 : 1 / (max + 1) - value
+  1/(max(variable + 1) - variable)
+}
+
+transformation2 <- function(variable){
+}
+
+
 # 01
 sample.id.label <- "Sample"
 cell.area.variable <- "Nucleus_Area"
@@ -21,6 +32,7 @@ output.updated.filename <- "halo_updated_path.Rdata"
 output.updated.path <- here(save.path, output.updated.filename)
 marker.quantile.variable <- "akt3.copies.quantile.scale"
 halo.quantiles.jpg.file.name <- ""
+transformed.marker.variable <- "akt3.transformation1"
 
 # 02
 

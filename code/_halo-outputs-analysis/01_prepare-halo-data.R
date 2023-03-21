@@ -28,13 +28,8 @@ transformed.counts <- unlist(lapply(unique.samples, function(sample){
 transformed.counts <- as.numeric(transformed.counts)
 transformed.counts[is.na(transformed.counts)] <- median(transformed.counts, na.rm = T) # replace NAs
 halo.output.table[,marker.quantile.variable] <- transformed.counts %>% as.numeric()
-
-# marker transformation 1 : 1 / (max + 1) - value
-transformed.marker.vector <- 1/(max(halo.output.table[,gene.marker.label] + 1) - 
-                                  halo.output.table[,gene.marker.label])
-halo.output.table[,transformed.marker.variable] <- transformed.marker.vector
-
-# 
+# get first transformation
+halo.output.table[,transformed.marker.variable] <- transformation1(halo.output.table[,gene.marker.label])
 
 # resave outputs table
 save(halo.output.table, file = output.updated.path)
