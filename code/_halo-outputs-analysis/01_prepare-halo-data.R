@@ -3,16 +3,15 @@ sapply(libv, library, character.only = T)
 halo.output.table <- get(load(halo.output.path))
 halo.output.table <- halo.output.table %>% as.data.frame()
 
-# get transformed variables
-# quantile transform marker counts by subject
-levels.vector <- halo.output.table$Samples
-halo.output.table[,marker.quantile.variable] <- levels.variable %>% 
-  quantile_transform() %>% as.numeric()
-
-# get inverse transformation
+# normalize marker counts
 marker.vector <- halo.output.table[,gene.marker.label]
-halo.output.table[,transformed.marker.variable] <- marker.vector %>%
-  inverse_maximum_difference_transformation()
+levels.vector <- halo.output.table[,levels.variable]
+
+# normalization1
+halo.output.table[,normalization.variable1] <- levels.variable %>% normalization1() %>% as.numeric()
+
+# normalization2
+halo.output.table[,normalization.variable2] <- marker.vector %>% normalization2() %>% as.numeric()
 
 # resave outputs table
 save(halo.output.table, file = output.updated.path)

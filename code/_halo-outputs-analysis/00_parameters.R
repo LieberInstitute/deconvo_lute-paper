@@ -2,7 +2,7 @@
 # header
 #------- 
 
-libv <- c("nlme", "ggplot2", "gridExtra", "dplyr")
+libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr")
 sapply(libv, library, character.only = TRUE)
 
 # set the save directory
@@ -18,7 +18,7 @@ labels <- c("Endo" = "CLDN5", "Astro" = "GFAP", "Inhib" = "GAD1", "Excit" = "SLC
             "Micro" = "TMEM119", "Oligo" = "OLIG2")
 
 # helper functions
-quantile_normalization1 <- function(levels.vector){
+normalization1 <- function(levels.vector){
   # get quantiles by level, e.g. quantiles by sample (a.k.a. "slide")
   unique.levels <- levels.vector %>% unique()
   transformed.counts <- unlist(lapply(unique.levels, function(level){
@@ -45,33 +45,30 @@ quantile_normalization1 <- function(levels.vector){
   return(transformed.counts)
 }
 
-quantile_normalization2 <- function(table){
-  require(preprocessCore)
-  df_rank <- table %>% apply(2, rank, ties.method = "min")
-  df_sorted <- table %>% apply(2, sort) %>% data.frame()
-  df_mean <- df_sorted %>% apply(1, mean)
-  index_to_mean <- function(my_index, my_mean){return(my_mean[my_index])}
-  
-  df_final <- apply(df_rank, 2, index_to_mean, my_mean = df_mean)
-  
-  
-  rownames(df_final) <- rownames(df)
-  return(df_final)
-}
-
-inverse_maximum_difference_transformation <- function(variable.vector){
+normalization2 <- function(variable.vector){
   # marker transformation 1 : 1 / (max + 1) - value
   1/(max(variable.vector + 1) - variable.vector)
 }
 
-transformation2 <- function(variable){}
+#normalization3 <- function(table){
+#  require(preprocessCore); require(dplyr)
+#  df_rank <- apply(table, 2, rank, ties.method = "min")
+#  df_sorted <- table %>% apply(2, sort) %>% data.frame()
+#  df_mean <- df_sorted %>% apply(1, mean)
+#  index_to_mean <- function(my_index, my_mean){return(my_mean[my_index])}
+#  df_final <- apply(df_rank, 2, index_to_mean, my_mean = df_mean)
+#  rownames(df_final) <- rownames(df)
+#  return(df_final)
+#}
+
+
 
 #--------
 # scripts
 #--------
 
 # 01
-sample.id.label <- "Sample"
+sample.id.label <- levels.variable <- "Sample"
 cell.area.variable <- "Nucleus_Area"
 gene.marker.label <- "AKT3_Copies"
 #
@@ -79,11 +76,14 @@ output.updated.filename <- "halo_updated_path.Rdata"
 output.updated.path <- here(save.path, output.updated.filename)
 #
 cell.area.log.variable <- "log10_nucleus_area"
-marker.quantile.variable <- "akt3.copies.quantile.scale"
-transformed.marker.variable <- "akt3.transformation1"
+normalization.variable1 <- "marker.normalized1"
+normalization.variable2 <- "marker.normalized2"
 halo.quantiles.jpg.file.name <- ""
 
 # 02
+
+
+
 
 # 99 quantile scale summaries
 

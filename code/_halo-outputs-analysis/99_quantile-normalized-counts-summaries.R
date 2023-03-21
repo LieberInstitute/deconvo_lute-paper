@@ -15,22 +15,7 @@ transformed.counts %>% density() %>%
   plot(title = "Marker Quantiles Frequency", xlab = "Frequency")
 dev.off()
 
-# qnorm method 2
-# library(preprocessCore)
 
-dfh$akt3.qnorm2 <- as.numeric(normalize.quantiles(as.matrix(dfh$AKT3_Copies, ncol = 1)))
-
-quantile_normalization <- function(df){
-  df_rank <- apply(df,2,rank,ties.method="min")
-  df_sorted <- data.frame(apply(df, 2, sort))
-  df_mean <- apply(df_sorted, 1, mean)
-  
-  index_to_mean <- function(my_index, my_mean){return(my_mean[my_index])}
-  
-  df_final <- apply(df_rank, 2, index_to_mean, my_mean = df_mean)
-  rownames(df_final) <- rownames(df)
-  return(df_final)
-}
 
 #-----------------------------------------------------
 # plot distributions, before and after transformations
