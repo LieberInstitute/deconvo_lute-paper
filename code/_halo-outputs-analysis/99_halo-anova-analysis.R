@@ -50,11 +50,17 @@ model3 <- paste0("glm(", model.string, ", data = halo.outputs.table)") %>%
   parse() %>% eval()
 
 # anova analysis
+
 dependent.variable <- cell.area.log.variable
+
 # basic model
+
 model.string <- paste0(dependent.variable, " ~ cell_type + Slide + SAMPLE_ID")
+
 anova.string <- paste0("aov(", model.string, ", data = halo.outputs.table)")
+
 anova.model1 <- anova.string %>% parse() %>% eval()
+
 # complex model
 model.string <- paste0(dependent.variable, " ~ cell_type + Slide + Combo + Position + BrNum")
 anova.string <- paste0("aov(", model.string, ", data = halo.outputs.table)")

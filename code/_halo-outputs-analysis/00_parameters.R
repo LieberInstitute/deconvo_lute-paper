@@ -2,7 +2,7 @@ libv <- c("nlme", "ggplot2", "gridExtra", "dplyr")
 sapply(libv, library, character.only = TRUE)
 
 # set the save directory
-save.dpath <- here("deconvo_method-paper", "outputs", "09_manuscript")
+save.path <- here("deconvo_method-paper", "outputs", "09_manuscript")
 # set the halo data path
 halo.output.file.name <- "halo_all.Rdata"
 halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", 
@@ -17,7 +17,11 @@ sample.id.label <- "Sample"
 cell.area.variable <- "Nucleus_Area"
 cell.area.log.variable <- "log10_nucleus_area"
 gene.marker.label <- "AKT3_Copies"
-marker.copies.quantile.variable <- "akt3.copies.quantile.scale"
+output.updated.filename <- "halo_updated_path.Rdata"
+output.updated.path <- here(save.path, output.updated.filename)
+marker.quantile.variable <- "akt3.copies.quantile.scale"
 halo.quantiles.jpg.file.name <- ""
 
 # 02
+
+# 99 quantile scale summaries
