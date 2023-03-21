@@ -11,17 +11,19 @@ sample.id.vector <- halo.outputs.table[,sample.id.label]
 
 # shapiro-wilk test of normality
 #
-shapiro.test.transform1 <- gene.marker.vector %>% sample(5000) %>% shapiro.test()
+test.input <- gene.marker.vector
+shapiro.test.transform1 <- sample(test.input, shapiro.downsample.amount) %>% 
+  shapiro.test()
 #
-inverse.transform <- 1/(halo.outputs.table[,gene.marker.label]+1e-10)
-shapiro.test.transform2 <- inverse.transform %>% sample(5000) %>% shapiro.test()
+test.input <- 1/(halo.outputs.table[,gene.marker.label]+1e-10)
+shapiro.test.transform2 <- sample(test.input, shapiro.downsample.amount) %>% 
+  shapiro.test()
 #
-sqrt.transform <- sqrt(gene.marker.vector)
-shapiro.test.transform2 <- sqrt.transform %>% sample(5000) %>% shapiro.test()
+test.input <- sqrt(gene.marker.vector)
+shapiro.test.transform3 <- sample(test.input, shapiro.downsample.amount) %>% shapiro.test()
 
 # get anova models
-dependent.variable <- "Nucleus_Area"
-model.string <- paste0(dependent.variable, " ~ cell_type + Slide + SAMPLE_ID")
+model.string <- paste0(anova.dependent.variable, " ~ cell_type + Slide + SAMPLE_ID")
 model1 <- paste0("lm(", model.string, ", data = halo.outputs.table)") %>% 
   parse() %>% eval()
 model2 <- paste0("gls(", model.string, ", data = halo.outputs.table, method = 'REML')") %>% 

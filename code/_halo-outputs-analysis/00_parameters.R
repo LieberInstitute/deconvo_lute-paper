@@ -82,6 +82,9 @@ halo.quantiles.jpg.file.name <- ""
 
 # 02
 
+# 03
+anova.dependent.variable <- "Nucleus_Area"
+shapiro.downsample.amount <- 5000
 
 
 
