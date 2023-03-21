@@ -14,9 +14,41 @@ labels <- c("Endo" = "CLDN5", "Astro" = "GFAP", "Inhib" = "GAD1",
 
 # helper functions
 
-transformation1 <- function(variable){
+quantile_transform <- function(levels.vector){
+  
+  unique.levels <- levels.vector %>% unique()
+  
+  transformed.counts <- unlist(lapply(unique.levels, function(level){
+    message("working on sample: ", level)
+    filter <- levels.vector==level
+    gene.marker.vector <- halo.output.table[filter, gene.marker.label]
+    quantile.vector <-  gene.marker.vector %>% quantile(seq(0, 1, 1e-3))
+    quantile.vector.names <- quantile.vector %>% names()
+    quantile.vector.names <- gsub("%", "", quantile.vector.names)
+    quantile.labels.vector <- quantile.vector.names %>% as.numeric()
+    index.vector <- 1:(length(quantile.labels.vector)-1)
+    quantile.labels.vector2 <- quantile.labels.vector[index.vector]
+    new.vector <- rep("NA", length(gene.marker.vector))
+    for(index in seq(length(quantile.labels.vector2))){
+      which.marker <- gene.marker.vector >= quantile.labels.vector[index] & 
+        gene.marker.vector < quantile.labels.vector[index+1]
+      new.vector[which.marker] <- quantile.labels.vector[index+1]
+    }
+    return(new.vector)
+  }))
+  
+  transformed.counts <- as.numeric(transformed.counts)
+  
+  transformed.counts[is.na(transformed.counts)] <- median(transformed.counts, na.rm = T)
+  
+  transformed.counts <- transformed.counts %>% as.numeric()
+  
+  return(transformed.counts)
+}
+
+inverse_maximum_difference_transformation <- function(variable.vector){
   # marker transformation 1 : 1 / (max + 1) - value
-  1/(max(variable + 1) - variable)
+  1/(max(variable.vector + 1) - variable.vector)
 }
 
 transformation2 <- function(variable){
