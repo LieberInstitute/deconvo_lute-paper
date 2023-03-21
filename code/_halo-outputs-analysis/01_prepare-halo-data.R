@@ -5,17 +5,14 @@ halo.output.table <- halo.output.table %>% as.data.frame()
 
 # get transformed variables
 # quantile transform marker counts by subject
-halo.output.table[,marker.quantile.variable] <- halo.output.table$Samples %>% 
+levels.vector <- halo.output.table$Samples
+halo.output.table[,marker.quantile.variable] <- levels.variable %>% 
   quantile_transform() %>% as.numeric()
 
 # get inverse transformation
-halo.output.table[,transformed.marker.variable] <- halo.output.table[,gene.marker.label] %>%
+marker.vector <- halo.output.table[,gene.marker.label]
+halo.output.table[,transformed.marker.variable] <- marker.vector %>%
   inverse_maximum_difference_transformation()
 
 # resave outputs table
 save(halo.output.table, file = output.updated.path)
-
-
-
-
-

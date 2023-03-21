@@ -1,23 +1,26 @@
+#-------
+# header
+#------- 
+
 libv <- c("nlme", "ggplot2", "gridExtra", "dplyr")
 sapply(libv, library, character.only = TRUE)
 
 # set the save directory
 save.path <- here("deconvo_method-paper", "outputs", "09_manuscript")
+
 # set the halo data path
 halo.output.file.name <- "halo_all.Rdata"
-halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", 
-                              "03_HALO", halo.output.file.name)
+halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", 
+                         halo.output.file.name)
 
 # cell labels
-labels <- c("Endo" = "CLDN5", "Astro" = "GFAP", "Inhib" = "GAD1", 
-            "Excit" = "SLC17A7", "Micro" = "TMEM119", "Oligo" = "OLIG2")
+labels <- c("Endo" = "CLDN5", "Astro" = "GFAP", "Inhib" = "GAD1", "Excit" = "SLC17A7", 
+            "Micro" = "TMEM119", "Oligo" = "OLIG2")
 
 # helper functions
-
-quantile_transform <- function(levels.vector){
-  
+quantile_normalization1 <- function(levels.vector){
+  # get quantiles by level, e.g. quantiles by sample (a.k.a. "slide")
   unique.levels <- levels.vector %>% unique()
-  
   transformed.counts <- unlist(lapply(unique.levels, function(level){
     message("working on sample: ", level)
     filter <- levels.vector==level
@@ -36,14 +39,24 @@ quantile_transform <- function(levels.vector){
     }
     return(new.vector)
   }))
-  
   transformed.counts <- as.numeric(transformed.counts)
-  
   transformed.counts[is.na(transformed.counts)] <- median(transformed.counts, na.rm = T)
-  
   transformed.counts <- transformed.counts %>% as.numeric()
-  
   return(transformed.counts)
+}
+
+quantile_normalization2 <- function(table){
+  require(preprocessCore)
+  df_rank <- table %>% apply(2, rank, ties.method = "min")
+  df_sorted <- table %>% apply(2, sort) %>% data.frame()
+  df_mean <- df_sorted %>% apply(1, mean)
+  index_to_mean <- function(my_index, my_mean){return(my_mean[my_index])}
+  
+  df_final <- apply(df_rank, 2, index_to_mean, my_mean = df_mean)
+  
+  
+  rownames(df_final) <- rownames(df)
+  return(df_final)
 }
 
 inverse_maximum_difference_transformation <- function(variable.vector){
@@ -51,21 +64,31 @@ inverse_maximum_difference_transformation <- function(variable.vector){
   1/(max(variable.vector + 1) - variable.vector)
 }
 
-transformation2 <- function(variable){
-}
+transformation2 <- function(variable){}
 
+#--------
+# scripts
+#--------
 
 # 01
 sample.id.label <- "Sample"
 cell.area.variable <- "Nucleus_Area"
-cell.area.log.variable <- "log10_nucleus_area"
 gene.marker.label <- "AKT3_Copies"
+#
 output.updated.filename <- "halo_updated_path.Rdata"
 output.updated.path <- here(save.path, output.updated.filename)
+#
+cell.area.log.variable <- "log10_nucleus_area"
 marker.quantile.variable <- "akt3.copies.quantile.scale"
-halo.quantiles.jpg.file.name <- ""
 transformed.marker.variable <- "akt3.transformation1"
+halo.quantiles.jpg.file.name <- ""
 
 # 02
 
 # 99 quantile scale summaries
+
+
+
+
+
+
