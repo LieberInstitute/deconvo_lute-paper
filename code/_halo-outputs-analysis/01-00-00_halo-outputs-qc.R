@@ -7,7 +7,25 @@
 
 libv <- c("ggplot2", "gridExtra")
 
-halo.outputs.table <- get(load(halo.output.path))
+#-------------
+# manage paths
+#-------------
+# get save dpath
+code.dname <- "09_manuscript"
+proj.dname <- "deconvo_method-paper"
+save.dpath <- file.path(proj.dname, "outputs", code.dname)
+
+#---------------
+# load halo data
+#---------------
+fname <- "halo_all.Rdata"
+path <- file.path("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", fname)
+dfh <- get(load(path))
+
+#--------------------
+# get transformations
+#--------------------
+# nuclear area
 # do log10 transformation
 dfh$nuc.area.log10 <- log10(dfh$Nucleus_Area)
 

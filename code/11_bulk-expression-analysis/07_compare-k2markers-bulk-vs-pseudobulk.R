@@ -12,7 +12,7 @@ rse.markers <- get(load(rse.k2markers.filepath))
 pseudobulk <- get(load(pseudobulk.path))
 # get bulk experiment groups
 rse.marker.expression <- assays(rse.filter.markers)[[assay.name]]
-rse.experiment.groups <- unique(rse.filter.markers[[condition.variable]])
+rse.experiment.groups <- rse.filter.markers[[condition.variable]] %>% unique()
 
 # compare expression
 # means
@@ -20,5 +20,5 @@ rse.experiment.groups <- unique(rse.filter.markers[[condition.variable]])
 # dispersion
 
 # save plots
-jpeg(correlation.heatmap.jpg.path, width = 10, height = 10, units = "in", res = 400)
-print(ggplot.correlation.heatmap); dev.off()
+jpeg(, width = , height = , units = "in", res = 400)
+print(); dev.off()

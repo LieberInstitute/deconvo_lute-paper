@@ -5,11 +5,11 @@
 #
 #
 
-libv <- c("ggplot2", "gridExtra")
-
+source("deconvo_method-paper/code/_halo-outputs-qc/00_parameters.R")
+sapply(libv, library, character.only = T)
 halo.outputs.table <- get(load(halo.output.path))
 # do log10 transformation
-dfh$nuc.area.log10 <- log10(dfh$Nucleus_Area)
+halo.outputs.table$nuc.area.log10 <- log10(halo.outputs.table$Nucleus_Area)
 
 # akt3 
 # do quantile transform by subject

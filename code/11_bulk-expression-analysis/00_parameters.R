@@ -285,7 +285,7 @@ pseudobulk.path <- here(save.path, pseudobulk.file.name)
 # load halo outputs
 halo.outputs.filename <- "halo_all.Rdata"
 halo.outputs.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", halo.outputs.filename)
-
+# halo table key
 
 
 
