@@ -118,8 +118,8 @@ histogram.filename.marker <- "histogram_akt3-marker.jpg"
 # 03
 anova.dependent.variable <- "Nucleus_Area"
 shapiro.downsample.amount <- 5000
-
-
+summary.terms = c("var", "mean", "max", "min")
+cell.type.label <- "cell_type"
 
 # 99 quantile scale summaries
 
