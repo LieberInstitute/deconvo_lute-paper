@@ -68,7 +68,28 @@ normalization2 <- function(variable.vector){
 #  return(df_final)
 #}
 
+summary_term_group <- function(table, term, cell.type.label){
+  aggregate(table[,summary.variable.label],
+            by = list(cell_type = table[,cell.type.label]), 
+            FUN = term)
+}
 
+summary_term_list <- function(table, group.id.variable, cell.type.variable,
+                              summary.terms = c("variance", "mean", "max", "min")){
+  lapply(summary.terms, function(term){
+    unique.groups <- table[,group.id.variable] %>% unique()
+    list.aggregate <- list(group = table[,group.id.variable])
+    aggregate(table, by = list.aggregate, FUN = "summary_term_group")
+    do.call(rbind, lapply(unique.groups, function(group){
+      group.filter <- table[,group.id.variable]
+      outputs.filtered <- table[group.filter,]
+      list.argument <- list(cell_type = halo.outputs.table[,cell.type.label])
+      summary_term_group(table = halo.outputs.table, term = term, cell.type.label = cell.type.label)
+      colnames(summary.table)[2] <- term; summary.table$term <- term
+      summary.table
+    }))
+  })
+}
 
 #--------
 # scripts

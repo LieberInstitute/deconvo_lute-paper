@@ -10,22 +10,30 @@ sapply(libv, library, character.only = T)
 halo.outputs.table <- get(load(halo.output.path))
 halo.outputs.table <- halo.outputs.table %>% as.data.frame()
 
-# check key assumptions
-# equality of variance between groups
+# check equality of variance between groups
 cell.area.vector <- halo.outputs.table[,cell.area.variable]
 gene.marker.vector <- halo.outputs.table[,gene.marker.label]
 sample.id.vector <- halo.outputs.table[,sample.id.label]
 
-# shapiro-wilk test of normality
-#
+
+summary_term_list(table = halo.outputs.table, 
+                  sample.id.vector = sample.id.label, 
+                  summary.variable.label = ,
+                  summary.terms = c("variance", "mean", "max", "min"))
+
+marker.variance.matrix <- do.call(cbind, lapply(sample.id.vector, function(sample.id){
+  filter <- halo.outputs.table[,sample.id.label] == sample.id
+  halo.outputs.table[filter, gene.marker.label] %>% as.numeric() %>% var()
+}))
+
+
+# shapiro-wilk tests of normality
 test.input <- gene.marker.vector
 shapiro.test.transform1 <- sample(test.input, shapiro.downsample.amount) %>% 
   shapiro.test()
-#
 test.input <- 1/(halo.outputs.table[,gene.marker.label]+1e-10)
 shapiro.test.transform2 <- sample(test.input, shapiro.downsample.amount) %>% 
   shapiro.test()
-#
 test.input <- sqrt(gene.marker.vector)
 shapiro.test.transform3 <- sample(test.input, shapiro.downsample.amount) %>% shapiro.test()
 
@@ -39,17 +47,11 @@ model3 <- paste0("glm(", model.string, ", data = halo.outputs.table)") %>%
   parse() %>% eval()
 
 # anova analysis
-
 dependent.variable <- cell.area.log.variable
-
-# basic model
-
+# basic models
 model.string <- paste0(dependent.variable, " ~ cell_type + Slide + SAMPLE_ID")
-
 anova.string <- paste0("aov(", model.string, ", data = halo.outputs.table)")
-
 anova.model1 <- anova.string %>% parse() %>% eval()
-
 # complex model
 model.string <- paste0(dependent.variable, " ~ cell_type + Slide + Combo + Position + BrNum")
 anova.string <- paste0("aov(", model.string, ", data = halo.outputs.table)")
