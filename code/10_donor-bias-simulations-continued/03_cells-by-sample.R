@@ -1,12 +1,21 @@
-library(ggplot2)
-library(gridExtra)
-library(ggpubr)
+# load data
+source("deconvo_method-paper/code/10_donor-bias-simulations-continued/00_parameters.R")
+sapply(libv, library, character.only = T)
 
-dft <- as.data.frame(table(sce[[group.variable]]))
+groups.table <- sce[[group.variable]] %>% table() %>% 
+  as.data.frame()
+#dft <- as.data.frame(table(sce[[group.variable]]))
 
-unique.types <- unique(sce[[celltype.variable]])
+unique.types <- sce[[celltype.variable]] %>% unique()
+
+# cell types by group
+sce.coldata <- colData(sce)
 dft <- do.call(rbind, lapply(unique.types, function(typei){
-  dfi <- as.data.frame(table(sce[,sce[[celltype.variable]]==typei][[group.variable]]))
+  sce.cells.filter <- sce[[celltype.variable]]==typei
+  sce.filtered <- sce[,sce.cells.filter]
+  group.cells.table <- sce.filtered %>% table() %>% as.data.frame()
+  
+  # dfi <- as.data.frame(table(sce[,sce[[celltype.variable]]==typei][[group.variable]]))
   dfi$type <- typei; dfi
 }))
 
@@ -31,6 +40,4 @@ ggbp2 <- ggplot(dft, aes(x = Var1, y = Freq, fill = type)) +
   
 lm <- matrix(c(rep(1, 5), rep(2, 5), 3), nrow = 1)
 
-  grid.arrange(ggbp1, ggbp2, ggbp.leg, nrow = 1,
-               layout_matrix = lm, bottom = "Sample ID")
-  
+grid.arrange(ggbp1, ggbp2, ggbp.leg, nrow = 1, layout_matrix = lm, bottom = "Sample ID")

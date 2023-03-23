@@ -5,92 +5,24 @@
 # Testing the donor bias experiment
 #
 
-libv <- c("lute", "ggplot2")
-sapply(libv, library, character.only = TRUE)
-
-
-#------------------
+# load data
+source("deconvo_method-paper/code/10_donor-bias-simulations-continued/00_parameters.R")
+sapply(libv, library, character.only = T)
+sce <- get(load(sce.path))
+# set seed for random number
+set.seed(seed.number)
 # get splatter data
-#------------------
-BiocManager::install("splatter")
-library(splatter)
-
-params <- splatEstimate(sce)
-sim <- splatSimulate(params)
-
-
-# Load package
-suppressPackageStartupMessages({
-  library(splatter)
-  library(scater)
-})
-
-# Create mock data
-set.seed(1)
-sce <- mockSCE()
-
+params <- splatter::splatEstimate(sce)
+sim <- splatter::splatSimulate(params)
 # Estimate parameters from mock data
-params <- splatEstimate(sce)
-#> NOTE: Library sizes have been found to be normally distributed instead of log-normal. You may want to check this is correct.
-# Simulate data using estimated parameters
-sim <- splatSimulate(params)
+sce.random.data <- scuttle::mockSCE()
+sce..splatter.parameters <- splatter::splatEstimate(sce)
+sce.splatter.simulation <- splatter::splatSimulate(params)
 
-plot_mean_var_sce <- function(sce, donor.variable = NULL){
-  if(is(donor.variable, "NULL")){
-    ct <- counts(sce)
-    dfp <- data.frame(mean = rowMeans(ct), var = rowVars(ct))
-    ggplot(dfp, aes(x = mean, y = var)) +
-      geom_smooth() + geom_abline(intercept = 0, slope = 1) +
-      theme_bw() + scale_x_log10() + scale_y_log10()
-  } else{
-    donor.vector <- unique(sce[[donor.variable]])
-    dfp <- do.call(rbind, lapply(donor.vector, function(donori){
-      ctf <- counts(sce[,sce[[donor.variable]]==donori])
-      dfi <- data.frame(mean = rowMeans(ctf), var = rowVars(ctf))
-      dfi$donor <- donori; dfi
-    }))
-    dfp$donor <- as.character(dfp$donor)
-    ggplot(dfp, aes(x = mean, y = var, color = donor)) +
-      geom_smooth() + geom_abline(intercept = 0, slope = 1) +
-      theme_bw() + scale_x_log10() + scale_y_log10()
-  }
-}
 
-plot_mean_var_sce(sce)
-plot_mean_var_sce(sim)
-
-donors_from_sce <- function(sce, bias.vector = seq(3), bias.means = seq(3)){
-  ct <- counts(sce)
-  medians <- rowMedians(ct) + 1
-  num.cells <- ncol(ct)
-  num.genes <- nrow(ct)
-  sce.new <- do.call(cbind, lapply(bias.vector, function(biasi){
-    sce.new <- sce
-    d <- biasi*(medians/(medians^2))
-    #biasv <- unlist(sapply(d, function(di){
-    #  rnbinom(1, size = di, mu = 1)
-    #}))
-    #ct.new <- sweep(ct, 1, biasv, FUN = "+")
-    #counts(sce.new) <- ct.new
-    ct.new <- do.call(rbind, lapply(seq(num.genes), function(ii){
-      rnbinom(num.cells, size = d[ii], mu = medians[ii])
-    }))
-    rownames(ct.new) <- rownames(ct)
-    colnames(ct.new) <- colnames(ct)
-    assays(sce.new)[["counts"]] <- ct.new
-    sce.new[["donor.bias"]] <- biasi
-    return(sce.new)
-  }))
-  return(sce.new)
-}
-
-set.seed(0)
-sce1 <- mockSCE()
-plot_mean_var_sce(sce1)
-
-params <- splatEstimate(sce1)
-sce2 <- splatSimulate(params)
-plot_mean_var_sce(sce2)
+# plot mean and variance
+plot_mean_var_sce(sce.random.data)
+plot_mean_var_sce(sce.splatter.simulation)
 
 sce3 <- donors_from_sce(sce2, c(100, 200, 300), rep(5, 3))
 plot_mean_var_sce(sce3, "donor.bias")
@@ -101,51 +33,7 @@ plot_mean_var_sce(sce3, "donor.bias") + facet_wrap(~donor)
 # simulate multiple donors
 #-------------------------
 
-get_sce_donor_bias <- function(donor.bias.coeff = 1, mean.vector = NULL,
-                               total.cells = 10, num.genes.iter = 10,
-                               num.types = 1, seed.num = 0){
-  set.seed(seed.num)
-  if(is(mean.vector, "NULL")){mean.vector = seq(1, 30, 1)}
-  sce <- do.call(rbind, lapply(mean.vector, function(meani){
-    d <- donor.bias.coeff*(meani/(meani^2))
-    scei <- random_sce(num.types = num.types, num.cells = total.cells, 
-                       expr.mean = meani, num.genes = num.genes.iter, 
-                       dispersion = d)
-    # as(scei, "SummarizedExperiment")
-    return(scei)
-  }))
-  return(as(sce, "SingleCellExperiment"))
-}
 
-simulate_sce_donor_bias <- function(donor.coeff.vector = NULL,
-                                    mean.vector = NULL, 
-                                    cells.per.donor = 1000,
-                                    num.genes.iter = 10){
-  lr <- list()
-  if(is(donor.coeff.vector, "NULL")){
-    donor.coeff.vector <- rnorm(10, mean = 200, sd = 30)
-  }
-  sce <- do.call(cbind, lapply(donor.coeff.vector, function(ii){
-    scei <- get_sce_donor_bias(donor.bias.coeff = ii, 
-                               mean.vector = mean.vector, 
-                               total.cells = cells.per.donor,
-                               num.genes.iter = num.genes.iter)
-    scei[["donor.coeff"]] <- ii; scei
-  }))
-  dfp <- do.call(rbind, lapply(donor.coeff.vector, function(ii){
-    ctf <- counts(sce[,sce[["donor.coeff"]]==ii])
-    dfi <- data.frame(mean = rowMeans(ctf), var = rowVars(ctf))
-    dfi$donor.coeff <- ii; dfi
-  }))
-  dfp$donor.coeff <- as.character(dfp$donor.coeff)
-  ggsm <- ggplot(dfp, aes(x = mean, y = var, color = donor.coeff)) + 
-    geom_abline(slope = 1, intercept = 0) + 
-    scale_x_log10() + scale_y_log10() + geom_smooth() +
-    theme(legend.position = 'none') +
-    xlab('Mean (log10)') + ylab("Var (log10)")
-  lr[["sce"]] <- sce; lr[["dfp"]] <- dfp; lr[["ggsmooth"]] <- ggsm
-  return(lr)
-}
 
 ld <- simulate_sce_donor_bias()
 

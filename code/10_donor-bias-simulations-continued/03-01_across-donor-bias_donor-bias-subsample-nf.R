@@ -4,117 +4,48 @@
 #
 # Run donor bias subsampling experiments.
 #
-# Note: run after script before 03-02 to use the same across-sample bulk 
-# reference across the two experiments.
 #
 
-libv <- c("lute", "SummarizedExperiment", "SingleCellExperiment", 
-          "ggplot2", "gridExtra", "GGally")
-sapply(libv, library, character.only = TRUE)
+source("deconvo_method-paper/code/10_donor-bias-simulations-continued/00_parameters.R")
+sapply(libv, library, character.only = T)
 
-#------------------
-# experiment params
-#------------------
-# get load path
-code.dname <- "09_manuscript"
-proj.dname <- "deconvo_method-paper"
-load.dpath <- file.path(proj.dname, "outputs", code.dname)
-# get save path
-code.dname <- "10_donor-bias-simulations-continued"
-proj.dname <- "deconvo_method-paper"
-save.dpath <- file.path(proj.dname, "outputs", code.dname)
-# get params for experiment
-seed.num <- 0
-celltype.variable <- "k2"
-proj.handle <- "ro1-dlpfc"
-save.fnstem <- paste0("inter-sample_", proj.handle)
-group.variable <- "Sample"
-assay.name <- "counts_adj"
-methodv <- c("nnls", "music", "epic", "deconrnaseq")
-iterations <- 1000
-fraction.cells <- 25
-num.sample.iter <- 3
-scale.factor <- c("glial" = 3, "neuron" = 10)
-rnf.dname <- "r-nf_deconvolution_inter-sample-bias"
-base.path <- "data"
-base.path <- file.path(save.dpath, rnf.dname, base.path)
-
-#----------------------------------
 # set up a new subsample experiment
-#----------------------------------
-# load data
-fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
-fpath <- file.path(load.dpath, fname)
-lscef <- get(load(fpath))
-sce <- lscef[[celltype.variable]]
-rm(lscef)
-
-# set count min
-count.min <- 200
-# get proportions
-proportions <- prop.table(table(sce[["k2"]]))
-# glial    neuron 
-# 0.3518927 0.6481073 
-
-# save new experiment data
-lsub <- prepare_subsample_experiment(sce,
-                                       scale.factor = scale.factor,
-                                       iterations = iterations,
-                                       groups.per.iteration = 3,
-                                       method.vector = methodv,
-                                       celltype.variable = celltype.variable,
-                                       group.variable = group.variable,
-                                       assay.name = assay.name,
-                                       cell.proportions = proportions,
-                                       count.minimum = count.min,
-                                       seed.num = seed.num,
-                                       which.save = c("sce", "tp", "ypb", "li"),
-                                       save.fnstem = save.fnstem,
-                                       base.path = "data",
-                                       verbose = TRUE)
-
-#---------------------
-# manage workflow runs
-#---------------------
-setwd(file.path(save.dpath, rnf.dname))
-base.path <- "data" # file.path(save.dpath, rnf.dname, "data")
-# get main starting workflow table
-wt <- lsub$wt
-# save full table
-proj.handle <- "ro1-dlpfc"
-save.fnstem <- paste0("inter-sample_", proj.handle)
-wt.fnamei <- paste0("workflow-table-all_",save.fnstem,".csv")
-wt.fpath <- file.path(base.path, wt.fnamei)
-write.csv(wt, file = wt.fpath)
-
+sce <- get(load(sce.list.path))[[celltype.variable]]; rm(lscef)
+proportions <- sce[[k.marker.variable]] %>% table() %>% prop.table()
+lsub <- prepare_subsample_experiment(sce, scale.factor = scale.factor,
+                                     iterations = iterations, groups.per.iteration = 3,
+                                     method.vector = methodv, celltype.variable = celltype.variable,
+                                     group.variable = group.variable, assay.name = assay.name,
+                                     cell.proportions = proportions, count.minimum = count.min,
+                                     seed.num = seed.num, which.save = c("sce", "tp", "ypb", "li"),
+                                     save.fnstem = save.fnstem, base.directory.workflow.data = "data", verbose = TRUE)
+setwd(workflow.path)
+# save workflow table
+workflow.table <- lsub$workflow.table
+write.csv(workflow.table, file = workflow.table.path)
 # save table iterations
-num.batch <- 200
-indexv <- seq(1, nrow(wt), num.batch)
-wt.fnamei <- paste0("workflow-table_",save.fnstem,".csv")
-for(iter.num in seq(length(indexv))){
-  index.start <- indexv[iter.num]
+index.vector <- seq(1, nrow(workflow.table), num.batch)
+workflow.table.filename.ter <- paste0("workflow-table_",save.fnstem,".csv")
+for(iteration.number in seq(length(index.vector))){
+  index.start <- index.vector[iteration.number]
   index.end <- (index.start+num.batch-1)
-  if(index.end > nrow(wt)){index.end <- nrow(wt)}
-  wti <- wt[index.start:index.end,]
-  wti.fname.iter <- wt.fnamei <- paste0("workflow-table-iter", 
+  if(index.end > nrow(workflow.table)){index.end <- nrow(workflow.table)}
+  workflow.tablei <- workflow.table[index.start:index.end,]
+  workflow.tablei.fname.iter <- workflow.table.fnamei <- paste0("workflow-table-iter", 
                                         iter.num, "_", save.fnstem,".csv")
-  wti.fpath <- file.path(base.path, wti.fname.iter)
-  write.csv(wti, file = wti.fpath, row.names = F)
+  workflow.tablei.fpath <- file.path(base.directory.workflow.data, workflow.tablei.fname.iter)
+  write.csv(workflow.tablei, file = workflow.tablei.fpath, row.names = F)
   message("finished with iter ", iter.num)
 }
 
-#-----------------
 # run the workflow
-#-----------------
 # navigate to:
 # /deconvo_method-paper/outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_donor-bias
 #
 # run:
-# bash ./sh/r-nf_run_wt-iter.sh
+# bash ./sh/r-nf_run_workflow.table-iter.sh
 
-#-----------------------
 # analyze results table
-#-----------------------
 results.filt <- "results_table_.*"
 data.dpath <- file.path(save.dpath, rnf.dname, "data")
 lfv <- list.files(data.dpath)
@@ -174,7 +105,6 @@ lgg$bias.type2
 lgg$rmse.types
 
 # violin plots
-#
 lgg <- lapply(varv, function(varname){
   dfp <- rtf; dfp$value <- dfp[,varname]
   ggplot(dfp, aes(x = deconvolution_method, y = value)) +

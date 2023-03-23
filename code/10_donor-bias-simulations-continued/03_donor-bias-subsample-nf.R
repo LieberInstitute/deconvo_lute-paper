@@ -6,8 +6,8 @@
 #
 #
 
-libv <- c("SummarizedExperiment", "SingleCellExperiment")
-sapply(libv, library, character.only = TRUE)
+source("deconvo_method-paper/code/10_donor-bias-simulations-continued/00_parameters.R")
+sapply(libv, library, character.only = T)
 
 #------
 # paths

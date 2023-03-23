@@ -9,9 +9,29 @@ The path to this repository on JHPCE is:
 This repo contains analysis code, outputs, figures, etc. for the deconvolution methods paper. The subdirs contained here include:
 
 * `code` : Main location where scripts and code to generate content live.
+
 * `figures_and_tables`: Main location of figures and tables, with same layout as `code` subdir
+
 * `outputs`: Objects (i.e. not figures or tables) which are produced by scripts from `code`. Has same layout as `code` subdir.
+
 * `source`: Scripts, vignettes, etc. which are central to the planned deconvolution resource. This will have its own internal structure and be developed in parallel to analyses for the paper.
+
+## Manuscript figures
+
+[Figure](1a) : Type-based cell size transformation simulations.
+[Figure](1b) : Subsample simulation results across groups.
+
+
+[Figure](2a) : K2 markers concordance at the top.
+[Figure](2b) : K2 markers upset plot.
+[Figure](2c) : K2 markers block overlap plot.
+[Figure](2d) : K2 markers expression heatmap.
+
+[Figure](S1a) : Dispersion mean-variance plots by cell type before/after adjustments.
+[Figure](S1b) : Dispersion coefficient boxplots.
+[Figure](S2) : Dispersion mean-variance plots by batch group.
+[Figure](S3) : 
+
 
 ## File locations
 

@@ -5,47 +5,27 @@
 #
 #
 
-libv <- c("SingleCellExperiment", "limma", "SummarizedExperiment", "scuttle",
-          "ggplot2")
-sapply(libv, library, character.only = TRUE)
-
-#---------------
-# manage paths
-#---------------
-# get save dpath
-code.dname <- "09_manuscript"
-proj.dname <- "deconvo_method-paper"
-save.dpath <- file.path(proj.dname, "outputs", code.dname)
-
-#--------------
-# manage params
-#--------------
-markeri <- "k2"
-handle.str <- "ro1-dlpfc"
-
-#----------
 # load data
-#----------
-sce.fname <- paste0("sce_marker-adj-",markeri,"_",handle.str,".rda")
-sce.fpath <- file.path(save.dpath, sce.fname)
-scei <- get(load(sce.fpath))
+source("deconvo_method-paper/code/10_donor-bias-simulations-continued/00_parameters.R")
+sapply(libv, library, character.only = T)
+sce <- get(load(sce.path))
 
-#-----------------------------
 # means and variances by donor
-#-----------------------------
-#groupvar <- paste0(scei[["k2"]], ";", scei[["Sample"]])
-#table(groupvar)
-#scei[["groupvar"]] <- groupvar
-#sce.var <- aggregateAcrossCells(scei, ids = scei[["groupvar"]], statistics = "var")
+sce[[new.group.variable]] <- group.vector <- 
+  paste0(sce[[k.marker.variable]], ";", sce[[sample.variable.name]])
 
-assayname <- "counts_adj"
-varname <- "groupvar"
-scei[[varname]] <- paste0(scei[["k2"]], ";", scei[["Sample"]])
-unique.groups <- unique(scei[[varname]])
+unique.groups <- group.vector %>% unique() # unique(sce[[new.group.variable]])
+
+# variance by types
+
+expression.matrix <- sce[,sce.filter] %>% assays()[[assay.name]]
+
+variance.matrix <- aggregate()
+
 sce.var <- do.call(cbind, lapply(unique.groups, function(groupi){
   message("working on group level ", groupi)
-  filt <- scei[[varname]] == groupi
-  rowVars(assays(scei[,filt])[[assayname]])
+  sce.filter <- sce[[varname]] == groupi
+  rowVars(assays(sce[,sce.filter])[[assayname]])
 }))
 
 sce.mean <- do.call(cbind, lapply(unique.groups, function(groupi){
