@@ -1,3 +1,10 @@
+#!/usr/bin/env R
+
+# Author: Sean Maden
+#
+# Parameters for HALO image analyses.
+#
+
 #-------
 # header
 #------- 
@@ -81,6 +88,11 @@ normalization.variable2 <- "marker.normalized2"
 halo.quantiles.jpg.file.name <- ""
 
 # 02
+halo.marker.yaxis.label <- "AKT3 counts"
+boxplot.marker.filename <-"ggboxplot_akt3-counts.jpg"
+boxplot.log.marker.filename <-"ggboxplot-logscale_akt3-counts.jpg"
+histogram.filename.area <- "histogram_nucleus-area.jpg"
+histogram.filename.marker <- "histogram_akt3-marker.jpg"
 
 # 03
 anova.dependent.variable <- "Nucleus_Area"
