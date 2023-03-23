@@ -21,16 +21,15 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure](1a) : Type-based cell size transformation simulations.
 [Figure](1b) : Subsample simulation results across groups.
 
-
 [Figure](2a) : K2 markers concordance at the top.
 [Figure](2b) : K2 markers upset plot.
 [Figure](2c) : K2 markers block overlap plot.
 [Figure](2d) : K2 markers expression heatmap.
 
-[Figure](S1a) : Dispersion mean-variance plots by cell type before/after adjustments.
+[Figure](S1a) : Dispersion mean-variance plots by cell type and adjustment.
 [Figure](S1b) : Dispersion coefficient boxplots.
 [Figure](S2) : Dispersion mean-variance plots by batch group.
-[Figure](S3) : 
+[Figure](S3) : Subsample simulation results, across- and within-groups.
 
 
 ## File locations

@@ -4,8 +4,6 @@
 #
 # Run donor bias subsampling experiments.
 #
-# See also: script 05
-#
 
 source("deconvo_method-paper/code/10_donor-bias-simulations-continued/00_parameters.R")
 sapply(libv, library, character.only = T)

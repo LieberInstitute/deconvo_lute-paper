@@ -94,13 +94,12 @@ plot_mean_var_sce <- function(sce, donor.variable = NULL){
 }
 
 # load
+project.handle.string <- "ro1-dlpfc"
+sce.list.file.name <- paste0("list-scef_markers-k2-k3-k4_",project.handle.string,".rda")
 sce.list.path <- file.path(sce.load.path, sce.list.file.path)
 
 workflow.table.filename <- paste0("workflow-table-all_", save.filename.stem, ".csv")
 workflow.table.path <- here(base.path, workflow.table.filename)
-
-rnf.workflow.directory <- "r-nf_deconvolution_inter-sample-bias"
-workflow.path <- here(save.directory.path, rnf.workflow.directory)
 
 #-----------------------
 # parameters for scripts
@@ -149,8 +148,7 @@ project.directory.name <- "deconvo_method-paper"
 load.dpath <- file.path(project.directory.name, "outputs", code.directory.name)
 # get save path
 save.code.directory.name <- "10_donor-bias-simulations-continued"
-save.directory.path <- file.path(project.directory.name, "outputs", 
-    code.directory.name)
+save.directory.path <- file.path(project.directory.name, "outputs", code.directory.name)
 # variable values for experiment
 seed.num <- 0
 iterations <- 1000
@@ -161,14 +159,14 @@ num.batch <- 200
 celltype.variable <- k.marker.variable <- "k2"
 group.variable <- "Sample"
 assay.name <- "counts_adj"
-project.handle.string <- "ro1-dlpfc"
 save.fnstem <- paste0("inter-sample_", project.handle.string)
-sce.list.file.path <- paste0("list-scef_markers-k2-k3-k4_",project.handle.string,".rda")
 save.filename.stem <- paste0("inter-sample_", experiment.name)
 scale.factor <- c("glial" = 3, "neuron" = 10)
 methodv <- c("nnls", "music", "epic", "deconrnaseq")
 base.directory.workflow.data <- "data"
 base.path.workflow.data <- file.path(save.dpath, rnf.dname, base.directory.workflow.data)
+rnf.workflow.directory <- "r-nf_deconvolution_inter-sample-bias"
+workflow.path <- here(save.directory.path, rnf.workflow.directory)
 
 # manuscript figures, across-donor bias, donor-bias simulations (05)
 results.table.filter.string <- "results_table_.*"
@@ -183,3 +181,44 @@ violin.plots.five.filename <- "ggvp-comp_inter-sample-bias.jpg"
 violin.plots.two.filename <- "ggvp-comp-bias_inter-sample-bias.jpg"
 scatterplot.filename <- "ggpt-facet-method_inter-sample-bias.jpg"
 
+# within-batch bias simulations (06)
+# get load path
+code.dname <- "09_manuscript"
+proj.dname <- "deconvo_method-paper"
+load.dpath <- file.path(proj.dname, "outputs", code.dname)
+# get save path
+code.dname <- "10_donor-bias-simulations-continued"
+proj.dname <- "deconvo_method-paper"
+save.dpath <- file.path(proj.dname, "outputs", code.dname)
+# get params for experiment
+seed.num <- 0
+celltype.variable <- "k2"
+proj.handle <- "ro1-dlpfc"
+save.fnstem <- paste0("intra-sample_", proj.handle)
+group.variable <- "Sample"
+assay.name <- "counts_adj"
+methodv <- c("nnls", "music", "epic", "deconrnaseq")
+iterations <- 1000
+# fraction.cells <- 25
+num.sample.iter <- 3
+scale.factor <- c("glial" = 3, "neuron" = 10)
+results.table.withingroup.filename.stem <- "r-nf_deconvolution_intra-sample-bias"
+base.path <- "data"
+base.path <- file.path(save.dpath, rnf.dname, base.path)
+# save data
+which.save = c("li", "sce")
+save.names = list(sce.name = "sce.rda", li.name = "lindex.rda")
+# load data
+fname <- paste0("list-scef_markers-k2-k3-k4_",proj.handle,".rda")
+fpath <- file.path(load.dpath, fname)
+count.minimum.acrossgroup <- 200
+rnf.workflow.directory <- "r-nf_deconvolution_inter-sample-bias"
+workflow.path.withingroup <- here(save.directory.path, rnf.workflow.directory)
+save.filename.stem.withingroup <- paste0("intra-sample_", proj.handle)
+wt.fnamei <- paste0("workflow-table-all_",save.filename.stem.withingroup,".csv")
+workflow.table.path.withingroup <- file.path(base.path, wt.fnamei)
+num.batch.withingroup <- 200
+
+# plot within-batch bias (07)
+results.filt <- "results_table_.*"
+data.dpath <- file.path(save.dpath, rnf.dname, "data")

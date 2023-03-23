@@ -4,8 +4,6 @@
 #
 # Run donor bias subsampling experiments.
 #
-# See also: script 05
-#
 
 source("deconvo_method-paper/code/10_donor-bias-simulations-continued/00_parameters.R")
 sapply(libv, library, character.only = T)
@@ -20,7 +18,7 @@ lsub <- prepare_subsample_experiment(sce, scale.factor = scale.factor,
                                      cell.proportions = proportions, count.minimum = count.min,
                                      seed.num = seed.num, which.save = c("sce", "tp", "ypb", "li"),
                                      save.fnstem = save.fnstem, base.directory.workflow.data = "data", verbose = TRUE)
-setwd(workflow.path)
+setwd(rnf.workflow.acrossgroup.directory)
 # save workflow table
 workflow.table <- lsub$workflow.table
 write.csv(workflow.table, file = workflow.table.path)
