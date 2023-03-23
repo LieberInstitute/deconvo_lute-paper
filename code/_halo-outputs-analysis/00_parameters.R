@@ -121,6 +121,19 @@ shapiro.downsample.amount <- 5000
 summary.terms = c("var", "mean", "max", "min")
 cell.type.label <- "cell_type"
 
+# 05
+anova.results.list.path <- here(save.path, "anova-results-list.rda")
+explained.variance.title.string <- "Nucleus area (log10-transformed)"
+# barplot with residuals
+barplot.residuals.jpg.filepath <- "ggbar-perc-var_nalog10-complex_ro1-dlpfc.jpg"
+barplot.residuals.jpg.path <- file.path(save.path, barplot.residuals.jpg.filepath)
+# barplot with residuals, log10 scale
+barplot.residuals.log10.jpg.filename <- "ggbar-perc-var-log10_nalog10-complex_ro1-dlpfc.jpg"
+barplot.residuals.log10.jpg.path <- file.path(save.path, barplot.residuals.log10.jpg.filename)
+# barplot, no residuals
+barplot.noresiduals.jpg.filepath <- "ggbar-perc-expl-var_nalog10-complex_ro1-dlpfc.jpg"
+barplot.noresiduals.jpg.path <- file.path(save.path, barplot.noresiduals.jpg.filepath)
+
 # 99 quantile scale summaries
 
 

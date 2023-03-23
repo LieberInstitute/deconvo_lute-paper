@@ -10,12 +10,9 @@ halo.outputs.table <- halo.outputs.table %>% as.data.frame()
 
 # get anova models
 model.string <- paste0(anova.dependent.variable, " ~ cell_type + Slide + SAMPLE_ID")
-model1 <- paste0("lm(", model.string, ", data = halo.outputs.table)") %>% 
-  parse() %>% eval()
-model2 <- paste0("gls(", model.string, ", data = halo.outputs.table, method = 'REML')") %>% 
-  parse() %>% eval()
-model3 <- paste0("glm(", model.string, ", data = halo.outputs.table)") %>% 
-  parse() %>% eval()
+model1 <- paste0("lm(", model.string, ", data = halo.outputs.table)") %>% parse() %>% eval()
+model2 <- paste0("gls(", model.string, ", data = halo.outputs.table, method = 'REML')") %>% parse() %>% eval()
+model3 <- paste0("glm(", model.string, ", data = halo.outputs.table)") %>% parse() %>% eval()
 
 # anova analysis
 dependent.variable <- cell.area.log.variable
@@ -31,8 +28,12 @@ anova.model2 <- anova.string %>% parse() %>% eval()
 dependent.variable <- gene.marker.label
 model.string <- paste0(dependent.variable, " ~ cell_type + Slide + Combo + Position + BrNum")
 anova.test.string <- paste0("aov(", model.string, ", data = halo.outputs.table)")
-result1 <- anova.test.string %>% parse() %>% eval() # eval(parse(text = anova.test.string))
+result1 <- anova.test.string %>% parse() %>% eval()
 # complex model
 model.string <- paste0(dependent.variable, " ~ cell_type + Slide + Combo + Position + BrNum")
 anova.string <- paste0("aov(", model.string, ", data = halo.outputs.table)")
 result2 <- anova.string %>% parse() %>% eval()
+
+# save anova results list
+anova.results.list <- list(result1 = result1, result2 = result2, result3 = result3)
+save(anova.results.list, file = anova.results.list.path)

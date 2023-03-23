@@ -31,3 +31,6 @@ summary.matrix <- do.call(rbind, lapply(unique(sample.id.vector), function(sampl
     rbind(matrix.area, matrix.marker)
   }))
 }))
+
+# save composite plot
+

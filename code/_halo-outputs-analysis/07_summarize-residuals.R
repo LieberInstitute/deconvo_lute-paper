@@ -7,6 +7,7 @@ source("deconvo_method-paper/code/_halo-outputs-analysis/00_parameters.R")
 sapply(libv, library, character.only = T)
 halo.outputs.table <- get(load(halo.output.path))
 halo.outputs.table <- halo.outputs.table %>% as.data.frame()
+anova.result.list <- get(load(anova.results.list.path))
 
 # make residual plots
 # get residuals
