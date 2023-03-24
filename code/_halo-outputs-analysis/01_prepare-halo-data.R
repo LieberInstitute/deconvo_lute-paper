@@ -12,10 +12,9 @@ halo.output.table <- halo.output.table %>% as.data.frame()
 
 # normalize marker counts
 marker.vector <- halo.output.table[,gene.marker.label]
-levels.vector <- halo.output.table[,levels.variable]
-# normalization1
-halo.output.table[,normalization.variable1] <- levels.variable %>% normalization1() %>% as.numeric()
-# normalization2
-halo.output.table[,normalization.variable2] <- marker.vector %>% normalization2() %>% as.numeric()
-# resave outputs table
+area.vector <- halo.output.table[,cell.area.variable]
+# get log10 normalizations
+halo.output.table[,normalized.area.variable] <- area.vector %>% normalization1() %>% as.numeric()
+halo.output.table[,normalized.marker.variable] <- marker.vector %>% normalization1() %>% as.numeric()
+# resave
 save(halo.output.table, file = output.updated.path)
