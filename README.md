@@ -35,6 +35,10 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 
 [Figure S4b](./outputs/13_halo-outputs-analysis/ggboxplot_slide-summary-statistics_norm-area.jpg) : Boxplots of summary statistics for log10 transformed nucleus area. ([script](./outputs/13_halo-outputs-analysis/03_summary-statistics-marker-area.R))
 
+[Figure S4c](./outputs/13_halo-outputs-analysis/ggbarplot_basic-model_variance-explained.jpg) : Bar plots of explained variances for basic model. ([script](./outputs/13_halo-outputs-analysis/06_variances-explained.R))
+
+[Figure S4d](./outputs/13_halo-outputs-analysis/ggbarplot_complex-model_variance-explained.jpg) : Bar plots of explained variances for complex model. ([script](./outputs/13_halo-outputs-analysis/06_variances-explained.R))
+
 
 ## File locations
 
