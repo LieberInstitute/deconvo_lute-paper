@@ -82,7 +82,9 @@ boxplot.log.marker.path <- here(save.path, boxplot.log.marker.filename)
 histogram.area.path <- here(save.path, histogram.area.filename)
 histogram.marker.path <- here(save.path, histogram.marker.filename)
 
-# 03
+# 03, summary statistics
+boxplot.composite.area.summary.name <- "ggboxplot_slide-summary-statistics_norm-area.jpg"
+boxplot.composite.area.summary.path <- here(save.path, boxplot.composite.area.summary.name)
 anova.dependent.variable <- "Nucleus_Area"
 shapiro.downsample.amount <- 5000
 summary.terms = c("var", "mean", "max", "min")

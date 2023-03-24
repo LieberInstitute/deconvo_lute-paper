@@ -31,7 +31,9 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure S2]() : Dispersion mean-variance plots by batch group.
 [Figure S3]() : Subsample simulation results, across- and within-groups.
 
-[Figure S4]() : Variances explained from image analysis outputs.
+[Figure S4a](./outputs/13_halo-outputs-analysis/ggboxplot_nucleus-area.jpg) : Nucleus area distribution before and after log10 transformation. ([script](./code/13_halo-outputs-analysis/02_plot-normalized-variables.R))
+
+[Figure S4b](./outputs/13_halo-outputs-analysis/ggboxplot_slide-summary-statistics_norm-area.jpg) : Boxplots of summary statistics for log10 transformed nucleus area. ([script](./outputs/13_halo-outputs-analysis/03_summary-statistics-marker-area.R))
 
 
 ## File locations
