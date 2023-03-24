@@ -3,10 +3,11 @@
 # Author: Sean Maden
 #
 
-source("deconvo_method-paper/code/_halo-outputs-analysis/00_parameters.R")
+source("deconvo_method-paper/code/13_halo-outputs-analysis/00_parameters.R")
 sapply(libv, library, character.only = T)
-halo.outputs.table <- get(load(halo.output.path))
-halo.outputs.table <- halo.outputs.table %>% as.data.frame()
+#halo.outputs.table <- get(load(halo.output.path))
+#halo.outputs.table <- halo.outputs.table %>% as.data.frame()
+model.results.list <- get(load(model.results.list.path))
 
 # explained variance analysis
 avi <- results1

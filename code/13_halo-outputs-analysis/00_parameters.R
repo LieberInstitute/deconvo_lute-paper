@@ -13,7 +13,7 @@ libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", "ggforce")
 sapply(libv, library, character.only = TRUE)
 
 # set the save directory
-save.path <- here("deconvo_method-paper", "outputs", "_halo-outputs-analysis")
+save.path <- here("deconvo_method-paper", "outputs", "13_halo-outputs-analysis")
 
 # set the halo data path
 halo.output.file.name <- "halo_all.Rdata"
@@ -86,11 +86,16 @@ histogram.marker.path <- here(save.path, histogram.marker.filename)
 boxplot.composite.area.summary.name <- "ggboxplot_slide-summary-statistics_norm-area.jpg"
 boxplot.composite.area.summary.path <- here(save.path, boxplot.composite.area.summary.name)
 anova.dependent.variable <- "Nucleus_Area"
+
+# 04, shapiro test normality
 shapiro.downsample.amount <- 5000
 summary.terms = c("var", "mean", "max", "min")
 cell.type.label <- "cell_type"
 
-# 05
+# 05, anova tests
+anova.dependent.variable <- normalized.area.variable
+model.results.list.path <- "list-results_linear-model_anova.rda"
+
 anova.results.list.path <- here(save.path, "anova-results-list.rda")
 explained.variance.title.string <- "Nucleus area (log10-transformed)"
 # barplot with residuals
