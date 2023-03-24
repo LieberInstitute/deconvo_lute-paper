@@ -96,6 +96,16 @@ cell.type.label <- "cell_type"
 anova.dependent.variable <- normalized.area.variable
 model.results.list.path <- "list-results_linear-model_anova.rda"
 
+# 06, variances explained
+plot.title.string.basic <- "Basic model (transformed nucleus area)"
+plot.title.string.complex <- "Complex model (transformed nucleus area)"
+# plot file names
+barplot.basic.variance.explained.name <- "ggbarplot_basic-model_variance-explained.jpg"
+barplot.basic.variance.explained.path <- here(save.path, barplot.basic.variance.explained.name)
+barplot.complex.variance.explained.name <- "ggbarplot_complex-model_variance-explained.jpg"
+barplot.complex.variance.explained.path <- here(save.path, barplot.complex.variance.explained.name)
+barplot.residuals.jpg.path <- ""
+
 anova.results.list.path <- here(save.path, "anova-results-list.rda")
 explained.variance.title.string <- "Nucleus area (log10-transformed)"
 # barplot with residuals
