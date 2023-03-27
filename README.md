@@ -41,7 +41,9 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 
 [Figure S5](./outputs/11_bulk-expression-analysis/ggplot-jitter-boxplot_mean-expression_bulk-rna-types.jpg) : Jittered scatterplots and boxplots of mean log10 expression (counts) by bulk RNA-seq experiment groups across four mRNA subspecies. ([script](./code/11_bulk-expression-analysis/09_deg-mrna-subspecies-bulk.R))
 
-[Figure S6](./outputs/11_bulk-expression-analysis/ggplot-boxplot_mean_k2-marker-vs-background_bulk-groups.jpg) : Boxplots of mean log10 counts expression at available filtered (a.k.a. "background") genes and K2 marker genes, with summaries by either batch ID, library preparation, library type, or experiment group ([script](./code/11_bulk-expression-analysis/05_compare-k2markers-vs-background-bulk.R))
+[Figure S6](./outputs/11_bulk-expression-analysis/ggplot-boxplot_mean_k2-marker-vs-background_bulk-groups.jpg) : Boxplots of means of log10 counts expression at available filtered (a.k.a. "background") genes and K2 marker genes, with summaries by either batch ID, library preparation, library type, or experiment group ([script](./code/11_bulk-expression-analysis/05_compare-k2markers-vs-background-bulk.R))
+
+[Figure S7](./outputs/11_bulk-expression-analysis/ggplot-boxplot_variance_k2-marker-vs-background_bulk-groups.jpg) : Boxplots of variances of log10 counts expression at available filtered (a.k.a. "background") genes and K2 marker genes, with summaries by either batch ID, library preparation, library type, or experiment group ([script](./code/11_bulk-expression-analysis/05_compare-k2markers-vs-background-bulk.R))
 
 ## File locations
 

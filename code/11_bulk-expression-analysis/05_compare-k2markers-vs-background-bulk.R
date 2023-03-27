@@ -62,10 +62,6 @@ for(index in statistic.index.vector){
   dev.off()
 }
 
-
-
-
-
 # qc at markers versus background -- jitter/boxplots
 # mean expression
 # expression variance
