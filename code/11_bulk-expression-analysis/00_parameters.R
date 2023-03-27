@@ -149,44 +149,77 @@ ggplot_from_dfp <- function(dfp, variable.name,
     new.plot <- new.plot + theme_bw() + ylab(variable.name) + xlab(variable.name) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
   }
+  
+  # parse group.type
+  #if("group.type" %in% colnames(dfp)){
+  #  new.plot <- new.plot + facet_wrap(~group.type)
+  #}
+  
   return(new.plot)
 }
 
-get_comparison_data <- function(expr.bg, expr.marker, plot.filename,
-                                type.vector, cd, save.path){
-  for(type in type.vector){
+get_comparison_data <- function(expression.background, expression.markers, 
+                                plot.filename, type.vector, variable.vector, 
+                                cd, save.path){
+  list.plot.data <- lapply(type.vector, function(type){
     message("Working on summary type ", type, "...")
     message("Working on background expression...")
-    lbg <- get_summary_list(type = type, plot.filename = plot.filename, 
+    list.background <- get_summary_list(type = type, plot.filename = plot.filename, 
                             variable.vector = variable.vector, cd = cd, 
-                            expression = expr.bg, save.path = save.path)
+                            expression = expression.background, save.path = save.path)
     message("Working on marker expression...")
-    lmarker <- get_summary_list(type = type, plot.filename = plot.filename, 
+    list.markers <- get_summary_list(type = type, plot.filename = plot.filename, 
                                 variable.vector = variable.vector, cd = cd, 
-                                expression = expr.marker, save.path = save.path)
+                                expression = expression.markers, save.path = save.path)
+    names(list.background) <- names(list.markers) <- variable.vector
     message("Getting new expression data...")
-    ldfp <- lapply(seq(length(lbg)), function(i){
-      dfp.bg <- lbg[[i]][[1]]; dfp.marker <- lmarker[[i]][[1]]
-      dfp.bg$marker.type <- "background"; dfp.marker$marker.type <- "marker"
-      return(rbind(dfp.bg, dfp.marker))
-    })
-    message("Finished with summary type ", type, ".")
-    
-  }
+    do.call(rbind, lapply(seq(length(list.background)), function(index){
+      plot.data.background <- list.background[[index]][[1]]
+      plot.data.markers <- list.markers[[index]][[1]]
+      plot.data.background$marker.type <- "background"
+      plot.data.markers$marker.type <- "marker"
+      plot.data.markers$group.type <- 
+        plot.data.background$group.type <- variable.vector[index]
+      return(rbind(plot.data.background, plot.data.markers))
+    }))
+  })
+  names(list.plot.data) <- type.vector
+  
   message("Done with all summary  types.")
   message("Getting plots...")
+  index.plots <- seq(length(list.plot.data))
   # get boxplots
-  lbox <- lapply(seq(length(ldfp)), function(i){
-    dfp <- ldfp[[i]]; dfp$category <- dfp$marker.type
-    ggplot_from_dfp(dfp, type.vector[i], "color", "box", scale = "normal")
+  lbox <- lapply(index.plots, function(index){
+    plot.data <- list.plot.data[[index]]
+    plot.data$category <- plot.data$marker.type
+    unique.group.types <- unique(plot.data$group.type)
+    lbox.type <- lapply(unique.group.types, function(type){
+      plot.data.filter <- plot.data[plot.data$group.type==type,]
+      ggplot_from_dfp(plot.data.filter, type.vector[index],
+                      "color", "box", scale = "normal") + xlab(type)
+    })
+    names(lbox.type) <- unique.group.types
+    lbox.type
   })
+  names(lbox) <- type.vector
+  
   # get boxplots -- log scale yaxis
-  lbox.logscale <- lapply(seq(length(ldfp)), function(i){
-    dfp <- ldfp[[i]]; dfp$category <- dfp$marker.type
-    ggplot_from_dfp(dfp, type.vector[i], "color", "box", scale = "log")
+  lbox.logscale <- lapply(index.plots, function(index){
+    plot.data <- list.plot.data[[index]]
+    plot.data$category <- plot.data$marker.type
+    unique.group.types <- unique(plot.data$group.type)
+    lbox.type <- lapply(unique.group.types, function(type){
+      plot.data.filter <- plot.data[plot.data$group.type==type,]
+      ggplot_from_dfp(plot.data.filter, type.vector[index],
+                      "color", "box", scale = "log") + xlab(type)
+    })
+    names(lbox.type) <- unique.group.types
+    lbox.type
   })
+  names(lbox.logscale) <- type.vector
+  
   message("Getting return list...")
-  lr <- list(dfp = ldfp, lgg = list(box = lbox, box.log = lbox.logscale))
+  lr <- list(dfp = list.plot.data, lgg = list(box = lbox, box.log = lbox.logscale))
   return(lr)
 }
 
@@ -243,8 +276,6 @@ assay.name <- "counts"
 assays <- c("counts")
 batch.variable <- "batch.id"
 condition.variable <- "expt_condition"
-# vector of group variables to summarize
-variable.vector <- c(batch.variable, "library_prep", "library_type", condition.variable)
 # define summary types
 type.vector <- c("total.counts", "zero.count", "mean", "variance")
 correlation.method.markers <- "spearman"
@@ -278,6 +309,15 @@ pseudobulk.path <- here(save.path, pseudobulk.file.name)
 #-------------------------------------------------
 # params for marker expression vs. background (05)
 #-------------------------------------------------
+bulk.compare.markers.composite.jpg.name <- "ggplot-boxplot_k2-marker-vs-background_bulk-groups.jpg"
+bulk.compare.markers.composite.jpg.path <- here(save.path, bulk.compare.markers.composite.jpg.name)
+# color palette
+colors.compare.markers <- c("background" = "forestgreen", "marker" = "grey60")
+# paths for new plots
+bulk.marker.compare.plots.names <- paste0("ggplot-boxplot_",type.vector,
+                                          "_k2-marker-vs-background_bulk-groups.jpg")
+bulk.marker.compare.plots.paths <- sapply(bulk.marker.compare.plots.names, 
+                                          function(name){here(save.path, name)})
 
 #------------------------------------
 # compare-k2markers-bulk-vs-halo (08)
