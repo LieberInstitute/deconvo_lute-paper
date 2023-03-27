@@ -39,7 +39,7 @@ image.cell.sizes.save.path <- here(save.path, image.cell.sizes.save.name)
 
 # 02 snrnaseq cell sizes
 sce.file.name <- "sce_DLPFC.Rdata"
-sce.path <- here("DLPFC_snRNAseq","processed-data/sce", sce.file.name)
+sce.path <- here("DLPFC_snRNAseq","processed-data", "sce", sce.file.name)
 
 sn.cell.sizes.save.name <- "snrnaseq_cell-sizes.rda"
 sn.cell.sizes.save.path <- here(save.path, sn.cell.sizes.save.name)
