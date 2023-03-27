@@ -211,9 +211,9 @@ get_pseudobulk <- function(sce, sce.assay.name, S){
 # params (01)
 #------------
 # gene type variables
-types.protein <- c("protein_coding")
-types.nonpolya <- c("lncRNA", "Mt_rRNA", "rRNA", "Mt_tRNA")
-types.include <- c(types.protein, types.nonpolya)
+gene.types.protein <- c("protein_coding")
+gene.types.nonpolya <- c("lncRNA", "Mt_rRNA", "rRNA", "Mt_tRNA")
+gene.types.include <- c(gene.types.protein, gene.types.nonpolya)
 
 # paths
 rse.bulk.filename <- "rse_gene.Rdata"
@@ -287,5 +287,19 @@ halo.outputs.filename <- "halo_all.Rdata"
 halo.outputs.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", halo.outputs.filename)
 # halo table key
 
-
-
+#-----------------------------
+# compare mrna subspecies (09)
+#-----------------------------
+# histone rna filter
+histone.patterns <- c("H1-", "H2A", "H2B", "H3C", "H3-", "H3P", "H3Y", "H4C")
+histone.genes.pattern <- paste0("^", histone.patterns, ".*", collapse = "|")
+# mitochondrial rna filter
+mito.pattern <- c("MT-")
+mito.genes.pattern <- paste0("^", mito.pattern, collapse = "|")
+# new plot names
+bulk.mean.rna.types.jpg.name <- "ggplot-jitter-boxplot_mean-expression_bulk-rna-types.jpg"
+bulk.variance.rna.types.jpg.name <- "ggplot-jitter-boxplot_variance-expression_bulk-rna-types.jpg"
+bulk.total.rna.types.jpg.name <- "ggplot-jitter-boxplot_total-expression_bulk-rna-types.jpg"
+bulk.mean.rna.types.jpg.path <- here(save.path, bulk.mean.rna.types.jpg.name)
+bulk.variance.rna.types.jpg.path <- here(save.path, bulk.variance.rna.types.jpg.name)
+bulk.total.rna.types.jpg.path <- here(save.path, bulk.total.rna.types.jpg.name)
