@@ -33,12 +33,13 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 
 [Figure S4a](./outputs/13_halo-outputs-analysis/ggboxplot_nucleus-area.jpg) : Nucleus area distribution before and after log10 transformation. ([script](./code/13_halo-outputs-analysis/02_plot-normalized-variables.R))
 
-[Figure S4b](./outputs/13_halo-outputs-analysis/ggboxplot_slide-summary-statistics_norm-area.jpg) : Boxplots of summary statistics for log10 transformed nucleus area. ([script](./outputs/13_halo-outputs-analysis/03_summary-statistics-marker-area.R))
+[Figure S4b](./outputs/13_halo-outputs-analysis/ggboxplot_slide-summary-statistics_norm-area.jpg) : Boxplots of summary statistics for log10 transformed nucleus area. ([script](./code/13_halo-outputs-analysis/03_summary-statistics-marker-area.R))
 
-[Figure S4c](./outputs/13_halo-outputs-analysis/ggbarplot_basic-model_variance-explained.jpg) : Bar plots of explained variances for basic model. ([script](./outputs/13_halo-outputs-analysis/06_variances-explained.R))
+[Figure S4c](./outputs/13_halo-outputs-analysis/ggbarplot_basic-model_variance-explained.jpg) : Bar plots of explained variances for basic model. ([script](./code/13_halo-outputs-analysis/06_variances-explained.R))
 
-[Figure S4d](./outputs/13_halo-outputs-analysis/ggbarplot_complex-model_variance-explained.jpg) : Bar plots of explained variances for complex model. ([script](./outputs/13_halo-outputs-analysis/06_variances-explained.R))
+[Figure S4d](./outputs/13_halo-outputs-analysis/ggbarplot_complex-model_variance-explained.jpg) : Bar plots of explained variances for complex model. ([script](./code/13_halo-outputs-analysis/06_variances-explained.R))
 
+[Figure S5](./outputs/11_bulk-expression-analysis/ggplot-jitter-boxplot_mean-expression_bulk-rna-types.jpg) : Jittered scatterplots and boxplots of mean log10 expression (counts) by bulk RNA-seq experiment groups across four mRNA subspecies. ([script](./code/11_bulk-expression-analysis/09_deg-mrna-subspecies-bulk.R))
 
 ## File locations
 
