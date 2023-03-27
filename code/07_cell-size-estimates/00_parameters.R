@@ -30,7 +30,7 @@ cell_sizes <- function(data, area.variable = "Nucleus_Area",
   aggregate(data[,area.variable], by = list(variable = data[,by.variable]), FUN = fun)
 }
 
-sce_summary <- function(sce, expression.summary.type = c("total.counts", "expressed.genes"), 
+sce_summary <- function(sce, expression.summary.type = c("total.expression", "expressed.genes"), 
                         assay.name = "logcounts", cell.types.variable = "cellType_broad_hc",
                         size.summary.type = "median", batch.id = "SAMPLE_ID",
                         minimum.expression = 2){
@@ -44,9 +44,11 @@ sce_summary <- function(sce, expression.summary.type = c("total.counts", "expres
     expression.filtered <- expression.delayed.matrix[,filter] %>% as.matrix()
     # parse summary type option
     if(expression.summary.type == "total.expression"){
+      message("getting total expression...")
       summary.vector <- colSums(expression.filtered) 
       summary.variable.name <- paste0("total.expression.",assay.name)
     } else{
+      message("getting expressed genes...")
       summary.vector <- apply(expression.filtered, 2, function(cell.data){
         length(cell.data[cell.data > minimum.expression])
       })
@@ -76,6 +78,7 @@ sce_summary <- function(sce, expression.summary.type = c("total.counts", "expres
 # parameters by script
 #---------------------
 # 01 image cell sizes
+area.variables <- c("Nucleus_Area", "AKT3_Copies") # table columns to summarize
 image.cell.sizes.save.name <- "image_cell-sizes.rda"
 image.cell.sizes.save.path <- here(save.path, image.cell.sizes.save.name)
 

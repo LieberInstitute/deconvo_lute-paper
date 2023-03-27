@@ -71,6 +71,17 @@ group_jitter <- function(variable, cd, expression,
       dfi <- data.frame(value = dispersion.vector)
       dfi$group <- gi; return(dfi)
     }))
+  } else if(type == "zero.fraction"){
+    value.string <- "Zero fraction"
+    gene.count <- expression %>% nrow()
+    dfp <- do.call(rbind, lapply(group.vector, function(gi){
+      message("Getting value ", type, " for group ", gi, "...")
+      filter <- cd[,variable]==gi; cf <- expression[,filter]
+      zero.fraction <- apply(cf,2,function(ci){
+        length(which(ci==0))/gene.count})
+      dfi <- data.frame(value = zero.fraction)
+      dfi$group <- gi; return(dfi)
+    }))
   } else{
     stop("Error, unrecognized type argument.")
   }
@@ -309,6 +320,9 @@ pseudobulk.path <- here(save.path, pseudobulk.file.name)
 #-------------------------------------------------
 # params for marker expression vs. background (05)
 #-------------------------------------------------
+# summary statistic types
+type.vector.marker.comparison <- c("mean", "variance", "zero.fraction")
+# new jpg path
 bulk.compare.markers.composite.jpg.name <- "ggplot-boxplot_k2-marker-vs-background_bulk-groups.jpg"
 bulk.compare.markers.composite.jpg.path <- here(save.path, bulk.compare.markers.composite.jpg.name)
 # color palette

@@ -23,7 +23,7 @@ list.comparison.plots <- lapply(assays, function(assay.name){
                       expression.markers = expression.markers,
                       plot.filename = plot.filename, 
                       variable.vector = variable.vector,
-                      type.vector = type.vector,
+                      type.vector = type.vector.marker.comparison,
                       cd = cd, save.path = save.path)
 })
 

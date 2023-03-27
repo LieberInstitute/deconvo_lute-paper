@@ -9,7 +9,6 @@ sapply(libv, library, character.only = T)
 halo.output.table <- get(load(halo.output.path))
 halo.output.table <- halo.output.table %>% as.data.frame()
 # get cell size estimates
-area.variables <- c("Nucleus_Area", "AKT3_Copies")
 list.image.cell.sizes <- lapply(area.variables, function(area.variable){
   sizes <- cell_sizes(halo.output.table, area.variable = area.variable)
   colnames(sizes) <- c("cell_type", "size")
