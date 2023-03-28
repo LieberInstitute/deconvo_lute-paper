@@ -96,3 +96,9 @@ sce.sizes.expressed.genes.path <- file.path("deconvo_method-paper", "outputs",
                                             sce.sizes.expressed.genes.name)
 
 # 03
+terms.neuron <- c("Excit", "Inhib")
+terms.glial <- c("Oligo", "Astro", "Micro", "OPC")
+table.cell.size.name <- "cell-sizes-table.rda"
+table.cell.size.path <- here(save.path, table.cell.size.name)
+table.cell.size.k2.name <- "cell-sizes-k2-table.rda"
+table.cell.size.k2.path <- here(save.path, table.cell.size.k2.name)
