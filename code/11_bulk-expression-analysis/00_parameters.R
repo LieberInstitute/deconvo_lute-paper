@@ -235,20 +235,42 @@ get_comparison_data <- function(expression.background, expression.markers,
 }
 
 # bulk-pseudobulk marker expression
-get_pseudobulk <- function(sce, sce.assay.name, S){
-  sce.expression <- assays(sce)[[sce.assay.name]]
-  sce.expression <- as.matrix(sce.expression)
-  ZP <- do.call(cbind, lapply(K, function(ki){
-    ki.filter <- colData(sce)[,sce.celltype.variable]==ki
-    rowMeans(sce.expression[,ki.filter])
-  }))
-  colnames(ZP) <- K
-  S <- S[order(match(names(S), colnames(ZP)))]
-  if(!identical(colnames(ZP), names(S))){stop("Error, couldn't match cell type names in ZP, S.")}
-  ZPS <- sweep(ZP, MARGIN = 2, STATS = S, FUN = "*")
-  pseudobulk <- matrix(rowMeans(ZPS), ncol = 1)
-  rownames(pseudobulk) <- rownames(sce)
-  return(pseudobulk)
+pseudobulk_from_sce <- function(sce, group.variable = "donor", 
+                                cell.type.variable = "k2", 
+                                s = c("neuron" = 3, "glial" = 10), 
+                                summary.method = "mean", 
+                                assay.name = "logcounts"){
+  cd <- colData(sce)
+  unique.groups <- unique(cd[,group.variable])
+  unique.cell.types <- unique(cd[,cell.type.variable])
+  unique.cell.types <- unique.cell.types[order(unique.cell.types)]
+  s <- s[order(names(s))]
+  if(!identical(names(s), unique.cell.types)){
+    stop("Error, couldn't match unique cell types to s names.")}
+  lpb <- lapply(unique.groups, function(group.index){
+    # group.index <- unique.groups[1]
+    filter <- cd[,group.variable] == group.index
+    # get zs transformed signature matrix
+    expression.matrix <- assays(sce)[[assay.name]]
+    z <- do.call(cbind, lapply(unique.cell.types, function(cell.type.index){
+      index.filter <- cd[,cell.type.variable]==cell.type.index
+      rowMeans(expression.matrix[,index.filter])
+    }))
+    colnames(z) <- unique.cell.types
+    zs <- sweep(z, 2, STATS = s, FUN = "*")
+    # get p cell type proportions
+    p.true.counts <- table(cd[,cell.type.variable])
+    p.true.counts <- p.true.counts[order(names(p.true.counts))]
+    if(!identical(names(p.true.counts), colnames(zs))){
+      stop("Error, couldn't match cell type labels in p.true and zs")}
+    p.true.proportions <- p <- prop.table(p.true.counts)
+    # final pseudobulk
+    y.pseudobulk <- t(t(p) %*% t(zs))
+    return(list(y = y.pseudobulk, p = p.true.proportions, 
+                p.counts = p.true.counts))
+  })
+  names(lpb) <- unique.groups
+  return(lpb)
 }
 
 #------------
