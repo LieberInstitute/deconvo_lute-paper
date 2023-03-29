@@ -61,7 +61,7 @@ names(lexperiment) <- complete.sample.id.vector
 z.main <- signature_matrix_from_sce(sce)
 s.main <- c("glial" = 3, "neuron" = 10)
 # perform experiments
-method.vector <- c("nnlsParam", "musicParam", "deconrnaseqParam")
+
 results.table <- do.call(rbind, lapply(complete.sample.id.vector, function(sample.id){
   lsample <- lexperiment[[sample.id]]
   z <- z.main; y <- lsample$y; s <- s.main
@@ -94,37 +94,14 @@ results.table <- do.call(rbind, lapply(complete.sample.id.vector, function(sampl
     return(results.matrix)
   }))
 }))
-
-# plot cell proportions
-new.plot <- ggplot(results.table, 
-                   aes(x = neuron.proportion.true, y = neuron_proportion,
-                       color = method)) +
-  geom_point(alpha = 0.4) + theme_bw() +
-  geom_abline(slope = 1, intercept = 0, color = "black") +
-  geom_vline(xintercept = 0.5, color = "black", alpha = 0.4) +
-  xlab("True") + ylab("Predicted") + ggtitle("Neuron cell proportion")
-new.plot + facet_wrap(~sample.id)
-new.plot + facet_wrap(~library.prep)
-new.plot + facet_wrap(~library.type)
-new.plot + facet_wrap(~method)
-
-# plot error
-results.table$error.neuron <- results.table$neuron_proportion-results.table$neuron.proportion.true
+# append errors, absolute errors
+results.table$error.neuron <- results.table$neuron_proportion-
+  results.table$neuron.proportion.true
 results.table$absolute.error.neuron <- abs(results.table$error.neuron)
-new.plot <- ggplot(results.table, aes(x = method, y = absolute.error.neuron)) + theme_bw() + 
-  geom_jitter(alpha = 0.2) + geom_boxplot(alpha = 0, color = "cyan") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-new.plot + facet_wrap(~sample.id)
-new.plot + facet_wrap(~library.prep)
-new.plot + facet_wrap(~library.type)
-
-# plot rmse
+# append rmse
 results.table$rmse <- apply(results.table[,c(6,7,10,12)], 1, function(row.index){
   sqrt(sum(row.index[1:2]-row.index[3:4]^2)/length(row.index[1:2]))
 })
-new.plot <- ggplot(results.table, aes(x = method, y = rmse)) + theme_bw() + 
-  geom_jitter(alpha = 0.2) + geom_boxplot(alpha = 0, color = "cyan") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-new.plot + facet_wrap(~sample.id)
-new.plot + facet_wrap(~library.prep)
-new.plot + facet_wrap(~library.type)
+
+# save results table
+save(results.table, file = within.samples.results.table.path)

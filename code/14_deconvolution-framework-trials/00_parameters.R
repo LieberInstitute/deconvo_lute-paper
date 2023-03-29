@@ -106,6 +106,8 @@ cell.sizes.k2.path <- here(cell.sizes.k2.path, "cell-sizes-k2-table.rda")
 #------------------
 # script parameters
 #------------------
+method.vector <- c("nnlsParam", "musicParam", "deconrnaseqParam")
+
 # 01, independent pseudobulk
 # new dlpfc markers
 sce.markers.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
@@ -121,8 +123,64 @@ halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO
 rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis", "rse_k2-marker-expression_ro1-dlpfc.rda")
 # data for experiments
 assay.name.rse <- "counts"
+# results table
+within.samples.results.table.name <- "results-table_within-sample-deconvolution.rda"
+within.samples.results.table.path <- here(save.path, within.samples.results.table.name)
 
+# 03, plot within-sample results
+# scatterplots
+scatterplot.proportions.bysample.colmethod.name <- 
+  "ggplot-scatterplot_neuron-proportions_bysample-colmethod.jpg"
+scatterplot.proportions.bysample.colmethod.path <- here(save.path, scatterplot.proportions.bysample.colmethod.name)
 
-# 03, across-samples tests
+scatterplot.proportions.bylibprep.colmethod.name <- 
+  "ggplot-scatterplot_neuron-proportions_bylibprep-colmethod.jpg"
+scatterplot.proportions.bylibprep.colmethod.path <- here(save.path, scatterplot.proportions.bylibprep.colmethod.name)
+
+scatterplot.proportions.bylibtype.colmethod.name <- 
+  "ggplot-scatterplot_neuron-proportions_bylibtype-colmethod.jpg"
+scatterplot.proportions.bylibtype.colmethod.path <- here(save.path, scatterplot.proportions.bylibtype.colmethod.name)
+
+scatterplot.proportions.byexptgroup.colmethod.name <-
+  "ggplot-scatterplot_neuron-proportions_byexptgroup-colmethod.jpg"
+scatterplot.proportions.byexptgroup.colmethod.path <- here(save.path, scatterplot.proportions.byexptgroup.colmethod.name)
+
+scatterplot.proportions.bymethod.colmethod.name <-
+  "ggplot-scatterplot_neuron-proportions_bymethod-colmethod.jpg"
+scatterplot.proportions.bymethod.colmethod.path <- here(save.path, scatterplot.proportions.byexptgroup.colmethod.name)
+
+# jitter-boxplots
+jitterbox.abserror.bysample.xmethod.name <- 
+  "ggplot-jitter-boxplot_neuron-abs-error_bysample-xmethod.jpg"
+jitterbox.abserror.bysample.xmethod.path <- here(save.path, jitterbox.abserror.bysample.xmethod.name)
+
+jitterbox.abserror.bylibprep.xmethod.name <- 
+  "ggplot-jitter-boxplot_neuron-abs-error_bylibprep-xmethod.jpg"
+jitterbox.abserror.bylibprep.xmethod.path <- here(save.path, jitterbox.abserror.bylibprep.xmethod.name)
+
+jitterbox.abserror.bylibtype.xmethod.name <-
+  "ggplot-jitter-boxplot_neuron-abs-error_bylibtype-xmethod.jpg"
+jitterbox.abserror.bylibtype.xmethod.path <- here(save.path, jitterbox.abserror.bylibtype.xmethod.name)
+
+jitterbox.abserror.byexptgroup.xmethod.name <-
+  "ggplot-jitter-boxplot_neuron-abs-error_byexptgroup-xmethod.jpg"
+jitterbox.abserror.byexptgroup.xmethod.path <- here(save.path, jitterbox.abserror.byexptgroup.xmethod.name)
+
+jitterbox.rmse.bysample.xmethod.name <-
+  "ggplot-jitter-boxplot_rmse-k2_bysample-xmethod.jpg"
+jitterbox.rmse.bysample.xmethod.path <- here(save.path, jitterbox.rmse.bysample.xmethod.name)
+
+jitterbox.rmse.bylibprep.xmethod.name <-
+  "ggplot-jitter-boxplot_rmse-k2_bylibprep-xmethod.jpg"
+jitterbox.rmse.bylibprep.xmethod.path <- here(save.path, jitterbox.rmse.bylibprep.xmethod.name)
+
+jitterbox.rmse.bylibtype.xmethod.name <-
+  "ggplot-jitter-boxplot_rmse-k2_bylibtype-xmethod.jpg"
+jitterbox.rmse.bylibtype.xmethod.path <- here(save.path, jitterbox.rmse.bylibtype.xmethod.name)
+
+jitterbox.rmse.byexptgroup.xmethod.name <-
+  "ggplot-jitter-boxplot_rmse-k2_byexptgroup-xmethod.jpg"
+jitterbox.rmse.byexptgroup.xmethod.path <- here(save.path, jitterbox.rmse.byexptgroup.xmethod.name)
+
 
 # 04
