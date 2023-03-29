@@ -34,7 +34,7 @@ z <- signature_matrix_from_sce(sce)
 # perform experiment
 lresult.nnls <- run_pseudobulk_experiment(list.pb, method = "nnlsParam")
 lresult.music <- run_pseudobulk_experiment(list.pb, method = "musicParam")
-lresult.deconrnaseq <- run_experiment(list.pb, method = "deconrnaseqParam")
+lresult.deconrnaseq <- run_pseudobulk_experiment(list.pb, method = "deconrnaseqParam")
 
 # aggregate results table
 donor.id.vector <- names(lresult.nnls)
@@ -47,21 +47,66 @@ results.table <- do.call(rbind, lapply(donor.id.vector, function(donor.id){
   row.music <- c(music$p.predicted, music$bias, music$rmse, "music")
   row.decon <- c(decon$p.predicted, decon$bias, decon$rmse, "deconrnaseq")
   # bind results table
-  results <- rbind(row.nnls, row.music, row.decon)
+  results <- rbind(row.nnls, row.music, row.decon) %>% as.data.frame()
   colnames(results) <- c("glial.prop.pred",
                          "neuron.prop.pred",
                          "glial.error",
                          "neuron.error",
                          "rmse.k2",
                          "method")
+  # append sample metadata
   results$sample.id <- donor.id
+  results$neuron.true.prop <- list.pb[[donor.id]]$p[["neuron"]]
+  results$glial.true.prop <- list.pb[[donor.id]]$p[["glial"]]
+  results$neuron.true.count <- list.pb[[donor.id]]$p.counts[["neuron"]]
+  results$glial.true.count <- list.pb[[donor.id]]$p.counts[["glial"]]
   return(results)
 }))
+results.table <- results.table %>% as.data.frame()
+# format as data frame
+for(index in c(1,2,3,4,5,8,9,10,11)){
+  results.table[,index] <- as.numeric(results.table[,index])}
 # save results table
 save(results.table, file = independent.pb.results.table.path)
 
 # plot true vs. pred proportions, neuron
+new.plot <- ggplot(results.table, aes(x = neuron.true.prop, 
+                                      y = neuron.prop.pred, 
+                                      color = method)) +
+  geom_point(alpha = 0.6) + geom_abline(slope = 1, intercept = 0, color = "black") +
+  geom_vline(xintercept = 0.5, alpha = 0.5) + xlab("True") + ylab("Predicted") +
+  ggtitle("Cell type: neuron") + xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot + facet_wrap(~sample.id)
+jpeg(pb.scatterplot.proportions.bysample.colmethod.path, width = 5, 
+     height = 4, units = "in", res = 400)
+new.plot + facet_wrap(~sample.id)
 
 # plot absolute errors, neuron
+results.table$neuron.abs.error <- abs(results.table$neuron.error)
+new.plot <- ggplot(results.table, 
+                   aes(x = method, y = neuron.abs.error, fill = method)) +
+  geom_bar(stat = "identity") + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none") +
+  xlab("Deconvolution algorithm") +
+  ylab("Absolute error") +
+  ggtitle("Cell type: neuron")
+jpeg(pb.barplot.abserror.bysample.colmethod.path, width = 5, height = 4, 
+     units = "in", res = 400)
+new.plot + facet_wrap(~sample.id)
+dev.off()
 
-# plot rmse, neuron
+# plot rmse, k2
+new.plot <- ggplot(results.table, aes(x = method, y = rmse.k2, fill = method)) +
+  geom_bar(stat = "identity") + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none") +
+  xlab("Deconvolution algorithm") +
+  ylab("RMSE") +
+  ggtitle("Cell type: neuron")
+jpeg(pb.barplot.rmse.bysample.colmethod.path, width = 5, height = 4, 
+     units = "in", res = 400)
+new.plot + facet_wrap(~sample.id)
+dev.off()

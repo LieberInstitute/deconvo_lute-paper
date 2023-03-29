@@ -118,6 +118,19 @@ sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb
 # save results table
 independent.pb.results.table.name <- "results-table_independent-pb-mrb.rda"
 independent.pb.results.table.path <- here(save.path, independent.pb.results.table.name)
+# save new plots
+# scatterplot, proportions
+pb.scatterplot.proportions.bysample.colmethod.name <- 
+  "ggplot-scatter_neuron-proportions_bysample-colmethod_independent-pb.jpg"
+pb.scatterplot.proportions.bysample.colmethod.path <- here(save.path, pb.scatterplot.proportions.bysample.colmethod.name)
+# barplot, abs error
+pb.barplot.abserror.bysample.xmethod.name <- 
+  "ggplot-barplot_neuron-abs-error_bysample-colmethod_independent-pb.jpg"
+pb.barplot.abserror.bysample.colmethod.path <- here(save.path, pb.barplot.abserror.bysample.xmethod.name)
+# barplot, rmse
+pb.barplot.rmse.bysample.xmethod.name <- 
+  "ggplot-barplot_rmse_bysample-colmethod_independent-pb.jpg"
+pb.barplot.rmse.bysample.colmethod.path <- here(save.path, pb.barplot.rmse.bysample.xmethod.name)
 
 # 02, within-samples tests
 # set the halo data path
