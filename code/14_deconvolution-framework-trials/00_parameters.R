@@ -139,6 +139,12 @@ halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO
 rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis", "rse_k2-marker-expression_ro1-dlpfc.rda")
 # data for experiments
 assay.name.rse <- "counts"
+# image cells path
+image.cells.name <- "image-cell-counts-table_by-brnum.rda"
+image.cells.path <- here(save.path, image.cells.name)
+# lexperiment list object
+lexperiment.withinsample.name <- "list-experiment-info_within-samples.rda"
+lexperiment.withinsample.path <- here(save.path, lexperiment.withinsample.name)
 # results table
 within.samples.results.table.name <- "results-table_within-sample-deconvolution.rda"
 within.samples.results.table.path <- here(save.path, within.samples.results.table.name)

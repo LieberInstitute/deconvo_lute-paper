@@ -2,7 +2,7 @@
 
 # Author: Sean Maden
 #
-# Plot summaries of results from within-sample deconvolution trials.
+# Plot results of within matched samples deconvolution experiments.
 
 source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters.R")
 sapply(libv, library, character.only = T)
@@ -17,7 +17,7 @@ new.plot <- ggplot(results.table,
   geom_vline(xintercept = 0.5, color = "black", alpha = 0.4) +
   xlab("True") + ylab("Predicted") + ggtitle("Neuron cell proportion") +
   xlim(0, 1) + ylim(0, 1) + 
-  theme(axis.text.x = elment_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 #
 jpeg(scatterplot.proportions.bysample.colmethod.path, width = 7, height = 5, 
      units = "in", res = 400)
