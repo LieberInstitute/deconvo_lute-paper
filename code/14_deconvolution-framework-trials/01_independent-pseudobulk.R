@@ -75,13 +75,14 @@ new.plot <- ggplot(results.table, aes(x = neuron.true.prop,
                                       color = method)) +
   geom_point(alpha = 0.6) + geom_abline(slope = 1, intercept = 0, color = "black") +
   geom_vline(xintercept = 0.5, alpha = 0.5) + xlab("True") + ylab("Predicted") +
-  ggtitle("Cell type: neuron") + xlim(0, 1) + ylim(0, 1) +
+  ggtitle("Cell type: neuron") + xlim(0, 1) + ylim(0, 1) + theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 new.plot + facet_wrap(~sample.id)
-jpeg(pb.scatterplot.proportions.bysample.colmethod.path, width = 5, 
-     height = 4, units = "in", res = 400)
+jpeg(pb.scatterplot.proportions.bysample.colmethod.path, width = 5.5, 
+     height = 2.3, units = "in", res = 400)
 new.plot + facet_wrap(~sample.id)
+dev.off()
 
 # plot absolute errors, neuron
 results.table$neuron.abs.error <- abs(results.table$neuron.error)
