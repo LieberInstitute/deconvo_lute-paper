@@ -72,7 +72,7 @@ signature_matrix_from_sce <- function(sce, cell.type.variable = "k2",
   return(z)
 }
 
-run_experiment <- function(list.pb, method = "nnlsParam"){
+run_pseudobulk_experiment <- function(list.pb, method = "nnlsParam"){
   # run an independent psedobulk experiment.
   lapply(list.pb, function(data){
     param.string <- paste0(method, "(y = data$y, z = z, s = s)")
@@ -115,6 +115,9 @@ sce.markers.list.path <- here("deconvo_method-paper", "outputs", "09_manuscript"
 # mrb dlpfc markers
 sce.mrb.name <- "sce-mrb_dlpfc.rda"
 sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb.name)
+# save results table
+independent.pb.results.table.name <- "results-table_independent-pb-mrb.rda"
+independent.pb.results.table.path <- here(save.path, independent.pb.results.table.name)
 
 # 02, within-samples tests
 # set the halo data path

@@ -32,5 +32,36 @@ list.pb <- pseudobulk_from_sce(sce = sce.mrb, group.variable = "donor",
 z <- signature_matrix_from_sce(sce)
 
 # perform experiment
-lresult.nnls <- run_experiment(list.pb, method = "nnlsParam")
-lresult.music <- run_experiment(list.pb, method = "musicParam")
+lresult.nnls <- run_pseudobulk_experiment(list.pb, method = "nnlsParam")
+lresult.music <- run_pseudobulk_experiment(list.pb, method = "musicParam")
+lresult.deconrnaseq <- run_experiment(list.pb, method = "deconrnaseqParam")
+
+# aggregate results table
+donor.id.vector <- names(lresult.nnls)
+results.table <- do.call(rbind, lapply(donor.id.vector, function(donor.id){
+  nnls <- lresult.nnls[[donor.id]]
+  music <- lresult.music[[donor.id]]
+  decon <- lresult.deconrnaseq[[donor.id]]
+  # get row data
+  row.nnls <- c(nnls$p.predicted, nnls$bias, nnls$rmse, "nnls")
+  row.music <- c(music$p.predicted, music$bias, music$rmse, "music")
+  row.decon <- c(decon$p.predicted, decon$bias, decon$rmse, "deconrnaseq")
+  # bind results table
+  results <- rbind(row.nnls, row.music, row.decon)
+  colnames(results) <- c("glial.prop.pred",
+                         "neuron.prop.pred",
+                         "glial.error",
+                         "neuron.error",
+                         "rmse.k2",
+                         "method")
+  results$sample.id <- donor.id
+  return(results)
+}))
+# save results table
+save(results.table, file = independent.pb.results.table.path)
+
+# plot true vs. pred proportions, neuron
+
+# plot absolute errors, neuron
+
+# plot rmse, neuron
