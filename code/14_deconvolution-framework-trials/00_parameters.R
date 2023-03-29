@@ -19,6 +19,7 @@ pseudobulk_from_sce <- function(sce, group.variable = "donor",
                             s = c("neuron" = 3, "glial" = 10), 
                             summary.method = "mean", 
                             assay.name = "logcounts"){
+  # makes a new pseudobulk sample from an sce object
   cd <- colData(sce)
   unique.groups <- unique(cd[,group.variable])
   unique.cell.types <- unique(cd[,cell.type.variable])
@@ -56,6 +57,7 @@ pseudobulk_from_sce <- function(sce, group.variable = "donor",
 signature_matrix_from_sce <- function(sce, cell.type.variable = "k2", 
                                       summary.method = "mean", 
                                       assay.name = "logcounts"){
+  # gets the z signature matrix from an sce object
   expression.matrix <- assays(sce)[[assay.name]] %>% as.matrix()
   cd <- colData(sce)
   unique.cell.types <- cd[,cell.type.variable] %>% unique()
@@ -71,6 +73,7 @@ signature_matrix_from_sce <- function(sce, cell.type.variable = "k2",
 }
 
 run_experiment <- function(list.pb, method = "nnlsParam"){
+  # run an independent psedobulk experiment.
   lapply(list.pb, function(data){
     param.string <- paste0(method, "(y = data$y, z = z, s = s)")
     deconvolution.parameters <- eval(parse(text = param.string))
@@ -83,6 +86,17 @@ run_experiment <- function(list.pb, method = "nnlsParam"){
     return(list(p.predicted = p.predicted.final, p.true = data$p, 
                 bias = bias, rmse = rmse, parameters = deconvolution.parameters))
   })
+}
+
+standard_sample_id <- function(table, location.label, brnum.label = "BrNum"){
+  # get standard formatted sample identifiers from sn, bulk, and image tables.
+  brnum.vector <- table[,brnum.label]
+  location.vector <- toupper(table[,location.label])
+  location.vector <- ifelse(grepl("ANT", location.vector), "ANTERIOR",
+                            ifelse(grepl("MID", location.vector), "MIDDLE",
+                                   ifelse(grepl("POST", location.vector), "POSTERIOR", 
+                                          location.vector)))
+  return(paste0(brnum.vector, "_", location.vector))
 }
 
 # load cell sizes
@@ -104,7 +118,10 @@ sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb
 # set the halo data path
 halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", "halo_all.Rdata")
 # bulk data
-rse.gene.filter.filepath <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis", "rse-gene-filter.rda")
+rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis", "rse_k2-marker-expression_ro1-dlpfc.rda")
+# data for experiments
+assay.name.rse <- "counts"
+
 
 # 03, across-samples tests
 
