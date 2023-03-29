@@ -9,6 +9,9 @@ libv <- c("here", "lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment
           "SummarizedExperiment", "scran")
 sapply(libv, library, character.only = TRUE)
 
+# save path
+save.path <- here("deconvo_method-paper", "outputs", "14_deconvolution-framework-trials")
+
 # helper functions
 
 pseudobulk_from_sce <- function(sce, group.variable = "donor", 
@@ -98,6 +101,10 @@ sce.mrb.name <- "sce-mrb_dlpfc.rda"
 sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb.name)
 
 # 02, within-samples tests
+# set the halo data path
+halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", "halo_all.Rdata")
+# bulk data
+rse.gene.filter.filepath <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis", "rse-gene-filter.rda")
 
 # 03, across-samples tests
 
