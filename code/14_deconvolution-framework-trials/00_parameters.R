@@ -149,24 +149,37 @@ lexperiment.withinsample.path <- here(save.path, lexperiment.withinsample.name)
 within.samples.results.table.name <- "results-table_within-sample-deconvolution.rda"
 within.samples.results.table.path <- here(save.path, within.samples.results.table.name)
 
-# 03, plot within-sample results
+# 03, prep image cell quantities
+plot.barplot.absdiff.byslide.path <- here(save.path, "ggplot-barplot_neuron-prop-abs-diff_by-slide.jpg")
+plot.jitterbox.diff.byposition.path <- here(save.path, "ggplot-jitterbox_neuron-prop-diff_by-position.jpg")
+plot.jitterbox.absdiff.byposition.path <- here(save.path, "ggplot-jitterbox_neuron-prop-abs-diff_by-position.jpg")
+plot.jitterbox.diff.bydonor.path <- here(save.path, "ggplot-jitterbox_neuron-prop-diff_by-donor-brnum.jpg")
+plot.jitterbox.absdiff.bydonor.path <- here(save.path, "ggplot-jitterbox_neuron-prop-abs-diff_by-donor-brnum.jpg")
+plot.jitterbox.diff.all.path <- here(save.path, "ggplot-jitterbox_neuron-prop-diff_all.jpg")
+plot.jitterbox.absdiff.all.path <- here(save.path, "ggplot-jitterbox_neuron-prop-abs-diff_all.jpg")
+
+# 04
+
+# 05
+
+# 06, plot within-sample results
 # scatterplots
 scatterplot.proportions.bysample.colmethod.name <- 
   "ggplot-scatterplot_neuron-proportions_bysample-colmethod.jpg"
 scatterplot.proportions.bysample.colmethod.path <- here(save.path, scatterplot.proportions.bysample.colmethod.name)
-
+#
 scatterplot.proportions.bylibprep.colmethod.name <- 
   "ggplot-scatterplot_neuron-proportions_bylibprep-colmethod.jpg"
 scatterplot.proportions.bylibprep.colmethod.path <- here(save.path, scatterplot.proportions.bylibprep.colmethod.name)
-
+#
 scatterplot.proportions.bylibtype.colmethod.name <- 
   "ggplot-scatterplot_neuron-proportions_bylibtype-colmethod.jpg"
 scatterplot.proportions.bylibtype.colmethod.path <- here(save.path, scatterplot.proportions.bylibtype.colmethod.name)
-
+#
 scatterplot.proportions.byexptgroup.colmethod.name <-
   "ggplot-scatterplot_neuron-proportions_byexptgroup-colmethod.jpg"
 scatterplot.proportions.byexptgroup.colmethod.path <- here(save.path, scatterplot.proportions.byexptgroup.colmethod.name)
-
+#
 scatterplot.proportions.bymethod.colmethod.name <-
   "ggplot-scatterplot_neuron-proportions_bymethod-colmethod.jpg"
 scatterplot.proportions.bymethod.colmethod.path <- here(save.path, scatterplot.proportions.byexptgroup.colmethod.name)
@@ -175,34 +188,33 @@ scatterplot.proportions.bymethod.colmethod.path <- here(save.path, scatterplot.p
 jitterbox.abserror.bysample.xmethod.name <- 
   "ggplot-jitter-boxplot_neuron-abs-error_bysample-xmethod.jpg"
 jitterbox.abserror.bysample.xmethod.path <- here(save.path, jitterbox.abserror.bysample.xmethod.name)
-
+#
 jitterbox.abserror.bylibprep.xmethod.name <- 
   "ggplot-jitter-boxplot_neuron-abs-error_bylibprep-xmethod.jpg"
 jitterbox.abserror.bylibprep.xmethod.path <- here(save.path, jitterbox.abserror.bylibprep.xmethod.name)
-
+#
 jitterbox.abserror.bylibtype.xmethod.name <-
   "ggplot-jitter-boxplot_neuron-abs-error_bylibtype-xmethod.jpg"
 jitterbox.abserror.bylibtype.xmethod.path <- here(save.path, jitterbox.abserror.bylibtype.xmethod.name)
-
+#
 jitterbox.abserror.byexptgroup.xmethod.name <-
   "ggplot-jitter-boxplot_neuron-abs-error_byexptgroup-xmethod.jpg"
 jitterbox.abserror.byexptgroup.xmethod.path <- here(save.path, jitterbox.abserror.byexptgroup.xmethod.name)
-
+#
 jitterbox.rmse.bysample.xmethod.name <-
   "ggplot-jitter-boxplot_rmse-k2_bysample-xmethod.jpg"
 jitterbox.rmse.bysample.xmethod.path <- here(save.path, jitterbox.rmse.bysample.xmethod.name)
-
+#
 jitterbox.rmse.bylibprep.xmethod.name <-
   "ggplot-jitter-boxplot_rmse-k2_bylibprep-xmethod.jpg"
 jitterbox.rmse.bylibprep.xmethod.path <- here(save.path, jitterbox.rmse.bylibprep.xmethod.name)
-
+#
 jitterbox.rmse.bylibtype.xmethod.name <-
   "ggplot-jitter-boxplot_rmse-k2_bylibtype-xmethod.jpg"
 jitterbox.rmse.bylibtype.xmethod.path <- here(save.path, jitterbox.rmse.bylibtype.xmethod.name)
-
+#
 jitterbox.rmse.byexptgroup.xmethod.name <-
   "ggplot-jitter-boxplot_rmse-k2_byexptgroup-xmethod.jpg"
 jitterbox.rmse.byexptgroup.xmethod.path <- here(save.path, jitterbox.rmse.byexptgroup.xmethod.name)
-
 
 # 04
