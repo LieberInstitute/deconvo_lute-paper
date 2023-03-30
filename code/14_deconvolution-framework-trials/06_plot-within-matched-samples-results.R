@@ -7,10 +7,12 @@
 source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters.R")
 sapply(libv, library, character.only = T)
 results.table <- get(load(within.samples.results.table.path))
+results.table$method <- gsub("Param", "", results.table$method.string)
 
 # plot cell proportions
 new.plot <- ggplot(results.table, 
-                   aes(x = neuron.proportion.true, y = neuron_proportion,
+                   aes(x = neuron.proportion.true, 
+                       y = neuron.proportion.predicted,
                        color = method)) +
   geom_point(alpha = 0.4) + theme_bw() +
   geom_abline(slope = 1, intercept = 0, color = "black") +

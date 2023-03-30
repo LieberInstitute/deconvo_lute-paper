@@ -12,11 +12,15 @@ sapply(libv, library, character.only = TRUE)
 # save path
 save.path <- here("deconvo_method-paper", "outputs", "14_deconvolution-framework-trials")
 
+#-----------------
 # helper functions
+#-----------------
+
+# 01 helper functions
 
 pseudobulk_from_sce <- function(sce, group.variable = "donor", 
                             cell.type.variable = "k2", 
-                            s = c("neuron" = 3, "glial" = 10), 
+                            s = c("glial" = 3, "neuron" = 10), 
                             summary.method = "mean", 
                             assay.name = "logcounts"){
   # makes a new pseudobulk sample from an sce object
@@ -88,6 +92,32 @@ run_pseudobulk_experiment <- function(list.pb, method = "nnlsParam"){
   })
 }
 
+# 03 helper functions
+
+cell_size_sample <- function(image.table, sample.id, image.sample.id.vector){
+  # get k2 cell sizes for a single sample/slide from image outputs
+  filter.sample <- image.sample.id.vector==sample.id
+  image.table.sample <- image.table[filter.sample,]
+  # get k2 labels
+  cell.type.vector <- image.table.sample$cell_type
+  image.table.sample$k2.type <- ifelse(cell.type.vector %in% c("Inhib", "Excit"), "neuron",
+                                       ifelse(cell.type.vector %in% 
+                                                c("Oligo", "OPC", "Astro", "Micro"), 
+                                              "glial", "other"))
+  image.table.sample <- image.table.sample[!image.table.sample$k2.type=="other",]
+  # get nuclear area
+  by.list <- list(k2.type = image.table.sample$k2.type)
+  sample.area <- aggregate(image.table.sample$Nucleus_Area, by = by.list, FUN = "mean")
+  sample.area <- c("glial" = sample.area$x[1], "neuron" = sample.area$x[2])
+  # get akt3 copies
+  by.list <- list(k2.type = image.table.sample$k2.type)
+  sample.counts <- aggregate(image.table.sample$AKT3_Copies, by = by.list, FUN = "mean")
+  sample.counts <- c("glial" = sample.counts$x[1], "neuron" = sample.counts$x[2])
+  return(list(nucleus.area = sample.area, akt3.counts = sample.counts))
+}
+
+# 04 helper functions
+
 standard_sample_id <- function(table, location.label, brnum.label = "BrNum"){
   # get standard formatted sample identifiers from sn, bulk, and image tables.
   brnum.vector <- table[,brnum.label]
@@ -99,8 +129,65 @@ standard_sample_id <- function(table, location.label, brnum.label = "BrNum"){
   return(paste0(brnum.vector, "_", location.vector))
 }
 
+get_k2_area <- function(sizes.table, area.variable, 
+                        cell.size.variable = "cell.type", summary.function = "mean"){
+  sizes.table$k2 <- ifelse(
+    sizes.table[, cell.size.variable] %in% c("Excit", "Inhib"), "neuron",
+    ifelse(sizes.table[, cell.size.variable] %in% c("Micro", "Oligo", "Astro"),
+           "glial", "other"))
+  k2.table <- aggregate(sizes.table[, area.variable], 
+                        by = list(k2 = sizes.table$k2), 
+                        FUN = summary.function)
+  colnames(k2.table) <- c("k2.cell.type", 
+                          paste0(area.variable, ".", summary.function))
+  return(k2.table)
+}
+
+# 05 helper functions
+
+run_deconvolution <- function(y, z, s, method.string){
+  param.text <- paste0(method.string, "(y = y, z = z, s = s)")
+  new.parameters <- eval(parse(text = param.text))
+  predicted.proportions <- deconvolution(new.parameters) %>% suppressMessages()
+  predicted.proportions <- predicted.proportions/sum(predicted.proportions)
+  return(predicted.proportions)
+}
+
+results_series_table <- function(y, z, method.vector, sizes.list){
+  # map method and sizes
+  table.map <- data.frame(method = rep(method.vector, length(sizes.list)),
+                          size = rep(names(sizes.list), 
+                                     each = length(method.vector)))
+  map.index.vector <- seq(nrow(table.map))
+  # get results table
+  results.mapped <- lapply(map.index.vector, function(map.index){
+    y.index.vector <- y %>% ncol() %>% seq()
+    cell.sizes.label <- table.map[map.index,2]
+    method.string <- table.map[map.index,1]
+    result.iter <- lapply(y.index.vector, function(y.index){
+      s <- sizes.list[[cell.sizes.label]]
+      y.iter <- y[,y.index,drop=FALSE]
+      run_deconvolution(y = y.iter, 
+                        z = z.main,
+                        s = s, 
+                        method.string = method.string)
+    })
+    result.iter <- do.call(rbind, result.iter) %>% 
+      as.data.frame()
+    colnames(result.iter)[1:2] <- paste0(colnames(result.iter)[1:2],
+                                         ".proportion.predicted")
+    result.iter$sample.id <- colnames(y)
+    result.iter$cell.sizes.label <- cell.sizes.label
+    result.iter$method.string <- method.string
+    return(result.iter)
+  })
+  results.mapped <- do.call(rbind, results.mapped) %>% as.data.frame()
+  return(results.mapped)
+}
+
 # load cell sizes
 cell.sizes.k2.path <- here("deconvo_method-paper", "outputs", "07_cell-size-estimates")
+
 cell.sizes.k2.path <- here(cell.sizes.k2.path, "cell-sizes-k2-table.rda")
 
 #------------------
@@ -118,6 +205,8 @@ sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb
 # save results table
 independent.pb.results.table.name <- "results-table_independent-pb-mrb.rda"
 independent.pb.results.table.path <- here(save.path, independent.pb.results.table.name)
+
+# 02, plot independent pseudobulk results
 # save new plots
 # scatterplot, proportions
 pb.scatterplot.proportions.bysample.colmethod.name <- 
@@ -132,7 +221,7 @@ pb.barplot.rmse.bysample.xmethod.name <-
   "ggplot-barplot_rmse_bysample-colmethod_independent-pb.jpg"
 pb.barplot.rmse.bysample.colmethod.path <- here(save.path, pb.barplot.rmse.bysample.xmethod.name)
 
-# 02, within-samples tests
+# 03, get image cell proportions
 # set the halo data path
 halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", "halo_all.Rdata")
 # bulk data
@@ -148,8 +237,7 @@ lexperiment.withinsample.path <- here(save.path, lexperiment.withinsample.name)
 # results table
 within.samples.results.table.name <- "results-table_within-sample-deconvolution.rda"
 within.samples.results.table.path <- here(save.path, within.samples.results.table.name)
-
-# 03, prep image cell quantities
+#
 plot.barplot.absdiff.byslide.path <- here(save.path, "ggplot-barplot_neuron-prop-abs-diff_by-slide.jpg")
 plot.jitterbox.diff.byposition.path <- here(save.path, "ggplot-jitterbox_neuron-prop-diff_by-position.jpg")
 plot.jitterbox.absdiff.byposition.path <- here(save.path, "ggplot-jitterbox_neuron-prop-abs-diff_by-position.jpg")
@@ -157,8 +245,12 @@ plot.jitterbox.diff.bydonor.path <- here(save.path, "ggplot-jitterbox_neuron-pro
 plot.jitterbox.absdiff.bydonor.path <- here(save.path, "ggplot-jitterbox_neuron-prop-abs-diff_by-donor-brnum.jpg")
 plot.jitterbox.diff.all.path <- here(save.path, "ggplot-jitterbox_neuron-prop-diff_all.jpg")
 plot.jitterbox.absdiff.all.path <- here(save.path, "ggplot-jitterbox_neuron-prop-abs-diff_all.jpg")
+# load cell sizes list
+image.cell.sizes.save.name <- "image_cell-sizes.rda"
+image.cell.sizes.save.path <- here("deconvo_method-paper", "outputs", "07_cell-size-estimates", 
+                                   image.cell.sizes.save.name)
 
-# 04
+# 04, get experiment info for within-samples experiments
 
 # 05
 
@@ -218,3 +310,5 @@ jitterbox.rmse.byexptgroup.xmethod.name <-
 jitterbox.rmse.byexptgroup.xmethod.path <- here(save.path, jitterbox.rmse.byexptgroup.xmethod.name)
 
 # 04
+complete.sample.id.vector.name <- "complete-sample-id-vector_within-samples-trials.rda"
+complete.sample.id.vector.path <- here(save.path, complete.sample.id.vector.name)

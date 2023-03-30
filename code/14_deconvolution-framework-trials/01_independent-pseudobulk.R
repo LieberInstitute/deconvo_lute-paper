@@ -10,7 +10,7 @@ sce.mrb <- get(load(sce.mrb.path))
 sce <- get(load(sce.markers.list.path))[["k2"]]
 
 # prepare deconvolution experiment
-s <- c("glial" = 5, "neuron" = 10)
+s <- c("glial" = 3, "neuron" = 10)
 # filter sce.mrb
 filter.markers <- rownames(sce.mrb) %in% rownames(sce)
 sce.mrb <- sce.mrb[filter.markers,]
