@@ -7,11 +7,10 @@
 source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters.R")
 sapply(libv, library, character.only = T)
 lexperiment <- get(load(lexperiment.withinsample.path))
-rse <- get(load(rse.k2markers.filepath))
 image.table <- get(load(halo.output.path))
 sce <- get(load(sce.markers.list.path))[["k2"]]
-sce <- logNormCounts(sce, assay.type = "counts_adj")
-complete.sample.id.vector <- get(load(complete.sample.id.vector.path))
+sce <- logNormCounts(sce, assay.type = "counts")
+# complete.sample.id.vector <- get(load(complete.sample.id.vector.path))
 
 # perform deconvolution experiments
 # get main z signature matrix
@@ -25,7 +24,9 @@ results.list <- lapply(sample.id.vector, function(sample.id){
   sample.results <- results_series_table(y = y, z = z, 
                                          method.vector = method.vector,
                                          sizes.list = sizes.list)
+  sample.results$bulk.label <- colnames(y)
   sample.results$sample.id <- sample.id
+  sample.results$y.total.expression <- lsample$y.total.expression
   sample.results$glial.proportion.true <- lsample$p.proportion.k2["glial"]
   sample.results$glial.count.true <- lsample$p.count.k2["glial"]
   sample.results$neuron.proportion.true <- lsample$p.proportion.k2["neuron"]

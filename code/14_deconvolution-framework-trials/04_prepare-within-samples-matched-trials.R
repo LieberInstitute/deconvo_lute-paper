@@ -10,7 +10,9 @@ rse <- get(load(rse.k2markers.filepath))
 image.table <- get(load(halo.output.path)) %>% as.data.frame()
 image.cells <- get(load(image.cells.path))
 sce <- get(load(sce.markers.list.path))[["k2"]]
-sce <- logNormCounts(sce)
+# get logcounts expression
+rse <- logNormCounts(rse, assay.type = "counts")
+sce <- logNormCounts(sce, assay.type = "counts")
 
 # get image-based cell size references
 list.image.cell.sizes <- get(load(image.cell.sizes.save.path))
@@ -45,7 +47,7 @@ complete.sample.id.vector <- intersect(unique.sample.id.sce,
 save(complete.sample.id.vector, file = complete.sample.id.vector.path)
 
 # get list of deconvolution experiment object sets
-cell.sizes.manual <- c("glial" = 3, "neuron" = 10)
+# cell.sizes.manual <- c("glial" = 3, "neuron" = 10)
 lexperiment <- lapply(complete.sample.id.vector, function(sample.id){
   message(sample.id)
   filter.sce <- sce.sample.id.vector == sample.id
@@ -60,22 +62,22 @@ lexperiment <- lapply(complete.sample.id.vector, function(sample.id){
   # parse cell counts/proportions
   brnum <- gsub("_.*", "", sample.id)
   image.cells.id <- image.cells[image.cells[,"sample.id"]==sample.id,]
-  p.count.k2 <- c(image.cells.id["glial"], image.cells.id["neuron"]) %>% unlist()
-  p.proportion.k2 <- c(image.cells.id["glial"], image.cells.id["neuron"]) %>% unlist()
+  p.count.k2 <- c(image.cells.id["glial.count"], image.cells.id["neuron.count"]) %>% unlist()
+  p.proportion.k2 <- c(image.cells.id["glial.proportion"], 
+                       image.cells.id["neuron.proportion"]) %>% unlist()
   names(p.count.k2) <- names(p.proportion.k2) <- c("glial", "neuron")
   y <- assays(rse.sample)[[assay.name.rse]]
   colnames(y) <- rse.sample[["expt_condition"]]
   # set cell sizes
-  sizes.sample <- cell_size_sample(image.table, sample.id, image.sample.id.vector)
-  list.sizes <- list(sample.area = sizes.sample$nucleus.area,
-                     sample.counts = sizes.sample$akt3.counts,
-                     reference.area = area.k2,
-                     reference.counts = counts.k2,
-                     manual.sizes = cell.sizes.manual)
+  # sizes.sample <- cell_size_sample(image.table, sample.id, image.sample.id.vector)
+  list.sizes <- list(reference.area = area.k2, reference.counts = counts.k2)
+  # get total expression y
+  y.total.expression <- colSums(y)
   # return
   return(list(sce = sce.sample, image = image.sample, rse = rse.sample,
               z = z.sample, p.count.k2 = p.count.k2, 
               p.proportion.k2 = p.proportion.k2, y = y,
+              y.total.expression = y.total.expression,
               list.sizes = list.sizes))
 })
 names(lexperiment) <- complete.sample.id.vector

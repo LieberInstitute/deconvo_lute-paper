@@ -20,10 +20,14 @@ image.table <- image.table[!image.table$k2.type=="other",]
 # get proportions on slide (combine circle/star)
 image.table$sample.id <- paste0(image.table$BrNum, "_", toupper(image.table$Position))
 unique.sample.id <- unique(image.table$sample.id)
-image.prop <- do.call(rbind, lapply(unique.sample.id, function(sample.id){
+image.cells <- do.call(rbind, lapply(unique.sample.id, function(sample.id){
   filter <- image.table$sample.id == sample.id
-  table(image.table[filter,]$k2.type) %>% prop.table() %>% t()
+  cell.counts <- table(image.table[filter,]$k2.type)
+  cell.proportions <- cell.counts %>% prop.table() %>% t()
+  row.data <- c(cell.counts %>% t(), cell.proportions)
 })) %>% as.data.frame()
-image.prop$sample.id <- unique.sample.id
+colnames(image.cells) <- c("glial.count", "neuron.count", "glial.proportion", 
+                          "neuron.proportion")
+image.cells$sample.id <- unique.sample.id
 # save
-save(image.prop, file = image.cells.path)
+save(image.cells, file = image.cells.path)

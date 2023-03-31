@@ -76,7 +76,7 @@ signature_matrix_from_sce <- function(sce, cell.type.variable = "k2",
   return(z)
 }
 
-run_pseudobulk_experiment <- function(list.pb, method = "nnlsParam"){
+run_pseudobulk_experiment <- function(list.pb, s, z, method = "nnlsParam"){
   # run an independent psedobulk experiment.
   lapply(list.pb, function(data){
     param.string <- paste0(method, "(y = data$y, z = z, s = s)")
@@ -190,11 +190,12 @@ cell.sizes.k2.path <- here("deconvo_method-paper", "outputs", "07_cell-size-esti
 
 cell.sizes.k2.path <- here(cell.sizes.k2.path, "cell-sizes-k2-table.rda")
 
+# deconvolution algorithms/methods to test
+method.vector <- c("nnlsParam", "musicParam", "deconrnaseqParam")
+
 #------------------
 # script parameters
 #------------------
-method.vector <- c("nnlsParam", "musicParam", "deconrnaseqParam")
-
 # 01, independent pseudobulk
 # new dlpfc markers
 sce.markers.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
@@ -227,7 +228,7 @@ halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO
 # bulk data
 rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis", "rse_k2-marker-expression_ro1-dlpfc.rda")
 # data for experiments
-assay.name.rse <- "counts"
+assay.name.rse <- "logcounts"
 # image cells path
 image.cells.name <- "image-cell-counts-table_by-brnum.rda"
 image.cells.path <- here(save.path, image.cells.name)
@@ -292,6 +293,10 @@ jitterbox.abserror.bylibtype.xmethod.path <- here(save.path, jitterbox.abserror.
 jitterbox.abserror.byexptgroup.xmethod.name <-
   "ggplot-jitter-boxplot_neuron-abs-error_byexptgroup-xmethod.jpg"
 jitterbox.abserror.byexptgroup.xmethod.path <- here(save.path, jitterbox.abserror.byexptgroup.xmethod.name)
+#
+jitterbox.abserror.bysizetype.xmethod.name <-
+  "ggplot-jitter-boxplot_neuron-abs-error_bysizetype-xmethod.jpg"
+jitterbox.abserror.bysizetype.xmethod.path <- here(save.path, jitterbox.abserror.bysizetype.xmethod.name)
 #
 jitterbox.rmse.bysample.xmethod.name <-
   "ggplot-jitter-boxplot_rmse-k2_bysample-xmethod.jpg"

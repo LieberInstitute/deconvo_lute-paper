@@ -7,7 +7,12 @@
 source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters.R")
 sapply(libv, library, character.only = T)
 results.table <- get(load(within.samples.results.table.path))
+
+# manage results.table variables
 results.table$method <- gsub("Param", "", results.table$method.string)
+results.table$library.prep <- gsub(".*_", "", results.table$bulk.label)
+results.table$library.type <- gsub("_.*", "", results.table$bulk.label)
+results.table$bulk.id <- results.table$bulk.label
 
 # plot cell proportions
 new.plot <- ggplot(results.table, 
@@ -73,29 +78,33 @@ jpeg(jitterbox.abserror.byexptgroup.xmethod.path, width = 6, height = 4,
 new.plot + facet_wrap(~bulk.id)
 dev.off()
 #
+jpeg(jitterbox.abserror.bysizetype.xmethod.path, width = 6, height = 4, 
+     units = "in", res = 400)
+new.plot + facet_wrap(~cell.sizes.label)
+dev.off()
 
 # plot rmse
-new.plot <- ggplot(results.table, aes(x = method, y = rmse)) + theme_bw() + 
-  geom_jitter(alpha = 0.2) + geom_boxplot(alpha = 0, color = "cyan") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  xlab("Deconvolution algorithm") + ylab("RMSE") + ggtitle("Cell type: neuron")
+#new.plot <- ggplot(results.table, aes(x = method, y = rmse)) + theme_bw() + 
+#  geom_jitter(alpha = 0.2) + geom_boxplot(alpha = 0, color = "cyan") +
+#  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#  xlab("Deconvolution algorithm") + ylab("RMSE") + ggtitle("Cell type: neuron")
 #
-jpeg(jitterbox.rmse.bysample.xmethod.path, width = 6, height = 4, 
-     units = "in", res = 400)
-new.plot + facet_wrap(~sample.id)
-dev.off()
+#jpeg(jitterbox.rmse.bysample.xmethod.path, width = 6, height = 4, 
+#     units = "in", res = 400)
+#new.plot + facet_wrap(~sample.id)
+#dev.off()
 #
-jpeg(jitterbox.rmse.bylibprep.xmethod.path, width = 5, height = 3, 
-     units = "in", res = 400)
-new.plot + facet_wrap(~library.prep)
-dev.off()
+#jpeg(jitterbox.rmse.bylibprep.xmethod.path, width = 5, height = 3, 
+#     units = "in", res = 400)
+#new.plot + facet_wrap(~library.prep)
+#dev.off()
 #
-jpeg(jitterbox.rmse.bylibtype.xmethod.path, width = 5, height = 3, 
-     units = "in", res = 400)
-new.plot + facet_wrap(~library.type)
-dev.off()
+#jpeg(jitterbox.rmse.bylibtype.xmethod.path, width = 5, height = 3, 
+#     units = "in", res = 400)
+#new.plot + facet_wrap(~library.type)
+#dev.off()
 #
-jpeg(jitterbox.rmse.byexptgroup.xmethod.path, width = 5, height = 4, 
-     units = "in", res = 400)
-new.plot + facet_wrap(~bulk.id)
-dev.off()
+#jpeg(jitterbox.rmse.byexptgroup.xmethod.path, width = 5, height = 4, 
+#     units = "in", res = 400)
+#new.plot + facet_wrap(~bulk.id)
+#dev.off()
