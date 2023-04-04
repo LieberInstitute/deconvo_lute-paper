@@ -14,9 +14,9 @@ filter.other <- !sce[["k2"]]=="other"
 sce <- sce[,filter.other]
 
 # set params for overlaps
-min.overlap.rate <- 0.8
+min.overlap.rate <- NULL
 markers.per.type.final <- 20
-markers.per.type.iter.start <- 1000
+markers.per.type.iter.start <- 5000
 # markers.by.type.iter <- seq(20, 1000, 20)
 
 # cell.types.vector <- sce[["k2"]]
@@ -27,15 +27,7 @@ markers.by.batch <- markers_by_batch(sce = sce, "Sample", "k2", "logcounts",
                                      markers.per.type.iter.start)
 list.markers.final <- get.overlapping.markers(markers.by.batch,
                                               min.overlap.rate)
-list.markers.final
+save(list.markers.final, file = list.markers.final.path)
 
-
-
-
-
-
-if(nrow(markers.final))
-
-
-
-
+# get signature matrices for differing overlap frequencies
+# get kapp values for differing overlap frequencies

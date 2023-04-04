@@ -54,8 +54,12 @@ get.overlapping.markers <- function(markers.by.batch, min.overlap.rate = 0.8){
     marker.table.type <- marker.table %>% filter(cellType.target == type)
     overlap.frequency <- marker.table.type$gene %>% table() %>% as.data.frame()
     overlap.frequency$rate.overlap <- 100*overlap.frequency[,2]/length(markers.by.batch)
-    filter.overlaps <- overlap.frequency$percent.overlap >= min.overlap.rate
-    overlap.frequency[filter.overlaps, 1] %>% as.character()
+    if(is(min.overlap.rate, "NULL")){
+      overlap.frequency
+    } else{
+      filter.overlaps <- overlap.frequency$percent.overlap >= min.overlap.rate
+      overlap.frequency[filter.overlaps, 1] %>% as.character()
+    }
   })
   names(list.markers.final) <- unique.cell.types
   return(list.markers.final)
@@ -71,6 +75,10 @@ sce.path <- file.path("DLPFC_snRNAseq/processed-data/sce", sce.name)
 sce.prepared.path <- file.path("deconvo_method-paper", "outputs", 
                                "15_sample-wise-signature-matrix-simulations",
                                "sce-prepared_dlpfc-ro1-train.rda")
+
+# 02, markers by slide, overlaps
+list.markers.final.name <- "list-markers-by-slide-overlaps_dlpfc-ro1-train.rda"
+list.markers.final.path <- here(save.path, list.markers.final.name)
 
 # 04 mrb setup
 # mrb dlpfc markers
