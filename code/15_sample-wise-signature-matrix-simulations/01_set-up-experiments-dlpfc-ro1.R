@@ -3,7 +3,7 @@
 # Author: Sean Maden
 #
 
-source("deconvo_method-paper/code/15_sample-wise-signature-matrix-simulations/00_parameters.R")
+source("deconvo_method-paper/code/15_sample-wise-signature-matrix-simulations/00_parameters-script-set-15.R")
 sapply(libv, library, character.only = T)
 sce <- get(load(sce.path))
 
@@ -17,10 +17,11 @@ k2.cell.type.vector <- ifelse(cell.type.vector %in% c("Excit", "Inhib"), "neuron
                                      "glial", "other"))
 sce[["k2"]] <- k2.cell.type.vector
 sce <- sce[,!sce[["k2"]]=="other"]
+save(sce, file = sce.prepared.path)
 
 # get markers by batch
-markers.by.batch <- markers_by_batch(sce = sce.mrb, "donor", "k2", "logcounts", 20)
+# markers.by.batch <- markers_by_batch(sce = sce.mrb, "donor", "k2", "logcounts", 20)
 
 # visualize overlaps
-list.markers <- lapply(markers.by.batch, function(markers){markers$gene})
-upset(fromList(list.markers))
+# list.markers <- lapply(markers.by.batch, function(markers){markers$gene})
+# upset(fromList(list.markers))

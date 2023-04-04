@@ -25,25 +25,40 @@ markers_by_batch <- function(sce, batch.variable, celltype.variable, assay.name,
   batch.markers.list <- lapply(unique.batch.vector, function(batch.id){
     message("Getting markers for batch id: ", batch.id, "...")
     filter <- sce[[batch.variable]] == batch.id
-    marker_genes(sce[,filter], celltype.variable, assay.name, genes.per.type)
+    lute(sce = sce[,filter], 
+         celltype.variable = celltype.variable, 
+         assay.name = assay.name, 
+         markers.per.type = genes.per.type,
+         deconvolution.algorithm = NULL,
+         return.info = TRUE)
   })
   names(batch.markers.list) <- unique.batch.vector
   message("Finished all marker lists.")
   return(batch.markers.list)
 }
 
-marker_genes <- function(sce, celltype.variable, assay.name, genes.per.type = 20){
-  message("Running marker tests...")
-  mr <- DeconvoBuddies::get_mean_ratio2(sce, assay_name = assay.name, cellType_col = celltype.variable)
-  mr <- mr %>% as.data.frame()
-  message("Getting top ",genes.per.type," markers per cell type...")
-  unique.cell.types <- mr[,"cellType.target"] %>% as.character() %>% unique()
-  top.markers.list <- lapply(unique.cell.types, function(unique.type.id){
-    mr %>% filter(cellType.target == unique.type.id) %>% arrange(rank_ratio) %>% 
-      top_n(n = genes.per.type)
+get.overlapping.markers <- function(markers.by.batch, min.overlap.rate = 0.8){
+  # parse cell types
+  batch.id.vector <- names(markers.by.batch)
+  marker.list <- lapply(batch.id.vector, function(batch.id){
+    result.batch <- markers.by.batch[[batch.id]][[1]]
+    table.batch <- result.batch$result.info
+    table.batch <- table.batch %>% filter(gene %in% result.batch$markers)
+    table.batch$batch.id <- batch.id
+    return(table.batch)
   })
-  top.markers.table <- do.call(rbind, top.markers.list)
-  return(top.markers.table)
+  marker.table <- do.call(rbind, marker.list) %>% as.data.frame()
+  unique.cell.types <- marker.table$cellType.target %>% unique()
+  # get overlaps by cell type
+  list.markers.final <- lapply(unique.cell.types, function(type){
+    marker.table.type <- marker.table %>% filter(cellType.target == type)
+    overlap.frequency <- marker.table.type$gene %>% table() %>% as.data.frame()
+    overlap.frequency$rate.overlap <- 100*overlap.frequency[,2]/length(markers.by.batch)
+    filter.overlaps <- overlap.frequency$percent.overlap >= min.overlap.rate
+    overlap.frequency[filter.overlaps, 1] %>% as.character()
+  })
+  names(list.markers.final) <- unique.cell.types
+  return(list.markers.final)
 }
 
 #------------------
@@ -53,6 +68,9 @@ marker_genes <- function(sce, celltype.variable, assay.name, genes.per.type = 20
 # get full sce data
 sce.name <- "sce_DLPFC.Rdata"
 sce.path <- file.path("DLPFC_snRNAseq/processed-data/sce", sce.name)
+sce.prepared.path <- file.path("deconvo_method-paper", "outputs", 
+                               "15_sample-wise-signature-matrix-simulations",
+                               "sce-prepared_dlpfc-ro1-train.rda")
 
 # 04 mrb setup
 # mrb dlpfc markers
