@@ -4,7 +4,7 @@
 #
 # Prepares experiment metadata for deconvolution within matched samples data.
 
-source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters.R")
+source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters_script-set-14.R")
 sapply(libv, library, character.only = T)
 rse <- get(load(rse.k2markers.filepath))
 image.table <- get(load(halo.output.path)) %>% as.data.frame()
@@ -70,7 +70,9 @@ lexperiment <- lapply(complete.sample.id.vector, function(sample.id){
   colnames(y) <- rse.sample[["expt_condition"]]
   # set cell sizes
   # sizes.sample <- cell_size_sample(image.table, sample.id, image.sample.id.vector)
-  list.sizes <- list(reference.area = area.k2, reference.counts = counts.k2)
+  list.sizes <- list(reference.area = area.k2, 
+                     reference.counts = counts.k2,
+                     null = c("glial" = 1, "neuron" = 1))
   # get total expression y
   y.total.expression <- colSums(y)
   # return

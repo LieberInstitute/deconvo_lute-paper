@@ -4,7 +4,7 @@
 #
 # Plot results of within matched samples deconvolution experiments.
 
-source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters.R")
+source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters_script-set-14.R")
 sapply(libv, library, character.only = T)
 results.table <- get(load(within.samples.results.table.path))
 
@@ -108,3 +108,23 @@ dev.off()
 #     units = "in", res = 400)
 #new.plot + facet_wrap(~bulk.id)
 #dev.off()
+
+# plot figure 1a -- results with no cell size adjustment
+results.table.filtered <- results.table[results.table$cell.sizes.label=="null",]
+# plot cell proportions
+new.plot <- ggplot(results.table.filtered, 
+                   aes(x = neuron.proportion.true, 
+                       y = neuron.proportion.predicted,
+                       color = method)) +
+  geom_point(alpha = 0.4) + theme_bw() +
+  geom_abline(slope = 1, intercept = 0, color = "black") +
+  geom_vline(xintercept = 0.5, color = "black", alpha = 0.4) +
+  xlab("True") + ylab("Predicted") + ggtitle("Neuron cell proportion") +
+  xlim(0, 1) + ylim(0, 1) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+#
+jpeg(scatterplot.proportions.bysample.colmethod.path, width = 7, height = 5, 
+     units = "in", res = 400)
+new.plot + facet_wrap(~sample.id)
+dev.off()
+
