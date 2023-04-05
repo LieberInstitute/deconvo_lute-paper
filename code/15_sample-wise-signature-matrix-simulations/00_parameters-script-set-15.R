@@ -7,7 +7,7 @@
 
 # dependencies
 libv <- c("here", "lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment", 
-          "SummarizedExperiment", "scran", "DeconvoBuddies", "UpSetR")
+          "SummarizedExperiment", "scran", "DeconvoBuddies", "UpSetR", "DelayedArray")
 sapply(libv, library, character.only = TRUE)
 
 # save path
@@ -63,6 +63,25 @@ get.overlapping.markers <- function(markers.by.batch, min.overlap.rate = 0.8){
   })
   names(list.markers.final) <- unique.cell.types
   return(list.markers.final)
+}
+
+signature_matrix_from_sce <- function(sce, 
+                                      cell.type.variable = "k2", 
+                                      summary.method = "mean", 
+                                      assay.name = "counts"){
+  # gets the z signature matrix from an sce object
+  expression.matrix <- assays(sce)[[assay.name]] %>% as.matrix()
+  cd <- colData(sce)
+  unique.cell.types <- cd[,cell.type.variable] %>% unique()
+  unique.cell.types <- unique.cell.types[order(unique.cell.types)]
+  z <- do.call(cbind, lapply(unique.cell.types, function(cell.type.index){
+    filter.index <- cd[,cell.type.variable]==cell.type.index
+    if(summary.method == "mean"){
+      DelayedArray::rowMeans(expression.matrix[,filter.index])
+    } else{stop('Error, unrecognized summary.method.')}
+  }))
+  colnames(z) <- unique.cell.types
+  return(z)
 }
 
 #------------------
