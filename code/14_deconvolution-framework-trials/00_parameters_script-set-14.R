@@ -93,7 +93,6 @@ run_pseudobulk_experiment <- function(list.pb, s, z, method = "nnlsParam"){
 }
 
 # 03 helper functions
-
 cell_size_sample <- function(image.table, sample.id, image.sample.id.vector){
   # get k2 cell sizes for a single sample/slide from image outputs
   filter.sample <- image.sample.id.vector==sample.id
@@ -117,7 +116,6 @@ cell_size_sample <- function(image.table, sample.id, image.sample.id.vector){
 }
 
 # 04 helper functions
-
 standard_sample_id <- function(table, location.label, brnum.label = "BrNum"){
   # get standard formatted sample identifiers from sn, bulk, and image tables.
   brnum.vector <- table[,brnum.label]
@@ -144,7 +142,6 @@ get_k2_area <- function(sizes.table, area.variable,
 }
 
 # 05 helper functions
-
 run_deconvolution <- function(y, z, s, method.string){
   param.text <- paste0(method.string, "(y = y, z = z, s = s)")
   new.parameters <- eval(parse(text = param.text))
