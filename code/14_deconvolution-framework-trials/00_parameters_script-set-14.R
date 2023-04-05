@@ -58,10 +58,13 @@ pseudobulk_from_sce <- function(sce, group.variable = "donor",
   return(lpb)
 }
 
-signature_matrix_from_sce <- function(sce, cell.type.variable = "k2", 
+signature_matrix_from_sce <- function(sce, 
+                                      cell.type.variable = "k2", 
                                       summary.method = "mean", 
                                       assay.name = "logcounts"){
   # gets the z signature matrix from an sce object
+  lc.condition <- assay.name == "logcounts" & !assay.name %in% names(assays(sce))
+  if(lc.condition){sce <- scuttle::logNormCounts(sce)}
   expression.matrix <- assays(sce)[[assay.name]] %>% as.matrix()
   cd <- colData(sce)
   unique.cell.types <- cd[,cell.type.variable] %>% unique()
