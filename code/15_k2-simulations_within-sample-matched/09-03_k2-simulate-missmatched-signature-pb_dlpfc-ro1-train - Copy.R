@@ -46,6 +46,7 @@ s <- c("glial" = 3, "neuron" = 10)
 deconvolution.algorithm <- "nnls"
 summary.method  <- "mean"
 
+# perform experiment
 experiment <- deconvolution.experiment.permute.groups(
   sce = sce, s = s,
   sample.id.variable = sample.id.variable, 
@@ -55,3 +56,7 @@ experiment <- deconvolution.experiment.permute.groups(
   summary.method = summary.method, 
   verbose = TRUE)
 
+# save
+experiment.name <- "experiment-results_k2-sim-permute_dlpfc-ro1-train.rda"
+experiment.path <- here("deconvo_method-paper", "outputs", experiment.name)
+save(experiment, file = experiment.path)

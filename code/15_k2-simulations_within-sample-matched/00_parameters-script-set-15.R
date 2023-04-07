@@ -10,9 +10,8 @@ libv <- c("here", "lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment
 sapply(libv, library, character.only = TRUE)
 
 # save path
-save.path <- here("deconvo_method-paper", "outputs", 
-                  "15_sample-wise-signature-matrix-simulations")
-
+save.path <- here("deconvo_method-paper", "outputs", "15_sample-wise-signature-matrix-simulations")
+save.path <- here("deconvo_method-paper", "outputs")
 
 #-----------------
 # helper functions
@@ -36,7 +35,8 @@ markers_by_batch <- function(sce, batch.variable, celltype.variable, assay.name,
   return(batch.markers.list)
 }
 
-get.overlapping.markers <- function(markers.by.batch, min.overlap.rate = 0.8){
+get.overlapping.markers <- function(markers.by.batch, min.overlap.rate = NULL){
+  require(dplyr)
   # parse cell types
   batch.id.vector <- names(markers.by.batch)
   marker.list <- lapply(batch.id.vector, function(batch.id){
