@@ -4,7 +4,7 @@
 # uses matched pseudobulk and signature matrices within samples
 # includes null cell sizes adjustment
 
-source("deconvo_method-paper/code/15_sample-wise-signature-matrix-simulations/00_parameters-script-set-15.R")
+source("deconvo_method-paper/code/15_k2-simulations_within-sample-matched/00_parameters-script-set-15.R")
 sapply(libv, library, character.only = T)
 
 # get save dpath

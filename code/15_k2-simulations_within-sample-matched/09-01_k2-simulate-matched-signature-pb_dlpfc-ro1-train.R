@@ -12,6 +12,22 @@ se.path <- here("deconvo_method-paper/outputs/15_k2-simulations_within-sample-ma
                         "se-markers-overlap-filters_dlpfc-ro1-train.rda")
 se <- get(load(se.path))
 
+# filter overlapping markers
+markers.data <- metadata(se)$marker.data$markers.overlaps
+markers.high.overlap <- lapply(markers.data, function(data){
+  data[data[,2] >= 5, 1]
+}) %>% unlist()
+# get overall mean ratios
+markers.se <- lute(sce = SingleCellExperiment(se), 
+                   celltype.variable = "k2", 
+     deconvolution.algorithm = NULL,
+     markers.per.type = 100)
+
+se <- se[rownames(se) %in% markers.high.overlap,]
+dim(se)
+length(intersect(rownames(se), markers.data$neuron[,1])) # 49
+length(intersect(rownames(se), markers.data$glial[,1])) # 49
+
 # simulations -- group-matched z and y-pseudobulk
 # experiment parameters
 assay.name <- "counts"
@@ -24,6 +40,10 @@ experiment <- deconvolution.experiment(y = NULL, sce = se, s = S.pb,
                                        sample.id.variable = sample.id.variable, 
                                        celltype.variable = celltype.variable, 
                                        markers.vector = NULL)
+# save
+experiment.name <- "experiment_within-slide-matched_dlpfc-ro1-train.rda"
+experiment.path <- here("deconvo_method-paper", "outputs", experiment.name)
+save(experiment, file = experiment.path)
 # plots
 experiment$plots.list$neuron$proportions.scatterplot
 experiment$plots.list$neuron$abs.error.barplot
@@ -33,7 +53,9 @@ experiment$plots.list$neuron$abs.error.jitterbox
 # experiment parameters
 # get true, pred proportions for sample pairs
 z.series <- c(unique(se[["Sample"]]), "all")
+sample.id.vector <- unique(se[["Sample"]])
 list.results.all <- lapply(z.series, function(z.id){
+  message(z.id)
   z.set <- se
   if(!z.id == "all"){z.set <- se[,se[["Sample"]]==z.id]}
   z <- signature_matrix_from_sce(z.set, "k2")
@@ -116,8 +138,3 @@ ggplot(plot.table, aes(x = abs.difference, y = abs.error)) +
 ggplot(results.all.table, aes(x = amount.true.z.neuron, y = abs.error.adj.neuron)) +
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
   facet_wrap(~sample.id.z) + scale_x_log10()
-
-# save
-experiment.name <- "experiment_within-slide-matched_dlpfc-ro1-train.rda"
-experiment.path <- here("deconvo_method-paper", "outputs", experiment.name)
-save(experiment, file = experiment.path)
