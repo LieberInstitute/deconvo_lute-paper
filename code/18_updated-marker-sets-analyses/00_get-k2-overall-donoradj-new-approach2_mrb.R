@@ -1,119 +1,70 @@
+# k2 markers in mrb dataset, including with donor adj counts/logcounts
 
 libv <- c("here", "dplyr", "lute", "biomaRt", "SummarizedExperiment", 
-          "SingleCellExperiment", "scuttle")
+          "SingleCellExperiment", "scuttle", "sva")
 sapply(libv, library, character.only = TRUE)
 
 # main run parameters
 markers.per.group.discover <- 500
 markers.per.group.final <- 40
-celltype.variable.original <- "cellType_broad_hc"
+celltype.variable.original <- "cellType"
 celltype.variable.new <- "k2"
-group.id.variable <- "Sample"
+group.id.variable <- "donor"
 assay.name.markers <- "counts"
 typemarker.algorithm <- "meanratios"
-min.group.overlap.rate <- 0.5
-markers.bygroup.name <- "group-markers-k2_train.rda"
-markers.filtered.name <- "overlap-markers-filtered-k2_train.rda"
+min.group.overlap.rate <- 0.8
+markers.bygroup.name <- "group-markers-k2_mrb.rda"
+markers.filtered.name <- "overlap-markers-filtered-k2_mrb.rda"
 
-# get sce data
-sce.name <- "sce_DLPFC.Rdata"
-sce.path <- file.path("DLPFC_snRNAseq/processed-data/sce", sce.name)
-sce.prepared.path <- file.path("deconvo_method-paper", "outputs", 
-                               "15_sample-wise-signature-matrix-simulations",
-                               "sce-prepared_dlpfc-ro1-train.rda")
-sce <- get(load(sce.path))
-# subset training donors
-donor.variable <- "BrNum"
-donor.id.train <- c("Br2720", "Br6471", "Br8492", "Br2743", "Br3942", "Br6423", "Br8325")
-filter.train <- sce[[donor.variable]] %in% donor.id.train
-sce <- sce[,filter.train]
-# get k2 labels and filter
-cell.type.vector <- sce[[celltype.variable.original]]
-k2.cell.type.vector <- ifelse(cell.type.vector %in% c("Excit", "Inhib"), "neuron",
-                              ifelse(cell.type.vector %in% c("Oligo", "OPC", "Astro", "Micro"), 
-                                     "glial", "other"))
-sce[[celltype.variable.new]] <- k2.cell.type.vector
-filter.other <- !sce[[celltype.variable.new]]=="other"
-sce <- sce[,filter.other]
+# load sce
+sce.mrb.name <- "sce-mrb_dlpfc.rda"
+sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb.name)
+sce <- get(load(sce.mrb.path))
+
+# get celltype variable
+celltype.variable.vector <- ifelse(grepl("Excit|Inhib", sce[["cellType"]]),"neuron",
+                                   ifelse(sce[["cellType"]] %in% 
+                                            c("Oligo", "OPC", "Micro", "Astro"), 
+                                          "glial", "other"))
+sce[[celltype.variable.new]] <- celltype.variable.vector
+# remove "other"
+filter.sce <- !sce[[celltype.variable.new]] == "other"
+sce <- sce[,filter.sce]
+
 sce <- scuttle::logNormCounts(sce)
-
-#scef <- sce[,sce[["Sample"]]=="Br2720_post"]
-#markers <- meanratiosParam(scef, "counts", "k2", 500, TRUE) %>% typemarkers()
 
 # get all marker candidates
 markers.by.group <- markers_by_group(sce, 
-                                     group.variable = group.id.variable, 
+                                     group.variable = group.id.variable,
                                      celltype.variable = celltype.variable.new, 
                                      assay.name = "logcounts", 
                                      markers.per.type = markers.per.group.discover, 
                                      typemarker.algorithm = typemarker.algorithm,
-                                     return.type = "list",
-                                     verbose = TRUE)
-
+                                     return.type = "list", verbose = TRUE)
 # save
 markers.bygroup.path <- file.path("deconvo_method-paper/outputs/", 
-                                   markers.bygroup.name)
+                                  markers.bygroup.name)
 save(markers.by.group, file = markers.bygroup.path)
 
-# get marker overlap info
-# get marker table list
-index.vector <- seq(length(markers.by.group))
-list.marker.tables <- lapply(index.vector, function(index){
-  marker.table <- markers.by.group[[index]]$result.info
-  marker.table$group.id <- names(markers.by.group)[index]
-  return(marker.table)
-})
-markers.filtered <- filter_group_markers(list.marker.tables,
-                                         minimum.group.overlap.rate = 
-                                           min.group.overlap.rate)
-# Found 8085 total markers.
-# Getting marker overlap info...
-# Found 4400 concordant markers by type.
-# Found 99 concordant markers with overlap rate at least 0.5
-
+# marker overlaps/concordance filter
+markers.filtered <- filter_group_markers(markers.by.group,
+                                         minimum.group.overlap.rate = 0.5)
 # save overlap markers info
-markers.filtered.path <- file.path("deconvo_method-paper/outputs/",markers.filtered.name)
+markers.filtered.path <- file.path("deconvo_method-paper/outputs/", 
+                                   markers.filtered.name)
 save(markers.filtered, file = markers.filtered.path)
 
 #---------------------
 # get slide-adj counts
 #---------------------
-libv <- c("here", "dplyr", "lute", "biomaRt", "SummarizedExperiment", 
-          "SingleCellExperiment", "scuttle", "sva")
-sapply(libv, library, character.only = TRUE)
-
-# get sce data
-sce.name <- "sce_DLPFC.Rdata"
-sce.path <- file.path("DLPFC_snRNAseq/processed-data/sce", sce.name)
-sce <- get(load(sce.path))
-
-filter.sce <- rownames(sce) %in% markers.filtered$marker.list.final
-
 dim(sce) # [1] 36601 77604
-
 scale.thresh <- -0.9 # scale filter
 assay.name.adj <- "counts_adjusted"
-celltype.variable.original <- "cellType_broad_hc"
 celltype.variable.new <- "k2"
-batch.variable.name <- "Sample"
-
-# subset training donors
-donor.variable <- "BrNum"
-donor.id.train <- c("Br2720", "Br6471", "Br8492", "Br2743", "Br3942", "Br6423", "Br8325")
-filter.train <- sce[[donor.variable]] %in% donor.id.train
-sce <- sce[,filter.train]
-# get k2 labels and filter
-cell.type.vector <- sce[[celltype.variable.original]]
-k2.cell.type.vector <- ifelse(cell.type.vector %in% c("Excit", "Inhib"), "neuron",
-                              ifelse(cell.type.vector %in% c("Oligo", "OPC", "Astro", "Micro"), 
-                                     "glial", "other"))
-sce[[celltype.variable.new]] <- k2.cell.type.vector
-filter.other <- !sce[[celltype.variable.new]]=="other"
-sce <- sce[,filter.other]
-sce <- scuttle::logNormCounts(sce)
-cd <- colData(sce)
+batch.variable.name <- "donor"
 
 # get downsampled cell type amounts
+cd <- colData(sce)
 dfm <- cd[,celltype.variable.new] %>% table() %>% as.data.frame()
 type.filt <- as.character(dfm[dfm[,2]==min(dfm[,2]),1])
 cdf <- cd[cd[,celltype.variable.new] == type.filt,]
@@ -131,8 +82,7 @@ md.rm <- list(type.filt = type.filt,
 message("removed ", length(cells.remove),
         " cells from ", length(sample.filt),
         " batches for cell type: '", type.filt, "'.")
-# removed 4997 cells from 2 batches for cell type: 'glial'.
-dim(sce.filter)
+dim(sce.filter) # [1] 33538 11165
 
 message("doing combat adj...")
 mexpr <- assays(sce.filter)[["counts"]]
@@ -144,10 +94,12 @@ mi.adj <- ComBat(dat = mexpr, batch = pheno$donor, mod = mod)
 message("converting negative values...")
 mi.adj[mi.adj < 0] <- 0 # convert negative values
 assays(sce.filter)[[assay.name.adj]] <- mi.adj
-# note: 10027 / 36601 genes have uniform variances, so aren't adjusted
+# Found 7428 genes with uniform expression within a single batch (all zeros); 
+# these will not be adjusted for batch
+
 # save sce adj
 save(sce.filter, file = 
-       here("deconvo_method-paper/outputs/sce-all_slide-adj_train.rda"))
+       here("deconvo_method-paper/outputs/sce-all_slide-adj_mrb.rda"))
 
 message("performing downsampling...")
 # downsample -- by donor, within celltypes
@@ -165,24 +117,10 @@ sce.ds <- do.call(cbind, lapply(utypev, function(ti){
   assays(scef)[[assay.name.adj]] <- mexpr.ds 
   scef
 }))
+message("Getting top markers on downsampled log slide-adjusted counts..")
 sce.ds <- scuttle::logNormCounts(sce.ds, assay.type = assay.name.adj)
-#save(sce.ds, file = 
-#       here("deconvo_method-paper/outputs/sce-all_slide-adj-ds_train.rda"))
-
-# filter overlapping markers
-filter.sce.ds <- rownames(sce.ds) %in% markers.filter$marker.list.final
-sce.ds.filtered <- sce.ds[filter.sce.ds,]
-# make new se
-matrix.counts.adj <- assays(sce.ds.filtered)[["counts_adjusted"]] %>% as.matrix()
-assays.list <- list(counts_adj = matrix.counts.adj)
-se.filter <- SummarizedExperiment(assays = assays.list,
-                                  colData = colData(sce.ds.filtered),
-                                  rowData = rowData(sce.ds.filtered))
-metadata(se.filter) <- list(markers.by.group = markers.by.group,
-                            markers.overlap.info = markers.filter)
-# save new se
-se.filter.all.adj.name <- "se-adj_overlap-concordant_marker-filter-all_train.rda"
-save(se.filter, file = here("deconvo_method-paper", "outputs", se.filter.all.adj.name))
+save(sce.ds, file = 
+       here("deconvo_method-paper/outputs/sce-all_slide-adj-ds_mrb.rda"))
 
 #--------------------------------
 # get markers from slide-adj data
@@ -216,8 +154,9 @@ se.filter <- SummarizedExperiment(assays = assays.list,
 metadata(se.filter) <- list(top.500.markers.results = markers.results.adj.1k,
                             top.40.markers.results = markers.results.adj.40)
 # save
-se.filter.all.adj.name <- "se-adj_marker-filter-all_train.rda"
-save(se.filter, file = here("deconvo_method-paper", "outputs", se.filter.all.adj.name))
+se.filter.all.adj.name <- "se-adj_marker-filter-all_mrb.rda"
+save(se.filter, file = 
+       here("deconvo_method-paper", "outputs", se.filter.all.adj.name))
 
 #-----------------------------------------------------
 # get overlaps with k2 concordant, overlapping markers
