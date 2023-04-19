@@ -111,3 +111,6 @@ ggplot(plot.data, aes(x = transform, y = abs.error.type1)) +
 ggplot(plot.data, aes(x = transform, y = abs.error.type1)) + 
   geom_jitter() + geom_boxplot(col = "cyan", alpha = 0) + 
   facet_wrap(~experiment.type)
+
+ggplot(plot.data, aes(x = p.true.type1, y = p.pred.type1)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~experiment.type)
