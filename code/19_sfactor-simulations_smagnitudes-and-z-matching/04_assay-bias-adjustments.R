@@ -1,6 +1,5 @@
 library(dplyr)
 library(ggplot2)
-
 set.seed(0)
 
 #-----------------
@@ -67,38 +66,83 @@ simulation_results <- function(s.list.experiment, z,
   return(experiment.table)
 }
 
-#-----------
-# get s list
-#-----------
-s.vector <- seq(1, 10, 1)
-s.list.square <- lapply(s.vector, function(item){c(item, item^2)})
+adjustment_simulations <- function(z, s.list, z.pb = NULL, p.true.list = list(c(0.2, 0.8))){
+  list.simulations <- lapply(p.true.list, function(p.true.iter){
+    # without scaling
+    result.unscale1 <- simulation_results(s.list.experiment = s.list, 
+                                          z = z, 
+                                          z.pb = z.pb, 
+                                          y.adjustment.type = "pb", 
+                                          scale.s = FALSE,
+                                          experiment.type = "adj_pb;unscaled",
+                                          p.true = p.true.iter)
+    result.unscale2 <- simulation_results(s.list.experiment = s.list, 
+                                          z = z, 
+                                          z.pb = z.pb, 
+                                          y.adjustment.type = "z", 
+                                          scale.s = FALSE,
+                                          experiment.type = "adj_z;unscaled",
+                                          p.true = p.true.iter)
+    result.unscale3 <- simulation_results(s.list.experiment = s.list, 
+                                          z = z, 
+                                          z.pb = z.pb, 
+                                          y.adjustment.type = NULL, 
+                                          scale.s = FALSE,
+                                          experiment.type = "unadj;unscaled",
+                                          p.true = p.true.iter)
+    # with scaling
+    result.scale1 <- simulation_results(s.list, z, z.pb = zs, "pb", scale.s = TRUE, 
+                                        experiment.type = "adj_pb;scale",
+                                        p.true = p.true.iter)
+    result.scale2 <- simulation_results(s.list, z, z.pb = zs, "z", scale.s = TRUE,
+                                        experiment.type = "adj_z;scale",
+                                        p.true = p.true.iter)
+    result.scale3 <- simulation_results(s.list, z, z.pb = zs, NULL, scale.s = TRUE,
+                                        experiment.type = "unadj;scale",
+                                        p.true = p.true.iter)
+    # get plot data
+    result.scale <- rbind(result.scale1, result.scale2, result.scale3)
+    result.unscale <- rbind(result.unscale1, result.unscale2, result.unscale3)
+    result.all <- rbind(result.scale, result.unscale)
+    return(result.all)
+  })
+  sim.results <- do.call(rbind, list.simulations) %>% as.data.frame()
+  plot.data <- data.frame(prop.pred.type1 = sim.results$p.pred.type1,
+                          prop.true.type1 = sim.results$p.true.type1,
+                          abs.error.type1 = sim.results$abs.error.type1,
+                          corr.r.type1 = sim.results$corr.r.type1,
+                          experiment.type = sim.results$experiment.type,
+                          s.type1 = sim.results$s.type1)
+  plot1 <- ggplot(plot.data, aes(x = prop.true.type1, y = prop.pred.type1,
+                                 color = s.type1)) + geom_point() +
+    geom_abline(slope = 1, intercept = 0) + facet_wrap(~experiment.type) +
+    xlim(0, 0.3) + ylim(0, 0.3)
+  plot2 <- ggplot(plot.data, aes(x = corr.r.type1, y = abs.error.type1,
+                                 color = s.type1)) + 
+    geom_point() + facet_wrap(~experiment.type)
+  plot3 <- ggplot(plot.data, aes(x = experiment.type, y = abs.error.type1)) + 
+    geom_jitter() + geom_boxplot(alpha = 0, color = "cyan")
+  lgg <- list(plot.data = plot.data, plot1 = plot1, plot2 = plot2, plot3 = plot3)
+  list.results <- list(results = sim.results, lgg = lgg)
+  return(list.results)
+}
 
-# without scaling
-result.unscale1 <- simulation_results(s.list.square, z, "pb", scale.s = FALSE)
-result.unscale2 <- simulation_results(s.list.square, z, "z", scale.s = FALSE)
-result.unscale3 <- simulation_results(s.list.square, z, NULL, scale.s = FALSE)
-
-# with scaling
-result.scale1 <- simulation_results(s.list.square, z, "pb", scale.s = TRUE)
-result.scale2 <- simulation_results(s.list.square, z, "z", scale.s = TRUE)
-result.scale3 <- simulation_results(s.list.square, z, NULL, scale.s = TRUE)
-
-#---------------------
-# set z with transform
-#---------------------
-# set z
-z.data <- c(rnbinom(50, 100, mu = 15), rnbinom(50, 100, mu = 1))
-z.data <- c(z.data, rnbinom(50, 100, mu = 1), rnbinom(50, 100, mu = 15))
-z.pb <- matrix(z.data, byrow = F, ncol = 2)
-s <- s.list.square[[length(s.list.square)]]
+make_z <- function(mu.low = 1, mu.high = 15, seed.num = 0){
+  set.seed(seed.num)
+  z.data <- c(rnbinom(50, 100, mu = mu.high), 
+              rnbinom(50, 100, mu = mu.low))
+  z.data <- c(z.data, rnbinom(50, 100, mu = mu.low), 
+              rnbinom(50, 100, mu = mu.high))
+  z <- matrix(z.data, byrow = F, ncol = 2)
+}
 
 #--------------------------
 # get main simulation terms
 #--------------------------
 mean.error = 0
 sd.error = 3
-num.types <- ncol(z)
-num.markers <- nrow(z)
+num.types <- 2
+num.markers <- 100
 
 # get s
 s <- c(3, 10)
@@ -108,35 +152,77 @@ p.true <- c(0.2, 0.8)
 # get z
 z.data <- c(rnbinom(50, 100, mu = 15), rnbinom(50, 100, mu = 1))
 z.data <- c(z.data, rnbinom(50, 100, mu = 1), rnbinom(50, 100, mu = 15))
-z <- z <- matrix(z.data, byrow = F, ncol = 2)
+z <- matrix(z.data, byrow = F, ncol = 2)
 # get pb
 y.pb1 <- t(t(p.true) %*% t(z))
-zs <- sweep(z.pb, 2, s, "*")
+zs <- sweep(z, 2, s, "*")
 y.pb2 <- t(t(p.true) %*% t(zs))
 
-#-----------------------------
-# define adjustment as medians
-#-----------------------------
-# quantify bias
-yz.bind <- cbind(z, y.pb)
-row.wise.diffs <- apply(yz.bind, 1, function(ri){
-  abs(ri[1:2]-ri[3]) %>% median()
+#----------------------------------------------------------
+# test adjustment, scaling for a series of true proportions
+#----------------------------------------------------------
+s.vector <- seq(1, 10, 1)
+s.list.square <- lapply(s.vector, function(item){c(item, item^2)})
+
+# for single p.true set
+results <- adjustment_simulations(z = z, z.pb = zs, s.list = s.list.square)
+
+# for multiple p.true sets
+p.true.type1.vector <- seq(0.05, 0.35, 0.01)
+p.true.list <- lapply(p.true.type1.vector, function(value){c(value,1-value)})
+results <- adjustment_simulations(z = z, z.pb = zs, s.list = s.list.square, 
+                                  p.true.list = p.true.list)
+
+#-----------------------------------------------------------------
+# test adjustment, scaling for a series of randomized z references
+#-----------------------------------------------------------------
+
+# get missmatched z based on correlation
+mu.low <- 1
+mu.high <- 15
+iter.vector <- seq(1e6)
+z.new.start <- make_z(iter.vector[1])
+corr.r <- cor.test(z.new.start[,1], z[,1], method = "spearman")$estimate
+while(corr.r > 0.5){
+  message(iter.new)
+  iter.new <- iter + 1
+  mu.low = mu.low * 0.99
+  mu.high = mu.high * 1.01
+  z.new.start <- make_z(mu.low = mu.low, mu.high = mu.high,
+                        seed.num = iter.vector[iter.new])
+  corr.r <- cor.test(z.new.start[,1], z[,1], method = "spearman")$estimate
+}
+
+corr.r.start <- make_z(iter[1])
+
+
+
+
+z.series <- lapply(seq(100), function(index){make_z(index)})
+list.results <- lapply(z.series, function(z.iteration){
+  adjustment_simulations(z = z.iteration, s.list = list(c(3, 10)))
 })
-bias <- median(row.wise.diffs)
-zm <- z+bias
 
-# summary plots
-plot(density(row.wise.diffs))
-plot.data <- data.frame(z1 = z[,1], zm1 = zm[,1])
-ggplot(plot.data, aes(x = z1, y = zm1)) + geom_point() + 
-  geom_abline(slope = 1, intercept = 1) + xlim(0, 100) + ylim(0,100)
+plot.data <- do.call(rbind, lapply(list.results, function(results){results$lgg$plot.data}))
+  
+plot1 <- ggplot(plot.data, aes(x = prop.true.type1, y = prop.pred.type1,
+                               color = s.type1)) + geom_point() +
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~experiment.type) +
+  xlim(0, 0.3) + ylim(0, 0.3)
 
-# evaluate adjustment
-corr.r.type1.start <- cor.test(y.pb, z[,1])$estimate
-corr.r.type1.end <- cor.test(y.pb, zm[,1])$estimate
+plot2 <- ggplot(plot.data, aes(x = corr.r.type1, y = abs.error.type1,
+                               color = s.type1)) + 
+  geom_point() + geom_smooth(method = 'lm') + facet_wrap(~experiment.type)
 
-corr.r.type2.start <- cor.test(y.pb, z[,1])$estimate
-corr.r.type2.end <- cor.test(y.pb, zm[,1])$estimate
+plot3 <- ggplot(plot.data, aes(x = experiment.type, y = abs.error.type1)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan")  
+
+
+#--------------------------------------------------------------------------------------
+# test adjustment, scaling for a series of true proportions and randomized z references
+#--------------------------------------------------------------------------------------
+
+
 
 #-------------------------------------
 # adjustment -- using only pseudobulks
