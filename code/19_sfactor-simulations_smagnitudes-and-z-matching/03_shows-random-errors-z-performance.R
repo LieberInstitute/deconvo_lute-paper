@@ -129,16 +129,14 @@ simulation_results <- function(z, s = c(3, 10), p = c(0.2, 0.8), z.pb = NULL,
 #---------------------
 # set error params
 mean.error = 0
-sd.error = 3
-z <- z.pb
-num.types <- ncol(z)
-num.markers <- nrow(z)
-
+sd.error = 1
 
 # set z
 z.data <- c(rnbinom(50, 100, mu = 15), rnbinom(50, 100, mu = 1))
 z.data <- c(z.data, rnbinom(50, 100, mu = 1), rnbinom(50, 100, mu = 15))
-z.pb <- matrix(z.data, byrow = F, ncol = 2)
+z.pb <- z <- matrix(z.data, byrow = F, ncol = 2)
+num.types <- ncol(z)
+num.markers <- nrow(z)
 
 # random errors on rows
 experiment.label <- "missmatch;row_errors"
@@ -159,8 +157,7 @@ list.z.error <- lapply(iterations.vector, function(index){
 # get series across varied p values
 p1 <- seq(0.1, 0.4, 1e-2)
 list.results <- lapply(p1, function(p1.iter){
-  p2.iter <- 1-p1.iter
-  simulation_results(z = list.z.error, p = c(p1.iter, p2.iter))
+  simulation_results(z = list.z.error, p = c(p1.iter, 1-p1.iter))
 })
 results.all <- do.call(rbind, list.results)
 
@@ -181,13 +178,29 @@ results.tall <- rbind(results.tall1, results.tall2)
 # make scatterplots
 #------------------
 # scatterplots -- p.true vs. p.predicted, by scale
-ggplot(results.tall, aes(x = p.true.type1, y = p.pred.type1, color = z.corr.type1)) +
-  geom_point(alpha = 0.4) + geom_abline(slope = 1, intercept = 0) + 
-  ggtitle("All experiments, composite") + geom_smooth(method = "glm") +
+scatterplot.prop <- ggplot(results.tall, 
+                           aes(x = p.true.type1, y = p.pred.type1, color = z.corr.type1)) +
+  geom_point(alpha = 0.2) + geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  facet_wrap(~type) + xlab("True") + ylab("Predicted")
+
+# glm smooth lines -- z.corr vs. abs.error, by scale
+scatterplot.error <- ggplot(results.tall, aes(x = z.corr.type1, y = abs.error.type1)) +
+  geom_point(alpha = 0.01) + geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  geom_smooth(method = "glm") +
   facet_wrap(~type)
 
-# scatterplots -- z.corr vs. abs.error, by scale
-ggplot(results.tall, aes(x = z.corr.type1, y = abs.error.type1)) +
-  geom_point(alpha = 0.2) + geom_abline(slope = 1, intercept = 0) + 
-  ggtitle("All experiments, composite") + geom_smooth(method = "glm") +
-  facet_wrap(~type)
+# make jitterbox plots
+jitterbox.error <- ggplot(results.tall, aes(x = type, y = abs.error.type1)) +
+  geom_jitter(alpha = 0.1) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw()
+
+ggplot(results.tall, aes(x = type, y = abs.error.type1)) +
+  geom_violin(draw_quantiles = 0.5) + theme_bw()
+
+# save plots
+jpeg("scatterplot_prop_train.jpg", width = 3, height = 3, res = 400, units = "in")
+scatterplot.prop; dev.off()
+jpeg("scatterplot_error_train.jpg", width = 3, height = 3, res = 400, units = "in")
+scatterplot.error; dev.off()
+jpeg("jitterbox_error_train.jpg", width = 3, height = 3, res = 400, units = "in")
+jitterbox.error; dev.off()
+

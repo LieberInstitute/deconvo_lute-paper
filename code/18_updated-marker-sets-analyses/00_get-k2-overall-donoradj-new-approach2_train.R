@@ -41,6 +41,8 @@ sce <- scuttle::logNormCounts(sce)
 #markers <- meanratiosParam(scef, "counts", "k2", 500, TRUE) %>% typemarkers()
 
 # get all marker candidates
+# omit 2720
+sce <- sce[,!sce[[group.id.variable]] == "Br2720_post"]
 markers.by.group <- markers_by_group(sce, 
                                      group.variable = group.id.variable, 
                                      celltype.variable = celltype.variable.new, 
@@ -54,6 +56,69 @@ markers.by.group <- markers_by_group(sce,
 markers.bygroup.path <- file.path("deconvo_method-paper/outputs/", 
                                    markers.bygroup.name)
 save(markers.by.group, file = markers.bygroup.path)
+
+#-------------------------------
+# visualize concordance overlaps
+#-------------------------------
+
+# upset plot of markers by participant
+library(UpSetR)
+unique.types <- c("glial", "neuron")
+unique.donors <- names(markers.by.group)
+list.concord <- lapply(unique.types, function(type){
+  lapply(unique.donors, function(donor){
+    table <- markers.by.group[[donor]]
+    tf <- table[table$cellType.target==type,]
+    tf$gene
+  })
+}) %>% unlist(recursive = F)
+names(list.concord) <- paste0(unique.donors, ";", 
+                              rep(unique.types, each = length(unique.donors)))
+upset(fromList(list.concord), nsets = 20)
+
+# barplots
+# get plot data
+glial.all <- list.concord[grepl("glial", names(list.concord))] %>% unlist()
+neuron.all <- list.concord[grepl("neuron", names(list.concord))] %>% unlist()
+nonconcord.all <- intersect(glial.all, neuron.all)
+length(nonconcord.all) # 135
+concord.glial <- glial.all[!glial.all %in% nonconcord.all]
+length(concord.glial) # 136
+concord.neuron <- neuron.all[!neuron.all %in% nonconcord.all]
+length(concord.neuron) # 5297
+# percent concordant
+length(concord.neuron)/length(neuron.all) # 0.9345448
+length(concord.glial)/length(glial.all) # 0.4788732
+# mean overlapping
+glial.overlap <- list.concord[grepl("glial", names(list.concord))] %>% 
+  unlist() %>% table() %>% as.data.frame()
+glial.overlap <- glial.overlap[,2]
+glial.mean.overlap <- mean(glial.overlap) %>% round(digits = 2) # 1.083969
+glial.sd.overlap <- sd(glial.overlap) %>% round(digits = 2)
+glial.median.overlap <- median(glial.overlap) %>% round(digits = 2)
+neuron.overlap <- list.concord[grepl("neuron", names(list.concord))] %>% 
+  unlist() %>% table() %>% as.data.frame()
+neuron.overlap <- neuron.overlap[,2]
+neuron.mean.overlap <- mean(neuron.overlap) %>% round(digits = 2)
+neuron.sd.overlap <- sd(neuron.overlap) %>% round(digits = 2)
+neuron.median.overlap <- median(neuron.overlap) %>% round(digits = 2)
+data.frame(type = c("neuron", "glial"),
+           mean = c(neuron.mean.overlap, glial.mean.overlap),
+           sd = c(neuron.sd.overlap, glial.sd.overlap),
+           median = c(neuron.median.overlap, glial.median.overlap))
+# make ggplot
+plot.data <- data.frame(marker.type = c("glial", "neuron", "both"),
+                        count = c(length(concord.glial), 
+                                  length(concord.neuron), 
+                                  length(nonconcord.all)))
+plot.data[,2] <- as.numeric(plot.data[,2])
+barplot.markers <- ggplot(plot.data, aes(x = marker.type, y = count)) + 
+  geom_bar(stat = "identity") + geom_label(aes(y=count,label=count)) + 
+  scale_y_log10() + ylab("Marker count (log10 scaled)") + theme_bw()
+# save plot
+jpeg("barplot_marker-counts-by-type_train.jpg", width = 3, height = 3, units = "in", res = 400)
+barplot.markers; dev.off()
+
 
 # get marker overlap info
 # get marker table list

@@ -41,10 +41,28 @@ markers.by.group <- markers_by_group(sce,
                                      markers.per.type = markers.per.group.discover, 
                                      typemarker.algorithm = typemarker.algorithm,
                                      return.type = "list", verbose = TRUE)
+
 # save
 markers.bygroup.path <- file.path("deconvo_method-paper/outputs/", 
                                   markers.bygroup.name)
 save(markers.by.group, file = markers.bygroup.path)
+
+# visualize concordance overlaps
+library(UpSetR)
+# upset plot of markers by participant
+unique.types <- c("glial", "neuron")
+unique.donors <- names(markers.by.group)
+list.concord <- lapply(unique.types, function(type){
+  lapply(unique.donors, function(donor){
+    table <- markers.by.group[[donor]]
+    tf <- table[table$cellType.target==type,]
+    tf$gene
+  })
+}) %>% unlist(recursive = F)
+names(list.concord) <- paste0(unique.donors, ";", 
+                              rep(unique.types, each = length(unique.donors)))
+upset(fromList(list.concord), nsets = 10)
+
 
 # marker overlaps/concordance filter
 markers.filtered <- filter_group_markers(markers.by.group,
