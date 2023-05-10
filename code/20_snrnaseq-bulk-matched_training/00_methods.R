@@ -85,25 +85,53 @@ sce <- sce[rownames(sce) %in% all.markers.vector,]
 # paths
 rse.path <- "Human_DLPFC_Deconvolution/processed-data/rse/rse_gene.Rdata"
 rse <- get(load(rse.path))
-rse$Sample <- paste0(rse$BrNum, "_", tolower(rse$location))
+# rse$Sample <- paste0(rse$BrNum, "_", ifelse(rse))
 rse <- rse[!duplicated(rowData(rse)$Symbol),]
 rownames(rse) <- rowData(rse)$Symbol
 
 # get experiment results
-decon.all <- lapply(sample.id.vector.sn, function(sample.id){
+sample.id.vector.sn <- unique(sce$Sample)
+result.list <- lapply(sample.id.vector.sn, function(sample.id){
   sce.sample <- sce[,sce$Sample == sample.id]
   rse.sample <- rse[,rse$Sample == sample.id]
   if(ncol(rse.sample) > 0){
-    for(markers in list.markers.sn[[sample.id]]){
-      sce.markers <- sce.sample[rownames(sce.sample) %in% markers[[1]],]
-      rse.markers <- rse.sample[rownames(rse.sample) %in% markers[[1]],]
+    sample.markers <- list.markers.sn[[sample.id]]
+    for(markers in sample.markers){
+      markers.vector <- markers$typemarker.results
+      sce.markers <- sce.sample[rownames(sce.sample) %in% markers.vector,]
+      rse.markers <- rse.sample[rownames(rse.sample) %in% markers.vector,]
+      shared.markers <- intersect(rownames(sce.markers), rownames(rse.markers))
+      sce.markers <- sce.sample[rownames(sce.sample) %in% shared.markers,]
+      rse.markers <- rse.sample[rownames(rse.sample) %in% shared.markers,]
+      rse.markers <- rse.markers[order(match(rownames(rse.markers), shared.markers)),]
+      identical(rownames(rse.markers), rownames(sce.markers))
+      
+      # make y expression
+      y.expression <- assays(rse.markers)[[1]]
+      colnames(y.expression) <- paste0(rse.markers$Sample, "_", 
+                                       rse.markers$library_type, "_", 
+                                       rse.markers$library_prep)
+      
       # without s
-      decon.no.scale <- lute()
+      decon.no.scale <- lute(sce = sce.markers, 
+                             y = y.expression,
+                             celltype.variable = "k2",
+                             typemarker.algorithm = NULL)
       # with s
-      decon.with.scale <- lute()
+      decon.with.scale <- lute(sce = sce.markers, 
+                               y = y.expression,
+                             celltype.variable = "k2",
+                             s = c("glial" = 3, "neuron" = 10),
+                             typemarker.algorithm = NULL)
+      decon.no.scale$scale <- FALSE
+      decon.with.scale$scale <- TRUE
+      df.result <- rbind(decon.no.scale, decon.with.scale)
+      df.result$sample_label <- rownames(df.result)
+      return(df.result)
     }
   }
 })
+result.table <- do.call(rbind, result.list) %>% as.data.frame()
 
 
 sample.id.vector.sn <- unique(sce.k2$Sample)
