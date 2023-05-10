@@ -137,11 +137,13 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
       df.result$marker.type <- marker.type
       return(df.result)
     })
-    results.bymarker.table <- do.call(rbind, results.bymarker.list) %>% as.data.frame()
-    return(results.bymarker.table)
+    # results.bymarker.table <- do.call(rbind, results.bymarker.list) %>% as.data.frame()
+    return(results.bymarker.list)
   }
 })
-result.table <- do.call(rbind, result.list) %>% as.data.frame()
+result.table.k2 <- do.call(rbind, result.list) %>% as.data.frame()
+result.table.k3 <- do.call(rbind, result.list) %>% as.data.frame()
+result.table.k4 <- do.call(rbind, result.list) %>% as.data.frame()
 
 result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_train.rda"
 result.table.path <- paste0("./deconvo_method-paper/outputs/", result.table.name)
@@ -158,6 +160,24 @@ halo.sample.prop <- do.call(rbind, sapply(unique(halo.all$Sample), function(samp
   table(halo.all[halo.all$Sample==sample.id,]$cell_type) %>% prop.table()
 })) %>% as.data.frame()
 halo.sample.prop$sample.id <- unique(halo.all$Sample)
+
+# merge k2 results
+result.filter <- result.table[result.table$marker.type=="k2",]
+result.filter$halo.neuron <- result.filter$halo.glial <- 0
+for(ii in seq(nrow(result.filter))){
+  sample.id <- result.filter$sample_label[ii]
+  sample.id.format <- paste0(unlist(strsplit(sample.id, "_"))[1:2], collapse = "_")
+  which.halo.id <- halo.sample.prop$sample.id==sample.id.format
+  halo.filter <- halo.sample.prop[which.halo.id,]
+  result.filter$halo.neuron[ii] <- halo.filter$Excit+halo.filter$Inhib
+  result.filter$halo.glial[ii] <- halo.filter$Oligo+halo.filter$Astro+halo.filter$Micro
+}
+
+# get errors
+result.filter$error.neuron <- result.filter$halo.neuron-result.filter$neuron
+result.filter$abs.error.neuron <- abs(result.filter$error.neuron)
+result.filter$error.glial <- result.filter$halo.glial-result.filter$glial
+result.filter$abs.error.glial <- abs(result.filter$glial)
 
 # cell type proportions by labels
 halo.sample.prop$Excit+halo.sample.prop$Inhib
