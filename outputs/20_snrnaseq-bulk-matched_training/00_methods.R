@@ -81,8 +81,6 @@ sce <- sce[rownames(sce) %in% all.markers.vector,]
 #-----------------------------------
 # do deconvolution with matched data
 #-----------------------------------
-# load sce
-sce <- get(load('./deconvo_method-paper/outputs/sce_prep_05-10-23_train.rda'))
 # bulk rnaseq
 # paths
 rse.path <- "Human_DLPFC_Deconvolution/processed-data/rse/rse_gene.Rdata"
@@ -121,18 +119,16 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
       decon.no.scale <- lute(sce = sce.markers, 
                              y = y.expression,
                              celltype.variable = "k2",
-                             typemarker.algorithm = NULL)$deconvolution.results %>%
-        as.data.frame()
+                             typemarker.algorithm = NULL)$deconvolution.results
       # with s
       decon.with.scale <- lute(sce = sce.markers, 
                                y = y.expression,
                                celltype.variable = "k2",
                                s = c("glial" = 3, "neuron" = 10),
-                               typemarker.algorithm = NULL)$deconvolution.results %>%
-        as.data.frame()
+                               typemarker.algorithm = NULL)$deconvolution.results
       decon.no.scale$scale <- FALSE
       decon.with.scale$scale <- TRUE
-      df.result <- rbind(decon.no.scale, decon.with.scale) %>% as.data.frame()
+      df.result <- rbind(decon.no.scale, decon.with.scale)
       df.result$sample_label <- rownames(df.result)
       df.result$marker.type <- marker.type
       return(df.result)
@@ -147,20 +143,27 @@ result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_train.rda"
 result.table.path <- paste0("./deconvo_method-paper/outputs/", result.table.name)
 save(result.table, file = result.table.path)
 
-#---------------
-# map image data
-#---------------
-halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
-halo.all <- get(load(halo.path))
 
-# cell type proportions by sample
-halo.sample.prop <- do.call(rbind, sapply(unique(halo.all$Sample), function(sample.id){
-  table(halo.all[halo.all$Sample==sample.id,]$cell_type) %>% prop.table()
-})) %>% as.data.frame()
-halo.sample.prop$sample.id <- unique(halo.all$Sample)
+sample.id.vector.sn <- unique(sce.k2$Sample)
+sample.id.vector.bulk <- unique(rse$Sample)
+decon.k2 <- lapply(sample.id.vector.sn, function(sample.id){
+  sce.sample <- sce[,sce$Sample==sample.id]
+  rse.sample <- rse[,rse$Sample == sample.id]
+  if(ncol(rse.sample)>0){
+    # get markers 
+    list(sce = sce.sample, y.series = rse.sample)
+  }
+})
+decon.k3 <- lapply()
+decon.k4 <- lapply()
 
-# cell type proportions by labels
-halo.sample.prop$Excit+halo.sample.prop$Inhib
+# get deconvolution results for matched samples
+# without sfactor transformation
+s <- c(1, 1)
 
-
-
+# get sce for varying k values
+#sce.k2 <- lsce$k2
+#sce.k3 <- lsce$k3
+#sce.k4 <- lsce$k4
+# with some sfactor transformation
+s <- c(3, 10)
