@@ -39,6 +39,9 @@ sce[["k4"]] <- ifelse(sce[[cell.type.variable]] %in% k4.types.labels[["neuron"]]
                       ifelse(sce[[cell.type.variable]] %in% k4.types.labels[["oligo"]], "oligo", 
                              ifelse(sce[[cell.type.variable]] %in% k4.types.labels[["astro"]], 
                                     "astro", "micro")))
+# save
+sce.prep.path <- './deconvo_method-paper/outputs/sce_prep_05-10-23_train.rda'
+save(sce, file = sce.prep.path)
 
 num.markers <- 100
 list.markers.sn <- lapply(sample.id.vector, function(sample.id){
@@ -68,23 +71,38 @@ list.markers.path <- "./deconvo_method-paper/outputs/list-markers-by-donor-k2-3-
 save(list.markers.sn, file = list.markers.path)
 
 # subset sce on only markers
+list.markers.path <- "./deconvo_method-paper/outputs/list-markers-by-donor-k2-3-4_train.rda"
+list.markers.sn <- get(load(list.markers.path))
 all.markers.vector <- lapply(list.markers.sn, function(list.iter){
   c(list.iter[[1]][[1]], list.iter[[2]][[1]], list.iter[[3]][[1]])
 }) %>% unlist() %>% unique()
 sce <- sce[rownames(sce) %in% all.markers.vector,]
 
-#-----------------
-# matched datasets
-#-----------------
+#-----------------------------------
+# do deconvolution with matched data
+#-----------------------------------
 # bulk rnaseq
 # paths
 rse.path <- "Human_DLPFC_Deconvolution/processed-data/rse/rse_gene.Rdata"
 rse <- get(load(rse.path))
 rse$Sample <- paste0(rse$BrNum, "_", tolower(rse$location))
+rse <- rse[!duplicated(rowData(rse)$Symbol),]
+rownames(rse) <- rowData(rse)$Symbol
 
 # get experiment results
 decon.all <- lapply(sample.id.vector.sn, function(sample.id){
-  
+  sce.sample <- sce[,sce$Sample == sample.id]
+  rse.sample <- rse[,rse$Sample == sample.id]
+  if(ncol(rse.sample) > 0){
+    for(markers in list.markers.sn[[sample.id]]){
+      sce.markers <- sce.sample[rownames(sce.sample) %in% markers[[1]],]
+      rse.markers <- rse.sample[rownames(rse.sample) %in% markers[[1]],]
+      # without s
+      decon.no.scale <- lute()
+      # with s
+      decon.with.scale <- lute()
+    }
+  }
 })
 
 
