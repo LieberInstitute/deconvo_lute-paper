@@ -10,15 +10,18 @@ save.path <- here("deconvo_method-paper", "outputs", "20_snrnaseq-bulk-matched_t
 # get markers within donors
 #--------------------------
 # we selected the top markers within each donor
-num.markers <- 500
+cell.type.variable <- "cellType_broad_hc"
 
 # load sn expression
 sce.path <- file.path("DLPFC_snRNAseq/processed-data/sce","sce_DLPFC.Rdata")
 sce <- get(load(sce.path))
 # filter training samples
+donor.variable <- "BrNum"
+donor.id.train <- c("Br2720", "Br6471", "Br8492", "Br2743", "Br3942", "Br6423", "Br8325")
+filter.train <- sce[[donor.variable]] %in% donor.id.train
+sce <- sce[,filter.train]
 
 # for each donor, get the top markers
-cell.type.variable <- "cellType_broad_hc"
 sample.id.vector <- unique(sce$Sample)
 k2.types.labels <- list("neuron" = c("Excit", "Inhib"), 
                         "glial" = c("OPC", "Oligo", "Astro", "Micro"))
@@ -26,47 +29,65 @@ k3.types.labels <- list("neuron" = c("Excit", "Inhib"), "oligo" = c("Oligo"),
                         "glial_non_oligo" = c("Astro", "Micro"))
 k4.types.labels <- list("neuron" = c("Excit", "Inhib"), "oligo" = c("Oligo"),
                         "astro" = c("Astro"), "micro" = c("Micro"))
-sce.filter <- sce[,sce[[cell.type.variable]] %in% unlist(k2.types.labels)]
+sce <- sce[,sce[[cell.type.variable]] %in% unlist(k2.types.labels)]
 # apply labels
+sce[["k2"]] <- ifelse(sce[[cell.type.variable]] %in% k2.types.labels[["neuron"]], "neuron", "glial")
+sce[["k3"]] <- ifelse(sce[[cell.type.variable]] %in% k3.types.labels[["neuron"]], "neuron", 
+                      ifelse(sce[[cell.type.variable]] %in% k3.types.labels[["oligo"]], 
+                             "oligo", "glial_non_oligo"))
+sce[["k4"]] <- ifelse(sce[[cell.type.variable]] %in% k4.types.labels[["neuron"]], "neuron", 
+                      ifelse(sce[[cell.type.variable]] %in% k4.types.labels[["oligo"]], "oligo", 
+                             ifelse(sce[[cell.type.variable]] %in% k4.types.labels[["astro"]], 
+                                    "astro", "micro")))
 
-
+num.markers <- 100
 list.markers.sn <- lapply(sample.id.vector, function(sample.id){
-  # k2 
-  sce.filter <- sce[[cell.type.variable]] %in% unlist(k2.types.labels)
-  sce.filter.k2 <- sce[, ]
+  sce.filter <- sce[,sce$Sample==sample.id]
+  # k2
   markers.k2 <- lute(
-    sce = sce.filter.k2,
+    sce = sce.filter,
     markers.per.type = num.markers, 
        celltype.variable = "k2", 
        deconvolution.algorithm = NULL)
   # k3
+  markers.k3 <- lute(
+    sce = sce.filter,
+    markers.per.type = num.markers, 
+    celltype.variable = "k3", 
+    deconvolution.algorithm = NULL)
   # k4
+  markers.k4 <- lute(
+    sce = sce.filter,
+    markers.per.type = num.markers, 
+    celltype.variable = "k4", 
+    deconvolution.algorithm = NULL)
+  return(list(k2 = markers.k2, k3 = markers.k3, k4 = markers.k4))
 })
+names(list.markers.sn) <- sample.id.vector
+list.markers.path <- "./deconvo_method-paper/outputs/list-markers-by-donor-k2-3-4_train.rda"
+save(list.markers.sn, file = list.markers.path)
 
-# select markers within every matched sample
+# subset sce on only markers
+all.markers.vector <- lapply(list.markers.sn, function(list.iter){
+  c(list.iter[[1]][[1]], list.iter[[2]][[1]], list.iter[[3]][[1]])
+}) %>% unlist() %>% unique()
+sce <- sce[rownames(sce) %in% all.markers.vector,]
 
 #-----------------
 # matched datasets
 #-----------------
-#sce.prepared.path <- file.path("deconvo_method-paper", "outputs", "09_manuscript",
-#                               "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
-#lsce <- get(load(sce.prepared.path))
-
-# get sce for varying k values
-#sce.k2 <- lsce$k2
-#sce.k3 <- lsce$k3
-#sce.k4 <- lsce$k4
-
 # bulk rnaseq
 # paths
-rse.bulk.filename <- "rse_gene.Rdata"
-rse.bulk.filepath <- here("Human_DLPFC_Deconvolution", "processed-data", 
-                          "01_SPEAQeasy", "round2_v40_2022-07-06", "rse", 
-                          rse.bulk.filename)
-rse <- get(load(rse.bulk.filepath))
+rse.path <- "Human_DLPFC_Deconvolution/processed-data/rse/rse_gene.Rdata"
+rse <- get(load(rse.path))
 rse$Sample <- paste0(rse$BrNum, "_", tolower(rse$location))
 
-# assemble matched experiments
+# get experiment results
+decon.all <- lapply(sample.id.vector.sn, function(sample.id){
+  
+})
+
+
 sample.id.vector.sn <- unique(sce.k2$Sample)
 sample.id.vector.bulk <- unique(rse$Sample)
 decon.k2 <- lapply(sample.id.vector.sn, function(sample.id){
