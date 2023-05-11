@@ -81,6 +81,8 @@ sce <- sce[rownames(sce) %in% all.markers.vector,]
 #-----------------------------------
 # do deconvolution with matched data
 #-----------------------------------
+# load list markers
+list.markers.sn <- get(load("./deconvo_method-paper/outputs/list-markers-by-donor-k2-3-4_train.rda"))
 # load sce
 sce <- get(load('./deconvo_method-paper/outputs/sce_prep_05-10-23_train.rda'))
 # bulk rnaseq
@@ -92,6 +94,8 @@ rse <- rse[!duplicated(rowData(rse)$Symbol),]
 rownames(rse) <- rowData(rse)$Symbol
 
 # get experiment results
+s.vector <- c("glial" = 3, "glial_non_oligo" = 3, 
+              "neuron" = 10, "astro" = 4, "oligo" = 3, "micro" = 3)
 sample.id.vector.sn <- unique(sce$Sample)
 result.list <- lapply(sample.id.vector.sn, function(sample.id){
   sce.sample <- sce[,sce$Sample == sample.id]
@@ -100,6 +104,7 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
     sample.markers <- list.markers.sn[[sample.id]]
     marker.index.vector <- seq(length(sample.markers))
     results.bymarker.list <- lapply(marker.index.vector, function(marker.index){
+      # filter and match marker order
       marker.type <- names(sample.markers)[marker.index]
       markers <- sample.markers[[marker.index]]
       markers.vector <- markers$typemarker.results
@@ -118,16 +123,13 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
                                        rse.markers$library_prep)
       
       # without s
-      decon.no.scale <- lute(sce = sce.markers, 
-                             y = y.expression,
-                             celltype.variable = "k2",
+      decon.no.scale <- lute(sce = sce.markers, y = y.expression,
+                             celltype.variable = marker.type,
                              typemarker.algorithm = NULL)$deconvolution.results %>%
         as.data.frame()
       # with s
-      decon.with.scale <- lute(sce = sce.markers, 
-                               y = y.expression,
-                               celltype.variable = "k2",
-                               s = c("glial" = 3, "neuron" = 10),
+      decon.with.scale <- lute(sce = sce.markers, y = y.expression,
+                               celltype.variable = marker.type, s = s.vector,
                                typemarker.algorithm = NULL)$deconvolution.results %>%
         as.data.frame()
       decon.no.scale$scale <- FALSE
@@ -141,17 +143,31 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
     return(results.bymarker.list)
   }
 })
-result.table.k2 <- do.call(rbind, result.list) %>% as.data.frame()
-result.table.k3 <- do.call(rbind, result.list) %>% as.data.frame()
-result.table.k4 <- do.call(rbind, result.list) %>% as.data.frame()
+result.table.k2 <- do.call(rbind, 
+                           lapply(result.list, 
+                                  function(list.iter){list.iter[[1]]})) %>% as.data.frame()
+result.table.k3 <- do.call(rbind, 
+                           lapply(result.list, 
+                                  function(list.iter){list.iter[[2]]})) %>% as.data.frame()
+result.table.k4 <- do.call(rbind, 
+                           lapply(result.list, 
+                                  function(list.iter){list.iter[[3]]})) %>% as.data.frame()
+
+deconvo.results.list.k234 <- list(k2 = result.table.k2,
+                                  k3 = result.table.k3,
+                                  k4 = result.table.k4)
 
 result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_train.rda"
 result.table.path <- paste0("./deconvo_method-paper/outputs/", result.table.name)
-save(result.table, file = result.table.path)
+save(deconvo.results.list.k234, file = result.table.path)
 
 #---------------
 # map image data
 #---------------
+# load data
+# deconvo results table
+result.table <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_train.rda"))
+# image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
 
