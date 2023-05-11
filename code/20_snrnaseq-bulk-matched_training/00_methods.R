@@ -166,7 +166,7 @@ save(deconvo.results.list.k234, file = result.table.path)
 #---------------
 # load data
 # deconvo results table
-result.table <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_train.rda"))
+result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_train.rda"))
 # image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
@@ -178,7 +178,7 @@ halo.sample.prop <- do.call(rbind, sapply(unique(halo.all$Sample), function(samp
 halo.sample.prop$sample.id <- unique(halo.all$Sample)
 
 # merge k2 results
-result.filter <- result.table[result.table$marker.type=="k2",]
+result.filter <- result.table.list["k2"][[1]]
 result.filter$halo.neuron <- result.filter$halo.glial <- 0
 for(ii in seq(nrow(result.filter))){
   sample.id <- result.filter$sample_label[ii]
@@ -188,15 +188,63 @@ for(ii in seq(nrow(result.filter))){
   result.filter$halo.neuron[ii] <- halo.filter$Excit+halo.filter$Inhib
   result.filter$halo.glial[ii] <- halo.filter$Oligo+halo.filter$Astro+halo.filter$Micro
 }
-
 # get errors
 result.filter$error.neuron <- result.filter$halo.neuron-result.filter$neuron
 result.filter$abs.error.neuron <- abs(result.filter$error.neuron)
 result.filter$error.glial <- result.filter$halo.glial-result.filter$glial
 result.filter$abs.error.glial <- abs(result.filter$glial)
 
-# cell type proportions by labels
-halo.sample.prop$Excit+halo.sample.prop$Inhib
+# merge k3 results
+result.filter <- result.table.list["k3"][[1]]
+result.filter$halo.neuron <- result.filter$halo.oligo <- result.filter$halo.non.oligo.glial <- 0
+for(ii in seq(nrow(result.filter))){
+  sample.id <- result.filter$sample_label[ii]
+  sample.id.format <- paste0(unlist(strsplit(sample.id, "_"))[1:2], collapse = "_")
+  which.halo.id <- halo.sample.prop$sample.id==sample.id.format
+  halo.filter <- halo.sample.prop[which.halo.id,]
+  result.filter$halo.neuron[ii] <- halo.filter$Excit+halo.filter$Inhib
+  result.filter$halo.oligo[ii] <- halo.filter$Oligo
+  result.filter$halo.non.oligo.glial[ii] <- halo.filter$Astro+halo.filter$Micro
+}
+# get errors
+result.filter$error.neuron <- result.filter$halo.neuron-result.filter$neuron
+result.filter$abs.error.neuron <- abs(result.filter$error.neuron)
+result.filter$error.oligo <- result.filter$halo.oligo-result.filter$oligo
+result.filter$abs.error.oligo <- abs(result.filter$oligo)
+result.filter$error.non.oligo.glial <- result.filter$halo.non.oligo.glial-result.filter$glial_non_oligo
+result.filter$abs.error.non.oligo.glial <- abs(result.filter$error.non.oligo.glial)
 
+# merge k4 results
+result.filter <- result.table.list["k4"][[1]]
+result.filter$halo.neuron <- result.filter$halo.astro <- 
+  result.filter$halo.micro <- result.filter$halo.oligo <- 0
+for(ii in seq(nrow(result.filter))){
+  sample.id <- result.filter$sample_label[ii]
+  sample.id.format <- paste0(unlist(strsplit(sample.id, "_"))[1:2], collapse = "_")
+  which.halo.id <- halo.sample.prop$sample.id==sample.id.format
+  halo.filter <- halo.sample.prop[which.halo.id,]
+  result.filter$halo.neuron[ii] <- halo.filter$Excit+halo.filter$Inhib
+  result.filter$halo.oligo[ii] <- halo.filter$Oligo
+  result.filter$halo.astro[ii] <- halo.filter$Astro
+  result.filter$halo.micro[ii] <- halo.filter$Micro
+}
+# get errors
+result.filter$error.neuron <- result.filter$halo.neuron-result.filter$neuron
+result.filter$abs.error.neuron <- abs(result.filter$error.neuron)
+result.filter$error.oligo <- result.filter$halo.oligo-result.filter$oligo
+result.filter$abs.error.oligo <- abs(result.filter$oligo)
+result.filter$error.astro <- result.filter$halo.astro-result.filter$astro
+result.filter$abs.error.astro <- abs(result.filter$error.astro)
+result.filter$error.micro <- result.filter$halo.micro-result.filter$micro
+result.filter$abs.error.micro <- abs(result.filter$error.micro)
 
+summary(result.filter$abs.error.micro)
+
+# append halo metadata
+# total cells
+# total cells per type
+
+# append expression metadata
+# total cells 
+# total cells per type
 
