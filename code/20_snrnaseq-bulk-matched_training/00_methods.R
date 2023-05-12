@@ -177,7 +177,9 @@ halo.sample.prop <- do.call(rbind, sapply(unique(halo.all$Sample), function(samp
 })) %>% as.data.frame()
 halo.sample.prop$sample.id <- unique(halo.all$Sample)
 
+#-----------------
 # merge k2 results
+#-----------------
 result.filter <- result.table.list["k2"][[1]]
 result.filter$halo.neuron <- result.filter$halo.glial <- 0
 for(ii in seq(nrow(result.filter))){
@@ -194,7 +196,9 @@ result.filter$abs.error.neuron <- abs(result.filter$error.neuron)
 result.filter$error.glial <- result.filter$halo.glial-result.filter$glial
 result.filter$abs.error.glial <- abs(result.filter$glial)
 
+#-----------------
 # merge k3 results
+#-----------------
 result.filter <- result.table.list["k3"][[1]]
 result.filter$halo.neuron <- result.filter$halo.oligo <- result.filter$halo.non.oligo.glial <- 0
 for(ii in seq(nrow(result.filter))){
@@ -214,7 +218,9 @@ result.filter$abs.error.oligo <- abs(result.filter$oligo)
 result.filter$error.non.oligo.glial <- result.filter$halo.non.oligo.glial-result.filter$glial_non_oligo
 result.filter$abs.error.non.oligo.glial <- abs(result.filter$error.non.oligo.glial)
 
+#-----------------
 # merge k4 results
+#-----------------
 result.filter <- result.table.list["k4"][[1]]
 result.filter$halo.neuron <- result.filter$halo.astro <- 
   result.filter$halo.micro <- result.filter$halo.oligo <- 0
@@ -247,4 +253,3 @@ summary(result.filter$abs.error.micro)
 # append expression metadata
 # total cells 
 # total cells per type
-
