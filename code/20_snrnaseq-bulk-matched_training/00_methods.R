@@ -157,7 +157,7 @@ deconvo.results.list.k234 <- list(k2 = result.table.k2,
                                   k3 = result.table.k3,
                                   k4 = result.table.k4)
 
-result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_train.rda"
+result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"
 result.table.path <- paste0("./deconvo_method-paper/outputs/", result.table.name)
 save(deconvo.results.list.k234, file = result.table.path)
 
@@ -166,7 +166,8 @@ save(deconvo.results.list.k234, file = result.table.path)
 #---------------
 # load data
 # deconvo results table
-result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_train.rda"))
+# result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_train.rda"))
+result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"))
 # image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
@@ -213,9 +214,6 @@ for(ii in seq(nrow(result.filter))){
   sample.id.format <- paste0(unlist(strsplit(sample.id, "_"))[1:2], collapse = "_")
   which.halo.id <- halo.sample.prop$sample.id==sample.id.format
   halo.filter <- halo.sample.prop[which.halo.id,]
-  halo.cells.all.filter <- halo.cells[halo.cells[,1]==sample.id.format,2]
-  halo.cells.neuron.filter <- halo.cells[halo.cells[,1]==sample.id.format,2]
-  halo.cells.neuron.filter <- halo.cells[halo.cells[,1]==sample.id.format,2]
   result.filter$halo.neuron[ii] <- halo.filter$Excit+halo.filter$Inhib
   result.filter$halo.glial[ii] <- halo.filter$Oligo+halo.filter$Astro+halo.filter$Micro
   result.filter$halo.total.cells[ii] <- 
