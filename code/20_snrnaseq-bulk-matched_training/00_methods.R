@@ -94,8 +94,8 @@ rse <- rse[!duplicated(rowData(rse)$Symbol),]
 rownames(rse) <- rowData(rse)$Symbol
 
 # get experiment results
-s.vector <- c("glial" = 3, "glial_non_oligo" = 3, 
-              "neuron" = 10, "astro" = 4, "oligo" = 3, "micro" = 3)
+s.vector <- c("glial" = 11, "glial_non_oligo" = 3, 
+              "neuron" = 12, "astro" = 4, "oligo" = 3, "micro" = 3)
 sample.id.vector.sn <- unique(sce$Sample)
 result.list <- lapply(sample.id.vector.sn, function(sample.id){
   sce.sample <- sce[,sce$Sample == sample.id]
@@ -170,12 +170,38 @@ result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-m
 # image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
+# filter halo.all
+cell.types.filter <- c("Other")
+halo.all <- halo.all[!halo.all$cell_type %in% cell.types.filter,]
 
 # cell type proportions by sample
 halo.sample.prop <- do.call(rbind, sapply(unique(halo.all$Sample), function(sample.id){
   table(halo.all[halo.all$Sample==sample.id,]$cell_type) %>% prop.table()
 })) %>% as.data.frame()
 halo.sample.prop$sample.id <- unique(halo.all$Sample)
+
+# total cells by sample
+neuron.types.vector <- c("Excit", "Inhib")
+glial.types.vector <- c("Oligo", "OPC", "Micro", "Astro")
+halo.cells.all <- table(halo.all$Sample) %>% as.data.frame()
+halo.cells.neuron <- table(halo.all[halo.all$cell_type %in% neuron.types.vector,]$Sample) %>% as.data.frame()
+halo.cells.glial <- table(halo.all[halo.all$cell_type %in% glial.types.vector,]$Sample) %>% as.data.frame()
+
+# cell sizes by sample, type
+halo.k2 <- halo.all
+halo.k2$k2 <- ifelse(halo.k2$cell_type %in% neuron.types.vector, "neuron", "glial")
+# aggregate cell size medians
+halo.cellsize <- aggregate(halo.k2$Cell_Area, 
+                           by = list(halo.k2$k2, halo.k2$Sample), FUN = median)
+colnames(halo.cellsize) <- c("k2", "sample", "median.cellsize")
+# jitterbox, by type
+ggplot(halo.cellsize, aes(x = k2, y = median.cellsize)) + 
+  geom_jitter(alpha = 0.4) + 
+  geom_boxplot(alpha = 0, color = "cyan")
+# jitterbox, by sample, type
+ggplot(halo.cellsize, aes(x = k2, y = median.cellsize)) + 
+  geom_jitter(alpha = 0.4) + 
+  geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~sample)
 
 #-----------------
 # merge k2 results
@@ -187,14 +213,76 @@ for(ii in seq(nrow(result.filter))){
   sample.id.format <- paste0(unlist(strsplit(sample.id, "_"))[1:2], collapse = "_")
   which.halo.id <- halo.sample.prop$sample.id==sample.id.format
   halo.filter <- halo.sample.prop[which.halo.id,]
+  halo.cells.all.filter <- halo.cells[halo.cells[,1]==sample.id.format,2]
+  halo.cells.neuron.filter <- halo.cells[halo.cells[,1]==sample.id.format,2]
+  halo.cells.neuron.filter <- halo.cells[halo.cells[,1]==sample.id.format,2]
   result.filter$halo.neuron[ii] <- halo.filter$Excit+halo.filter$Inhib
   result.filter$halo.glial[ii] <- halo.filter$Oligo+halo.filter$Astro+halo.filter$Micro
+  result.filter$halo.total.cells[ii] <- 
+    halo.cells.all[halo.cells.all[,1]==sample.id.format,2]
+  result.filter$halo.neuron.cells[ii] <- 
+    halo.cells.neuron[halo.cells.neuron[,1]==sample.id.format,2]
+  result.filter$halo.glial.cells[ii] <- 
+    halo.cells.glial[halo.cells.glial[,1]==sample.id.format,2]
+  result.filter$halo.glial.median.cellsize[ii] <- 
+    halo.cellsize[halo.cellsize[,2]==sample.id.format & 
+                    halo.cellsize[,1]=="glial", 3]
+  result.filter$halo.neuron.median.cellsize[ii] <- 
+    halo.cellsize[halo.cellsize[,2]==sample.id.format & 
+                    halo.cellsize[,1]=="neuron", 3]
 }
 # get errors
 result.filter$error.neuron <- result.filter$halo.neuron-result.filter$neuron
 result.filter$abs.error.neuron <- abs(result.filter$error.neuron)
 result.filter$error.glial <- result.filter$halo.glial-result.filter$glial
 result.filter$abs.error.glial <- abs(result.filter$glial)
+result.filter$cell.size.fraction <- 
+  result.filter$halo.neuron.median.cellsize/
+  result.filter$halo.glial.median.cellsize
+
+# plots
+# error by scale
+ggplot(result.filter, aes(x = scale, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.4) + geom_boxplot(alpha = 0, color = "cyan")
+# proportions, facet scale
+ggplot(result.filter, aes(x = halo.neuron, y = neuron)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~scale)
+# error by amount
+ggplot(result.filter, aes(x = halo.neuron.cells, y = abs.error.neuron)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~scale) + geom_smooth(method = "glm")
+
+# error by cellsize fract
+ggplot(result.filter, aes(x = cell.size.fraction, y = abs.error.neuron)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~scale) + geom_smooth(method = "glm")
+
+# get scale error change by bulk sample
+sample.id.vector <- unique(result.filter$sample_label)
+sample.id.vector <- sample.id.vector[!grepl(".*Cyto1|.*Nuc1|.*Bulk1", sample.id.vector)]
+plot.data <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
+  dff <- result.filter[grepl(sample.id, result.filter$sample_label),]
+  value <- dff[dff$scale==FALSE,"abs.error.neuron"]-dff[dff$scale==TRUE,"abs.error.neuron"]
+  c(sample.id, value, dff$halo.neuron.cells[1])
+})) %>% as.data.frame()
+colnames(plot.data) <- c("sample.id", "scale.error.diff", "halo.cells.neuron")
+plot.data[,2] <- as.numeric(plot.data[,2])
+plot.data[,3] <- as.numeric(plot.data[,3])
+plot.data[,1] <- factor(plot.data[,1], levels = plot.data[,1][order(plot.data[,2])])
+
+# barplot error diff
+ggplot(plot.data, aes(x = sample.id, y = scale.error.diff)) + 
+  geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# scatterplot error diff vs. num. halo neurons
+ggplot(plot.data, aes(x = halo.cells.neuron, y = scale.error.diff)) +
+  geom_hline(yintercept = 0) + geom_point(alpha = 0.4) + 
+  geom_smooth(method = "glm")
+
+ggplot(plot.data, aes(x = halo.cells.neuron, y = scale.error.diff)) +
+  geom_hline(yintercept = 0) + geom_point(alpha = 0.4) + 
+  geom_smooth(method = "glm") + geom_label(aes(label = sample.id))
 
 #-----------------
 # merge k3 results
