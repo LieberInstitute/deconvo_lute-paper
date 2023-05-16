@@ -257,6 +257,17 @@ ggplot(result.filter, aes(x = halo.neuron.cells, y = abs.error.neuron)) +
   geom_point() + geom_abline(slope = 1, intercept = 0) +
   facet_wrap(~scale) + geom_smooth(method = "glm")
 
+# proportions, facet scale, color by condition
+plot.data <- result.filter
+sample.label.vector <- plot.data$sample_label
+condition.vector <- sapply(sample.label.vector, function(sample.id){
+  paste0(unlist(strsplit(sample.id, "_"))[3:4], collapse = "_")
+})
+plot.data$condition <- gsub("1", "", condition.vector)
+ggplot(plot.data, aes(x = halo.neuron, y = neuron, color = condition)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~scale)
+
 # error by cellsize fract
 ggplot(result.filter, aes(x = cell.size.fraction, y = abs.error.neuron)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) +
