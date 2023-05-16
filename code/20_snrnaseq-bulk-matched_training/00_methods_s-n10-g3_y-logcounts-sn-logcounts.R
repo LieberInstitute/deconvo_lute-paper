@@ -254,9 +254,9 @@ result.filter$cell.size.fraction <-
   result.filter$halo.neuron.median.cellsize/
   result.filter$halo.glial.median.cellsize
 # error summaries
-median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.3997985
+median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.2185597
 median(result.filter[result.filter$scale==F,]$abs.error.neuron) # 0.1722251
-median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.9148593
+median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.674576
 median(result.filter[result.filter$scale==F,]$abs.error.glial) # 0.3834312
 
 

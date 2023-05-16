@@ -2,7 +2,7 @@
 #
 # uses the following conditions
 #
-# * S : non-standard scale factors (neuron = 11, glial = 12)
+# * S : standard scale factors (neuron = 10, glial = 3)
 # * scales, y and z : uses logcounts for y and z both
 #
 #
@@ -87,6 +87,30 @@ all.markers.vector <- lapply(list.markers.sn, function(list.iter){
 }) %>% unlist() %>% unique()
 sce <- sce[rownames(sce) %in% all.markers.vector,]
 
+#----------------------
+# halo cell sizes -- k2
+#----------------------
+neuron.types.vector <- c("Excit", "Inhib")
+glial.types.vector <- c("Oligo", "OPC", "Micro", "Astro")
+# image reference
+halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
+halo.all <- get(load(halo.path))
+# filter halo.all
+cell.types.filter <- c("Other")
+halo.all <- halo.all[!halo.all$cell_type %in% cell.types.filter,]
+# cell sizes by sample, type
+halo.k2 <- halo.all
+halo.k2$k2 <- ifelse(halo.k2$cell_type %in% neuron.types.vector, "neuron", "glial")
+# aggregate cell size medians
+halo.cellsize <- aggregate(halo.k2$Cell_Area, 
+                           by = list(halo.k2$k2, halo.k2$Sample), FUN = median)
+colnames(halo.cellsize) <- c("k2", "sample", "median.cellsize")
+# norm cellsize
+halo.cellsize$norm.size <- 1
+halo.cellsize[halo.cellsize$k2=="neuron",]$norm.size <- 
+  halo.cellsize[halo.cellsize$k2=="neuron",]$median.cellsize/
+  halo.cellsize[halo.cellsize$k2=="glial",]$median.cellsize
+
 #-----------------------------------
 # do deconvolution with matched data
 #-----------------------------------
@@ -103,9 +127,8 @@ rse <- rse[!duplicated(rowData(rse)$Symbol),]
 rownames(rse) <- rowData(rse)$Symbol
 
 # get experiment results
-s.vector <- c("glial" = 12, "neuron" = 11,
-              "glial_non_oligo" = 3, "astro" = 4, 
-              "oligo" = 3, "micro" = 3)
+#s.vector <- c("glial" = 3, "glial_non_oligo" = 3, 
+#              "neuron" = 10, "astro" = 4, "oligo" = 3, "micro" = 3)
 sample.id.vector.sn <- unique(sce$Sample)
 result.list <- lapply(sample.id.vector.sn, function(sample.id){
   sce.sample <- sce[,sce$Sample == sample.id]
@@ -116,7 +139,7 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
   assays(sce.sample)[["logcounts"]] <- as.matrix(assays(sce.sample)[["logcounts"]])
   assays(rse.sample)[["logcounts"]] <- as.matrix(assays(rse.sample)[["logcounts"]])
   if(ncol(rse.sample) > 0){
-    sample.markers <- list.markers.sn[[sample.id]]
+    sample.markers <- list.markers.sn[[sample.id]][1]
     marker.index.vector <- seq(length(sample.markers))
     results.bymarker.list <- lapply(marker.index.vector, function(marker.index){
       # filter and match marker order
@@ -144,8 +167,11 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
                              assay.name = "logcounts")$deconvolution.results %>%
         as.data.frame()
       # with s
+      s.filter <- halo.cellsize[halo.cellsize$sample==sample.id,]
+      s.sample <- c("neuron" = s.filter[s.filter[,1]=="neuron",]$norm.size,
+             "glial" = s.filter[s.filter[,1]=="glial",]$norm.size)
       decon.with.scale <- lute(sce = sce.markers, y = y.expression,
-                               celltype.variable = marker.type, s = s.vector,
+                               celltype.variable = marker.type, s = s.sample,
                                typemarker.algorithm = NULL,
                                assay.name = "logcounts")$deconvolution.results %>%
         as.data.frame()
@@ -175,7 +201,7 @@ deconvo.results.list.k234 <- list(k2 = result.table.k2,
                                   k4 = result.table.k4)
 
 # result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"
-result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_s-11n-12g_scale-yz-logcounts_train.rda"
+result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_s-halo-cellsize_scale-yz-logcounts_train.rda"
 result.table.path <- paste0("./deconvo_method-paper/outputs/", result.table.name)
 save(deconvo.results.list.k234, file = result.table.path)
 
@@ -184,7 +210,7 @@ save(deconvo.results.list.k234, file = result.table.path)
 #---------------
 # load data
 # deconvo results table
-result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_s-11n-12g_scale-yz-logcounts_train.rda"))
+result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_s-10n-3g_scale-yz-logcounts_train.rda"))
 # image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
@@ -255,9 +281,9 @@ result.filter$cell.size.fraction <-
   result.filter$halo.neuron.median.cellsize/
   result.filter$halo.glial.median.cellsize
 # error summaries
-median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.1924339
+median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.2185597
 median(result.filter[result.filter$scale==F,]$abs.error.neuron) # 0.1722251
-median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.36308
+median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.674576
 median(result.filter[result.filter$scale==F,]$abs.error.glial) # 0.3834312
 
 
@@ -282,9 +308,6 @@ condition.vector <- sapply(sample.label.vector, function(sample.id){
 })
 plot.data$condition <- gsub("1", "", condition.vector)
 ggplot(plot.data, aes(x = halo.neuron, y = neuron, color = condition)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) +
-  facet_wrap(~scale)
-ggplot(plot.data, aes(x = halo.glial, y = glial, color = condition)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) +
   facet_wrap(~scale)
 
