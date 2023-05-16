@@ -189,16 +189,16 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
 result.table.k2 <- do.call(rbind, 
                            lapply(result.list, 
                                   function(list.iter){list.iter[[1]]})) %>% as.data.frame()
-result.table.k3 <- do.call(rbind, 
-                           lapply(result.list, 
-                                  function(list.iter){list.iter[[2]]})) %>% as.data.frame()
-result.table.k4 <- do.call(rbind, 
-                           lapply(result.list, 
-                                  function(list.iter){list.iter[[3]]})) %>% as.data.frame()
+#result.table.k3 <- do.call(rbind, 
+#                           lapply(result.list, 
+#                                  function(list.iter){list.iter[[2]]})) %>% as.data.frame()
+#result.table.k4 <- do.call(rbind, 
+#                           lapply(result.list, 
+#                                  function(list.iter){list.iter[[3]]})) %>% as.data.frame()
 
-deconvo.results.list.k234 <- list(k2 = result.table.k2,
-                                  k3 = result.table.k3,
-                                  k4 = result.table.k4)
+deconvo.results.list.k234 <- list(k2 = result.table.k2) #,
+                                  #k3 = result.table.k3,
+                                  #k4 = result.table.k4)
 
 # result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"
 result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_s-halo-cellsize_scale-yz-logcounts_train.rda"
@@ -210,7 +210,7 @@ save(deconvo.results.list.k234, file = result.table.path)
 #---------------
 # load data
 # deconvo results table
-result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_s-10n-3g_scale-yz-logcounts_train.rda"))
+result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_s-halo-cellsize_scale-yz-logcounts_train.rda"))
 # image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
@@ -281,15 +281,17 @@ result.filter$cell.size.fraction <-
   result.filter$halo.neuron.median.cellsize/
   result.filter$halo.glial.median.cellsize
 # error summaries
-median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.2185597
+median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.1596352
 median(result.filter[result.filter$scale==F,]$abs.error.neuron) # 0.1722251
-median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.674576
+median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.4086078
 median(result.filter[result.filter$scale==F,]$abs.error.glial) # 0.3834312
-
 
 # plots
 # error by scale
 ggplot(result.filter, aes(x = scale, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.4) + geom_boxplot(alpha = 0, color = "cyan")
+# error by scale
+ggplot(result.filter, aes(x = scale, y = abs.error.glial)) + 
   geom_jitter(alpha = 0.4) + geom_boxplot(alpha = 0, color = "cyan")
 # proportions, facet scale
 ggplot(result.filter, aes(x = halo.neuron, y = neuron)) + 
