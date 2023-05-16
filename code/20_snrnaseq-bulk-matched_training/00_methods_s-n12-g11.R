@@ -94,8 +94,8 @@ rse <- rse[!duplicated(rowData(rse)$Symbol),]
 rownames(rse) <- rowData(rse)$Symbol
 
 # get experiment results
-s.vector <- c("glial" = 3, "glial_non_oligo" = 3, 
-              "neuron" = 10, "astro" = 4, "oligo" = 3, "micro" = 3)
+s.vector <- c("glial" = 11, "glial_non_oligo" = 3, 
+              "neuron" = 12, "astro" = 4, "oligo" = 3, "micro" = 3)
 sample.id.vector.sn <- unique(sce$Sample)
 result.list <- lapply(sample.id.vector.sn, function(sample.id){
   sce.sample <- sce[,sce$Sample == sample.id]
@@ -157,8 +157,7 @@ deconvo.results.list.k234 <- list(k2 = result.table.k2,
                                   k3 = result.table.k3,
                                   k4 = result.table.k4)
 
-# result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"
-result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_train.rda"
+result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"
 result.table.path <- paste0("./deconvo_method-paper/outputs/", result.table.name)
 save(deconvo.results.list.k234, file = result.table.path)
 
@@ -167,7 +166,7 @@ save(deconvo.results.list.k234, file = result.table.path)
 #---------------
 # load data
 # deconvo results table
-result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_train.rda"))
+result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"))
 # image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
@@ -238,9 +237,9 @@ result.filter$cell.size.fraction <-
   result.filter$halo.neuron.median.cellsize/
   result.filter$halo.glial.median.cellsize
 # error summaries
-median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.4407705
+median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.3703508
 median(result.filter[result.filter$scale==F,]$abs.error.neuron) # 0.3667202
-median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.9555176
+median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.8754689
 median(result.filter[result.filter$scale==F,]$abs.error.glial) # 0.8656688
 
 
