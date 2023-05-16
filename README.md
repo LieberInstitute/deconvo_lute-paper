@@ -26,10 +26,12 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure 2c]() : K2 markers block overlap plot.
 [Figure 2d]() : K2 markers expression heatmap.
 
+[Figure 3]() : Changes in absolute error from deconvolution of neurons in an applied experiment setting. The R script to reproduce this figure is located at `./code/20_snrnaseq-bulk-matched_training/00_methods_s-halo-cellsizes-normbyneuron_y-logcounts-sn-logcounts`
+
 [Figure S1a]() : Dispersion mean-variance plots by cell type and adjustment.
 [Figure S1b]() : Dispersion coefficient boxplots.
 
-[Figure S2]() : Dispersion mean-variance plots by batch group. The R script to reproduce this figure is located at `code/19_sfactor-simulations_smagnitudes-and-z-matching/03_shows-random-errors-z-performance.R`
+[Figure S2]() : Pseudobulk simulation results in DLPFC Cohort 1. Dispersion mean-variance plots by batch group. The R script to reproduce this figure is located at `code/19_sfactor-simulations_smagnitudes-and-z-matching/03_shows-random-errors-z-performance.R`
 
 [Figure S3]() : Subsample simulation results, across- and within-groups.
 
