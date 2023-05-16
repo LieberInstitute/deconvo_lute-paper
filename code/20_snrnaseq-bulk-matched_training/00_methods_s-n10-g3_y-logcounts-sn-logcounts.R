@@ -145,7 +145,8 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
       # with s
       decon.with.scale <- lute(sce = sce.markers, y = y.expression,
                                celltype.variable = marker.type, s = s.vector,
-                               typemarker.algorithm = NULL)$deconvolution.results %>%
+                               typemarker.algorithm = NULL,
+                               assay.name = "logcounts")$deconvolution.results %>%
         as.data.frame()
       decon.no.scale$scale <- FALSE
       decon.with.scale$scale <- TRUE

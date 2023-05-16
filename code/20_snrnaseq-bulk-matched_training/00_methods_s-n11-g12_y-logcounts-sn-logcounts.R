@@ -103,8 +103,9 @@ rse <- rse[!duplicated(rowData(rse)$Symbol),]
 rownames(rse) <- rowData(rse)$Symbol
 
 # get experiment results
-s.vector <- c("glial" = 3, "glial_non_oligo" = 3, 
-              "neuron" = 10, "astro" = 4, "oligo" = 3, "micro" = 3)
+s.vector <- c("glial" = 12, "neuron" = 11,
+              "glial_non_oligo" = 3, "astro" = 4, 
+              "oligo" = 3, "micro" = 3)
 sample.id.vector.sn <- unique(sce$Sample)
 result.list <- lapply(sample.id.vector.sn, function(sample.id){
   sce.sample <- sce[,sce$Sample == sample.id]
@@ -145,7 +146,8 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
       # with s
       decon.with.scale <- lute(sce = sce.markers, y = y.expression,
                                celltype.variable = marker.type, s = s.vector,
-                               typemarker.algorithm = NULL)$deconvolution.results %>%
+                               typemarker.algorithm = NULL,
+                               assay.name = "logcounts")$deconvolution.results %>%
         as.data.frame()
       decon.no.scale$scale <- FALSE
       decon.with.scale$scale <- TRUE
