@@ -28,7 +28,9 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 
 [Figure S1a]() : Dispersion mean-variance plots by cell type and adjustment.
 [Figure S1b]() : Dispersion coefficient boxplots.
-[Figure S2]() : Dispersion mean-variance plots by batch group.
+
+[Figure S2]() : Dispersion mean-variance plots by batch group. The R script to reproduce this figure is located at `code/19_sfactor-simulations_smagnitudes-and-z-matching/03_shows-random-errors-z-performance.R`
+
 [Figure S3]() : Subsample simulation results, across- and within-groups.
 
 [Figure S4a](./outputs/13_halo-outputs-analysis/ggboxplot_nucleus-area.jpg) : Nucleus area distribution before and after log10 transformation. ([script](./code/13_halo-outputs-analysis/02_plot-normalized-variables.R))

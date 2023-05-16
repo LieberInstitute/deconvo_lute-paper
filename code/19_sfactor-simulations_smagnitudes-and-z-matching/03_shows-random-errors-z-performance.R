@@ -157,7 +157,8 @@ list.z.error <- lapply(iterations.vector, function(index){
 # get series across varied p values
 p1 <- seq(0.1, 0.4, 1e-2)
 list.results <- lapply(p1, function(p1.iter){
-  simulation_results(z = list.z.error, p = c(p1.iter, 1-p1.iter))
+  p.iter <- c(p1.iter, 1-p1.iter)
+  simulation_results(z = list.z.error, p = p.iter)
 })
 results.all <- do.call(rbind, list.results)
 
@@ -179,9 +180,15 @@ results.tall <- rbind(results.tall1, results.tall2)
 #------------------
 # scatterplots -- p.true vs. p.predicted, by scale
 scatterplot.prop <- ggplot(results.tall, 
-                           aes(x = p.true.type1, y = p.pred.type1, color = z.corr.type1)) +
+                           aes(x = p.true.type1, y = p.pred.type1, 
+                               color = z.corr.type1)) +
   geom_point(alpha = 0.2) + geom_abline(slope = 1, intercept = 0) + theme_bw() +
   facet_wrap(~type) + xlab("True") + ylab("Predicted")
+# save
+scatterplot.filename <- "ggscatter_proportions_scale-facet_sim-zy-error_dlpfc-train-sim.jpg"
+scatterplot.path <- file.path("./deconvo_method-paper/outputs/", scatterplot.filename)
+jpeg(scatterplot.path, width = 5.5, height = 2.5, res = 100, units = "in")
+scatterplot.prop; dev.off()
 
 # glm smooth lines -- z.corr vs. abs.error, by scale
 scatterplot.error <- ggplot(results.tall, aes(x = z.corr.type1, y = abs.error.type1)) +
