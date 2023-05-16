@@ -107,6 +107,7 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
   rse.sample <- rse[,rse$Sample == sample.id]
   if(ncol(rse.sample) > 0){
     sample.markers <- list.markers.sn[[sample.id]]
+    sample.markers <- sample.markers["k2"] # only get k2 markers for now
     marker.index.vector <- seq(length(sample.markers))
     results.bymarker.list <- lapply(marker.index.vector, function(marker.index){
       # filter and match marker order
@@ -128,16 +129,27 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
                                        rse.markers$library_prep)
       
       # get fitted y values
-      z <- assays(sce.markers)[["counts"]]
-      lmi <- lm(y.expression[,1] ~ )
+      # get top markers
+      markers <- lute(sce = sce.markers, 
+                      celltype.variable = marker.type, 
+                      deconvolution.algorithm = NULL)[[1]]
+      z <- lute:::.get_z_from_sce(sce[markers,], "counts", marker.type)
+      # get fitted marker values
+      y.fitted <- do.call(cbind, lapply(seq(ncol(y.expression)), function(bulk.index){
+        model.marker <- cbind(y.expression[markers,bulk.index], z) %>% 
+          as.data.frame()
+        colnames(model.marker) <- c("bulk.sample", colnames(z))
+        lm(bulk.sample ~. , data = model.marker)$fit
+      }))
+      colnames(y.fitted) <- colnames(y.expression)
       
       # without s
-      decon.no.scale <- lute(sce = sce.markers, y = y.expression,
+      decon.no.scale <- lute(sce = sce.markers[markers,], y = y.fitted,
                              celltype.variable = marker.type,
                              typemarker.algorithm = NULL)$deconvolution.results %>%
         as.data.frame()
       # with s
-      decon.with.scale <- lute(sce = sce.markers, y = y.expression,
+      decon.with.scale <- lute(sce = sce.markers, y = y.fitted,
                                celltype.variable = marker.type, s = s.vector,
                                typemarker.algorithm = NULL)$deconvolution.results %>%
         as.data.frame()
@@ -155,18 +167,18 @@ result.list <- lapply(sample.id.vector.sn, function(sample.id){
 result.table.k2 <- do.call(rbind, 
                            lapply(result.list, 
                                   function(list.iter){list.iter[[1]]})) %>% as.data.frame()
-result.table.k3 <- do.call(rbind, 
-                           lapply(result.list, 
-                                  function(list.iter){list.iter[[2]]})) %>% as.data.frame()
-result.table.k4 <- do.call(rbind, 
-                           lapply(result.list, 
-                                  function(list.iter){list.iter[[3]]})) %>% as.data.frame()
+#result.table.k3 <- do.call(rbind, 
+#                           lapply(result.list, 
+#                                  function(list.iter){list.iter[[2]]})) %>% as.data.frame()
+#result.table.k4 <- do.call(rbind, 
+#                           lapply(result.list, 
+#                                  function(list.iter){list.iter[[3]]})) %>% as.data.frame()
 
-deconvo.results.list.k234 <- list(k2 = result.table.k2,
-                                  k3 = result.table.k3,
-                                  k4 = result.table.k4)
+deconvo.results.list.k234 <- list(k2 = result.table.k2) #,
+                                  #k3 = result.table.k3,
+                                  #k4 = result.table.k4)
 
-result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"
+result.table.name <- "deconvo-results-table_bulk-matched-sn-bydonor_y-fitted-lm_train.rda"
 result.table.path <- paste0("./deconvo_method-paper/outputs/", result.table.name)
 save(deconvo.results.list.k234, file = result.table.path)
 
@@ -176,7 +188,7 @@ save(deconvo.results.list.k234, file = result.table.path)
 # load data
 # deconvo results table
 # result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_train.rda"))
-result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_cellsize-fract-1-0-9_train.rda"))
+result.table.list <- get(load("./deconvo_method-paper/outputs/20_snrnaseq-bulk-matched_training/deconvo-results-table_bulk-matched-sn-bydonor_y-fitted-lm_train.rda"))
 # image reference
 halo.path <- "Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata"
 halo.all <- get(load(halo.path))
@@ -246,6 +258,11 @@ result.filter$abs.error.glial <- abs(result.filter$glial)
 result.filter$cell.size.fraction <- 
   result.filter$halo.neuron.median.cellsize/
   result.filter$halo.glial.median.cellsize
+# error summaries
+median(result.filter[result.filter$scale==T,]$abs.error.neuron) # 0.4295904
+median(result.filter[result.filter$scale==F,]$abs.error.neuron) # 0.3139582
+median(result.filter[result.filter$scale==T,]$abs.error.glial) # 0.9470644
+median(result.filter[result.filter$scale==F,]$abs.error.glial) # 0.8429648
 
 # plots
 # error by scale
