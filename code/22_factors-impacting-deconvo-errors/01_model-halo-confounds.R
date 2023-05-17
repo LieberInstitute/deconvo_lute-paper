@@ -73,8 +73,8 @@ head(total.cells[order(total.cells[,2]),])
 # fewest neurons
 neuron.labels.vector <- c("Excit", "Inhib")
 halo.filter <- halo.all$cell_type %in% neuron.labels.vector
-total.cells <- as.data.frame(table(halo.all[halo.filter,]$SAMPLE_ID))
-head(total.cells[order(total.cells[,2]),])
+total.neuron <- as.data.frame(table(halo.all[halo.filter,]$SAMPLE_ID))
+head(total.neuron[order(total.neuron[,2]),])
 # Var1 Freq
 # 22 Br6522M_CIRCLE  574
 # 14   Br6432A_STAR 1624
@@ -85,8 +85,8 @@ head(total.cells[order(total.cells[,2]),])
 
 # fewest glial
 halo.filter <- !halo.all$cell_type %in% neuron.labels.vector
-total.cells <- as.data.frame(table(halo.all[halo.filter,]$SAMPLE_ID))
-head(total.cells[order(total.cells[,2]),])
+total.glial <- as.data.frame(table(halo.all[halo.filter,]$SAMPLE_ID))
+head(total.glial[order(total.glial[,2]),])
 # Var1 Freq
 # 8    Br3942M_STAR 1416
 # 36   Br8667M_STAR 1942
@@ -94,6 +94,14 @@ head(total.cells[order(total.cells[,2]),])
 # 7  Br3942M_CIRCLE 3449
 # 23   Br6522M_STAR 5031
 # 32   Br8492P_STAR 5764
+
+# save
+list.halo.confounds <- list(total.cells = total.cells,
+                            total.neuron = total.neuron,
+                            total.glial = total.glial)
+save(list.halo.confounds, 
+     file = paste0("deconvo_method-paper/outputs/22_factors-impacting-deconvo-errors/",
+                   "list-halo-confounds_dlpfc-train.rda"))
 
 #----------------------------------------------
 # subsample cells of varying amounts, by sample
