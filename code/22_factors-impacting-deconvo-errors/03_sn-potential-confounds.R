@@ -12,11 +12,42 @@ sce <- get(load('./deconvo_method-paper/outputs/sce_prep_05-10-23_train.rda'))
 #-------------------------------
 # get counts and expressed genes
 #-------------------------------
+library(scuttle)
+
 # total counts summaries
+# mean counts
+count.summary <- summarizeAssayByGroup(sce, sce$Sample, statistics = "mean")
+neuron.filter <- sce[["k2"]]=="neuron"
+sce.filter <- sce[,neuron.filter]
+neuron.count.summary <- summarizeAssayByGroup(sce.filter, sce.filter$Sample, statistics = "mean")
+glial.filter <- sce[["k2"]]=="glial"
+sce.filter <- sce[,glial.filter]
+glial.count.summary <- summarizeAssayByGroup(sce.filter, sce.filter$Sample, statistics = "mean")
+# total counts
+df.counts <- data.frame(sample.id = colnames(assays(count.summary)[["mean"]]),
+           total.counts = colSums(assays(count.summary)[["mean"]]),
+           neuron.counts = colSums(assays(neuron.count.summary)[["mean"]]),
+           glial.counts = colSums(assays(neuron.count.summary)[["mean"]]))
 
 # expressed genes by sample
+library(dplyr)
+min.expr <- 5
+df.expr.genes <- data.frame(sample.id = 
+                              colnames(assays(count.summary)[["mean"]]),
+                            total.expr.genes = 
+                              apply(assays(count.summary)[["mean"]], 2, 
+                                    function(ci){length(ci[ci>=min.expr])}) %>% as.numeric(),
+                            neuron.expr.genes =
+                              apply(assays(neuron.count.summary)[["mean"]], 2, 
+                                    function(ci){length(ci[ci>=min.expr])}) %>% as.numeric(),
+                            glial.expr.genes =
+                              apply(assays(glial.count.summary)[["mean"]], 2, 
+                                    function(ci){length(ci[ci>=min.expr])}) %>% as.numeric())
 
 # save 
+df.sn.confound <- cbind(df.expr.genes, df.counts) %>% as.data.frame()
+save(df.sn.confound, file = 
+       "./deconvo_method-paper/outputs/df-confounds-sn_dlpfc-train.rda")
 
 #------------------------------------
 # get expression at top donor markers
