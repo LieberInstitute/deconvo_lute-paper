@@ -91,7 +91,7 @@ sce <- sce[rownames(sce) %in% all.markers.vector,]
 # halo cell sizes -- k2
 #----------------------
 # params
-cell.area.variable <- "Cell_Area"
+cell.area.variable <- "Nucleus_Area"
 neuron.types.vector <- c("Excit", "Inhib")
 glial.types.vector <- c("Oligo", "OPC", "Micro", "Astro")
 
@@ -216,7 +216,7 @@ save(deconvo.results.list.k234, file = result.table.path)
 #---------------
 # params
 cell.types.filter <- c("Other")
-cell.area.variable <- "Cell_Area"
+cell.area.variable <- "Nucleus_Area"
 
 # load data
 # deconvo results table
