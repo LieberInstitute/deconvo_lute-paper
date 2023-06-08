@@ -21,3 +21,4 @@ outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_inter-sample-bias
 outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_intra-sample-bias/rscript/predict-proportions_no-transform.R
 outputs/09_manuscript/.Rhistory
 outputs/23_replicate-sosina-findings/Strategies-for-cellular-deconvolution-in-human-brain-RNA-sequencing-data/
+outputs/23_replicate-sosina2021/env_predict-music.RData
