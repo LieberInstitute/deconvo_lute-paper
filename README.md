@@ -9,12 +9,17 @@ The path to this repository on JHPCE is:
 This repo contains analysis code, outputs, figures, etc. for the deconvolution methods paper. The subdirs contained here include:
 
 * `code` : Main location where scripts and code to generate content live.
-
 * `figures_and_tables`: Main location of figures and tables, with same layout as `code` subdir
-
 * `outputs`: Objects (i.e. not figures or tables) which are produced by scripts from `code`. Has same layout as `code` subdir.
-
 * `source`: Scripts, vignettes, etc. which are central to the planned deconvolution resource. This will have its own internal structure and be developed in parallel to analyses for the paper.
+
+## Data files
+
+`SingleCellExperiment` objects containing single nucleus RNA-seq data.
+
+* `data/sce`  
+** `data/sce/SCE_DLPFC...` snRNAseq Dorsolateral prefrontal cortex data from Tran et al 2021. Downloaded from ![link](https://github.com/LieberInstitute/10xPilot_snRNAseq-human)
+** `data/sce/sce...` snRNAseq Dorsolateral prefrontal cortex data, new to this study.
 
 ## Manuscript figures
 
