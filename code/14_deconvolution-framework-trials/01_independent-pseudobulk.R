@@ -4,7 +4,7 @@
 #
 # Test independent pseudobulk from multi-region brain data.
 
-source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters.R")
+source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters_script-set-14.R")
 sapply(libv, library, character.only = T)
 sce.mrb <- get(load(sce.mrb.path))
 sce <- get(load(sce.markers.list.path))[["k2"]]
