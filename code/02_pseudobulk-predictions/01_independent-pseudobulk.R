@@ -7,6 +7,11 @@
 source("deconvo_method-paper/code/02_pseudobulk-outputs/00_parameters_script-set-14.R")
 sapply(libv, library, character.only = T)
 sce.mrb <- get(load(sce.mrb.path))
+
+# get predictions
+
+
+
 sce <- get(load(sce.markers.list.path))[["k2"]]
 
 set.seed(0)
