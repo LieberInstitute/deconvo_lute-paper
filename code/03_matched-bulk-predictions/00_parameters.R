@@ -229,7 +229,7 @@ pb.barplot.rmse.bysample.colmethod.path <- here(save.path, pb.barplot.rmse.bysam
 # set the halo data path
 halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", "halo_all.Rdata")
 # bulk data
-rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "11_bulk-expression-analysis", "rse_k2-marker-expression_ro1-dlpfc.rda")
+rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "rse_k2-marker-expression_ro1-dlpfc.rda")
 # data for experiments
 assay.name.rse <- "logcounts"
 # image cells path

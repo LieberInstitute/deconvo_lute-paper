@@ -1,8 +1,7 @@
 #!/usr/bin/env R
 
-# Author: Sean Maden
 #
-# Pre-filter and process bulk RNA-seq data.
+# Filter the bulk RNA-seq data on gene types and k2 markers.
 #
 
 # load data
@@ -20,7 +19,7 @@ rse.k2markers.filepath <- here(save.path, rse.k2markers.filename)
 rse.gene.filter.filename <- "rse-gene-filter.rda"
 rse.gene.filter.filepath <- here(save.path, rse.gene.filter.filename)
 sce.markers.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
-sce.markers.list.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.markers.filename)
+sce.markers.list.path <- here(save.path, sce.markers.filename)
 
 # variable names
 experiment.condition1 <- "library_prep"
@@ -29,7 +28,6 @@ condition.variable <- "expt_condition"
 donor.variable <- "BrNum"
 location.variable <- "location"
 batch.variable <- "batch.id"
-
 # gene type variables
 gene.types.protein <- c("protein_coding")
 gene.types.nonpolya <- c("lncRNA", "Mt_rRNA", "rRNA", "Mt_tRNA")
@@ -42,7 +40,6 @@ rse <- get(load(file.path(rse.bulk.filepath)))
 rd <- rowData(rse)
 table(rd$gene_type)
 cd <- colData(rse)
-
 # add batch id
 cd[,batch.variable] <- paste0(cd[,donor.variable], "_", cd[,location.variable])
 # add experiment groups
@@ -55,8 +52,25 @@ colData(rse) <- cd
 # filter gene types
 gene.types.vector <- rd$gene_type
 gene.type.filter <- which(gene.types.vector %in% gene.types.include) 
-rse.filtered <- rse[gene.type.filter,]
+rse.filter <- rse[gene.type.filter,]
 
 # save
-save(rse, file = rse.bulk.path.new)
-save(rse.filtered, file = rse.gene.filter.filepath)
+# save(rse, file = rse.bulk.path.new)
+save(rse.filter, file = rse.gene.filter.filepath)
+
+# subset k2 markers
+# load k2 sce data
+sce <- get(load(sce.markers.list.path))[["k2"]]
+# get bulk marker expression
+marker.genes.vector <- rownames(sce)
+# subset rse on markers
+bulk.gene.names <- rowData(rse.filter)$Symbol
+gene.marker.intersect <- intersect(bulk.gene.names, marker.genes.vector)
+message("Found ", length(gene.marker.intersect), " overlapping markers.")
+rse.filter.markers <- which(bulk.gene.names %in% gene.marker.intersect)
+rse.filter.markers <- rse.filter[rse.filter.markers,]
+# gene symbols as rownames
+rownames(rse.filter.markers) <- rowData(rse.filter.markers)$Symbol
+dim(rse.filter.markers)
+# save
+save(rse.filter.markers, file = rse.k2markers.filepath)
