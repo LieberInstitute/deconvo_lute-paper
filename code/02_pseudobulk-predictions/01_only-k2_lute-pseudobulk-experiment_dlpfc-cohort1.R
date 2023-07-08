@@ -38,3 +38,12 @@ ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() +
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab("True proportion") + ylab("Predicted proportion") +
   xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) + ggtitle("Neuron")
+
+
+ggplot(dfp.ct, aes(x = ))
+
+dfp.tall$abs.error.neuron <- abs(dfp.tall$neuron.true-dfp.tall$neuron.pred)
+ggplot(dfp.tall, aes(x = type, y = abs.error.neuron)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw()
+
+

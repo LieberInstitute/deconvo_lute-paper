@@ -91,6 +91,22 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
   return(dfp)
 }
 
+dfp_tall_append_errors <- function(dfp.tall){
+  # appends errors to a tall table
+  # see also get_ypb_experiment_series()
+  cn.tall <- colnames(dfp.tall)
+  cn.tall <- cn.tall[!cn.tall %in% c("type", "sample.id", "abs.error.neuron")]
+  ct.tall <- unique(gsub("\\..*", "", cn.tall)) 
+  dfp.tall.new <- do.call(cbind, lapply(ct.tall, function(ct.iter){
+    dfp.tall.iter <- dfp.tall[,grepl(paste0(ct.iter,"\\..*"), colnames(dfp.tall))]
+    abs(dfp.tall.iter[,1]-dfp.tall.iter[,2])
+  }))
+  colnames(dfp.tall.new) <- paste0(ct.tall, ".abs.error")
+  rownames(dfp.tall.new) <- rownames(dfp.tall.iter)
+  dfp.tall.new <- cbind(dfp.tall, dfp.tall.new)
+  return(dfp.tall.new)
+}
+
 dfp_tall_by_celltype <- function(dfp.wide){
   # input: dfp.wide from get_ypb_experiment_series()
   # also append absolute errors 
