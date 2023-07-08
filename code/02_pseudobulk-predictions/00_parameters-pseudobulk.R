@@ -23,7 +23,10 @@ get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample",
                                       celltype.variable = "k2", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "neuron" = 10),
                                       algorithm.name = "nnls", return.dimensions = c("wide", "tall")){
+  # get pseudobulk experiment series, testing cellsize adjustment
+  # use with dfp_tall_by_celltype()
   # get experiment results
+  if(!sample.id.variable %in% colnames(colData(sce))){stop("Error: couldn't find sample.id.variable in sce coldata.")}
   celltype.variable.format <- sce[[celltype.variable]] %>% as.factor()
   unique.celltypes <- unique(celltype.variable.format)
   num.celltypes <- length(unique(celltype.variable.format))
@@ -64,6 +67,8 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
                                        s.vector.ypb = c("glial" = 3, "neuron" = 10),
                                        s.vector.pred = c("glial" = 1, "neuron" = 1),
                                        algorithm.name = "nnls"){
+  # get results for a single iteration of an experiment
+  # use with get_ypb_experiment_series()
   if(assay.name == "logcounts" & !"logcounts" %in% names(assays(sce))){sce <- scuttle::logNormCounts(sce)}
   unique.sample.id.vector <- unique(sce[[sample.id.variable]])
   dfp <- do.call(rbind, lapply(unique.sample.id.vector, function(sample.id){
@@ -84,4 +89,18 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
   }))
   rownames(dfp) <- unique.sample.id.vector
   return(dfp)
+}
+
+dfp_tall_by_celltype <- function(dfp.wide){
+  # input: dfp.wide from get_ypb_experiment_series()
+  cn.wide <- colnames(dfp.wide)
+  ct.wide <- unique(gsub("\\..*", "", cn.wide))
+  dfp.tall.by.celltype <- do.call(rbind, lapply(ct.wide, function(ct.iter){
+    dfp.wide.iter <- dfp.wide[,grepl(paste0(ct.iter,"\\..*"), cn.wide)]
+    colnames(dfp.wide.iter) <- gsub(paste0(ct.iter, "\\."), "", colnames(dfp.wide.iter))
+    dfp.wide.iter$celltype <- ct.iter
+    dfp.wide.iter$sample.id <- rownames(dfp.wide.iter)
+    dfp.wide.iter
+  }))
+  return(dfp.tall.by.celltype)
 }

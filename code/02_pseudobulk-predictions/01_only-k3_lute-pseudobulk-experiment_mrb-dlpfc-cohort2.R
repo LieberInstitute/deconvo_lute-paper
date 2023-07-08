@@ -8,31 +8,48 @@ source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudo
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k3
-
 sce.mrb <- get(load(sce.mrb.path)) # load sce data
 
-# harmonize labels
-
-
 # get experiment results tables
-dfp.tall <- get_ypb_experiment_series(sce.mrb, sample.id.variable = "Sample", 
+dfp.tall <- get_ypb_experiment_series(sce.mrb, sample.id.variable = "donor", 
                                       celltype.variable = "k3", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
                                       algorithm.name = "nnls", return.dimensions = "tall")
 
-dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
+dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "donor", 
                                       celltype.variable = "k3", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
                                       algorithm.name = "nnls", return.dimensions = "wide")
 
-# make new plots
-# plot proportions panel -- no scale
-ggplot(dfp.tall[dfp.tall$type=="noscale",], 
-       aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
+# dfp.wide, tall by cell type
+dfp.ct <- dfp_tall_by_celltype(dfp.wide)
+
+ggplot(dfp.ct, aes(x = true.noscale, y = pred.noscale)) + geom_point() + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab("True proportion") + ylab("Predicted proportion") +
-  xlim(0, 1) + ylim(0, 1) + ggtitle("Neuron")
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~celltype)
+
+
+
+
+# make new plots
+# plot proportions panel -- no scale
+ggplot(dfp.tall[dfp.tall$type=="noscale",], aes(x = Excit.true, y = Excit.pred)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True proportion") + ylab("Predicted proportion") +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("Excit")
+ggplot(dfp.tall[dfp.tall$type=="noscale",], aes(x = Inhib.true, y = Inhib.pred)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True proportion") + ylab("Predicted proportion") +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("Inhib")
+ggplot(dfp.tall[dfp.tall$type=="noscale",], aes(x = glial.true, y = glial.pred)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True proportion") + ylab("Predicted proportion") +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("Glial")
 
 # plot proportions multipanel -- scale vs with scale
 ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
