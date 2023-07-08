@@ -7,10 +7,13 @@
 source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudobulk.R")
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
-sce.k2 <- list.sce.markers$k2 # load markers
-sce.mrb <- get(load(sce.mrb.path)) # load sce object
 
-dfp.k2 <- get_ypb_experiment_results(sce.k2)
+list.sce.markers <- get(load(sce.markers.list.path)) # load marker data
+sce.mrb <- get(load(sce.mrb.path)) # load sce data
+sce.k2 <- sce.mrb[rownames(sce.mrb) %in% rownames(list.sce.markers[["k2"]]),]
+dfp.k2 <- get_ypb_experiment_results(sce.k2, sample.id.variable = "donor", 
+                                     celltype.variable = "k2", assay.name = "logcounts",
+                                     s.vector = c("glial" = 3, "neuron" = 10))
 
 # scatterplots of neurons
 ggplot(dfp.k2, aes(x = neuron.true, y = neuron.pred)) + geom_point() + 

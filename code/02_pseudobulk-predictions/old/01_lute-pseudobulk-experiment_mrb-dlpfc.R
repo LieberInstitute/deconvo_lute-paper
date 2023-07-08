@@ -6,8 +6,9 @@
 
 source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudobulk.R")
 sapply(libv, library, character.only = T)
-sce.mrb <- get(load(sce.mrb.path))
 list.sce.markers <- get(load(sce.markers.list.path))
+sce.mrb <- get(load(sce.mrb.path))
+sce.k2 <- sce.mrb[rownames(sce.mrb) %in% rownames(list.sce.markers[["k2"]]),]
 
 # filter on markers
 all.markers <- unique(c(rownames(list.sce.markers[[1]]), 
