@@ -8,10 +8,20 @@ source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudo
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce.k2 <- list.sce.markers$k2
-dfp.k2 <- get_ypb_experiment_results(sce.k2, sample.id.variable = "Sample", 
-                                     celltype.variable = "k2", assay.name = "logcounts",
-                                     s.vector = c("glial" = 3, "neuron" = 10))
-ggplot(dfp.k2, aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
+
+# get experiment results tables
+dfp.tall <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample", 
+                                 celltype.variable = "k2", assay.name = "logcounts",
+                                 s.vector = c("glial" = 3, "neuron" = 10),
+                                 algorithm.name = "nnls", return.dimensions = "tall")
+
+dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample", 
+                                      celltype.variable = "k2", assay.name = "logcounts",
+                                      s.vector = c("glial" = 3, "neuron" = 10),
+                                      algorithm.name = "nnls", return.dimensions = "wide")
+
+# make new plots
+ggplot(dfp.k2[,grepl("noscale", colnames(dfp.k2))], aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab("True proportion") + ylab("Predicted proportion") +
