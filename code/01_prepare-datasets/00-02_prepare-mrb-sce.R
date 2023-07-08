@@ -37,13 +37,19 @@ mrb.is.glial <- grepl("Oligo|OPC|Micro|Astro", mrb.cell.type.vector)
 mrb.is.oligo <- grepl("Oligo", mrb.cell.type.vector)
 mrb.is.non.oligo.glial <- grepl("OPC|Micro|Astro", mrb.cell.type.vector)
 
+mrb.is.excit <- grepl("Excit", mrb.cell.type.vector)
+mrb.is.inhib <- grepl("Inhib", mrb.cell.type.vector)
+
 # define k labels
 colData(sce)[,"k2"] <- ifelse(mrb.is.neuron, "neuron", 
                                   ifelse(mrb.is.glial, "glial", "other"))
-colData(sce)[,"k3"] <- ifelse(mrb.is.neuron, "neuron", 
-                              ifelse(mrb.is.oligo, "oligo", 
-                                     ifelse(mrb.is.non.oligo.glial, 
-                                            "non.oligo.glial", "other")))
+colData(sce)[,"k3"] <- ifelse(mrb.is.excit, "excit", 
+                              ifelse(mrb.is.inhib, "inhib", 
+                                     ifelse(mrb.is.glial, "glial", "other")))
+colData(sce)[,"k4"] <- ifelse(mrb.is.excit, "excit", 
+                              ifelse(mrb.is.inhib, "inhib", 
+                                     ifelse(mrb.is.oligo, "oligo",
+                                          ifelse(mrb.is.non.oligo.glial, "non_oligo_glial", "other"))))
 
 #--------------
 # save sce data
