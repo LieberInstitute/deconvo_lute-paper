@@ -15,14 +15,14 @@ sce.mrb <- get(load(sce.mrb.path)) # load sce data
 
 
 # get experiment results tables
-dfp.tall <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
+dfp.tall <- get_ypb_experiment_series(sce.mrb, sample.id.variable = "Sample", 
                                       celltype.variable = "k3", assay.name = "logcounts",
-                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" ),
+                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
                                       algorithm.name = "nnls", return.dimensions = "tall")
 
 dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
                                       celltype.variable = "k3", assay.name = "logcounts",
-                                      s.vector = c("glial" = 3, "neuron" = 10),
+                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
                                       algorithm.name = "nnls", return.dimensions = "wide")
 
 # make new plots
