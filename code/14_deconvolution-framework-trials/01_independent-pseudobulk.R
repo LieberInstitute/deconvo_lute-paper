@@ -47,7 +47,7 @@ s <- s.pb
 # perform experiment
 lresult.nnls.adj <- run_pseudobulk_experiment(list.pb, s = s, z = z, method = "nnlsParam")
 lresult.music.adj <- run_pseudobulk_experiment(list.pb, s = s, z = z, method = "musicParam")
-lresult.deconrnaseq.adj <- run_pseudobulk_experiment(list.pb, s = s, z = z, method = "deconrnaseqParam")
+# lresult.deconrnaseq.adj <- run_pseudobulk_experiment(list.pb, s = s, z = z, method = "deconrnaseqParam")
 
 # aggregate results table
 donor.id.vector <- names(lresult.nnls.adj)

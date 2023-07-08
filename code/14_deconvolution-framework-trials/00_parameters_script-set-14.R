@@ -86,12 +86,13 @@ run_pseudobulk_experiment <- function(list.pb, s, z, method = "nnlsParam"){
     deconvolution.parameters <- eval(parse(text = param.string))
     p.predicted.pre <- deconvolution.parameters %>% deconvolution()
     p.predicted.final <- p.predicted.pre/sum(p.predicted.pre)
-    if(!identical(names(p.predicted.final), names(data$p))){
+    if(!identical(colnames(p.predicted.final), names(data$p))){
       stop("Error, couldn't match cell type names in data$p, p.predicted.final.")}
-    bias <- p.predicted.final - data$p
+    bias <- as.vector(p.predicted.final) - data$p
     rmse <- sqrt(sum(bias^2)/length(bias))
     return(list(p.predicted = p.predicted.final, p.true = data$p, 
-                bias = bias, rmse = rmse, parameters = deconvolution.parameters))
+                bias = bias, rmse = rmse, 
+                parameters = deconvolution.parameters))
   })
 }
 

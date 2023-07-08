@@ -26,14 +26,24 @@ sce <- get(load(sce.downloaded.filepath))
 #-----------------------------------
 # assign marker labels at variable k
 #-----------------------------------
-celltypevar <- "cellType"
-# define marker categories
-sce[["k2"]] <- ifelse(grepl("^Excit.*|^Inhib.*", sce[[celltypevar]]), "neuron", "other")
-sce[["k3"]] <- ifelse(grepl("^Excit.*", sce[[celltypevar]]), "Excit", 
-                      ifelse(grepl("^Inhib.*", sce[[celltypevar]]), "Inhib", "other"))
-sce[["k4"]] <- ifelse(grepl("^Excit.*", sce[[celltypevar]]), "Excit", 
-                      ifelse(grepl("^Inhib.*", sce[[celltypevar]]), "Inhib", 
-                             ifelse(grepl("^Oligo$", sce[[celltypevar]]), "Oligo", "other")))
+# filter non-neuron, non-glial
+filter.types.neuron.glial <- grepl("Excit|Inhib|Oligo|OPC|Micro|Astro", sce[["cellType"]])
+sce <- sce[,filter.types.neuron.glial]
+
+# define marker categories from cell types vector
+mrb.cell.type.vector <- sce[["cellType"]]
+mrb.is.neuron <- grepl("Excit|Inhib", mrb.cell.type.vector)
+mrb.is.glial <- grepl("Oligo|OPC|Micro|Astro", mrb.cell.type.vector)
+mrb.is.oligo <- grepl("Oligo", mrb.cell.type.vector)
+mrb.is.non.oligo.glial <- grepl("OPC|Micro|Astro", mrb.cell.type.vector)
+
+# define k labels
+colData(sce)[,"k2"] <- ifelse(mrb.is.neuron, "neuron", 
+                                  ifelse(mrb.is.glial, "glial", "other"))
+colData(sce)[,"k3"] <- ifelse(mrb.is.neuron, "neuron", 
+                              ifelse(mrb.is.oligo, "oligo", 
+                                     ifelse(mrb.is.non.oligo.glial, 
+                                            "non.oligo.glial", "other")))
 
 #--------------
 # save sce data
