@@ -20,9 +20,6 @@ dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample",
                                       s.vector = c("glial" = 3, "neuron" = 10),
                                       algorithm.name = "nnls", return.dimensions = "wide")
 
-
-dfp.ct <- dfp_tall_by_celltype(dfp.wide) # dfp.wide, tall by cell type
-
 # make new plots
 # plot proportions panel -- no scale
 ggplot(dfp.tall[dfp.tall$type=="noscale",], 
@@ -39,11 +36,6 @@ ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() +
   xlab("True proportion") + ylab("Predicted proportion") +
   xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) + ggtitle("Neuron")
 
-
-ggplot(dfp.ct, aes(x = ))
-
-dfp.tall$abs.error.neuron <- abs(dfp.tall$neuron.true-dfp.tall$neuron.pred)
-ggplot(dfp.tall, aes(x = type, y = abs.error.neuron)) + geom_jitter(alpha = 0.5) + 
-  geom_boxplot(color = "cyan", alpha = 0) + theme_bw()
-
-
+# jitterbox -- jittered points and boxplots of absolute errors
+ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + ggtitle("Neuron")

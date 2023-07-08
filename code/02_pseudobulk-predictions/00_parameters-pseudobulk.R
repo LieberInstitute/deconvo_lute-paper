@@ -22,7 +22,8 @@ sce.markers.list.path <- here("deconvo_method-paper", "outputs", "02_pseudobulk-
 get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample", 
                                       celltype.variable = "k2", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "neuron" = 10),
-                                      algorithm.name = "nnls", return.dimensions = c("wide", "tall")){
+                                      algorithm.name = "nnls", return.dimensions = c("wide", "tall"),
+                                      dfp.tall.errors = TRUE){
   # get pseudobulk experiment series, testing cellsize adjustment
   # use with dfp_tall_by_celltype()
   # get experiment results
@@ -52,6 +53,7 @@ get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample",
     dfp.noscale$sample.id <- rownames(dfp.noscale)
     dfp.withscale$sample.id <- rownames(dfp.withscale)
     dfp <- rbind(dfp.noscale, dfp.withscale)
+    if(dfp.tall.errors){dfp <- dfp_tall_append_errors(dfp)}
   } else{
     # get plot data -- wide
     colnames(dfp.noscale) <- paste0(colnames(dfp.noscale), ".noscale")
@@ -102,7 +104,7 @@ dfp_tall_append_errors <- function(dfp.tall){
     abs(dfp.tall.iter[,1]-dfp.tall.iter[,2])
   }))
   colnames(dfp.tall.new) <- paste0(ct.tall, ".abs.error")
-  rownames(dfp.tall.new) <- rownames(dfp.tall.iter)
+  rownames(dfp.tall.new) <- rownames(dfp.tall)
   dfp.tall.new <- cbind(dfp.tall, dfp.tall.new)
   return(dfp.tall.new)
 }
