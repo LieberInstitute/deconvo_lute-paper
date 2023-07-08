@@ -30,9 +30,9 @@ y.k4.unscale <- ypb_from_sce(sce = sce.mrb,
                              sample.id.variable = "donor") %>% as.matrix()
  
 # get true proportions
-prop.true.k2 <- get_true_proportions(sce.mrb, "k2", "donor")
-prop.true.k3 <- get_true_proportions(sce.mrb, "k3", "donor")
-prop.true.k4 <- get_true_proportions(sce.mrb, "k4", "donor")
+prop.true.k2 <- get_true_proportions(sce.mrb, "k2", "Sample")
+prop.true.k3 <- get_true_proportions(sce.mrb, "k3", "Sample")
+prop.true.k4 <- get_true_proportions(sce.mrb, "k4", "Sample")
 
 # get predictions
 filter.k2 <- rownames(sce.mrb) %in% rownames(list.sce.markers$k2)
