@@ -43,12 +43,12 @@ mrb.is.inhib <- grepl("Inhib", mrb.cell.type.vector)
 # define k labels
 colData(sce)[,"k2"] <- ifelse(mrb.is.neuron, "neuron", 
                                   ifelse(mrb.is.glial, "glial", "other"))
-colData(sce)[,"k3"] <- ifelse(mrb.is.excit, "excit", 
-                              ifelse(mrb.is.inhib, "inhib", 
+colData(sce)[,"k3"] <- ifelse(mrb.is.excit, "Excit", 
+                              ifelse(mrb.is.inhib, "Inhib", 
                                      ifelse(mrb.is.glial, "glial", "other")))
-colData(sce)[,"k4"] <- ifelse(mrb.is.excit, "excit", 
-                              ifelse(mrb.is.inhib, "inhib", 
-                                     ifelse(mrb.is.oligo, "oligo",
+colData(sce)[,"k4"] <- ifelse(mrb.is.excit, "Excit", 
+                              ifelse(mrb.is.inhib, "Inhib", 
+                                     ifelse(mrb.is.oligo, "Oligo",
                                           ifelse(mrb.is.non.oligo.glial, "non_oligo_glial", "other"))))
 
 #--------------

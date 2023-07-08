@@ -9,6 +9,11 @@ sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k3
 
+sce.mrb <- get(load(sce.mrb.path)) # load sce data
+
+# harmonize labels
+
+
 # get experiment results tables
 dfp.tall <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
                                       celltype.variable = "k3", assay.name = "logcounts",
