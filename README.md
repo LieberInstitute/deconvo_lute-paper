@@ -26,8 +26,10 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure 1](./figures/lute_diagram.jpg) : Diagram of `lute` deconvolution framework.
 
 * Figure 2
-[Figure 2a](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1) : Scatterplot of true versus predicted proportions from pseudobulk experiment, DLPFC cohort1.
-[Figure 2b](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2) : Scatterplot of true versus predicted proportions from pseudobulk experiment, DLPFC cohort2.
+[Figure 2A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in neuron from k2 labels tests, using DLPFC Cohort1.
+[Figure 2B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in neuron from k2 labels tests, using DLPFC Cohort2.
+[Figure 2C](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, using DLPFC Cohort1.
+[Figure 2D](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, DLPFC Cohort2.
 
 * Figure 3
 [Figure 3]() : Changes in absolute error from deconvolution of neurons in an applied experiment setting. The R script to reproduce this figure is located at `./code/20_snrnaseq-bulk-matched_training/00_methods_s-halo-cellsizes-normbyneuron_y-logcounts-sn-logcounts`
