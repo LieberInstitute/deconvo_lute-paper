@@ -18,15 +18,26 @@ sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "
 # dlpfc markers path
 sce.markers.list.path <- here("deconvo_method-paper", "outputs", "02_pseudobulk-predictions", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
 
-# function to get true proportions
-get_true_proportions <- function(sce, 
-                                 celltype.variable, 
-                                 donor.variable){
-  donor.levels <- unique(sce[[donor.variable]])
-  dfp <- do.call(rbind, lapply(donor.levels, function(donor.iter){
-    scei <- sce[,sce[[donor.variable]]==donor.iter]
-    table(scei[[celltype.variable]]) %>% prop.table()
+# define experiment function
+get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample", 
+                                       celltype.variable = "k2", assay.name = "logcounts",
+                                       s.vector = c("glial" = 3, "neuron" = 10)){
+  unique.sample.id.vector <- unique(sce[[sample.id.variable]])
+  dfp <- do.call(rbind, lapply(unique.sample.id.vector, function(sample.id){
+    sce.iter <- sce[,sce$Sample==sample.id]
+    ypb.iter <- ypb_from_sce(sce = sce.iter, assay.name = assay.name, 
+                             celltype.variable = celltype.variable,
+                             sample.id.variable = sample.id.variable, 
+                             S = s.vector) %>% as.matrix()
+    prop.true.iter <- table(sce.iter[[celltype.variable]]) %>% prop.table() %>% as.matrix() %>% t()
+    prop.pred.iter <- lute(sce = sce.iter, y = ypb.iter, assay.name = assay.name, 
+                           celltype.variable = celltype.variable, typemarker.algorithm = NULL, 
+                           return.info = FALSE)$deconvolution.results
+    colnames(prop.pred.iter) <- paste0(colnames(prop.pred.iter), ".pred")
+    colnames(prop.true.iter) <- paste0(colnames(prop.true.iter), ".true")
+    dfp.iter <- cbind(prop.true.iter, prop.pred.iter) %>% as.data.frame()
+    dfp.iter
   }))
-  rownames(dfp) <- donor.levels
+  rownames(dfp) <- unique.sample.id.vector
   return(dfp)
 }
