@@ -23,36 +23,23 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 
 ## Manuscript figures
 
-[Figure 1a]() : Type-based cell size transformation simulations.
-[Figure 1b]() : Subsample simulation results across groups.
+[Figure 1](./figures/lute_diagram.jpg) : Diagram of `lute` deconvolution framework.
 
-[Figure 2a]() : K2 markers concordance at the top.
-[Figure 2b]() : K2 markers upset plot.
-[Figure 2c]() : K2 markers block overlap plot.
-[Figure 2d]() : K2 markers expression heatmap.
+* Figure 2
+[Figure 2a](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1) : Scatterplot of true versus predicted proportions from pseudobulk experiment, DLPFC cohort1.
+[Figure 2b](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2) : Scatterplot of true versus predicted proportions from pseudobulk experiment, DLPFC cohort2.
 
+* Figure 3
 [Figure 3]() : Changes in absolute error from deconvolution of neurons in an applied experiment setting. The R script to reproduce this figure is located at `./code/20_snrnaseq-bulk-matched_training/00_methods_s-halo-cellsizes-normbyneuron_y-logcounts-sn-logcounts`
 
-[Figure S1a]() : Dispersion mean-variance plots by cell type and adjustment.
-[Figure S1b]() : Dispersion coefficient boxplots.
+* Supplemental Figure S1
+[Figure S1A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 1.
+[Figure S1B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
+[Figure S2A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 2.
+[Figure S2B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
 
-[Figure S2]() : Pseudobulk simulation results in DLPFC Cohort 1. Dispersion mean-variance plots by batch group. The R script to reproduce this figure is located at `code/19_sfactor-simulations_smagnitudes-and-z-matching/03_shows-random-errors-z-performance.R`
-
-[Figure S3]() : Subsample simulation results, across- and within-groups.
-
-[Figure S4a](./outputs/13_halo-outputs-analysis/ggboxplot_nucleus-area.jpg) : Nucleus area distribution before and after log10 transformation. ([script](./code/13_halo-outputs-analysis/02_plot-normalized-variables.R))
-
-[Figure S4b](./outputs/13_halo-outputs-analysis/ggboxplot_slide-summary-statistics_norm-area.jpg) : Boxplots of summary statistics for log10 transformed nucleus area. ([script](./code/13_halo-outputs-analysis/03_summary-statistics-marker-area.R))
-
-[Figure S4c](./outputs/13_halo-outputs-analysis/ggbarplot_basic-model_variance-explained.jpg) : Bar plots of explained variances for basic model. ([script](./code/13_halo-outputs-analysis/06_variances-explained.R))
-
-[Figure S4d](./outputs/13_halo-outputs-analysis/ggbarplot_complex-model_variance-explained.jpg) : Bar plots of explained variances for complex model. ([script](./code/13_halo-outputs-analysis/06_variances-explained.R))
-
-[Figure S5](./outputs/11_bulk-expression-analysis/ggplot-jitter-boxplot_mean-expression_bulk-rna-types.jpg) : Jittered scatterplots and boxplots of mean log10 expression (counts) by bulk RNA-seq experiment groups across four mRNA subspecies. ([script](./code/11_bulk-expression-analysis/09_deg-mrna-subspecies-bulk.R))
-
-[Figure S6](./outputs/11_bulk-expression-analysis/ggplot-boxplot_mean_k2-marker-vs-background_bulk-groups.jpg) : Boxplots of means of log10 counts expression at available filtered (a.k.a. "background") genes and K2 marker genes, with summaries by either batch ID, library preparation, library type, or experiment group ([script](./code/11_bulk-expression-analysis/05_compare-k2markers-vs-background-bulk.R))
-
-[Figure S7](./outputs/11_bulk-expression-analysis/ggplot-boxplot_variance_k2-marker-vs-background_bulk-groups.jpg) : Boxplots of variances of log10 counts expression at available filtered (a.k.a. "background") genes and K2 marker genes, with summaries by either batch ID, library preparation, library type, or experiment group ([script](./code/11_bulk-expression-analysis/05_compare-k2markers-vs-background-bulk.R))
+* Supplemental Figure S1
+[Figure S2](./code/) : Pseudobulk simulation results in DLPFC Cohort 1. Dispersion mean-variance plots by batch group. The R script to reproduce this figure is located at `code/19_sfactor-simulations_smagnitudes-and-z-matching/03_shows-random-errors-z-performance.R`
 
 ## File locations
 
