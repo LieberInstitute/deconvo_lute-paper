@@ -93,6 +93,7 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
 
 dfp_tall_by_celltype <- function(dfp.wide){
   # input: dfp.wide from get_ypb_experiment_series()
+  # also append absolute errors 
   cn.wide <- colnames(dfp.wide)
   ct.wide <- unique(gsub("\\..*", "", cn.wide))
   dfp.tall.by.celltype <- do.call(rbind, lapply(ct.wide, function(ct.iter){
@@ -102,5 +103,7 @@ dfp_tall_by_celltype <- function(dfp.wide){
     dfp.wide.iter$sample.id <- rownames(dfp.wide.iter)
     dfp.wide.iter
   }))
+  dfp.tall.by.celltype$abs.error.noscale <- abs(dfp.tall.by.celltype$true.noscale-dfp.tall.by.celltype$pred.noscale)
+  dfp.tall.by.celltype$abs.error.withscale <- abs(dfp.tall.by.celltype$true.withscale-dfp.tall.by.celltype$pred.withscale)
   return(dfp.tall.by.celltype)
 }
