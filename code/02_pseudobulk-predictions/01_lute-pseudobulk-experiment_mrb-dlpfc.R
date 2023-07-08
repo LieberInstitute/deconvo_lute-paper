@@ -1,8 +1,8 @@
 #!/usr/bin/env R
 
-# Author: Sean Maden
 #
 # Test independent pseudobulk from multi-region brain data.
+#
 
 source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudobulk.R")
 sapply(libv, library, character.only = T)
@@ -30,20 +30,9 @@ y.k4.unscale <- ypb_from_sce(sce = sce.mrb,
                              sample.id.variable = "donor") %>% as.matrix()
  
 # get true proportions
-get_true_proportions <- function(sce.mrb, 
-                                 celltype.variable, 
-                                 donor.variable = "donor"){
-  donor.levels <- unique(sce.mrb[[donor.variable]])
-  dfp <- do.call(rbind, lapply(donor.levels, function(donor.iter){
-    scei <- sce.mrb[,sce.mrb[[donor.variable]]==donor.iter]
-    table(scei[[celltype.variable]]) %>% prop.table()
-  }))
-  rownames(dfp) <- donor.levels
-  return(dfp)
-}
-prop.true.k2 <- get_true_proportions(sce.mrb, "k2")
-prop.true.k3 <- get_true_proportions(sce.mrb, "k3")
-prop.true.k4 <- get_true_proportions(sce.mrb, "k4")
+prop.true.k2 <- get_true_proportions(sce.mrb, "k2", "donor")
+prop.true.k3 <- get_true_proportions(sce.mrb, "k3", "donor")
+prop.true.k4 <- get_true_proportions(sce.mrb, "k4", "donor")
 
 # get predictions
 filter.k2 <- rownames(sce.mrb) %in% rownames(list.sce.markers$k2)
