@@ -227,14 +227,19 @@ pb.barplot.rmse.bysample.colmethod.path <- here(save.path, pb.barplot.rmse.bysam
 
 # 03, get image cell proportions
 # set the halo data path
-halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", "halo_all.Rdata")
+
+# halo.output.path <- here("Human_DLPFC_Deconvolution", "processed-data", "03_HALO", "halo_all.Rdata")
+output.updated.filename <- "halo-outputs_updated.Rdata"
+halo.output.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", output.updated.filename)
+# image cells path
+image.cells.name <- "image-cell-counts-table_by-brnum.rda"
+image.cells.path <- here(save.path, image.cells.name)
+
 # bulk data
 rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "rse_k2-marker-expression_ro1-dlpfc.rda")
 # data for experiments
 assay.name.rse <- "logcounts"
-# image cells path
-image.cells.name <- "image-cell-counts-table_by-brnum.rda"
-image.cells.path <- here(save.path, image.cells.name)
+
 # lexperiment list object
 lexperiment.withinsample.name <- "list-experiment-info_within-samples.rda"
 lexperiment.withinsample.path <- here(save.path, lexperiment.withinsample.name)
