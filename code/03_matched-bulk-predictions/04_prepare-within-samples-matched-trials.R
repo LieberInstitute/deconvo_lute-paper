@@ -4,9 +4,11 @@
 #
 # Prepares experiment metadata for deconvolution within matched samples data.
 
-source("deconvo_method-paper/code/14_deconvolution-framework-trials/00_parameters_script-set-14.R")
+source("deconvo_method-paper/code/03_matched-bulk-predictions/00_parameters.R")
 sapply(libv, library, character.only = T)
+
 rse <- get(load(rse.k2markers.filepath))
+
 image.table <- get(load(halo.output.path)) %>% as.data.frame()
 image.cells <- get(load(image.cells.path))
 sce <- get(load(sce.markers.list.path))[["k2"]]

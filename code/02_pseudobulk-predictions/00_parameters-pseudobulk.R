@@ -16,7 +16,7 @@ save.path <- here("deconvo_method-paper", "outputs", "02_pseudobulk-predictions"
 sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "sce-mrb_dlpfc.rda")
 
 # dlpfc markers path
-sce.markers.list.path <- here("deconvo_method-paper", "outputs", "02_pseudobulk-predictions", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
 
 # define experiment function
 get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample", 

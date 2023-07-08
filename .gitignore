@@ -22,3 +22,4 @@ outputs/10_donor-bias-simulations-continued/r-nf_deconvolution_intra-sample-bias
 outputs/09_manuscript/.Rhistory
 outputs/23_replicate-sosina-findings/Strategies-for-cellular-deconvolution-in-human-brain-RNA-sequencing-data/
 outputs/23_replicate-sosina2021/env_predict-music.RData
+outputs/01_prepare-datasets/rse_gene.Rdata
