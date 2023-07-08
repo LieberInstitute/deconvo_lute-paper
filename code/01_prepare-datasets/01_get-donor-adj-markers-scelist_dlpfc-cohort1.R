@@ -14,8 +14,8 @@ sapply(libv, library, character.only = TRUE)
 # manage paths
 #---------------
 # get save dpath
-code.dname <- "09_manuscript"
 proj.dname <- "deconvo_method-paper"
+code.dname <- "01_prepare-datasets"
 save.dpath <- file.path(proj.dname, "outputs", code.dname)
 
 #----------------------------------
