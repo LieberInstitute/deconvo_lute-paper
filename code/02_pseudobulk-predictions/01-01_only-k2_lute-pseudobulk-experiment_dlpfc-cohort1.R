@@ -21,7 +21,6 @@ dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample",
                                       algorithm.name = "nnls", return.dimensions = "wide")
 
 # make new plots
-
 # plot proportions panel -- no scale
 ggplot(dfp.tall[dfp.tall$type=="noscale",], 
        aes(x = neuron.true, y = neuron.pred)) + geom_point() + 

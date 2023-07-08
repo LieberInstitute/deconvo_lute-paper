@@ -11,13 +11,30 @@ list.sce.markers <- get(load(sce.markers.list.path))
 list.sce.markers <- get(load(sce.markers.list.path)) # load marker data
 sce.mrb <- get(load(sce.mrb.path)) # load sce data
 sce.k2 <- sce.mrb[rownames(sce.mrb) %in% rownames(list.sce.markers[["k2"]]),]
-dfp.k2 <- get_ypb_experiment_results(sce.k2, sample.id.variable = "donor", 
-                                     celltype.variable = "k2", assay.name = "logcounts",
-                                     s.vector = c("glial" = 3, "neuron" = 10))
 
-# scatterplots of neurons
-ggplot(dfp.k2, aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
+# get experiment results tables
+dfp.tall <- get_ypb_experiment_series(sce.k2, sample.id.variable = "donor", 
+                                      celltype.variable = "k2", assay.name = "logcounts",
+                                      s.vector = c("glial" = 3, "neuron" = 10),
+                                      algorithm.name = "nnls", return.dimensions = "tall")
+
+dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "donor", 
+                                      celltype.variable = "k2", assay.name = "logcounts",
+                                      s.vector = c("glial" = 3, "neuron" = 10),
+                                      algorithm.name = "nnls", return.dimensions = "wide")
+
+# make new plots
+# plot proportions panel -- no scale
+ggplot(dfp.tall[dfp.tall$type=="noscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab("True proportion") + ylab("Predicted proportion") +
-  xlim(0, 1) + ylim(0, 1)
+  xlim(0, 1) + ylim(0, 1) + ggtitle("Neuron")
+
+# plot proportions multipanel -- scale vs with scale
+ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True proportion") + ylab("Predicted proportion") +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) + ggtitle("Neuron")
