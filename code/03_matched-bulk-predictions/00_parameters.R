@@ -131,20 +131,6 @@ standard_sample_id <- function(table, location.label, brnum.label = "BrNum"){
   return(paste0(brnum.vector, "_", location.vector))
 }
 
-get_k2_area <- function(sizes.table, area.variable, 
-                        cell.size.variable = "cell.type", summary.function = "mean"){
-  sizes.table$k2 <- ifelse(
-    sizes.table[, cell.size.variable] %in% c("Excit", "Inhib"), "neuron",
-    ifelse(sizes.table[, cell.size.variable] %in% c("Micro", "Oligo", "Astro"),
-           "glial", "other"))
-  k2.table <- aggregate(sizes.table[, area.variable], 
-                        by = list(k2 = sizes.table$k2), 
-                        FUN = summary.function)
-  colnames(k2.table) <- c("k2.cell.type", 
-                          paste0(area.variable, ".", summary.function))
-  return(k2.table)
-}
-
 # 05 helper functions
 run_deconvolution <- function(y, z, s, method.string){
   param.text <- paste0(method.string, "(y = y, z = z, s = s)")
@@ -188,7 +174,6 @@ results_series_table <- function(y, z, method.vector, sizes.list){
 
 # load cell sizes
 cell.sizes.k2.path <- here("deconvo_method-paper", "outputs", "07_cell-size-estimates")
-
 cell.sizes.k2.path <- here(cell.sizes.k2.path, "cell-sizes-k2-table.rda")
 
 # deconvolution algorithms/methods to test
@@ -203,7 +188,6 @@ sce.markers.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
 sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", sce.markers.filename)
 # mrb dlpfc markers
 sce.mrb.name <- "sce-mrb_dlpfc.rda"
-# sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb.name)
 sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", sce.mrb.name)
 
 # save results table
@@ -234,6 +218,11 @@ halo.output.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets
 # image cells path
 image.cells.name <- "image-cell-counts-table_by-brnum.rda"
 image.cells.path <- here(save.path, image.cells.name)
+
+# halo lists
+halo.cellsize.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list_halo-cell-sizes_dlpfc-cohort1.rda")
+halo.cellprop.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list_halo-cell-proportions_k2-k3-k4_dlpfc-cohort1.rda")
+halo.cellcount.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list_halo-cell-amounts_k2-k3-k4_dlpfc-cohort1.rda")
 
 # bulk data
 rse.k2markers.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "rse_k2-marker-expression_ro1-dlpfc.rda")

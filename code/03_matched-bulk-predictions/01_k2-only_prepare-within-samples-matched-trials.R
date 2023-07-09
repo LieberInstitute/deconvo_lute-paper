@@ -12,8 +12,8 @@ rse <- get(load(rse.k2markers.filepath))
 image.table <- get(load(halo.output.path)) %>% as.data.frame()
 sce <- get(load(sce.markers.list.path))[["k2"]]
 halo.cellsize <- get(load(halo.cellsize.filepath))
-halo.prop <- get(load(halo.cellsize.filepath))
-# image.cells <- get(load(image.cells.path))
+halo.count <- get(load(halo.cellcount.filepath))
+halo.prop <- get(load(halo.cellprop.filepath))
 
 # get logcounts expression
 rse <- logNormCounts(rse, assay.type = "counts")
@@ -35,11 +35,10 @@ length(intersect(unique.sample.id.rse, unique.sample.id.image)) # 19
 complete.sample.id.vector <- intersect(unique.sample.id.sce, 
                                        intersect(unique.sample.id.image, 
                                                  unique.sample.id.rse))
-# save
-save(complete.sample.id.vector, file = complete.sample.id.vector.path)
 
+#-------------------------------------------------
 # get list of deconvolution experiment object sets
-# cell.sizes.manual <- c("glial" = 3, "neuron" = 10)
+#-------------------------------------------------
 lexperiment <- lapply(complete.sample.id.vector, function(sample.id){
   message(sample.id)
   filter.sce <- sce.sample.id.vector == sample.id
@@ -49,17 +48,42 @@ lexperiment <- lapply(complete.sample.id.vector, function(sample.id){
   image.sample <- image.table[filter.image,]
   sce.sample <- sce[,filter.sce]
   rse.sample <- rse[,filter.rse]
+  
+  
   # get deconvolution objects
   z.sample <- signature_matrix_from_sce(sce.sample)
+  
   # parse cell counts/proportions
   brnum <- gsub("_.*", "", sample.id)
-  image.cells.id <- image.cells[image.cells[,"sample.id"]==sample.id,]
+  
+  # filtered cellsizes
+  halo.cellsize.sample <- lapply(halo.cellsize, function(sample.label.data){
+    data.sample <- sample.label.data[["k2"]]
+    data.sample$sample.id <- paste0(gsub("_.*", "", data.sample$sample.id), "_", 
+                               toupper(gsub(".*_", "", data.sample$sample.id)))
+    sample.id.fetch.format <- paste0(gsub("_.*", "", sample.id), "_",
+                                     paste0(unlist(strsplit(gsub(".*_", "", sample.id),""))[1:3],collapse =""))
+    data.sample[data.sample$sample.id==sample.id.fetch.format,]
+  })
+  
+  halo.count.sample <- lapply(halo.count, function(sample.label.data){
+    data.sample <- sample.label.data[["k2"]]
+    data.sample$sample.id <- paste0(gsub("_.*", "", data.sample$sample.id), "_", 
+                                    toupper(gsub(".*_", "", data.sample$sample.id)))
+    sample.id.fetch.format <- paste0(gsub("_.*", "", sample.id), "_",
+                                     paste0(unlist(strsplit(gsub(".*_", "", sample.id),""))[1:3],collapse =""))
+    data.sample[data.sample$sample.id==sample.id.fetch.format,]
+  })
+  
   p.count.k2 <- c(image.cells.id["glial.count"], image.cells.id["neuron.count"]) %>% unlist()
   p.proportion.k2 <- c(image.cells.id["glial.proportion"], 
                        image.cells.id["neuron.proportion"]) %>% unlist()
+  
   names(p.count.k2) <- names(p.proportion.k2) <- c("glial", "neuron")
+  
   y <- assays(rse.sample)[[assay.name.rse]]
   colnames(y) <- rse.sample[["expt_condition"]]
+  
   # set cell sizes
   # sizes.sample <- cell_size_sample(image.table, sample.id, image.sample.id.vector)
   list.sizes <- list(reference.area = area.k2, 
