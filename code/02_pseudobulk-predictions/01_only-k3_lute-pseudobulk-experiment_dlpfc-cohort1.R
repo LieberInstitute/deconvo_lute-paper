@@ -8,16 +8,17 @@ source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudo
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k3
+s.vector <- c("Excit" = 10, "glial" = 3, "Inhib" = 10)
 
 # get experiment results tables
 dfp.tall <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
                                       celltype.variable = "k3", assay.name = "logcounts",
-                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
+                                      s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "tall")
 
 dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
                                       celltype.variable = "k3", assay.name = "logcounts",
-                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
+                                      s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "wide")
 
 dfp.ct <- dfp_tall_by_celltype(dfp.wide) # dfp.wide, tall by cell type

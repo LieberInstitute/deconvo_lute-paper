@@ -40,18 +40,18 @@ dfp.tall <- rbind(dfp.tall1, rbind(dfp.tall2, dfp.tall3))
 
 # get dfp.wide with memory management
 dfp.wide1 <- get_ypb_experiment_series(sce[,sample.id.filter1], sample.id.variable = "Sample", 
-                                      celltype.variable = "k3", assay.name = "logcounts",
-                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
+                                      celltype.variable = "k4", assay.name = "logcounts",
+                                      s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
                                       algorithm.name = "nnls", return.dimensions = "wide")
 gc()
 dfp.wide2 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
-                                       celltype.variable = "k3", assay.name = "logcounts",
-                                       s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
+                                       celltype.variable = "k4", assay.name = "logcounts",
+                                       s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
                                        algorithm.name = "nnls", return.dimensions = "wide")
 gc()
 dfp.wide3 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
-                                       celltype.variable = "k3", assay.name = "logcounts",
-                                       s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
+                                       celltype.variable = "k4", assay.name = "logcounts",
+                                       s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
                                        algorithm.name = "nnls", return.dimensions = "wide")
 gc()
 dfp.wide <- rbind(dfp.wide1, rbind(dfp.wide2, dfp.wide3))
