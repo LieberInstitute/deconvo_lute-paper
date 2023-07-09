@@ -1,6 +1,10 @@
 library(dplyr)
 library(ggplot2)
 
+#
+# Simulations introducing random distributed errors into z to break correlation between ypb and z.
+#
+
 set.seed(0)
 
 #-----------------
@@ -81,8 +85,8 @@ experiment_results <- function(list.experiment.info){
     p.pred.scale <- p.pred.scale/sum(p.pred.scale)
     
     # errors
-    error.unscale.vector <- p - p.pred.unscale
-    error.scale.vector <- p - p.pred.scale
+    error.unscale.vector <- p.iter - p.pred.unscale
+    error.scale.vector <- p.iter - p.pred.scale
     
     # new row data
     new.row <- c(index, p.iter, s.iter, z.corr, p.pred.unscale, p.pred.scale,
@@ -106,7 +110,7 @@ experiment_results <- function(list.experiment.info){
   return(experiment.table)
 }
 
-simulation_results <- function(z, s = c(3, 10), p = c(0.2, 0.8), z.pb = NULL,
+simulation_results <- function(z, s = c(3, 10), p.vector = c(0.2, 0.8), z.pb = NULL,
                                experiment.type = "new_experiment"){
   require(dplyr)
   # get experiment list info
@@ -117,7 +121,7 @@ simulation_results <- function(z, s = c(3, 10), p = c(0.2, 0.8), z.pb = NULL,
       z.pb <- z
     }
   }
-  list.experiment.info <- make_experiment_list(s = s, z = z, p = p, z.pb = z.pb)
+  list.experiment.info <- make_experiment_list(s = s, z = z, p = p.vector, z.pb = z.pb)
   # get results table
   experiment.results.table <- experiment_results(list.experiment.info)
   experiment.results.table$experiment.type <- experiment.type
@@ -158,7 +162,7 @@ list.z.error <- lapply(iterations.vector, function(index){
 p1 <- seq(0.1, 0.4, 1e-2)
 list.results <- lapply(p1, function(p1.iter){
   p.iter <- c(p1.iter, 1-p1.iter)
-  simulation_results(z = list.z.error, p = p.iter)
+  simulation_results(z = list.z.error, p.vector = p.iter)
 })
 results.all <- do.call(rbind, list.results)
 

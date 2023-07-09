@@ -37,11 +37,12 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 * Supplemental Figure S1
 [Figure S1A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 1.
 [Figure S1B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
-[Figure S2A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 2.
-[Figure S2B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
+[Figure S1C](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 2.
+[Figure S1D](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
 
-* Supplemental Figure S1
-[Figure S2](./code/) : Pseudobulk simulation results in DLPFC Cohort 1. Dispersion mean-variance plots by batch group. The R script to reproduce this figure is located at `code/19_sfactor-simulations_smagnitudes-and-z-matching/03_shows-random-errors-z-performance.R`
+* Supplemental Figure S2
+[Figure S2A](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Paneled scatterplots of scaled and unscaled results from pseudobulk simulations with random offsets.
+[Figure S2B](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Jittered points and boxplots of absolute errors from pseudobulk simulations with random offsets.
 
 ## File locations
 
