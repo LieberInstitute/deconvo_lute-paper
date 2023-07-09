@@ -29,3 +29,14 @@ ggplot(dfp.ct, aes(x = true.noscale, y = pred.noscale)) + geom_point() +
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab("True proportion") + ylab("Predicted proportion") +
   xlim(0, 1) + ylim(0, 1) + facet_wrap(~celltype)
+
+# jitterbox -- jittered points and boxplots of absolute errors
+dfp.ae1 <- data.frame(celltype = dfp.ct$celltype,
+                      abs.error = dfp.ct$abs.error.withscale)
+dfp.ae1$type <- "withscale"
+dfp.ae2 <- data.frame(celltype = dfp.ct$celltype,
+                      abs.error = dfp.ct$abs.error.noscale)
+dfp.ae2$type <- "noscale"
+dfp.ae <- rbind(dfp.ae1, dfp.ae2)
+ggplot(dfp.ae, aes(x = celltype, y = abs.error)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + facet_wrap(~type)
