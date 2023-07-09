@@ -8,6 +8,7 @@ source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudo
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k4
+s.vector <- c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3)
 
 # get experiment results tables
 unique.sample.id.vector <- unique(sce[["Sample"]])
@@ -18,21 +19,21 @@ sample.id.filter3 <- sce[["Sample"]] %in% unique.sample.id.vector[7:9]
 # get dfp.tall with memory management
 dfp.tall1 <- get_ypb_experiment_series(sce[,sample.id.filter1], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
-                                       s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
+                                       s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
                                        system.sleep.sec = 5)
 gc()
 
 dfp.tall2 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
-                                       s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
+                                       s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
                                        system.sleep.sec = 5)
 gc()
 
 dfp.tall3 <- get_ypb_experiment_series(sce[,sample.id.filter3], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
-                                       s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
+                                       s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
                                        system.sleep.sec = 5)
 gc()
@@ -41,17 +42,17 @@ dfp.tall <- rbind(dfp.tall1, rbind(dfp.tall2, dfp.tall3))
 # get dfp.wide with memory management
 dfp.wide1 <- get_ypb_experiment_series(sce[,sample.id.filter1], sample.id.variable = "Sample", 
                                       celltype.variable = "k4", assay.name = "logcounts",
-                                      s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
+                                      s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "wide")
 gc()
 dfp.wide2 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
-                                       s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
+                                       s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "wide")
 gc()
 dfp.wide3 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
-                                       s.vector = c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3),
+                                       s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "wide")
 gc()
 dfp.wide <- rbind(dfp.wide1, rbind(dfp.wide2, dfp.wide3))

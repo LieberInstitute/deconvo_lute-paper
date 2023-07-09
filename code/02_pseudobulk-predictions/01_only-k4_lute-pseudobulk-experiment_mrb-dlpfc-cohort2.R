@@ -9,15 +9,16 @@ sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k3
 sce.mrb <- get(load(sce.mrb.path)) # load sce data
+s.vector <- c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3)
 
 # get experiment results tables
 dfp.tall <- get_ypb_experiment_series(sce.mrb, sample.id.variable = "donor", 
-                                      celltype.variable = "k3", assay.name = "logcounts",
-                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
+                                      celltype.variable = "k4", assay.name = "logcounts",
+                                      s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "tall")
 dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "donor", 
-                                      celltype.variable = "k3", assay.name = "logcounts",
-                                      s.vector = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
+                                      celltype.variable = "k4", assay.name = "logcounts",
+                                      s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "wide")
 dfp.ct <- dfp_tall_by_celltype(dfp.wide) # dfp.wide, tall by cell type
 
