@@ -156,9 +156,3 @@ names(list.cell.sizes.halo) <- c("combo", "star", "circle")
 save.path.cell.size.halo <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", 
                                  "list_halo-cell-proportions_k2-k3-k4_dlpfc-cohort1.rda")
 save(list.cell.sizes.halo, file = save.path.cell.size.halo)
-
-
-
-
-
-
