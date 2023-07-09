@@ -23,7 +23,7 @@ get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample",
                                       celltype.variable = "k2", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "neuron" = 10),
                                       algorithm.name = "nnls", return.dimensions = c("wide", "tall"),
-                                      dfp.tall.errors = TRUE){
+                                      dfp.tall.errors = TRUE, system.sleep.sec = 2){
   # get pseudobulk experiment series, testing cellsize adjustment
   # use with dfp_tall_by_celltype()
   # get experiment results
@@ -39,13 +39,15 @@ get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample",
                                                celltype.variable = celltype.variable, 
                                                assay.name = assay.name,
                                                s.vector.ypb = s.vector,
-                                               s.vector.pred = s.vector.null)
+                                               s.vector.pred = s.vector.null,
+                                            system.sleep.sec = system.sleep.sec)
   dfp.withscale <- get_ypb_experiment_results(sce, 
                                                  sample.id.variable = sample.id.variable, 
                                                  celltype.variable = celltype.variable, 
                                                  assay.name = assay.name,
                                                  s.vector.ypb = s.vector,
-                                                 s.vector.pred = s.vector)
+                                                 s.vector.pred = s.vector,
+                                              system.sleep.sec = system.sleep.sec)
   if(return.dimensions == "tall"){
     # get plot data -- tall
     dfp.noscale$type <- 'noscale'
@@ -68,7 +70,7 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
                                        celltype.variable = "k2", assay.name = "logcounts",
                                        s.vector.ypb = c("glial" = 3, "neuron" = 10),
                                        s.vector.pred = c("glial" = 1, "neuron" = 1),
-                                       algorithm.name = "nnls"){
+                                       algorithm.name = "nnls", system.sleep.sec = 2){
   # get results for a single iteration of an experiment
   # use with get_ypb_experiment_series()
   if(assay.name == "logcounts" & !"logcounts" %in% names(assays(sce))){sce <- scuttle::logNormCounts(sce)}
@@ -87,6 +89,7 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
     colnames(prop.pred.iter) <- paste0(colnames(prop.pred.iter), ".pred")
     colnames(prop.true.iter) <- paste0(colnames(prop.true.iter), ".true")
     dfp.iter <- cbind(prop.true.iter, prop.pred.iter) %>% as.data.frame()
+    Sys.sleep(system.sleep.sec)
     dfp.iter
   }))
   rownames(dfp) <- unique.sample.id.vector
