@@ -200,7 +200,7 @@ method.vector <- c("nnlsParam", "musicParam", "deconrnaseqParam")
 # 01, independent pseudobulk
 # new dlpfc markers
 sce.markers.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
-sce.markers.list.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.markers.filename)
+sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", sce.markers.filename)
 # mrb dlpfc markers
 sce.mrb.name <- "sce-mrb_dlpfc.rda"
 # sce.mrb.path <- here("deconvo_method-paper", "outputs", "09_manuscript", sce.mrb.name)
