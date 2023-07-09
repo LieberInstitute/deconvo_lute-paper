@@ -200,7 +200,7 @@ scatterplot.error <- ggplot(results.tall, aes(x = z.corr.type1, y = abs.error.ty
   geom_smooth(method = "glm") +
   facet_wrap(~type)
 
-# make jitterbox plots
+# make jitterbox plots of absolute errors
 jitterbox.error <- ggplot(results.tall, aes(x = type, y = abs.error.type1)) +
   geom_jitter(alpha = 0.1) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw()
 
