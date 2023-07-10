@@ -30,6 +30,8 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure 2B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in neuron from k2 labels tests, using DLPFC Cohort2.
 [Figure 2C](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, using DLPFC Cohort1.
 [Figure 2D](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, DLPFC Cohort2.
+[Figure 2E](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, using DLPFC Cohort1.
+[Figure 2F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, DLPFC Cohort2.
 
 * Figure 3
 [Figure 3]() : Changes in absolute error from deconvolution of neurons in an applied experiment setting. The R script to reproduce this figure is located at `./code/20_snrnaseq-bulk-matched_training/00_methods_s-halo-cellsizes-normbyneuron_y-logcounts-sn-logcounts`
@@ -38,7 +40,11 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure S1A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 1.
 [Figure S1B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
 [Figure S1C](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 2.
-[Figure S1D](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
+[Figure S1D](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1 k2 tests.
+[Figure S1E](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k3 tests.
+[Figure S1F](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k3 tests.
+[Figure S1E](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k4 tests.
+[Figure S1F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 2, k4 tests.
 
 * Supplemental Figure S2
 [Figure S2A](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Paneled scatterplots of scaled and unscaled results from pseudobulk simulations with random offsets.
