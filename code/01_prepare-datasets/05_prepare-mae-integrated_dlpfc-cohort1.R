@@ -31,17 +31,24 @@ sample.id.bulk <- "batch.id2"
 
 # make mae on common indices
 # make maplist
-sn.map <- data.frame(coldata = colnames(sce),
-                     sample.id = sce[[sample.id.snrnaseq]])
-bulk.map <- data.frame(coldata = colnames(rse.filter),
-                       sample.id = rse.filter[[sample.id.bulk]])
-image.map <- data.frame(coldata = halo.output.table[,sample.id.halo],
-                        sample.id = halo.output.table[,sample.id.halo])
+sn.map <- data.frame(colname = colnames(sce),
+                     primary = sce[[sample.id.snrnaseq]])
+bulk.map <- data.frame(colname = colnames(rse.filter),
+                       primary = rse.filter[[sample.id.bulk]])
+image.map <- data.frame(colname = halo.output.table[,sample.id.halo],
+                        primary = halo.output.table[,sample.id.halo])
 listmap <- list(sn.rnaseq = sn.map,
                 bulk.rnaseq = bulk.map,
                 rnascope.image = image.map)
+dfmap <- listToMap(listmap) # make new sampleMap object
 
-# make new sampleMap object
-listToMap(maplist)
+# get object list
+object.list <- list(bulk.rnaseq = rse.filter,
+                    sn.rnaseq = sce,
+                    rnascope.image = halo.output.table)
 
+# get coldata (harmonized sample ids)
+coldata <- data.frame(sample.id = unique(c(sn.map$sample.id, bulk.map$sample.id, image.map$sample.id)))
 
+# make new mae object
+mae <- MultiAssayExperiment(experiments = object.list, sampleMap = dfmap, colData = coldata)
