@@ -1,12 +1,3 @@
-#!/usr/bin/env R
-
-#
-# Makes a multi assay experiment object containing the data for integrated analysis. 
-# The new MAE object includes the following asssays:
-# * snRNAseq
-# * bulk RNAseq
-# * RNAscope image processing outputs from HALO
-#
 
 libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", "ggforce", "MultiAssayExperiment")
 sapply(libv, library, character.only = TRUE)
@@ -22,10 +13,8 @@ load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/rse-gene-filter.
 # load rnascope image data
 load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/halo-outputs_updated.Rdata")
 
-#---------
-# make mae
-#---------
-sample.id.snrnaseq <- "Sample"
+---------
+  sample.id.snrnaseq <- "Sample"
 sample.id.halo <- "Sample"
 sample.id.bulk <- "batch.id2"
 
@@ -48,46 +37,4 @@ object.list <- list(bulk.rnaseq = assays(rse.filter)[["counts"]],
                     sn.rnaseq = assays(sce)[["logcounts"]],
                     rnascope.image = halo.output.table)
 
-# get coldata (harmonized sample ids)
-coldata <- data.frame(sample.id = unique(c(sn.map$sample.id, bulk.map$sample.id, image.map$sample.id)))
-
-# make new mae object
-mae <- MultiAssayExperiment(experiments = object.list, sampleMap = dfmap, colData = coldata)
-
-###
-
-
 experiment.list <- ExperimentList(object.list)
-
-###
-
-mae <- prepMultiAssay(ExperimentList = experiment.list, sampleMap = dfmap, colData = coldata)
-experiments(mae)
-
-mae <- prepMultiAssay(ExperimentList = experiment.list)
-experiments(mae)
-
-mae <- prepMultiAssay(ExperimentList = experiment.list, colData = coldata)
-experiments(mae)
-
-mae <- prepMultiAssay(ExperimentList = experiment.list, sampleMap = dfmap)
-experiments(mae)
-
-#-----------------------------------
-# mae: inspect, with basic summaries
-#-----------------------------------
-experiments(mae)
-
-colData(mae)
-
-
-
-mae <- prepMultiAssay(ExperimentList = ExperimentList(bulk.rnaseq = rse.filter), 
-                      sampleMap = dfmap[dfmap$assay=="bulk.rnaseq",])
-
-
-
-
-
-
-
