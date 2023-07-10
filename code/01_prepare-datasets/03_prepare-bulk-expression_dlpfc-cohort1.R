@@ -48,11 +48,13 @@ cond2 <- cd[,experiment.condition2]
 cd[,condition.variable] <- paste0(cond1, "_", cond2)
 # reassign coldata
 colData(rse) <- cd
-
 # filter gene types
 gene.types.vector <- rd$gene_type
 gene.type.filter <- which(gene.types.vector %in% gene.types.include) 
 rse.filter <- rse[gene.type.filter,]
+# append new formatted batch id
+rse.filter[["batch.id2"]] <- paste0(rse.filter[["BrNum"]], "_", 
+                                    tolower(rse.filter[["location"]]))
 
 # save
 # save(rse, file = rse.bulk.path.new)

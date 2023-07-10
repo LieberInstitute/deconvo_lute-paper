@@ -26,6 +26,7 @@ bulk.rse <- load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/halo
 #---------
 sample.id.snrnaseq <- "Sample"
 sample.id.halo <- "Sample"
+sample.id.bulk <- "batch.id2"
 
 # make mae on common indices
 
