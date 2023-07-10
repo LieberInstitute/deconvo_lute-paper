@@ -19,11 +19,16 @@ sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "
 sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
 
 # define experiment function
+order_svector <- function(s.vector = c("neuron" = 10, "glial" = 3)){
+  s.vector[names(s.vector)[order(names(s.vector))]]
+}
+
 get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample", 
                                       celltype.variable = "k2", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "neuron" = 10),
                                       algorithm.name = "nnls", return.dimensions = c("wide", "tall"),
                                       dfp.tall.errors = TRUE, system.sleep.sec = 2){
+  s.vector <- order_svector(s.vector)
   # get pseudobulk experiment series, testing cellsize adjustment
   # use with dfp_tall_by_celltype()
   # get experiment results
@@ -71,6 +76,7 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
                                        s.vector.ypb = c("glial" = 3, "neuron" = 10),
                                        s.vector.pred = c("glial" = 1, "neuron" = 1),
                                        algorithm.name = "nnls", system.sleep.sec = 2){
+  s.vector <- order_svector(s.vector)
   # get results for a single iteration of an experiment
   # use with get_ypb_experiment_series()
   if(assay.name == "logcounts" & !"logcounts" %in% names(assays(sce))){sce <- scuttle::logNormCounts(sce)}

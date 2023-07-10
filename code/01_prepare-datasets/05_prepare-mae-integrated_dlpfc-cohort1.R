@@ -7,3 +7,7 @@
 # * bulk RNAseq
 # * RNAscope image processing outputs from HALO
 #
+
+libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", "ggforce", "MultiAssayExperiment")
+sapply(libv, library, character.only = TRUE)
+
