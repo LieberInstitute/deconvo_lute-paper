@@ -41,6 +41,7 @@ listmap <- list(sn.rnaseq = sn.map,
                 bulk.rnaseq = bulk.map,
                 rnascope.image = image.map)
 dfmap <- listToMap(listmap) # make new sampleMap object
+rownames(dfmap) <- dfmap$primary
 
 # get object list
 object.list <- list(bulk.rnaseq = rse.filter,
@@ -52,3 +53,14 @@ coldata <- data.frame(sample.id = unique(c(sn.map$sample.id, bulk.map$sample.id,
 
 # make new mae object
 mae <- MultiAssayExperiment(experiments = object.list, sampleMap = dfmap, colData = coldata)
+
+#-----------------------------------
+# mae: inspect, with basic summaries
+#-----------------------------------
+experiments(mae)
+
+colData(mae)
+
+
+
+
