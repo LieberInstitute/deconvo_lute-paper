@@ -76,7 +76,8 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
                                        s.vector.ypb = c("glial" = 3, "neuron" = 10),
                                        s.vector.pred = c("glial" = 1, "neuron" = 1),
                                        algorithm.name = "nnls", system.sleep.sec = 2){
-  s.vector <- order_svector(s.vector)
+  s.vector.ypb <- order_svector(s.vector.ypb)
+  s.vector.pred <- order_svector(s.vector.pred)
   # get results for a single iteration of an experiment
   # use with get_ypb_experiment_series()
   if(assay.name == "logcounts" & !"logcounts" %in% names(assays(sce))){sce <- scuttle::logNormCounts(sce)}
