@@ -58,7 +58,23 @@ dfp <- dfp[!is.na(dfp$median_nucleus_area),]
 # facet by sample id
 ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, color = cell_type)) +
   geom_point() + facet_wrap(~sample.id) + geom_abline(slope = 1, intercept = 0) +
-  geom_smooth() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, shape = cell_type)) +
+  geom_point(size=4,alpha=0.5) + facet_wrap(~sample.id) + geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, shape = k2)) +
+  geom_point(size=4,alpha=0.5) + facet_wrap(~sample.id) + geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, shape = k3)) +
+  geom_point(size=4,alpha=0.5) + facet_wrap(~sample.id) + geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, shape = k4)) +
+  geom_point(size=4,alpha=0.5) + facet_wrap(~sample.id) + geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, color = sample.id)) +
   geom_point() + facet_wrap(~cell_type) + geom_abline(slope = 1, intercept = 0) +
@@ -74,17 +90,17 @@ ggplot(dfp[dfp$k2=="glial",], aes(x = median_counts_snrnaseq, y = median_nucleus
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
 
 # k2 labels
-ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) +
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) + theme_bw() +
   geom_point(alpha = 0.5) + facet_wrap(~k2) + geom_abline(slope = 1, intercept = 0) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # k3 labels
-ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) +
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) + theme_bw() +
   geom_point(alpha = 0.5) + facet_wrap(~k3) + geom_abline(slope = 1, intercept = 0) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # k4 labels
-ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) +
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) + theme_bw() +
   geom_point(alpha = 0.5) + facet_wrap(~k4) + geom_abline(slope = 1, intercept = 0) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
