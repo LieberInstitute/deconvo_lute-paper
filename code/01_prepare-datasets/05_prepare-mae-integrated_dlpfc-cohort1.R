@@ -50,7 +50,7 @@ names(img.list) <- img.data.colnames
 sce.img <- SingleCellExperiment(assays = img.list)
 img.coldata <- DataFrame(img[,img.coldata.colnames])
 rownames(img.coldata) <- new.img.colnames
-colData(sce.img) <- new.img.colnames
+colData(sce.img) <- img.coldata
 rm(halo.output.table)
 
 gc()
@@ -70,7 +70,9 @@ bulk.map <- data.frame(colname = colnames(rse.filter),
                        primary = rse.filter[[sample.id.bulk]])
 image.map <- data.frame(colname = colnames(sce.img),
                         primary = sce.img[[sample.id.halo]])
-listmap <- list(sn.rnaseq = sn.map,
+listmap <- list(sn1.rnaseq = sn1.map,
+                sn2.rnaseq = sn2.map,
+                sn3.rnaseq = sn3.map,
                 bulk.rnaseq = bulk.map,
                 rnascope.image = image.map)
 dfmap <- listToMap(listmap) # make new sampleMap object
@@ -78,14 +80,22 @@ rownames(dfmap) <- dfmap$primary
 
 # get object list
 object.list <- list(bulk.rnaseq = assays(rse.filter)[["counts"]],
-                    sn.rnaseq = assays(sce)[["logcounts"]],
-                    rnascope.image = halo.output.table)
+                    sn1.rnaseq = assays(sce1)[["logcounts"]],
+                    sn2.rnaseq = assays(sce2)[["logcounts"]],
+                    sn3.rnaseq = assays(sce3)[["logcounts"]],
+                    rnascope.image = sce.img)
 
 # get coldata (harmonized sample ids)
-coldata <- data.frame(sample.id = unique(c(sn.map$sample.id, bulk.map$sample.id, image.map$sample.id)))
+coldata <- data.frame(sample.id = unique(c(sn1.map$sample.id,
+                                           sn2.map$sample.id,
+                                           sn3.map$sample.id, 
+                                           bulk.map$sample.id, 
+                                           image.map$sample.id)))
 
 # make new mae object
-mae <- MultiAssayExperiment(experiments = object.list, sampleMap = dfmap, colData = coldata)
+mae <- MultiAssayExperiment(experiments = object.list, 
+                            sampleMap = dfmap, 
+                            colData = coldata)
 
 ###
 
@@ -113,14 +123,7 @@ experiments(mae)
 
 colData(mae)
 
-
-
 mae <- prepMultiAssay(ExperimentList = ExperimentList(bulk.rnaseq = rse.filter), 
                       sampleMap = dfmap[dfmap$assay=="bulk.rnaseq",])
-
-
-
-
-
 
 
