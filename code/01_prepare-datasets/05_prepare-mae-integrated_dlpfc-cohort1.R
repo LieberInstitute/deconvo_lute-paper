@@ -8,7 +8,8 @@
 # * RNAscope image processing outputs from HALO
 #
 
-libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", "ggforce", "MultiAssayExperiment")
+libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", "ggforce", "MultiAssayExperiment",
+          "SPIAT")
 sapply(libv, library, character.only = TRUE)
 
 #--------------------
@@ -16,27 +17,75 @@ sapply(libv, library, character.only = TRUE)
 #--------------------
 # load snrnaseq data
 load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
-sce <- lscef[[1]]
 # load bulk data
 load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/rse-gene-filter.rda")
 # load rnascope image data
 load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/halo-outputs_updated.Rdata")
 
+#------------------
+# prep data for mae
+#------------------
+# isolate sce data
+sce1 <- lscef[[1]]
+sce2 <- lscef[[2]]
+sce3 <- lscef[[3]]
+rm(lscef)
+
+# make sce with image data
+img <- halo.output.table
+new.img.colnames <- paste0("cell", seq(nrow(img)))
+img.data.colnames <- c("Nucleus_Area", "DAPI_Nucleus_Intensity")
+img.list <- lapply(img.colnames, function(colname){
+  new.data <- img[,colname] %>% as.matrix() %>% t()
+  colnames(new.data) <- new.img.colnames
+  new.data
+})
+names(img.list) <- img.colnames
+sce.image <- SingleCellExperiment(assays = img.list)
+colData(sce.image) <- img
+
+nucleus.area <- img$Nucleus_Area
+dapi <- img$DAPI_Nucleus_Intensity
+
+
+gene.colnames <- c("")
+img.expr <- do.call(rbind, lapply())
+
+sce.image <- SingleCellExperiment(assays = list(image = t(halo.output.table)))
+
+# get transpose of large image file
+image <- halo.output.table %>% as.data.table() %>% transpose()
+
+colnames(image) <- paste0("cell", seq(ncol(image)))
+rm(halo.output.table)
+
+# format image data as very wide data.table
+img <- halo.output.table %>% t() %>% as.data.table()
+rm(halo.output.table)
+colnames(img) <- paste0("cell", seq(ncol(img)))
+
+gc()
+
 #---------
 # make mae
 #---------
+# common sample ids
 sample.id.snrnaseq <- "Sample"
 sample.id.halo <- "Sample"
 sample.id.bulk <- "batch.id2"
 
 # make mae on common indices
 # make maplist
-sn.map <- data.frame(colname = colnames(sce),
-                     primary = sce[[sample.id.snrnaseq]])
+sn1.map <- data.frame(colname = colnames(sce1),
+                     primary = sce1[[sample.id.snrnaseq]])
+sn2.map <- data.frame(colname = colnames(sce2),
+                      primary = sce2[[sample.id.snrnaseq]])
+sn3.map <- data.frame(colname = colnames(sce3),
+                      primary = sce3[[sample.id.snrnaseq]])
 bulk.map <- data.frame(colname = colnames(rse.filter),
                        primary = rse.filter[[sample.id.bulk]])
-image.map <- data.frame(colname = halo.output.table[,sample.id.halo],
-                        primary = halo.output.table[,sample.id.halo])
+image.map <- data.frame(colname = colnames(img),
+                        primary = img[sample.id.halo,])
 listmap <- list(sn.rnaseq = sn.map,
                 bulk.rnaseq = bulk.map,
                 rnascope.image = image.map)
