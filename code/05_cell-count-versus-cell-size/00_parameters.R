@@ -32,9 +32,12 @@ harmonize_celltype_tables_1to1 <- function(df.input1, df.input2, celltype.variab
   # harmonize when there is one unique celltype level per row in each input
   celltype.vector1 <- df.input1[,celltype.variable]
   unique.cell.types1 <- unique(celltype.vector1)
-  df.input2.cn.filter <- !colnames(df.input2)==celltype.variable
+  #df2.cn.filter <- !colnames(df.input2)==celltype.variable
+  #df2.cn.return <- colnames(df.input2)[df2.cn.filter]
+  
   do.call(rbind, lapply(unique.cell.types1, function(cell.type.id){
-    c(df.input1[df.input1[,celltype.variable]==cell.type.id,], 
-      df.input2[df.input2[,celltype.variable]==cell.type.id,df.input2.cn.filter])
+    df1.filter <- df.input1[,celltype.variable]==cell.type.id
+    df2.filter <- df.input2[,celltype.variable]==cell.type.id
+    c(df.input1[df1.filter,], df.input2[df2.filter,])
   })) %>% as.data.frame()
 }
