@@ -79,18 +79,31 @@ dfmap <- listToMap(listmap) # make new sampleMap object
 rownames(dfmap) <- dfmap$primary
 
 # get object list
-object.list <- list(bulk.rnaseq = assays(rse.filter)[["counts"]],
+object.list1 <- list(bulk.rnaseq = assays(rse.filter)[["counts"]],
                     sn1.rnaseq = assays(sce1)[["logcounts"]],
                     sn2.rnaseq = assays(sce2)[["logcounts"]],
                     sn3.rnaseq = assays(sce3)[["logcounts"]],
-                    rnascope.image = sce.img)
+                    rnascope.image = assays(sce.img)[["Nucleus_Area"]],
+                    rnascope.image = assays(sce.img)[["AKT3_Copies"]],
+                    rnascope.image = assays(sce.img)[["Cell_Area"]],
+                    rnascope.image = assays(sce.img)[["DAPI_Nucleus_Intensity"]],
+                    rnascope.image = assays(sce.img)[["DAPI_Cytoplasm_Intensity"]])
+
+
+
 
 # get coldata (harmonized sample ids)
 coldata <- data.frame(sample.id = unique(c(sn1.map$sample.id,
                                            sn2.map$sample.id,
                                            sn3.map$sample.id, 
                                            bulk.map$sample.id, 
-                                           image.map$sample.id)))
+                                           sce.img$Sample)))
+
+
+
+
+
+experiment.list <- ExperimentList(object.list)
 
 # make new mae object
 #mae <- MultiAssayExperiment(experiments = object.list, 
@@ -98,19 +111,23 @@ coldata <- data.frame(sample.id = unique(c(sn1.map$sample.id,
 #                            colData = coldata)
 
 ###
-
-experiment.list <- ExperimentList(object.list)
+# make maplist
+index.img <- seq(10)
+sn1.map <- data.frame(colname = colnames(sce1), primary = sce1[[sample.id.snrnaseq]])
+bulk.map <- data.frame(colname = colnames(rse.filter), primary = rse.filter[[sample.id.bulk]])
+image.map <- data.frame(colname = colnames(sce.img), primary = sce.img[[sample.id.halo]])
+listmap <- list(sn1.rnaseq = sn1.map, bulk.rnaseq = bulk.map, rnascope.image = image.map[index.img,])
+dfmap <- listToMap(listmap) # make new sampleMap object
+rownames(dfmap) <- dfmap$primary
+object.list2 <- list(bulk.rnaseq = rse.filter, sn1.rnaseq = sce1, rnascope.image = sce.img[,index.img])   
+experiment.list <- ExperimentList(object.list2)
+rownames(coldata) <- coldata$sample.id
 mae <- prepMultiAssay(ExperimentList = experiment.list, sampleMap = dfmap, colData = coldata)
 experiments(mae)
+mae.final <- MultiAssayExperiment(mae$experiments, mae$colData, mae$sampleMap)
 
-mae <- prepMultiAssay(ExperimentList = experiment.list)
-experiments(mae)
-
-mae <- prepMultiAssay(ExperimentList = experiment.list, colData = coldata)
-experiments(mae)
-
-mae <- prepMultiAssay(ExperimentList = experiment.list, sampleMap = dfmap)
-experiments(mae)
+mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_final.rda")
+save(mae.final, file = mae.final.filepath)
 
 #-----------------------------------
 # mae: inspect, with basic summaries
