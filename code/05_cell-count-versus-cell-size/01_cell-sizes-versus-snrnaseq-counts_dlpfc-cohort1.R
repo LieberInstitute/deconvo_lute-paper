@@ -45,7 +45,9 @@ df.cellsize <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
   df.harmonized
 }))
 
-# plots
+#-----------------------------------------
+# plots -- snrnaseq vs. image nucleus area
+#-----------------------------------------
 dfp <- df.cellsize[,c(1,2,4,6:9)]
 dfp$median_counts_snrnaseq <- as.numeric(dfp$median_counts_snrnaseq)
 dfp$median_nucleus_area <- as.numeric(dfp$median_nucleus_area)
@@ -55,6 +57,34 @@ dfp <- dfp[!is.na(dfp$median_nucleus_area),]
 
 # facet by sample id
 ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, color = cell_type)) +
-  geom_point() + facet_wrap(~sample.id) + 
-  geom_abline(slope = 1, intercept = 0) +
-  geom_smooth()
+  geom_point() + facet_wrap(~sample.id) + geom_abline(slope = 1, intercept = 0) +
+  geom_smooth() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area, color = sample.id)) +
+  geom_point() + facet_wrap(~cell_type) + geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(method = "lm") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# glial only
+ggplot(dfp[dfp$k2=="glial",], aes(x = median_counts_snrnaseq, y = median_nucleus_area, color = sample.id)) +
+  geom_point() + facet_wrap(~cell_type) + geom_abline(slope = 1, intercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp[dfp$k2=="glial",], aes(x = median_counts_snrnaseq, y = median_nucleus_area)) +
+  geom_point(alpha = 0.5) + facet_wrap(~cell_type) + geom_abline(slope = 1, intercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+
+# k2 labels
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) +
+  geom_point(alpha = 0.5) + facet_wrap(~k2) + geom_abline(slope = 1, intercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+
+# k3 labels
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) +
+  geom_point(alpha = 0.5) + facet_wrap(~k3) + geom_abline(slope = 1, intercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+
+# k4 labels
+ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) +
+  geom_point(alpha = 0.5) + facet_wrap(~k4) + geom_abline(slope = 1, intercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + theme_bw()
+
