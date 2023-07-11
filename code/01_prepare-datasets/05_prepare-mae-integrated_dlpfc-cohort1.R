@@ -93,17 +93,13 @@ coldata <- data.frame(sample.id = unique(c(sn1.map$sample.id,
                                            image.map$sample.id)))
 
 # make new mae object
-mae <- MultiAssayExperiment(experiments = object.list, 
-                            sampleMap = dfmap, 
-                            colData = coldata)
+#mae <- MultiAssayExperiment(experiments = object.list, 
+#                            sampleMap = dfmap, 
+#                            colData = coldata)
 
 ###
-
 
 experiment.list <- ExperimentList(object.list)
-
-###
-
 mae <- prepMultiAssay(ExperimentList = experiment.list, sampleMap = dfmap, colData = coldata)
 experiments(mae)
 
