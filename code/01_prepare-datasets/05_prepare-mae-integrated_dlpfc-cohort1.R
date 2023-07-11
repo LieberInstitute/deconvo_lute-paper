@@ -40,7 +40,8 @@ img <- halo.output.table
 new.img.colnames <- paste0("cell", seq(nrow(img)))
 img.data.colnames <- c("Nucleus_Area", "AKT3_Copies", "Cell_Area", 
                        "DAPI_Nucleus_Intensity", "DAPI_Cytoplasm_Intensity")
-img.coldata.colnames <- c("SAMPLE_ID", sample.id.halo, "Slide", "XMin", "XMax", "YMin", "YMax")
+img.coldata.colnames <- c("SAMPLE_ID", sample.id.halo, "cell_type", "Slide", 
+                          "XMin", "XMax", "YMin", "YMax")
 img.list <- lapply(img.data.colnames, function(colname){
   new.data <- img[,colname] %>% as.matrix() %>% t()
   colnames(new.data) <- new.img.colnames
@@ -64,6 +65,10 @@ sn.index <- seq(ncol(sce1))
 img.index <- seq(ncol(sce.img))
 
 # mae prep
+# coldata
+coldata <- DataFrame(data.frame(sample.id = unique(c(sn.sce.subset[[sample.id.snrnaseq]],
+                                                     bulk.rse.subset[[sample.id.bulk]],
+                                                     img.sce.subset[[sample.id.halo]]))))
 # get subsets
 bulk.rse.subset <- rse.filter[,bulk.index]
 sn.sce.subset <- sce1[,sn.index]
