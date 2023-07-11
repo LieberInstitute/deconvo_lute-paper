@@ -92,6 +92,13 @@ mae.final <- MultiAssayExperiment(mae$experiments, mae$colData, mae$sampleMap)
 mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_final.rda")
 save(mae.final, file = mae.final.filepath)
 
+#--------------
+# mae summaries
+#--------------
+# summarize
+complete.id <- colData(mae.final)[complete.cases(mae.final),]
+length(complete.id) # 11
+
 #-----------------------------------
 # mae: inspect, with basic summaries
 #-----------------------------------
