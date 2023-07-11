@@ -104,3 +104,52 @@ ggplot(dfp, aes(x = median_counts_snrnaseq, y = median_nucleus_area)) + theme_bw
   geom_point(alpha = 0.5) + facet_wrap(~k4) + geom_abline(slope = 1, intercept = 0) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+#-------
+# tables
+#-------
+unique.sample.id.vector <- unique(dfp$sample.id)
+# variance across cell type sizes
+table.var <- do.call(rbind, lapply(unique.sample.id.vector, function(sample.id){
+  dfp.iter <- dfp[dfp$sample.id==sample.id,]
+  # var
+  var.size.all <- var(dfp.iter$median_counts_snrnaseq)
+  var.area.all <- var(dfp.iter$median_nucleus_area)
+  var.size.glial <- var(dfp.iter[dfp.iter$k2=="glial",]$median_counts_snrnaseq)
+  var.area.glial <- var(dfp.iter[dfp.iter$k2=="glial",]$median_nucleus_area)
+  var.size.neuron <- var(dfp.iter[dfp.iter$k2=="neuron",]$median_counts_snrnaseq)
+  var.area.neuron <- var(dfp.iter[dfp.iter$k2=="neuron",]$median_nucleus_area)
+  # mean
+  mean.size.all <- mean(dfp.iter$median_counts_snrnaseq)
+  mean.area.all <- mean(dfp.iter$median_nucleus_area)
+  mean.size.glial <- mean(dfp.iter[dfp.iter$k2=="glial",]$median_counts_snrnaseq)
+  mean.area.glial <- mean(dfp.iter[dfp.iter$k2=="glial",]$median_nucleus_area)
+  mean.size.neuron <- mean(dfp.iter[dfp.iter$k2=="neuron",]$median_counts_snrnaseq)
+  mean.area.neuron <- mean(dfp.iter[dfp.iter$k2=="neuron",]$median_nucleus_area)
+  
+  c(var.size.all, var.area.all, 
+    var.size.glial, var.area.glial,
+    var.size.neuron, var.area.neuron,
+    mean.size.all, mean.area.all, 
+    mean.size.glial, mean.area.glial,
+    mean.size.neuron, mean.area.neuron,
+    sample.id)
+})) %>% as.data.frame()
+rownames(table.var) <- table.var$sample.id
+colnames(table.var) <- c("var.cellsize.all", "var.cellarea.all",
+                         "var.cellsize.glial", "var.cellarea.glial",
+                         "var.cellsize.neuron", "var.cellarea.neuron", 
+                         "mean.cellsize.all", "mean.cellarea.all",
+                         "mean.cellsize.glial", "mean.cellarea.glial",
+                         "mean.cellsize.neuron", "mean.cellarea.neuron", 
+                         "sample.id")
+
+#-----------------------
+# plot mean and variance
+#-----------------------
+dfp <- table.var[!is.na(table.var$var.cellsize.all),]
+ggplot(table.var, aes(x = mean.cellsize.neuron, y = var.cellsize.neuron)) + theme_bw() + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  theme()
+
+
+
