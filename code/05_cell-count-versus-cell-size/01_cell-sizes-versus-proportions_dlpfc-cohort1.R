@@ -17,7 +17,7 @@ mae <- get(load(mae.filepath))
 mae.cd <- colData(mae.final)
 sample.id.vector <- mae.cd$sample.id[complete.cases(mae.final)]
 
-# get cell size table
+# get table of cell sizes and cell counts
 df.cellsize <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
   mae.iter <- mae[,mae.cd$sample.id==sample.id,]
   
@@ -40,7 +40,12 @@ df.cellsize <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
   # harmonized image and sn data
   df.harmonized <- harmonize_celltype_tables_1to1(df.sn.final, df.img)
   df.harmonized <- append_k_columns(df.harmonized)
+  df.harmonized$sample.id <- sample.id
   df.harmonized
 }))
 
+# plots
 
+# facet by sample id
+ggplot(df.cellsize, aes(x = median_counts_snrnaseq, y = median_nucleus_area, color = cell_type)) +
+  geom_point() + facet_wrap(~sample.id)
