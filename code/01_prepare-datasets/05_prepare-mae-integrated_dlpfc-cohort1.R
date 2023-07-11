@@ -99,6 +99,9 @@ save(mae.final, file = mae.final.filepath)
 complete.id <- colData(mae.final)[complete.cases(mae.final),]
 length(complete.id) # 11
 
+# upset plot of samples by assays
+upsetSamples(mae.final)
+
 #-----------------------------------
 # mae: inspect, with basic summaries
 #-----------------------------------
