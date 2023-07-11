@@ -102,6 +102,9 @@ length(complete.id) # 11
 # upset plot of samples by assays
 upsetSamples(mae.final)
 
+# example: subset on one sample id
+mae.final[,colData(mae.final)$sample.id=="Br8492_mid",]
+
 #-----------------------------------
 # mae: inspect, with basic summaries
 #-----------------------------------
