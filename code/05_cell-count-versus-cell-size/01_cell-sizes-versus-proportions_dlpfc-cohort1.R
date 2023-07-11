@@ -17,7 +17,22 @@ mae <- get(load(mae.filepath))
 mae.cd <- colData(mae.final)
 sample.id.vector <- mae.cd$sample.id[complete.cases(mae.final)]
 
-#
+# cell type harmonization table
+df.ct <- data.frame(cell_type = c("Inhib", "Other", "Astro", "Endo", "Excit", "Oligo", "OPC", "Micro"),
+                    k2 = c("neuron", "NA", "glial", "glial", "neuron", "glial", "glial", "glial"),
+                    k3 = c("Inhib", "NA", "glial", "glial", "Excit", "glial", "glial", "glial"),
+                    k4 = c("Inhib", "NA", "non_oligo_glial", "non_oligo_glial", "Excit", "Oligo", 
+                           "non_oligo_glial", "non_oligo_glial"))
+
+append_k_columns <- function(df.input, df.ct, celltype.variable = "cell_type"){
+  celltype.vector <- df.input[,celltype.variable]
+  unique.cell.types <- unique(celltype.vector)
+  df.ct.filter <- df.ct[df.ct$cell_type %in% unique.cell.types,]
+  df.ct.new <- do.call(rbind, lapply(celltype.vector, function(cell.type.id){
+    df.ct.filter[df.ct.filter[,"cell_type"]==cell.type.id,,drop = F]
+  }))
+  cbind(df.input, df.ct.new)
+}
 
 # get cell size table
 df.cellsize <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
