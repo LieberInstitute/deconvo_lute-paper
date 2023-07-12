@@ -12,9 +12,15 @@ sapply(libv, library, character.only = TRUE)
 # save path
 save.path <- here("deconvo_method-paper", "outputs", "02_pseudobulk-predictions")
 
+#-------------------
+# dlpfc cohort2 data
+#-------------------
 # mrb sce path
 sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "sce-mrb_dlpfc.rda")
 
+#-------------------
+# dlpfc cohort1 data
+#-------------------
 # dlpfc markers path
 sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
 

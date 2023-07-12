@@ -7,9 +7,18 @@ sapply(libv, library, character.only = TRUE)
 prepped.data.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets")
 save.path <- here("deconvo_method-paper", "outputs", "05_cell-count-versus-cell-size")
 
+#-------------------
+# dlpfc cohort1 data
+#-------------------
 # multi assay experiment path
 mae.filename <- "mae_final.rda"
 mae.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", mae.filename)
+# dlpfc markers path
+sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+
+#-------------------
+# dlpfc cohort2 data
+#-------------------
 
 # helper functions
 append_k_columns <- function(df.input, df.ct = NULL, celltype.variable = "cell_type"){
