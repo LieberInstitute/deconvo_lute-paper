@@ -27,7 +27,8 @@ get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample",
                                       celltype.variable = "k2", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "neuron" = 10),
                                       algorithm.name = "nnls", return.dimensions = c("wide", "tall"),
-                                      dfp.tall.errors = TRUE, system.sleep.sec = 2){
+                                      dfp.tall.errors = TRUE, system.sleep.sec = 2,
+                                      deconvolution.algorithm = deconvolution.algorithm){
   s.vector <- order_svector(s.vector)
   # get pseudobulk experiment series, testing cellsize adjustment
   # use with dfp_tall_by_celltype()
@@ -45,14 +46,16 @@ get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample",
                                                assay.name = assay.name,
                                                s.vector.ypb = s.vector,
                                                s.vector.pred = s.vector.null,
-                                            system.sleep.sec = system.sleep.sec)
+                                            system.sleep.sec = system.sleep.sec,
+                                            deconvolution.algorithm = deconvolution.algorithm)
   dfp.withscale <- get_ypb_experiment_results(sce, 
                                                  sample.id.variable = sample.id.variable, 
                                                  celltype.variable = celltype.variable, 
                                                  assay.name = assay.name,
                                                  s.vector.ypb = s.vector,
                                                  s.vector.pred = s.vector,
-                                              system.sleep.sec = system.sleep.sec)
+                                              system.sleep.sec = system.sleep.sec,
+                                              deconvolution.algorithm = deconvolution.algorithm)
   if(return.dimensions == "tall"){
     # get plot data -- tall
     dfp.noscale$type <- 'noscale'
@@ -75,7 +78,7 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
                                        celltype.variable = "k2", assay.name = "logcounts",
                                        s.vector.ypb = c("glial" = 3, "neuron" = 10),
                                        s.vector.pred = c("glial" = 1, "neuron" = 1),
-                                       algorithm.name = "nnls", system.sleep.sec = 2){
+                                       deconvolution.algorithm = "nnls", system.sleep.sec = 2){
   s.vector.ypb <- order_svector(s.vector.ypb)
   s.vector.pred <- order_svector(s.vector.pred)
   # get results for a single iteration of an experiment
@@ -86,13 +89,13 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
     sce.iter <- sce[,sce[[sample.id.variable]]==sample.id]
     ypb.iter <- ypb_from_sce(sce = sce.iter, assay.name = assay.name, 
                              celltype.variable = celltype.variable,
-                             sample.id.variable = sample.id.variable, 
+                             sample.id.variable = sample.id.variable,
                              S = s.vector.ypb) %>% as.matrix()
     prop.true.iter <- table(sce.iter[[celltype.variable]]) %>% prop.table() %>% as.matrix() %>% t()
     prop.pred.iter <- lute(sce = sce.iter, y = ypb.iter, assay.name = assay.name, 
                            celltype.variable = celltype.variable, s = s.vector.pred, 
                            typemarker.algorithm = NULL, return.info = FALSE,
-                           deconvolution.algorithm = algorithm.name)$deconvolution.results
+                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results
     colnames(prop.pred.iter) <- paste0(colnames(prop.pred.iter), ".pred")
     colnames(prop.true.iter) <- paste0(colnames(prop.true.iter), ".true")
     dfp.iter <- cbind(prop.true.iter, prop.pred.iter) %>% as.data.frame()

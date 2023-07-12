@@ -146,10 +146,14 @@ colnames(table.var) <- c("var.cellsize.all", "var.cellarea.all",
 #-----------------------
 # plot mean and variance
 #-----------------------
-dfp <- table.var[!is.na(table.var$var.cellsize.all),]
-ggplot(table.var, aes(x = mean.cellsize.neuron, y = var.cellsize.neuron)) + theme_bw() + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) +
-  theme()
+dfp <- table.var[!is.na(table.var$var.cellarea.glial),]
 
+ggplot(dfp, aes(x = mean.cellsize.neuron, y = var.cellsize.neuron)) + theme_bw() + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  theme() + geom_text(label = sample.id)
+
+ggplot(dfp, aes(x = mean.cellarea.neuron, y = var.cellsize.neuron)) + theme_bw() + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  theme() + geom_label(label = sample.id)
 
 
