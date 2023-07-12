@@ -19,8 +19,12 @@ sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-dat
 #-------------------
 # dlpfc cohort2 data
 #-------------------
+# mrb sce path
+sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "sce-mrb_dlpfc.rda")
 
+#-----------------
 # helper functions
+#-----------------
 append_k_columns <- function(df.input, df.ct = NULL, celltype.variable = "cell_type"){
   df.ct <- data.frame(cell_type = c("Inhib", "Other", "Astro", "Endo", "Excit", "Oligo", "OPC", "Micro", "all"),
                       k2 = c("neuron", "NA", "glial", "glial", "neuron", "glial", "glial", "glial", "NA"),

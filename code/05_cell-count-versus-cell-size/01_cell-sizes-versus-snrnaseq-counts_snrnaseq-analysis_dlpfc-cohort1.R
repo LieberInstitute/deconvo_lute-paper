@@ -17,7 +17,6 @@ sce <- list.sce.markers$k2
 #-------------------------------
 # get cell sizes and counts data
 #-------------------------------
-
 sample.id.vector <- unique(sce$Sample)
 assay.name <- "counts"
 
