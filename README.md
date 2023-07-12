@@ -34,7 +34,9 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure 2F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, DLPFC Cohort2.
 
 * Figure 3
-[Figure 3]() : Changes in absolute error from deconvolution of neurons in an applied experiment setting. The R script to reproduce this figure is located at `./code/20_snrnaseq-bulk-matched_training/00_methods_s-halo-cellsizes-normbyneuron_y-logcounts-sn-logcounts`
+[Figure 3A](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K2 labels
+[Figure 3B](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K3 labels
+[Figure 3C](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K4 labels
 
 * Supplemental Figure S1
 [Figure S1A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 1.
@@ -46,12 +48,17 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure S1E](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k4 tests.
 [Figure S1F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 2, k4 tests.
 
-* Supplemental Figure S2
-[Figure S2A](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Paneled scatterplots of scaled and unscaled results from pseudobulk simulations with random offsets.
-[Figure S2B](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Jittered points and boxplots of absolute errors from pseudobulk simulations with random offsets.
+* Supplemental Figure 2
+[Supplemental Figure 2A](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Paneled scatterplots of scaled and unscaled results from pseudobulk simulations with random offsets.
+[Supplemental Figure 2B](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Jittered points and boxplots of absolute errors from pseudobulk simulations with random offsets.B
+
+* Supplemental Figure 3
+[Supplemental Figure 3A](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_snrnaseq-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 snRNAseq and RNAscope data, using RNAscope cell type labels.
+[Supplemental Figure 3B](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_snrnaseq-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 snRNAseq data, using snRNAseq clustering cell type labels.
+
+
 
 ## File locations
-
 This is an integrative, multi-assay project including individual-matched data generated from human dorsolateral prefrontal cortex (DLPFC) using the RNAscope, 10X Chromium, and Illumina HiSeq platforms. 
 
 The main directory path on JHPCE is located at:

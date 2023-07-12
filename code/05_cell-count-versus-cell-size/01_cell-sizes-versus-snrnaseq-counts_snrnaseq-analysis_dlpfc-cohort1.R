@@ -14,6 +14,9 @@ sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k2
 
+# note: uses cell type labels from cellType_broad_hc, e.g.:
+# > Astro EndoMural     Micro     Oligo       OPC     Excit     Inhib Ambiguous 
+
 #-------------------------------
 # get cell sizes and counts data
 #-------------------------------
