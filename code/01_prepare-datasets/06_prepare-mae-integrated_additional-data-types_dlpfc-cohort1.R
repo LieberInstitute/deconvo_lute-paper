@@ -94,7 +94,7 @@ mae <- prepMultiAssay(ExperimentList = experiment.list, sampleMap = dfmap, colDa
 mae.final <- MultiAssayExperiment(mae$experiments, mae$colData, mae$sampleMap)
 
 # save
-mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_final.rda")
+mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_additional-data_final.rda")
 save(mae.final, file = mae.final.filepath)
 
 #--------------

@@ -177,5 +177,3 @@ ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) +
 ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
   facet_wrap(~s.set.label) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
