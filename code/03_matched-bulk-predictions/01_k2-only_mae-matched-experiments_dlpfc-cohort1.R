@@ -19,8 +19,34 @@ sce.iter <- logNormCounts(sce.iter)
 # experiment variables
 assay.name <- "logcounts"
 deconvolution.algorithm <- "nnls"
+# get true proportions from rnascope data
+rnascope <- mae[[3]]
+# append k2 label
+cd <- colData(rnascope)
+cd$k2 <- "NA"
+cd$k2 <- ifelse(grepl("Excit|Inhib", cd$cell_type), "neuron",
+                ifelse(grepl("Endo|Oligo|Micro", cd$cell_type), "glial", "NA"))
+colData(rnascope) <- cd
+# filter na
+rnascope <- rnascope[,!rnascope$k2=="NA"]
+sample.id.vector <- unique(rnascope$Sample)
+cell.type.variable <- "k2"
+df.rn <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
+  rnf <- rnascope[,rnascope$Sample==sample.id]
+  # proportions
+  df.prop <- table(rnf[[cell.type.variable]], rnf$Sample) %>% prop.table()
+  # sizes
+  df.size <- aggregate(data.frame(area = assays(rnf)[["Nucleus_Area"]][1,]), 
+                       by = list(cell_type = rnf[[cell.type.variable]]), FUN = "median")
+  df.iter <- cbind(df.prop, df.size)
+  df.iter <- df.iter[,c(1,2,3,5)]
+  colnames(df.iter) <- c("cell_type", "sample_id", "true_proportion", "cell_size")
+  df.iter
+}))
 
+#---------------
 # get cell sizes
+#---------------
 # get cell size factor series
 # load cell size scale factors
 df.csf <- get_csf_reference()
@@ -35,7 +61,10 @@ s.set.osm.mrna <- c("glial" = df.csf.mrna[df.csf.mrna$cell_type=="glial",]$scale
 list.s.pred <- list(s.set1 = c("glial" = 3, "neuron" = 10),
                     s.set2 = c("glial" = 10, "neuron" = 3),
                     s.set3 = c("glial" = 1, "neuron" = 1),
-                    s.set4 = s.set.osm.area, s.set5 = s.set.osm.mrna)
+                    s.set4 = s.set.osm.area, 
+                    s.set5 = s.set.osm.mrna,
+                    s.set6 = c("glial" = median(df.rn[df.rn$cell_type=="glial"]$cell_size),
+                               "neuron" = median(df.rn[df.rn$cell_type=="neuron"]$cell_size)))
 
 #---------------------------------------------------
 # k2 experiment -- same reference across experiments
@@ -117,6 +146,12 @@ df.s.k2.within$experiment.type <- "within.sample.snrnaseq.reference"
 # format results
 #---------------
 df.k2 <- rbind(df.s.k2.shared, df.s.k2.within)
+
+#-----
+# plot
+#-----
+
+ggplot()
 
 
 

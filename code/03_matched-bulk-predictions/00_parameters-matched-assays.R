@@ -16,6 +16,21 @@ save.path <- here("deconvo_method-paper", "outputs", "14_deconvolution-framework
 # helper functions
 #-----------------
 
+append_k_columns <- function(df.input, df.ct = NULL, celltype.variable = "cell_type"){
+  df.ct <- data.frame(cell_type = c("Inhib", "Other", "Astro", "Endo", "Excit", "Oligo", "OPC", "Micro", "all"),
+                      k2 = c("neuron", "NA", "glial", "glial", "neuron", "glial", "glial", "glial", "NA"),
+                      k3 = c("Inhib", "NA", "glial", "glial", "Excit", "glial", "glial", "glial", "NA"),
+                      k4 = c("Inhib", "NA", "non_oligo_glial", "non_oligo_glial", "Excit", "Oligo", 
+                             "non_oligo_glial", "non_oligo_glial", "NA"))
+  celltype.vector <- df.input[,celltype.variable]
+  unique.cell.types <- unique(celltype.vector)
+  df.ct.filter <- df.ct[df.ct$cell_type %in% unique.cell.types,]
+  df.ct.new <- do.call(rbind, lapply(celltype.vector, function(cell.type.id){
+    df.ct.filter[df.ct.filter[,"cell_type"]==cell.type.id,,drop = F]
+  }))
+  cbind(df.input, df.ct.new)
+}
+
 get_ymatch_experiment_results <- function(mae, sample.id.variable = "Sample", 
                                        celltype.variable = "k2", assay.name = "logcounts",
                                        s.vector.pred = c("glial" = 3, "neuron" = 10),
