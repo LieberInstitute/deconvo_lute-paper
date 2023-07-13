@@ -10,6 +10,11 @@ sapply(libv, library, character.only = T)
 # load mae 
 mae.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_final.rda")
 mae <- get(load(mae.filepath))
+# unpack mae
+rse.all <- mae[[1]]
+# snrnaseq reference -- using same reference across experiments
+sce.iter <- mae[[2]]
+sce.iter <- logNormCounts(sce.iter)
 
 #--------------
 # k2 experiment
@@ -40,8 +45,6 @@ df.s.k2 <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.index){
   deconvolution.algorithm <- "nnls"
   s.vector.pred <- list.s.pred[[s.index]] # c("glial" = 2, "neuron" = 3)
   s.vector.pred <- order_svector(s.vector.pred)
-  sce.iter <- mae[[2]]
-  sce.iter <- logNormCounts(sce.iter)
   rownames(rse.all) <- rowData(rse.all)$Symbol
   filter.y.sample <- colData(rse.all)[,"batch.id2"]==sample.id
   filter.y.marker <- rownames(rse.all) %in% rownames(sce.iter)
@@ -65,7 +68,6 @@ df.s.k2 <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.index){
 # k3 experiment
 #--------------
 # get cell sizes for k3 experiments from expression data
-
 # coerce to list for experiment
 list.s.pred <- list(s.set1 = c("glial" = 3, "Excit" = 10, "Inhib" = 10),
                     s.set2 = c("glial" = 10, "Excit" = 3, "Inhib" = 10),
