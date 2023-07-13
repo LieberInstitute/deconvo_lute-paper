@@ -110,6 +110,8 @@ df.rnascope.kdata <- do.call(rbind, lapply(c("k2", "k3", "k4"), function(cell.ty
 rownames(df.rnascope.kdata) <- paste0(df.rnascope.kdata$sample_id,";",
                                       df.rnascope.kdata$cell_type, ";",
                                       df.rnascope.kdata$k.label)
+# make transpose
+df.rnascope.kdata <- t(df.rnascope.kdata)
 
 
 #-------------
@@ -137,7 +139,8 @@ sn3.map <- data.frame(colname = colnames(sce3), primary = sce3[[sample.id.snrnas
 bulk.map <- data.frame(colname = colnames(rse.filter), primary = rse.filter[[sample.id.bulk]])
 # rnascope data
 image.map <- data.frame(colname = colnames(sce.img), primary = sce.img[[sample.id.halo]])
-dfrn.map <- data.frame(colname = rownames(df.rnascope.kdata), primary = df.rnascope.kdata$sample_id)
+dfrn.map <- data.frame(colname = colnames(df.rnascope.kdata), 
+                       primary = gsub(";.*", "", colnames(df.rnascope.kdata)))
 
 # make mappings list, then map df
 listmap <- list(sn1.rnaseq = sn1.map, # snrnaseq
@@ -158,7 +161,7 @@ object.list <- list(
   sn3.rnaseq = sce3, 
   bulk.rnaseq = rse.filter,
   rnascope.image = sce.img,
-  df.cellstat.rnascope = df.rnascope.kdata)   
+  df.cellstat.rnascope = df.rnascope.kdata %>% as.matrix())   
 experiment.list <- ExperimentList(object.list)
 rownames(coldata) <- coldata$sample.id
 
