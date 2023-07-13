@@ -8,8 +8,9 @@ source("deconvo_method-paper/code/03_matched-bulk-predictions/00_parameters-matc
 sapply(libv, library, character.only = T)
 
 # load mae 
-mae.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_final.rda")
-mae <- get(load(mae.filepath))
+# mae.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_final.rda")
+mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_additional-data_final.rda")
+mae <- get(load(mae.final.filepath))
 # unpack mae
 rse.all <- mae[[1]]
 rownames(rse.all) <- rowData(rse.all)$Symbol
