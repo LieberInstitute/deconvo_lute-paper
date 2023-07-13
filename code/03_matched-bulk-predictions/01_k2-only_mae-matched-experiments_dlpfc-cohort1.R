@@ -63,8 +63,8 @@ list.s.pred <- list(s.set1 = c("glial" = 3, "neuron" = 10),
                     s.set3 = c("glial" = 1, "neuron" = 1),
                     s.set4 = s.set.osm.area, 
                     s.set5 = s.set.osm.mrna,
-                    s.set6 = c("glial" = median(df.rn[df.rn$cell_type=="glial"]$cell_size),
-                               "neuron" = median(df.rn[df.rn$cell_type=="neuron"]$cell_size)))
+                    s.set6 = c("glial" = median(df.rn[df.rn$cell_type=="glial",]$cell_size),
+                               "neuron" = median(df.rn[df.rn$cell_type=="neuron",]$cell_size)))
 
 #---------------------------------------------------
 # k2 experiment -- same reference across experiments
@@ -98,10 +98,14 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
       names(s.vector.pred),"=",s.vector.pred,collapse=",")
     prop.pred.iter$sample.id <- sample.id
     prop.pred.iter$k.type <- celltype.variable
+    # get true proportions
+    df.rn.iter <- df.rn[df.rn$sample_id==sample.id,]
+    prop.pred.iter$true.glial <- df.rn.iter[df.rn.iter$cell_type=="glial",]$true_proportion
+    prop.pred.iter$true.neuron <- df.rn.iter[df.rn.iter$cell_type=="neuron",]$true_proportion
     prop.pred.iter
   }))
 }))
-df.s.k2.shared$experiment.type <- "shared.snrnaseq.reference"
+df.s.k2.shared$experiment.type <- "shared.reference"
 
 #--------------------------------------------------------------------------
 # k2 experiment -- using within-sample matched reference across experiments
@@ -137,22 +141,41 @@ df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
       names(s.vector.pred),"=",s.vector.pred,collapse=",")
     prop.pred.iter$sample.id <- sample.id
     prop.pred.iter$k.type <- celltype.variable
+    # get true proportions
+    df.rn.iter <- df.rn[df.rn$sample_id==sample.id,]
+    prop.pred.iter$true.glial <- df.rn.iter[df.rn.iter$cell_type=="glial",]$true_proportion
+    prop.pred.iter$true.neuron <- df.rn.iter[df.rn.iter$cell_type=="neuron",]$true_proportion
     prop.pred.iter
   }))
 }))
-df.s.k2.within$experiment.type <- "within.sample.snrnaseq.reference"
+df.s.k2.within$experiment.type <- "within.reference"
 
 #---------------
 # format results
 #---------------
 df.k2 <- rbind(df.s.k2.shared, df.s.k2.within)
+# append abs.error
+df.k2$abs.error.neuron <- abs(df.k2$neuron-df.k2$true.neuron)
+df.k2$abs.error.glial <- abs(df.k2$glial-df.k2$true.glial)
 
 #-----
 # plot
 #-----
+# proportions scatterplots
+ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~experiment.type*s.set.label)
 
-ggplot()
+ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label)
 
+# absolute errors
+ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 
+ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~s.set.label) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
