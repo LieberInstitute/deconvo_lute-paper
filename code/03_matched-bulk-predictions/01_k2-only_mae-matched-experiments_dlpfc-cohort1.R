@@ -12,16 +12,16 @@ sapply(libv, library, character.only = T)
 mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_additional-data_final.rda")
 mae <- get(load(mae.final.filepath))
 # unpack mae
-rse.all <- mae[[1]]
+rse.all <- mae[["bulk.rnaseq"]]
 rownames(rse.all) <- rowData(rse.all)$Symbol
 # snrnaseq reference -- using same reference across experiments
-sce.iter <- mae[[2]]
+sce.iter <- mae[["sn1.rnaseq"]]
 sce.iter <- logNormCounts(sce.iter)
 # experiment variables
 assay.name <- "logcounts"
 deconvolution.algorithm <- "nnls"
 # get true proportions from rnascope data
-rnascope <- mae[[3]]
+rnascope <- mae[["rnascope.image"]]
 # append k2 label
 cd <- colData(rnascope)
 cd$k2 <- "NA"
@@ -92,7 +92,7 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
     prop.pred.iter <- lute(sce = sce.iter, y = y.iter, assay.name = assay.name, 
                            celltype.variable = celltype.variable, s = s.vector.pred, 
                            typemarker.algorithm = NULL, return.info = FALSE,
-                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results %>%
+                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results@predictions.table %>%
       as.data.frame()
     prop.pred.iter$s.set.label <- s.set.name
     prop.pred.iter$s.set.values <- paste0(
@@ -135,7 +135,7 @@ df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
     prop.pred.iter <- lute(sce = sce.iter.sample, y = y.iter, assay.name = assay.name, 
                            celltype.variable = celltype.variable, s = s.vector.pred, 
                            typemarker.algorithm = NULL, return.info = FALSE,
-                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results %>%
+                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results@predictions.table %>%
       as.data.frame()
     prop.pred.iter$s.set.label <- s.set.name
     prop.pred.iter$s.set.values <- paste0(
