@@ -171,6 +171,20 @@ ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
   geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
   facet_wrap(~s.set.label)
 
+ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label) + geom_label(label = sample.id)
+
+ggplot(df.k2[df.k2$sample.id %in% c("Br2720_mid", "Br8492_post"),], 
+       aes(x = true.neuron, y = neuron)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~sample.id)
+
+ggplot(df.k2[df.k2$sample.id %in% c("Br2720_mid", "Br6471_mid"),], 
+       aes(x = true.neuron, y = neuron)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~sample.id)
+
 # absolute errors
 ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
