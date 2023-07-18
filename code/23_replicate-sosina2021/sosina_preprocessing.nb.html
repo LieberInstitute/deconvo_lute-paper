@@ -2098,42 +2098,14 @@ ggpt.rpkm.cellarea &lt;-
 <p>Check value set identities.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy51bmFkaiwgZGZwJG11c2ljLmFsbC51bmFkailcbmBgYCJ9 -->
-<pre class="r"><code>identical(dfp$music.qc.unadj, dfp$music.all.unadj)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy51bmFkaiwgZGZwJG11c2ljLmFsbC51bmFkailcbmlkZW50aWNhbChkZnAkbXVzaWMucWMudW5hZGosIGRmcCRtdXNpYy5ycGttLnVuYWRqKVxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy5ucm5hLCBkZnAkbXVzaWMuYWxsLm5ybmEpXG5pZGVudGljYWwoZGZwJG11c2ljLnFjLm5ybmEsIGRmcCRtdXNpYy5ycGttLm5ybmEpXG5pZGVudGljYWwoZGZwJG11c2ljLnFjLmNlbGxhcmVhLCBkZnAkbXVzaWMuYWxsLmNlbGxhcmVhKVxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy5jZWxsYXJlYSwgZGZwJG11c2ljLnJwa20uY2VsbGFyZWEpXG5gYGAifQ== -->
+<pre class="r"><code>identical(dfp$music.qc.unadj, dfp$music.all.unadj)
+identical(dfp$music.qc.unadj, dfp$music.rpkm.unadj)
+identical(dfp$music.qc.nrna, dfp$music.all.nrna)
+identical(dfp$music.qc.nrna, dfp$music.rpkm.nrna)
+identical(dfp$music.qc.cellarea, dfp$music.all.cellarea)
+identical(dfp$music.qc.cellarea, dfp$music.rpkm.cellarea)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFRSVUVcbiJ9 -->
-<pre><code>[1] TRUE</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy51bmFkaiwgZGZwJG11c2ljLnJwa20udW5hZGopXG5gYGAifQ== -->
-<pre class="r"><code>identical(dfp$music.qc.unadj, dfp$music.rpkm.unadj)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFRSVUVcbiJ9 -->
-<pre><code>[1] TRUE</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy5ucm5hLCBkZnAkbXVzaWMuYWxsLm5ybmEpXG5gYGAifQ== -->
-<pre class="r"><code>identical(dfp$music.qc.nrna, dfp$music.all.nrna)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFRSVUVcbiJ9 -->
-<pre><code>[1] TRUE</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy5ucm5hLCBkZnAkbXVzaWMucnBrbS5ucm5hKVxuYGBgIn0= -->
-<pre class="r"><code>identical(dfp$music.qc.nrna, dfp$music.rpkm.nrna)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFRSVUVcbiJ9 -->
-<pre><code>[1] TRUE</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy5jZWxsYXJlYSwgZGZwJG11c2ljLmFsbC5jZWxsYXJlYSlcbmBgYCJ9 -->
-<pre class="r"><code>identical(dfp$music.qc.cellarea, dfp$music.all.cellarea)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFRSVUVcbiJ9 -->
-<pre><code>[1] TRUE</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaWRlbnRpY2FsKGRmcCRtdXNpYy5xYy5jZWxsYXJlYSwgZGZwJG11c2ljLnJwa20uY2VsbGFyZWEpXG5gYGAifQ== -->
-<pre class="r"><code>identical(dfp$music.qc.cellarea, dfp$music.rpkm.cellarea)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFRSVUVcbiJ9 -->
-<pre><code>[1] TRUE</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Compare plots</p>
