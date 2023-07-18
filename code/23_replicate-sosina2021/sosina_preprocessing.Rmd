@@ -1,0 +1,303 @@
+---
+title: "R Notebook"
+author: Sean Maden
+output: html_notebook
+---
+
+Notebook to perform A/B testing on Sosina et al bulk expression datasets.
+
+Run this from base path on local: sosina_reproducibility_notes/sm_reproducibility_report/
+
+```{r, messages = F}
+libv <- c("here", "SummarizedExperiment", "MuSiC")
+sapply(libv, library, character.only = T)
+```
+
+Source fig2 data.
+
+```{r, messages = F}
+scripts.path <- "scripts"
+source(file.path(scripts.path,"chunk2_prepare-predictions.R"))
+source(file.path(scripts.path, "chunk2_prepare-cellsize-osm.R"))
+source(file.path(scripts.path,"chunk_predict-plot-music-cellsize-osm.R"))
+```
+
+Load bulk datasets.
+
+```{r}
+base.path <- "count_data"
+rse.counts.all.path <- file.path(base.path, "NAc_Nicotine_hg38_rseGene_rawCounts_allSamples_n239.rda")
+rse.counts.postqc.path <- file.path(base.path, "NAc_Nicotine_hg38_rseGene_rawCounts_postQCSamples_n223.rda")
+rse.rpkm.all.path <- file.path(base.path, "rpkmCounts_NAc_NicotineGrant_hg38_Sept28_2017_n239.rda")
+rse.rpkm.all.newpath <- file.path(base.path, "rse-rpkmCounts_NAc_NicotineGrant_hg38_Sept28_2017_n239.rda")
+```
+
+Manage RPKM counts.
+
+```{r}
+if(!file.exists(rse.rpkm.all.newpath)){
+  rpkm.all <- get(load(rse.rpkm.all.path))
+  # make rse from rpkm gene counts
+  rse.rpkm <- SummarizedExperiment(assays = geneRpkm, rowData = geneMap) %>% as("RangedSummarizedExperiment")
+  # save rse from rpkm gene counts
+  save(rse.rpkm, file = rse.rpkm.all.newpath)
+  # cleanup
+  rm(geneRpkm); rm(geneMap); rm(jMap); rm(jRpkm)
+  gc()
+} else{
+  rse.rpkm <- get(load(rse.rpkm.all.newpath))
+}
+```
+
+Load rse counts objects.
+
+```{r}
+rse.all <- get(load(rse.counts.all.path))
+rse.qc <- get(load(rse.counts.postqc.path))
+```
+
+# Compare bulk datasets
+
+Dataset comparisons
+
+```{r}
+ncol(rse.all)
+```
+
+```{r}
+ncol(rse.qc)
+```
+
+```{r}
+ncol(rse.rpkm)
+```
+
+```{r}
+sample.id.all <- "SAMPLE_ID"
+sample.id.qc <- "SampleID"
+sample.id.rpkm <- "sample.id"
+cd.all <- colData(rse.all)
+cd.qc <- colData(rse.qc)
+cd.rpkm <- data.frame(sample.id = colnames(rse.rpkm))
+
+# filter cd.all on cd.qc
+cd.all[,sample.id.all][!cd.all[,sample.id.all] %in% cd.qc[,sample.id.qc]]
+
+# filter cd.rpkm on cd.qc
+cd.rpkm[,sample.id.rpkm][!cd.rpkm[,sample.id.rpkm] %in% cd.qc[,sample.id.qc]]
+
+# compare cd.all, cd.rpkm
+identical(cd.rpkm[,sample.id.rpkm], cd.all[,sample.id.all])
+```
+
+# Plot bulk predictions
+
+Filter bulk markers.
+
+```{r}
+rownames(rse.all) <- rowData(rse.all)$Symbol
+rownames(rse.qc) <- rowData(rse.qc)$Symbol
+rownames(rse.rpkm) <- rowData(rse.rpkm)$Symbol
+y.rse.all.25 <- rse.all[rownames(rse.all) %in% rownames(y25),]
+y.rse.qc.25 <- rse.qc[rownames(rse.qc) %in% rownames(y25),]
+y.rse.rpkm.25 <- rse.rpkm[rownames(rse.rpkm) %in% rownames(y25),]
+dim(y.rse.all.25)
+dim(y.rse.qc.25)
+dim(y.rse.rpkm.25)
+```
+
+Get predictions.
+
+```{r}
+# predict
+# rse.all
+music_est_all_unadj <- music_prop(bulk.mtx = assays(y.rse.all.25)[["counts"]], 
+                        sc.sce = sc.sce.music, clusters = "Neuron",
+                        samples = "Sample", cell_size = NULL)
+music_est_all_nrna <- music_prop(bulk.mtx = assays(y.rse.all.25)[["counts"]], 
+                        sc.sce = sc.sce.music, clusters = "Neuron",
+                        samples = "Sample", cell_size = osm.nrna)
+music_est_all_cellarea <- music_prop(bulk.mtx = assays(y.rse.all.25)[["counts"]], 
+                        sc.sce = sc.sce.music, 
+                        clusters = "Neuron",
+                        samples = "Sample",
+                        cell_size = osm.cellarea)
+# rse.qc
+music_est_qc_unadj <- music_prop(bulk.mtx = assays(y.rse.qc.25)[["counts"]], 
+                        sc.sce = sc.sce.music, 
+                        clusters = "Neuron",
+                        samples = "Sample",
+                        cell_size = NULL)
+music_est_qc_nrna <- music_prop(bulk.mtx = assays(y.rse.qc.25)[["counts"]], 
+                        sc.sce = sc.sce.music, 
+                        clusters = "Neuron",
+                        samples = "Sample",
+                        cell_size = osm.nrna)
+music_est_qc_cellarea <- music_prop(bulk.mtx = assays(y.rse.qc.25)[["counts"]], 
+                        sc.sce = sc.sce.music, 
+                        clusters = "Neuron",
+                        samples = "Sample",
+                        cell_size = osm.cellarea)
+
+# rse.rpkm
+music_est_rpkm_unadj <- music_prop(bulk.mtx = assays(y.rse.rpkm.25)[[1]], 
+                        sc.sce = sc.sce.music, 
+                        clusters = "Neuron",
+                        samples = "Sample",
+                        cell_size = NULL)
+music_est_rpkm_nrna <- music_prop(bulk.mtx = assays(y.rse.rpkm.25)[[1]], 
+                        sc.sce = sc.sce.music, 
+                        clusters = "Neuron",
+                        samples = "Sample",
+                        cell_size = osm.nrna)
+music_est_rpkm_cellarea <- music_prop(bulk.mtx = assays(y.rse.rpkm.25)[[1]], 
+                        sc.sce = sc.sce.music, 
+                        clusters = "Neuron",
+                        samples = "Sample",
+                        cell_size = osm.cellarea)
+```
+
+Make new plots.
+
+```{r}
+# plot
+
+# rse.all
+# get predictions
+pred.all.unadj <- music_est_all_unadj$Est.prop.weighted %>% as.data.frame()
+pred.all.nrna <- music_est_all_nrna$Est.prop.weighted %>% as.data.frame()
+pred.all.cellarea <- music_est_all_cellarea$Est.prop.weighted %>% as.data.frame()
+# filter samples
+pred.all.unadj <- pred.all.unadj[rownames(pred.all.unadj) %in% prop$samples,]
+pred.all.nrna <- pred.all.nrna[rownames(pred.all.nrna) %in% prop$samples,]
+pred.all.cellarea <- pred.all.cellarea[rownames(pred.all.cellarea) %in% prop$samples,]
+# check sample ids against prop
+identical(rownames(pred.all.unadj), prop$samples)
+identical(rownames(pred.all.nrna), prop$samples)
+identical(rownames(pred.all.cellarea), prop$samples)
+# assign new prop variables
+prop$music.all.unadj <- pred.all.unadj[,"TRUE"]
+prop$music.all.nrna <- pred.all.nrna[,"TRUE"]
+prop$music.all.cellarea <- pred.all.cellarea[,"TRUE"]
+
+# rse.qc
+# get predictions
+pred.qc.unadj <- music_est_qc_unadj$Est.prop.weighted %>% as.data.frame()
+pred.qc.nrna <- music_est_qc_nrna$Est.prop.weighted %>% as.data.frame()
+pred.qc.cellarea <- music_est_qc_cellarea$Est.prop.weighted %>% as.data.frame()
+# check sample ids against prop
+identical(rownames(pred.all.unadj), prop$samples)
+identical(rownames(pred.qc.unadj), prop$samples)
+# assign new prop variables
+prop$music.qc.unadj <- pred.qc.unadj[,"TRUE"]
+prop$music.qc.nrna <- pred.qc.nrna[,"TRUE"]
+prop$music.qc.cellarea <- pred.qc.cellarea[,"TRUE"]
+
+# rse.rpkm
+# get predictions
+pred.rpkm.unadj <- music_est_all_unadj$Est.prop.weighted %>% as.data.frame()
+pred.rpkm.nrna <- music_est_all_nrna$Est.prop.weighted %>% as.data.frame()
+pred.rpkm.cellarea <- music_est_all_cellarea$Est.prop.weighted %>% as.data.frame()
+# filter samples
+pred.rpkm.unadj <- pred.rpkm.unadj[rownames(pred.rpkm.unadj) %in% prop$samples,]
+pred.rpkm.nrna <- pred.rpkm.nrna[rownames(pred.rpkm.nrna) %in% prop$samples,]
+pred.rpkm.cellarea <- pred.rpkm.cellarea[rownames(pred.rpkm.cellarea) %in% prop$samples,]
+# check sample ids against prop
+identical(rownames(pred.rpkm.unadj), prop$samples)
+identical(rownames(pred.rpkm.nrna), prop$samples)
+identical(rownames(pred.rpkm.cellarea), prop$samples)
+# assign new prop variables
+prop$music.rpkm.unadj <- pred.rpkm.unadj[,"TRUE"]
+prop$music.rpkm.nrna <- pred.rpkm.nrna[,"TRUE"]
+prop$music.rpkm.cellarea <- pred.rpkm.cellarea[,"TRUE"]
+
+# make plot dataset
+dfp <- data.frame(true = prop[,2], 
+                  music.qc.unadj = pred.qc.unadj$`TRUE`, 
+                  music.qc.nrna = pred.qc.nrna$`TRUE`,
+                  music.qc.cellarea = pred.qc.cellarea$`TRUE`,
+                  music.all.unadj = pred.all.unadj$`TRUE`, 
+                  music.all.nrna = pred.all.nrna$`TRUE`,
+                  music.all.cellarea = pred.all.cellarea$`TRUE`,
+                  music.rpkm.unadj = pred.rpkm.unadj$`TRUE`,
+                  music.rpkm.nrna = pred.rpkm.nrna$`TRUE`,
+                  music.rpkm.cellarea = pred.rpkm.cellarea$`TRUE`)
+
+# make plot objects
+
+# rse.qc
+ggpt.qc.unadj <- 
+  ggplot(dfp, aes(x = music.qc.unadj, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+ggpt.qc.nrna <- 
+  ggplot(dfp, aes(x = music.qc.nrna, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+ggpt.qc.cellarea <- 
+  ggplot(dfp, aes(x = music.qc.cellarea, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+
+# rse.all
+ggpt.all.unadj <- 
+  ggplot(dfp, aes(x = music.all.unadj, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+ggpt.all.nrna <- 
+  ggplot(dfp, aes(x = music.all.nrna, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+ggpt.all.cellarea <- 
+  ggplot(dfp, aes(x = music.all.cellarea, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+
+# rse.rpkm
+ggpt.rpkm.unadj <- 
+  ggplot(dfp, aes(x = music.rpkm.unadj, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+ggpt.rpkm.nrna <- 
+  ggplot(dfp, aes(x = music.rpkm.nrna, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+ggpt.rpkm.cellarea <- 
+  ggplot(dfp, aes(x = music.rpkm.cellarea, y = true)) + 
+  geom_point(alpha = 1, col = "springgreen4", shape = 15) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 0.5) + ylim(0, 0.4) + theme_classic()
+```
+
+Check value set identities.
+
+```{r}
+identical(dfp$music.qc.unadj, dfp$music.all.unadj)
+identical(dfp$music.qc.unadj, dfp$music.rpkm.unadj)
+identical(dfp$music.qc.nrna, dfp$music.all.nrna)
+identical(dfp$music.qc.nrna, dfp$music.rpkm.nrna)
+identical(dfp$music.qc.cellarea, dfp$music.all.cellarea)
+identical(dfp$music.qc.cellarea, dfp$music.rpkm.cellarea)
+```
+
+Compare plots
+
+```{r}
+grid.arrange(ggpt.all.unadj, ggpt.qc.unadj, ggpt.rpkm.unadj, nrow = 1)
+```
+
+```{r}
+grid.arrange(ggpt.all.nrna, ggpt.qc.nrna, ggpt.rpkm.nrna, nrow = 1)
+```
+
+```{r}
+grid.arrange(ggpt.all.cellarea, ggpt.qc.cellarea, ggpt.rpkm.cellarea, nrow = 1)
+```
