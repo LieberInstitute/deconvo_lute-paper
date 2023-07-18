@@ -18,7 +18,7 @@ rownames(rse.all) <- rowData(rse.all)$Symbol
 sce.iter <- mae[["sn1.rnaseq"]]
 sce.iter <- logNormCounts(sce.iter)
 # experiment variables
-assay.name <- "logcounts"
+assay.name <- "counts"
 deconvolution.algorithm <- "nnls"
 # get true proportions from rnascope data
 rnascope <- mae[["rnascope.image"]]

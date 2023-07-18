@@ -6,7 +6,7 @@
 
 # dependencies
 libv <- c("here", "lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment", 
-          "SummarizedExperiment", "scran")
+          "SummarizedExperiment", "scran", "edgeR")
 sapply(libv, library, character.only = TRUE)
 
 # save path
