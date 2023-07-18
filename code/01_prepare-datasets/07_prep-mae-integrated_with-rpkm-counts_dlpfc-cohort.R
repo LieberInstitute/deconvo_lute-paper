@@ -11,6 +11,9 @@
 libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", "ggforce", "MultiAssayExperiment", "SingleCellExperiment")
 sapply(libv, library, character.only = TRUE)
 
+# set new mae filename
+new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+
 #--------------------
 # load prepped assays
 #--------------------
@@ -138,7 +141,7 @@ df.rnascope.kdata <- t(df.rnascope.kdata)
 # coldata
 unique.sample.id.vector <- unique(
   c(sce1[[sample.id.snrnaseq]], 
-    rse.filter[[sample.id.bulk]],
+    rse.filter[[sample.id.bulk]], # bulk and rpkm have same sample ids ...
     sce.img[[sample.id.halo]])
 )
 coldata <- DataFrame(
@@ -155,6 +158,7 @@ sn2.map <- data.frame(colname = colnames(sce2), primary = sce2[[sample.id.snrnas
 sn3.map <- data.frame(colname = colnames(sce3), primary = sce3[[sample.id.snrnaseq]])
 # bulk
 bulk.map <- data.frame(colname = colnames(rse.filter), primary = rse.filter[[sample.id.bulk]])
+bulk.rpkm.map <- data.frame(colname = colnames(rse.rpkm), primary = rse.rpkm[[sample.id.bulk]])
 # rnascope data
 image.map <- data.frame(colname = colnames(sce.img), primary = sce.img[[sample.id.halo]])
 dfrn.map <- data.frame(colname = colnames(df.rnascope.kdata), 
@@ -165,6 +169,7 @@ listmap <- list(sn1.rnaseq = sn1.map, # snrnaseq
                 sn2.rnaseq = sn2.map, 
                 sn3.rnaseq = sn3.map,
                 bulk.rnaseq = bulk.map, # bulk
+                bulk.rpkm.rnaseq = bulk.rpkm.map, # bulk, rpkm
                 rnascope.image = image.map, # rnascope
                 df.cellstat.rnascope = dfrn.map)
 dfmap <- listToMap(listmap) # make new sampleMap object
@@ -178,8 +183,9 @@ object.list <- list(
   sn2.rnaseq = sce2, 
   sn3.rnaseq = sce3, 
   bulk.rnaseq = rse.filter,
+  bulk.rpkm.rnaseq = rse.rpkm,
   rnascope.image = sce.img,
-  df.cellstat.rnascope = df.rnascope.kdata %>% as.matrix())   
+  df.cellstat.rnascope = df.rnascope.kdata %>% as.matrix())
 experiment.list <- ExperimentList(object.list)
 rownames(coldata) <- coldata$sample.id
 
@@ -192,7 +198,7 @@ mae.final <- MultiAssayExperiment(mae$experiments, mae$colData, mae$sampleMap)
 #----------
 # mae: save
 #----------
-mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_additional-data_final.rda")
+mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", new.mae.filename)
 save(mae.final, file = mae.final.filepath)
 
 #--------------
