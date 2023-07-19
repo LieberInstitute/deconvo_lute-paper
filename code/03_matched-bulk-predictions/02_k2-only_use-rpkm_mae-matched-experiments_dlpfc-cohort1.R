@@ -13,13 +13,14 @@ new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
 mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", new.mae.filename)
 mae <- get(load(mae.final.filepath))
 # unpack mae
-rse.all <- mae[["bulk.rnaseq"]]
+rse.all <- mae[["bulk.rpkm.rnaseq"]]
+names(assays(rse.all)) <- "counts"
 rownames(rse.all) <- rowData(rse.all)$Symbol
 # snrnaseq reference -- using same reference across experiments
 sce.iter <- mae[["sn1.rnaseq"]]
 sce.iter <- logNormCounts(sce.iter)
 # experiment variables
-assay.name <- "counts"
+assay.name <- "logcounts"
 deconvolution.algorithm <- "nnls"
 # get true proportions from rnascope data
 rnascope <- mae[["rnascope.image"]]
@@ -60,13 +61,16 @@ s.set.osm.area <- c("glial" = df.csf.area[df.csf.area$cell_type=="glial",]$scale
 s.set.osm.mrna <- c("glial" = df.csf.mrna[df.csf.mrna$cell_type=="glial",]$scale.factor.value,
                     "neuron" = df.csf.mrna[df.csf.mrna$cell_type=="neuron",]$scale.factor.value)
 # coerce to list for experiment
-list.s.pred <- list(s.set1 = c("glial" = 3, "neuron" = 10),
-                    s.set2 = c("glial" = 10, "neuron" = 3),
-                    s.set3 = c("glial" = 1, "neuron" = 1),
-                    s.set4 = s.set.osm.area, 
-                    s.set5 = s.set.osm.mrna,
-                    s.set6 = c("glial" = median(df.rn[df.rn$cell_type=="glial",]$cell_size),
-                               "neuron" = median(df.rn[df.rn$cell_type=="neuron",]$cell_size)))
+list.s.pred <- list(s.set.null = c("glial" = 1, "neuron" = 1),
+                    s.set1 = c("glial" = 0.5, "neuron" = 10),
+                    s.set2 = c("glial" = 1, "neuron" = 10),
+                    s.set3 = c("glial" = 2, "neuron" = 10),
+                    s.set4 = c("glial" = 3, "neuron" = 10),
+                    s.set5 = c("glial" = 4, "neuron" = 10))
+
+# notes:
+# difference scale seems to matter more than magnitude scale (e.g. similar c(3,10), c(30,100), etc.)
+# ratio difference matters (e.g. different c(3,10), c(5,10), etc.)
 
 #---------------------------------------------------
 # k2 experiment -- same reference across experiments
@@ -152,6 +156,8 @@ df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
 }))
 df.s.k2.within$experiment.type <- "within.reference"
 
+# do within, using within-sample s values
+
 #---------------
 # format results
 #---------------
@@ -163,33 +169,12 @@ df.k2$abs.error.glial <- abs(df.k2$glial-df.k2$true.glial)
 #-----
 # plot
 #-----
-# proportions scatterplots
-ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
-  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~experiment.type*s.set.label)
-
-ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
-  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~s.set.label)
-
-ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
-  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~s.set.label) + geom_label(label = sample.id)
-
-ggplot(df.k2[df.k2$sample.id %in% c("Br2720_mid", "Br8492_post"),], 
-       aes(x = true.neuron, y = neuron)) + theme_bw() +
-  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~sample.id)
-
-ggplot(df.k2[df.k2$sample.id %in% c("Br2720_mid", "Br6471_mid"),], 
-       aes(x = true.neuron, y = neuron)) + theme_bw() +
-  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~sample.id)
-
 # absolute errors
 ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~s.set.label) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+# errors by sample
 ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
   facet_wrap(~s.set.label) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
