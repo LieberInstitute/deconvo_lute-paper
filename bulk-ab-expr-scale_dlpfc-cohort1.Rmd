@@ -1,0 +1,28 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is to perform A/B tests on the bulk datasets using counts, RPKM-counts, logcounts.
+
+# Load/source scripts
+
+```{r}
+base.path <- file.path("code", "07_bulk-scale-abtest_dlpfc-cohort1")
+# prep dependencies
+source(file.path(base.path, "00_helper-functions.R"))
+# prep data
+source(file.path(base.path, "01-01_prepare-mae.R")) # prep mae data
+source(file.path(base.path, "01-02_prep-s-vector.R"))
+# run experiments
+source(file.path(base.path, "02-01_rse-counts_shared-reference-experiments.R"))
+source(file.path(base.path, "02-02_rse-counts_within-reference-experiments.R"))
+source(file.path(base.path, "02-01_rse-rpkm_shared-reference-experiments.R"))
+source(file.path(base.path, "02-02_rse-rpkm_within-reference-experiments.R"))
+# bind results
+source(file.path(base.path, "03_prep-experiment-results.R"))
+```
+
+```{r}
+```
+
