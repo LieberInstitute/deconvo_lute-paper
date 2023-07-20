@@ -1758,7 +1758,7 @@ RPKM-counts, logcounts.</p>
 <h1>Load/source scripts</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYmFzZS5wYXRoIDwtIGZpbGUucGF0aChcImNvZGVcIiwgXCIwN19idWxrLXNjYWxlLWFidGVzdF9kbHBmYy1jb2hvcnQxXCIpXG4jIHByZXAgZGVwZW5kZW5jaWVzXG5zb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgXCIwMF9oZWxwZXItZnVuY3Rpb25zLlJcIikpXG4jIHByZXAgZGF0YVxuc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsIFwiMDEtMDFfcHJlcGFyZS1tYWUuUlwiKSkgIyBwcmVwIG1hZSBkYXRhXG5zb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgXCIwMS0wMl9wcmVwLXMtdmVjdG9yLlJcIikpXG4jIHJ1biBleHBlcmltZW50c1xuc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsIFwiMDItMDFfc2hhcmVkLXJlZmVyZW5jZS1leHBlcmltZW50cy5SXCIpKVxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYmFzZS5wYXRoIDwtIGZpbGUucGF0aChcImNvZGVcIiwgXCIwN19idWxrLXNjYWxlLWFidGVzdF9kbHBmYy1jb2hvcnQxXCIpXG4jIHByZXAgZGVwZW5kZW5jaWVzXG5zb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgXCIwMF9oZWxwZXItZnVuY3Rpb25zLlJcIikpXG4jIHByZXAgZGF0YVxuc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsIFwiMDEtMDFfcHJlcGFyZS1tYWUuUlwiKSkgIyBwcmVwIG1hZSBkYXRhXG5zb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgXCIwMS0wMl9wcmVwLXMtdmVjdG9yLlJcIikpXG4jIHJ1biBleHBlcmltZW50c1xuc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsIFwiMDItMDFfcnNlLWNvdW50c19zaGFyZWQtcmVmZXJlbmNlLWV4cGVyaW1lbnRzLlJcIikpXG5zb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgXCIwMi0wMl9yc2UtY291bnRzX3dpdGhpbi1yZWZlcmVuY2UtZXhwZXJpbWVudHMuUlwiKSlcbnNvdXJjZShmaWxlLnBhdGgoYmFzZS5wYXRoLCBcIjAyLTAzX3JzZS1ycGttX3NoYXJlZC1yZWZlcmVuY2UtZXhwZXJpbWVudHMuUlwiKSlcbnNvdXJjZShmaWxlLnBhdGgoYmFzZS5wYXRoLCBcIjAyLTA0X3JzZS1ycGttX3dpdGhpbi1yZWZlcmVuY2UtZXhwZXJpbWVudHMuUlwiKSlcbiMgYmluZCByZXN1bHRzXG5zb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgXCIwM19wcmVwLWV4cGVyaW1lbnQtcmVzdWx0cy5SXCIpKVxuYGBgIn0= -->
 <pre class="r"><code>base.path &lt;- file.path(&quot;code&quot;, &quot;07_bulk-scale-abtest_dlpfc-cohort1&quot;)
 # prep dependencies
 source(file.path(base.path, &quot;00_helper-functions.R&quot;))
@@ -1766,22 +1766,58 @@ source(file.path(base.path, &quot;00_helper-functions.R&quot;))
 source(file.path(base.path, &quot;01-01_prepare-mae.R&quot;)) # prep mae data
 source(file.path(base.path, &quot;01-02_prep-s-vector.R&quot;))
 # run experiments
-source(file.path(base.path, &quot;02-01_shared-reference-experiments.R&quot;))</code></pre>
+source(file.path(base.path, &quot;02-01_rse-counts_shared-reference-experiments.R&quot;))
+source(file.path(base.path, &quot;02-02_rse-counts_within-reference-experiments.R&quot;))
+source(file.path(base.path, &quot;02-03_rse-rpkm_shared-reference-experiments.R&quot;))
+source(file.path(base.path, &quot;02-04_rse-rpkm_within-reference-experiments.R&quot;))
+# bind results
+source(file.path(base.path, &quot;03_prep-experiment-results.R&quot;))</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogY2Fubm90IG9wZW4gZmlsZSAnY29kZS8wN19idWxrLXNjYWxlLWFidGVzdF9kbHBmYy1jb2hvcnQxLzAyLTAxX3NoYXJlZC1yZWZlcmVuY2UtZXhwZXJpbWVudHMuUic6IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnlFcnJvciBpbiBmaWxlKGZpbGVuYW1lLCBcInJcIiwgZW5jb2RpbmcgPSBlbmNvZGluZykgOiBcbiAgY2Fubm90IG9wZW4gdGhlIGNvbm5lY3Rpb25cbiJ9 -->
-<pre><code>Warning: cannot open file &#39;code/07_bulk-scale-abtest_dlpfc-cohort1/02-01_shared-reference-experiments.R&#39;: No such file or directoryError in file(filename, &quot;r&quot;, encoding = encoding) : 
-  cannot open the connection</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+</div>
+<div id="experiment-summaries" class="section level1">
+<h1>Experiment summaries</h1>
+<p>Overall experiment design table with conditions tested.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZXhwdCA8LSBkYXRhLmZyYW1lKHoucmVmZXJlbmNlLnR5cGUgPSBjKFwic2hhcmVkXCIsIFwid2l0aGluXCIsIFwic2hhcmVkXCIsIFwid2l0aGluXCIpLFxuICAgICAgICAgICAgICAgICAgIHkuZXhwcmVzc2lvbi5zY2FsZSA9IGMoXCJjb3VudHNcIiwgXCJjb3VudHNcIiwgXCJSUEtNXCIsIFwiUlBLTVwiKSlcbmV4cHQgPC0gZG8uY2FsbChyYmluZCwgbGFwcGx5KHNlcShsZW5ndGgobGlzdC5zLnByZWQpKSwgZnVuY3Rpb24oaWkpe1xuICBleHB0Lml0ZXIgPC0gZXhwdFxuICBleHB0Lml0ZXIkcy5wcmVkLnNldC5uYW1lIDwtIG5hbWVzKGxpc3Qucy5wcmVkKVtpaV1cbiAgZXhwdC5pdGVyJHMucHJlZC5zZXQudmFsdWVzIDwtIHBhc3RlMChuYW1lcyhsaXN0LnMucHJlZFtbaWldXSksIFwiOlwiLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBsaXN0LnMucHJlZFtbaWldXSxjb2xsYXBzZSA9IFwiO1wiKVxuICBleHB0Lml0ZXJcbn0pKVxuZXhwdCRjZWxsLmxhYmVsLnR5cGUgPC0gXCJrMlwiXG4jIHRhYmxlIHZpc3VhbGl6YXRpb25cbmtuaXRyOjprYWJsZShleHB0KVxuYGBgIn0= -->
+<pre class="r"><code>expt &lt;- data.frame(z.reference.type = c(&quot;shared&quot;, &quot;within&quot;, &quot;shared&quot;, &quot;within&quot;),
+                   y.expression.scale = c(&quot;counts&quot;, &quot;counts&quot;, &quot;RPKM&quot;, &quot;RPKM&quot;))
+expt &lt;- do.call(rbind, lapply(seq(length(list.s.pred)), function(ii){
+  expt.iter &lt;- expt
+  expt.iter$s.pred.set.name &lt;- names(list.s.pred)[ii]
+  expt.iter$s.pred.set.values &lt;- paste0(names(list.s.pred[[ii]]), &quot;:&quot;, 
+                                        list.s.pred[[ii]],collapse = &quot;;&quot;)
+  expt.iter
+}))
+expt$cell.label.type &lt;- &quot;k2&quot;
+# table visualization
+knitr::kable(expt)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Experiment condition table data dictionary *
+<code>z.reference.type</code> : What type of cell reference atlas was
+used. “shared” is the same summary across donors and experiments,
+“within” means a new reference was calculated based on each donor’s own
+snRNAseq data. * <code>y.expression.scale</code> : What type of scaling
+was used in the bulk RNAseq expression data. “counts” means unadjusted
+counts from SPEQeasy, “RPKM” means the same as “counts” but with
+RPKM-normalization, a type of gene/transcript-length normalization. *
+<code>s.pred.set.name</code> : Label of the s cell size scale factor set
+used (see plots). * <code>s.pred.set.values</code> : Values of the s
+cell size scale factor set used. * <code>cell.label.type</code> :
+Identifier of the cell type labels for experiments.</p>
+</div>
+<div id="condition-1-summaries-bulk-counts-scale" class="section level1">
+<h1>Condition 1 Summaries – Bulk counts scale</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpUaGlzIGlzIHRvIHBlcmZvcm0gQS9CIHRlc3RzIG9uIHRoZSBidWxrIGRhdGFzZXRzIHVzaW5nIGNvdW50cywgUlBLTS1jb3VudHMsIGxvZ2NvdW50cy4NCg0KIyBMb2FkL3NvdXJjZSBzY3JpcHRzDQoNCmBgYHtyfQ0KYmFzZS5wYXRoIDwtIGZpbGUucGF0aCgiY29kZSIsICIwN19idWxrLXNjYWxlLWFidGVzdF9kbHBmYy1jb2hvcnQxIikNCiMgcHJlcCBkZXBlbmRlbmNpZXMNCnNvdXJjZShmaWxlLnBhdGgoYmFzZS5wYXRoLCAiMDBfaGVscGVyLWZ1bmN0aW9ucy5SIikpDQojIHByZXAgZGF0YQ0Kc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsICIwMS0wMV9wcmVwYXJlLW1hZS5SIikpICMgcHJlcCBtYWUgZGF0YQ0Kc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsICIwMS0wMl9wcmVwLXMtdmVjdG9yLlIiKSkNCiMgcnVuIGV4cGVyaW1lbnRzDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAyLTAxX3JzZS1jb3VudHNfc2hhcmVkLXJlZmVyZW5jZS1leHBlcmltZW50cy5SIikpDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAyLTAyX3JzZS1jb3VudHNfd2l0aGluLXJlZmVyZW5jZS1leHBlcmltZW50cy5SIikpDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAyLTAxX3JzZS1ycGttX3NoYXJlZC1yZWZlcmVuY2UtZXhwZXJpbWVudHMuUiIpKQ0Kc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsICIwMi0wMl9yc2UtcnBrbV93aXRoaW4tcmVmZXJlbmNlLWV4cGVyaW1lbnRzLlIiKSkNCiMgYmluZCByZXN1bHRzDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAzX3ByZXAtZXhwZXJpbWVudC1yZXN1bHRzLlIiKSkNCmBgYA0KDQpgYGB7cn0NCmBgYA0KDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpUaGlzIGlzIHRvIHBlcmZvcm0gQS9CIHRlc3RzIG9uIHRoZSBidWxrIGRhdGFzZXRzIHVzaW5nIGNvdW50cywgUlBLTS1jb3VudHMsIGxvZ2NvdW50cy4NCg0KIyBMb2FkL3NvdXJjZSBzY3JpcHRzDQoNCmBgYHtyfQ0KYmFzZS5wYXRoIDwtIGZpbGUucGF0aCgiY29kZSIsICIwN19idWxrLXNjYWxlLWFidGVzdF9kbHBmYy1jb2hvcnQxIikNCiMgcHJlcCBkZXBlbmRlbmNpZXMNCnNvdXJjZShmaWxlLnBhdGgoYmFzZS5wYXRoLCAiMDBfaGVscGVyLWZ1bmN0aW9ucy5SIikpDQojIHByZXAgZGF0YQ0Kc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsICIwMS0wMV9wcmVwYXJlLW1hZS5SIikpICMgcHJlcCBtYWUgZGF0YQ0Kc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsICIwMS0wMl9wcmVwLXMtdmVjdG9yLlIiKSkNCiMgcnVuIGV4cGVyaW1lbnRzDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAyLTAxX3JzZS1jb3VudHNfc2hhcmVkLXJlZmVyZW5jZS1leHBlcmltZW50cy5SIikpDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAyLTAyX3JzZS1jb3VudHNfd2l0aGluLXJlZmVyZW5jZS1leHBlcmltZW50cy5SIikpDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAyLTAzX3JzZS1ycGttX3NoYXJlZC1yZWZlcmVuY2UtZXhwZXJpbWVudHMuUiIpKQ0Kc291cmNlKGZpbGUucGF0aChiYXNlLnBhdGgsICIwMi0wNF9yc2UtcnBrbV93aXRoaW4tcmVmZXJlbmNlLWV4cGVyaW1lbnRzLlIiKSkNCiMgYmluZCByZXN1bHRzDQpzb3VyY2UoZmlsZS5wYXRoKGJhc2UucGF0aCwgIjAzX3ByZXAtZXhwZXJpbWVudC1yZXN1bHRzLlIiKSkNCmBgYA0KDQojIEV4cGVyaW1lbnQgc3VtbWFyaWVzDQoNCk92ZXJhbGwgZXhwZXJpbWVudCBkZXNpZ24gdGFibGUgd2l0aCBjb25kaXRpb25zIHRlc3RlZC4NCg0KYGBge3J9DQpleHB0IDwtIGRhdGEuZnJhbWUoei5yZWZlcmVuY2UudHlwZSA9IGMoInNoYXJlZCIsICJ3aXRoaW4iLCAic2hhcmVkIiwgIndpdGhpbiIpLA0KICAgICAgICAgICAgICAgICAgIHkuZXhwcmVzc2lvbi5zY2FsZSA9IGMoImNvdW50cyIsICJjb3VudHMiLCAiUlBLTSIsICJSUEtNIikpDQpleHB0IDwtIGRvLmNhbGwocmJpbmQsIGxhcHBseShzZXEobGVuZ3RoKGxpc3Qucy5wcmVkKSksIGZ1bmN0aW9uKGlpKXsNCiAgZXhwdC5pdGVyIDwtIGV4cHQNCiAgZXhwdC5pdGVyJHMucHJlZC5zZXQubmFtZSA8LSBuYW1lcyhsaXN0LnMucHJlZClbaWldDQogIGV4cHQuaXRlciRzLnByZWQuc2V0LnZhbHVlcyA8LSBwYXN0ZTAobmFtZXMobGlzdC5zLnByZWRbW2lpXV0pLCAiOiIsIA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGxpc3Qucy5wcmVkW1tpaV1dLGNvbGxhcHNlID0gIjsiKQ0KICBleHB0Lml0ZXINCn0pKQ0KZXhwdCRjZWxsLmxhYmVsLnR5cGUgPC0gImsyIg0KIyB0YWJsZSB2aXN1YWxpemF0aW9uDQprbml0cjo6a2FibGUoZXhwdCkNCmBgYA0KDQpFeHBlcmltZW50IGNvbmRpdGlvbiB0YWJsZSBkYXRhIGRpY3Rpb25hcnkNCiogYHoucmVmZXJlbmNlLnR5cGVgIDogV2hhdCB0eXBlIG9mIGNlbGwgcmVmZXJlbmNlIGF0bGFzIHdhcyB1c2VkLiAic2hhcmVkIiBpcyB0aGUgc2FtZSBzdW1tYXJ5IGFjcm9zcyBkb25vcnMgYW5kIGV4cGVyaW1lbnRzLCAid2l0aGluIiBtZWFucyBhIG5ldyByZWZlcmVuY2Ugd2FzIGNhbGN1bGF0ZWQgYmFzZWQgb24gZWFjaCBkb25vcidzIG93biBzblJOQXNlcSBkYXRhLg0KKiBgeS5leHByZXNzaW9uLnNjYWxlYCA6IFdoYXQgdHlwZSBvZiBzY2FsaW5nIHdhcyB1c2VkIGluIHRoZSBidWxrIFJOQXNlcSBleHByZXNzaW9uIGRhdGEuICJjb3VudHMiIG1lYW5zIHVuYWRqdXN0ZWQgY291bnRzIGZyb20gU1BFUWVhc3ksICJSUEtNIiBtZWFucyB0aGUgc2FtZSBhcyAiY291bnRzIiBidXQgd2l0aCBSUEtNLW5vcm1hbGl6YXRpb24sIGEgdHlwZSBvZiBnZW5lL3RyYW5zY3JpcHQtbGVuZ3RoIG5vcm1hbGl6YXRpb24uDQoqIGBzLnByZWQuc2V0Lm5hbWVgIDogTGFiZWwgb2YgdGhlIHMgY2VsbCBzaXplIHNjYWxlIGZhY3RvciBzZXQgdXNlZCAoc2VlIHBsb3RzKS4NCiogYHMucHJlZC5zZXQudmFsdWVzYCA6IFZhbHVlcyBvZiB0aGUgcyBjZWxsIHNpemUgc2NhbGUgZmFjdG9yIHNldCB1c2VkLg0KKiBgY2VsbC5sYWJlbC50eXBlYCA6IElkZW50aWZpZXIgb2YgdGhlIGNlbGwgdHlwZSBsYWJlbHMgZm9yIGV4cGVyaW1lbnRzLg0KDQojIENvbmRpdGlvbiAxIFN1bW1hcmllcyAtLSBCdWxrIGNvdW50cyBzY2FsZQ0KDQpgYGB7cn0NCmBgYA0K</div>
 
 
 
