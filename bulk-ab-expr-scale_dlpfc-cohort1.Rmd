@@ -1,13 +1,22 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
+
+```{r}
+# load mae 
+new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae.final.filepath <- file.path("outputs", "01_prepare-datasets", new.mae.filename)
+mae <- get(load(mae.final.filepath))
+```
 
 This is to perform A/B tests on the bulk datasets using counts, RPKM-counts, logcounts.
 
 # Load/source scripts
 
-```{r}
+```{r, message=F,warning=F,error=F}
 base.path <- file.path("code", "07_bulk-scale-abtest_dlpfc-cohort1")
 # prep dependencies
 source(file.path(base.path, "00_helper-functions.R"))
@@ -43,13 +52,34 @@ knitr::kable(expt)
 ```
 
 Experiment condition table data dictionary
-* `z.reference.type` : What type of cell reference atlas was used. "shared" is the same summary across donors and experiments, "within" means a new reference was calculated based on each donor's own snRNAseq data.
-* `y.expression.scale` : What type of scaling was used in the bulk RNAseq expression data. "counts" means unadjusted counts from SPEQeasy, "RPKM" means the same as "counts" but with RPKM-normalization, a type of gene/transcript-length normalization.
-* `s.pred.set.name` : Label of the s cell size scale factor set used (see plots).
-* `s.pred.set.values` : Values of the s cell size scale factor set used.
-* `cell.label.type` : Identifier of the cell type labels for experiments.
+
+```{r}
+data.dict <- list(z.reference.type = "What type of cell reference atlas was used. 'shared' is the same summary across donors and experiments, 'within' means a new reference was calculated based on each donor's own snRNAseq data.",
+                  y.expression.scale = "What type of scaling was used in the bulk RNAseq expression data. 'counts' means unadjusted counts from SPEQeasy, 'RPKM' means the same as 'counts' but with RPKM-normalization, a type of gene/transcript-length normalization.",
+                  s.pred.set.name = "Label of the s cell size scale factor set used (see plots).",
+                  s.pred.set.values = "Values of the s cell size scale factor set used.",
+                  cell.label.type = "Identifier of the cell type labels for experiments.")
+data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(data.dict)[ii], data.dict[[ii]])}))
+knitr::kable(data.dict)
+```
+
 
 # Condition 1 Summaries -- Bulk counts scale
 
+Absolute errors, organized by S cell size scale factor set ID.
+
 ```{r}
+# absolute errors
+ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~s.set.label) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Absolute errors, organized by sample ID.
+
+```{r}
+# errors by sample
+ggplot(df.k2, aes(x = s.set.label, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~sample.id) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```

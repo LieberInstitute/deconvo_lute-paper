@@ -6,9 +6,9 @@
 
 
 # load mae 
-new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
-mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", new.mae.filename)
-mae <- get(load(mae.final.filepath))
+#new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+#mae.final.filepath <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", new.mae.filename)
+#mae <- get(load(mae.final.filepath))
 
 # experiment variables
 assay.name <- "logcounts"
