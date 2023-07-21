@@ -47,6 +47,7 @@ expt <- do.call(rbind, lapply(seq(length(list.s.pred)), function(ii){
   expt.iter
 }))
 expt$cell.label.type <- "k2"
+
 # table visualization
 knitr::kable(expt)
 ```
@@ -64,7 +65,21 @@ knitr::kable(data.dict)
 ```
 
 
-# Condition 1 Summaries -- Bulk counts scale
+# Condition 1 Summaries -- Counts and RPKM-counts
+
+Proportions scatterplots
+
+```{r}
+ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~experiment.type*s.set.label)
+```
+
+```{r}
+ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label)
+```
 
 Absolute errors, organized by S cell size scale factor set ID.
 
@@ -83,3 +98,15 @@ ggplot(df.k2, aes(x = s.set.label, y = abs.error.neuron)) +
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
   facet_wrap(~sample.id) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+# Condition 2 Summaries -- Counts and RPKM-counts
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+

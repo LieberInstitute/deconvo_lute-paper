@@ -38,3 +38,6 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
   }))
 }))
 df.s.k2.shared$experiment.type <- "shared.reference"
+df.s.k2.shared$bulk.scale.type <- "rpkm.counts"
+df.s.k2.shared.rpkm <- df.s.k2.shared
+rm(df.s.k2.shared)

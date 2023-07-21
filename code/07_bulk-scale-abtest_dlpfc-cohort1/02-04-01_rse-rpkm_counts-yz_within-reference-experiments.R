@@ -14,9 +14,9 @@ df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
   do.call(rbind, lapply(sample.id.vector, function(sample.id){
     message(sample.id)
     # filter bulk
-    filter.y.sample <- colData(rse.counts)[,"batch.id2"]==sample.id
-    filter.y.marker <- rownames(rse.counts) %in% rownames(sce.iter)
-    rse.iter <- rse.counts[filter.y.marker, filter.y.sample]
+    filter.y.sample <- colData(rse.rpkm)[,"batch.id2"]==sample.id
+    filter.y.marker <- rownames(rse.rpkm) %in% rownames(sce.iter)
+    rse.iter <- rse.rpkm[filter.y.marker, filter.y.sample]
     rse.iter <- logNormCounts(rse.iter)
     y.iter <- assays(rse.iter)[[assay.name]]
     # filter snrnaseq
@@ -40,3 +40,6 @@ df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
   }))
 }))
 df.s.k2.within$experiment.type <- "within.reference"
+df.s.k2.within$bulk.scale.type <- "rpkm.counts"
+df.s.k2.within.rpkm <- df.s.k2.within
+rm(df.s.k2.within)
