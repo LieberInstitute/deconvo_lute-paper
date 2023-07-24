@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("lute", "here", "dplyr", "ggplot2", "reshape2")
+libv <- c("lute", "here", "dplyr", "ggplot2", "reshape2", "ggforce")
 sapply(libv, library, character.only = T)
 ```
 
@@ -99,6 +99,9 @@ ggplot(dfp, aes(x = donor, y = proportion, fill = cell_type)) +
 Bias versus number of markers.
 
 ```{r}
-ggplot(df.res, aes(x = nmarker, y = bias.neuron, shape = donor, lty = donor)) +
-  geom_line() + geom_point() + theme_bw()
+ggplot(df.res, aes(x = nmarker, y = bias.neuron, 
+                   shape = donor, lty = donor, color = donor)) +
+  geom_line() + geom_point() + theme_bw() + geom_hline(yintercept = 0) +
+  facet_zoom(xlim = c(10, 500)) + xlab("Markers per cell type (G/K)") + 
+  ylab("Neuron proportion (P_pred - P_true)")
 ```
