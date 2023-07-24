@@ -4,6 +4,18 @@ output: html_notebook
 ---
 
 ```{r}
+libv <- c("scuttle", "SingleCellExperiment")
+base.path <- file.path("outputs", "01_prepare-datasets")
+```
+
+Get QC and counts data from JHPCE.
+
+```{r}
+```
+
+Load QC and counts results for local analyses.
+
+```{r}
 ```
 
 # Compare counts versus standard quality metrics

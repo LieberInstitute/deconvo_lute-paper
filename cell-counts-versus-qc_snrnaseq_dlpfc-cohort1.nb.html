@@ -1754,6 +1754,23 @@ display: none;
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlidiA8LSBjKFwic2N1dHRsZVwiLCBcIlNpbmdsZUNlbGxFeHBlcmltZW50XCIpXG5iYXNlLnBhdGggPC0gZmlsZS5wYXRoKFwib3V0cHV0c1wiLCBcIjAxX3ByZXBhcmUtZGF0YXNldHNcIilcbnNucm5hc2VxLmZpbGVuYW1lIDwtIFwibGlzdC1zY2VmX21hcmtlcnMtazItazMtazRfcm8xLWRscGZjLnJkYVwiXG5zbnJuYXNlcS5wYXRoIDwtIGZpbGUucGF0aChiYXNlLnBhdGgsIHNucm5hc2VxLmZpbGVuYW1lKVxuc25ybmFzZXEgPC0gZ2V0KGxvYWQoc25ybmFzZXEucGF0aCkpXG5gYGAifQ== -->
+<pre class="r"><code>libv &lt;- c(&quot;scuttle&quot;, &quot;SingleCellExperiment&quot;)
+base.path &lt;- file.path(&quot;outputs&quot;, &quot;01_prepare-datasets&quot;)
+snrnaseq.filename &lt;- &quot;list-scef_markers-k2-k3-k4_ro1-dlpfc.rda&quot;
+snrnaseq.path &lt;- file.path(base.path, snrnaseq.filename)
+snrnaseq &lt;- get(load(snrnaseq.path))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Get QC and counts data from JHPCE.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Load QC and counts results for local analyses.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <div id="compare-counts-versus-standard-quality-metrics" class="section level1">
@@ -1775,7 +1792,7 @@ display: none;
 <!-- rnb-chunk-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7cn0NCmBgYA0KDQojIENvbXBhcmUgY291bnRzIHZlcnN1cyBzdGFuZGFyZCBxdWFsaXR5IG1ldHJpY3MNCg0KYGBge3J9DQpgYGANCg0KYGBge3J9DQpgYGANCg0KYGBge3J9DQpgYGANCg0KYGBge3J9DQpgYGA=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7cn0NCmxpYnYgPC0gYygic2N1dHRsZSIsICJTaW5nbGVDZWxsRXhwZXJpbWVudCIpDQpiYXNlLnBhdGggPC0gZmlsZS5wYXRoKCJvdXRwdXRzIiwgIjAxX3ByZXBhcmUtZGF0YXNldHMiKQ0KYGBgDQoNCkdldCBRQyBhbmQgY291bnRzIGRhdGEgZnJvbSBKSFBDRS4NCg0KYGBge3J9DQpgYGANCg0KTG9hZCBRQyBhbmQgY291bnRzIHJlc3VsdHMgZm9yIGxvY2FsIGFuYWx5c2VzLg0KDQpgYGB7cn0NCmBgYA0KDQojIENvbXBhcmUgY291bnRzIHZlcnN1cyBzdGFuZGFyZCBxdWFsaXR5IG1ldHJpY3MNCg0KYGBge3J9DQpgYGANCg0KYGBge3J9DQpgYGANCg0KYGBge3J9DQpgYGANCg0KYGBge3J9DQpgYGA=</div>
 
 
 
