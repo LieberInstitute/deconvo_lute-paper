@@ -1,26 +1,26 @@
 # dependencies
-libv <- c("here", "lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment", 
+libv <- c("lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment", 
           "SummarizedExperiment", "scran", "MultiAssayExperiment", "ComplexHeatmap", "pheatmap")
 sapply(libv, library, character.only = TRUE)
 
 # save path
-prepped.data.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets")
-save.path <- here("deconvo_method-paper", "outputs", "05_cell-count-versus-cell-size")
+prepped.data.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets")
+save.path <- file.path("deconvo_method-paper", "outputs", "05_cell-count-versus-cell-size")
 
 #-------------------
 # dlpfc cohort1 data
 #-------------------
 # multi assay experiment path
 mae.filename <- "mae_final.rda"
-mae.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", mae.filename)
+mae.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", mae.filename)
 # dlpfc markers path
-sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+sce.markers.list.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
 
 #-------------------
 # dlpfc cohort2 data
 #-------------------
 # mrb sce path
-sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "sce-mrb_dlpfc.rda")
+sce.mrb.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "sce-mrb_dlpfc.rda")
 
 #-----------------
 # helper functions

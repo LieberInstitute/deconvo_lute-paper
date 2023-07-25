@@ -5,55 +5,95 @@ date: "2023-07-25"
 output: html_document
 ---
 
+# Setup
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("here")
+libv <- c("here", "reshape2")
 sapply(libv, library, character.only = T)
-project.dir <- "deconvo_method-paper"
-script.path <- "deconvo_method-paper/code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R"
 ```
 
-```{r}
-getwd()
+Source datasets and functions.
+
+```{r, include = FALSE}
+ypb.cohort1.script.path <- "deconvo_method-paper/code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R"
+var.cohort1.script.path <- "deconvo_method-paper/code/06_var-and-covar-celltypes/01_var-and-covar_dlpfc-cohort1.R"
 setwd("..")
-getwd()
+source(ypb.cohort1.script.path, local = knitr::knit_global())
+source(var.cohort1.script.path, local = knitr::knit_global())
+```
+
+# Show relation between S and reference quality
+
+Define some series of s values.
+
+```{r}
+dfs <- data.frame(glial = c(seq(10), rep(10,10)), neuron = c(rep(10,10), seq(10)))
+```
+
+Correlation/collinearity
+
+```{r}
+list.results <- lapply(seq(nrow(dfs)), function(index){
+  s.vector <- as.numeric(dfs[index,])
+  names(s.vector) <- c("glial", "neuron")
+  zlist.types <- z_list(sce, s.vector, assay.name = "logcounts", celltype.variable = "k2")
+  zlist.donors <- z_list_bydonor(sce, sample.id.variable = "Sample", 
+                           s.vector = c("glial" = 3, "neuron" = 10), 
+                           assay.name = "logcounts", celltype.variable = "k2")
+  covcor.types <- covcor_from_zlist(zlist.types, type = "cor")
+  covcor.donors <- covcor_from_zlist(zlist.donors, type = "cor")
+  list(zlist.types = zlist.types, zlist.donors = zlist.donors, 
+       covcor.types = covcor.types, covcor.donors = covcor.donors)
+})
+names(list.results) <- paste0("row", seq(nrow(dfs)))
+
+# bind results
+value.relation <- "covariance.diff.unadj.minus.adj"
+colnames.vector <- c("cell.type.compare1", "cell.type.compare2",value.relation, "donor")
+df.covar <- do.call(rbind, lapply(seq(length(list.results)), function(index){
+  df.iter <- list.results[[index]][["covcor.donors"]][["lcov.diff.unadj.minus.adj"]] %>% melt()
+  colnames(df.iter) <- colnames.vector
+  df.iter$compare.label <- paste0(df.iter$cell.type.compare1, ";", df.iter$cell.type.compare2)
+  # append s vector
+  df.iter$s.iter <- paste0("s.set.",index)
+  df.iter$s.neuron <- dfs$neuron[index]
+  df.iter$s.glial <- dfs$glial[index]
+  return(df.iter)
+}))
+```
+
+Summarize results
+
+```{r}
+ggplot(df.covar, aes(x = s.neuron, y = covariance.diff.unadj.minus.adj)) + 
+  geom_point() + geom_line() + theme_bw() + facet_wrap(~compare.label) 
 ```
 
 ```{r}
-# setwd("..")
-source(script.path, local = knitr::knit_global())
-# setwd(project.dir)
-```
-
-# Get pseudobulk data
-
-```{r}
-set_here("..")
-pb.script.filename <- "01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R"
-base.path <- here("deconvo_method-paper", "code","02_pseudobulk-predictions")
-pb.script.path <- here("deconvo_method-paper", "code", "02_pseudobulk-predictions",pb.script.filename)
-pb.script.path
-file.exists(pb.script.path)
+ggplot(df.covar, aes(x = s.neuron, y = covariance.diff.unadj.minus.adj, color = compare.label)) + 
+  geom_point() + geom_line() + theme_bw() + facet_wrap(~donor)
 ```
 
 ```{r}
-file.access(pb.script.path, 0)
-file.access(pb.script.path, 1)
-file.access(pb.script.path, 2)
-file.access(pb.script.path, 4)
-# source(pb.script.path)
+ggplot(df.covar, aes(x = compare.label, y = covariance.diff.unadj.minus.adj)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(color = 'cyan', alpha = 0) + 
+  theme_bw() + facet_wrap(~donor) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+Variance vs. covariance
 
 ```{r}
-# source(pb.script.path)
 ```
 
+# Define a convergence function
 
-# set_here("..")
-set_here(base.path)
-source(pb.script.path)
-set_here("deconvo_method-paper")
+Pseudocode for convergence function:
+* For a series of S normalization sets:
+** Gets the correlation within and across cell types.
+** Gets the correlation within and across donors.
+** Perform a correlation comparison -- if its the same by cell type, try between donors. If its the same, 
 
-pb.script.filename <- "01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R"
-base.path <- here("code","02_pseudobulk-predictions")
-pb.script.path <- here("code","02_pseudobulk-predictions",pb.script.filename)
+
+
+
