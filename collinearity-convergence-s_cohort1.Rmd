@@ -1,0 +1,59 @@
+---
+title: "collinearity-convergence-s_cohort2"
+author: "Sean Maden"
+date: "2023-07-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("here")
+sapply(libv, library, character.only = T)
+project.dir <- "deconvo_method-paper"
+script.path <- "deconvo_method-paper/code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R"
+```
+
+```{r}
+getwd()
+setwd("..")
+getwd()
+```
+
+```{r}
+# setwd("..")
+source(script.path, local = knitr::knit_global())
+# setwd(project.dir)
+```
+
+# Get pseudobulk data
+
+```{r}
+set_here("..")
+pb.script.filename <- "01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R"
+base.path <- here("deconvo_method-paper", "code","02_pseudobulk-predictions")
+pb.script.path <- here("deconvo_method-paper", "code", "02_pseudobulk-predictions",pb.script.filename)
+pb.script.path
+file.exists(pb.script.path)
+```
+
+```{r}
+file.access(pb.script.path, 0)
+file.access(pb.script.path, 1)
+file.access(pb.script.path, 2)
+file.access(pb.script.path, 4)
+# source(pb.script.path)
+```
+
+```{r}
+# source(pb.script.path)
+```
+
+
+# set_here("..")
+set_here(base.path)
+source(pb.script.path)
+set_here("deconvo_method-paper")
+
+pb.script.filename <- "01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R"
+base.path <- here("code","02_pseudobulk-predictions")
+pb.script.path <- here("code","02_pseudobulk-predictions",pb.script.filename)

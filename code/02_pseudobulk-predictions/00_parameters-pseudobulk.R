@@ -5,24 +5,24 @@
 # Main parameters, or dependency objects, for deconvolution framework trials.
 
 # dependencies
-libv <- c("here", "lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment", 
+libv <- c("lute", "dplyr", "ggplot2", "gridExtra", "SingleCellExperiment", 
           "SummarizedExperiment", "scran")
 sapply(libv, library, character.only = TRUE)
 
 # save path
-save.path <- here("deconvo_method-paper", "outputs", "02_pseudobulk-predictions")
+save.path <- file.path("deconvo_method-paper", "outputs", "02_pseudobulk-predictions")
 
 #-------------------
 # dlpfc cohort2 data
 #-------------------
 # mrb sce path
-sce.mrb.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "sce-mrb_dlpfc.rda")
+sce.mrb.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "sce-mrb_dlpfc.rda")
 
 #-------------------
 # dlpfc cohort1 data
 #-------------------
 # dlpfc markers path
-sce.markers.list.path <- here("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+sce.markers.list.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
 
 # define experiment function
 order_svector <- function(s.vector = c("neuron" = 10, "glial" = 3)){
@@ -34,7 +34,7 @@ get_ypb_experiment_series <- function(sce, sample.id.variable = "Sample",
                                       s.vector = c("glial" = 3, "neuron" = 10),
                                       algorithm.name = "nnls", return.dimensions = c("wide", "tall"),
                                       dfp.tall.errors = TRUE, system.sleep.sec = 2,
-                                      deconvolution.algorithm = deconvolution.algorithm){
+                                      deconvolution.algorithm = "nnls"){
   s.vector <- order_svector(s.vector)
   # get pseudobulk experiment series, testing cellsize adjustment
   # use with dfp_tall_by_celltype()
@@ -101,7 +101,7 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
     prop.pred.iter <- lute(sce = sce.iter, y = ypb.iter, assay.name = assay.name, 
                            celltype.variable = celltype.variable, s = s.vector.pred, 
                            typemarker.algorithm = NULL, return.info = FALSE,
-                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results
+                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results@predictions.table
     colnames(prop.pred.iter) <- paste0(colnames(prop.pred.iter), ".pred")
     colnames(prop.true.iter) <- paste0(colnames(prop.true.iter), ".true")
     dfp.iter <- cbind(prop.true.iter, prop.pred.iter) %>% as.data.frame()
