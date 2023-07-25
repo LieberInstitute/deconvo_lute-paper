@@ -37,13 +37,13 @@ Correlation/collinearity
 list.results <- lapply(seq(nrow(dfs)), function(index){
   s.vector <- as.numeric(dfs[index,])
   names(s.vector) <- c("glial", "neuron")
-  zlist.types <- z_list(sce, s.vector, assay.name = "logcounts", celltype.variable = "k2")
-  zlist.donors <- z_list_bydonor(sce, sample.id.variable = "Sample", s.vector = s.vector, 
+  zlist.type <- z_list(sce, s.vector, assay.name = "logcounts", celltype.variable = "k2")
+  zlist.donor <- z_list_bydonor(sce, sample.id.variable = "Sample", s.vector = s.vector, 
                            assay.name = "logcounts", celltype.variable = "k2")
-  covcor.types <- covcor_from_zlist(zlist.types)
-  covcor.donors <- covcor_from_zlist(zlist.donor)
-  list(zlist.types = zlist.types, zlist.donors = zlist.donors, 
-       covcor.types = covcor.types, covcor.donors = covcor.donors)
+  covcor.type <- covcor_from_zlist(zlist.type)
+  covcor.donor <- covcor_from_zlist(zlist.donor)
+  list(zlist.type = zlist.type, zlist.donor = zlist.donor, 
+       covcor.type = covcor.type, covcor.donor = covcor.donor)
 })
 names(list.results) <- paste0("row", seq(nrow(dfs)))
 
@@ -51,7 +51,7 @@ names(list.results) <- paste0("row", seq(nrow(dfs)))
 value.relation <- "covariance.diff.unadj.minus.adj"
 colnames.vector <- c("cell.type.compare1", "cell.type.compare2", value.relation, "donor")
 df.covar <- do.call(rbind, lapply(seq(length(list.results)), function(index){
-  df.iter <- list.results[[index]][["covcor.donors"]][["lcov.diff.unadj.minus.adj"]] %>% melt()
+  df.iter <- list.results[[index]][["covcor.donor"]][["lcov.diff.unadj.minus.adj"]] %>% melt()
   colnames(df.iter) <- colnames.vector
   df.iter$compare.label <- paste0(df.iter$cell.type.compare1, ";", df.iter$cell.type.compare2)
   # append s vector
@@ -65,14 +65,14 @@ df.covar <- do.call(rbind, lapply(seq(length(list.results)), function(index){
 filter.compare.label <- df.covar$compare.label %in% c("neuron;neuron", "glial;glial")
 df.covar <- df.covar[!filter.compare.label,]
 df.var <- df.covar[filter.compare.label,]
+# remove redundant covarainces
+df.covar <- df.covar[!df.covar$compare.label == "glial;neuron",]
 ```
 
 Check if covariance changes for a single group across transformations (NOTE: if unchanging, likely there is bug in the above loop)
 
 ```{r}
-summary(df.covar[
-  df.covar$donor=="Br2720_mid" & 
-    df.covar$compare.label=="glial;neuron",]$covariance.diff.unadj.minus.adj)
+summary(df.covar[df.covar$donor=="Br2720_mid",]$covariance.diff.unadj.minus.adj)
 ```
 
 Summarize results
