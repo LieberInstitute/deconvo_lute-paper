@@ -38,11 +38,10 @@ list.results <- lapply(seq(nrow(dfs)), function(index){
   s.vector <- as.numeric(dfs[index,])
   names(s.vector) <- c("glial", "neuron")
   zlist.types <- z_list(sce, s.vector, assay.name = "logcounts", celltype.variable = "k2")
-  zlist.donors <- z_list_bydonor(sce, sample.id.variable = "Sample", 
-                           s.vector = c("glial" = 3, "neuron" = 10), 
+  zlist.donors <- z_list_bydonor(sce, sample.id.variable = "Sample", s.vector = s.vector, 
                            assay.name = "logcounts", celltype.variable = "k2")
-  covcor.types <- covcor_from_zlist(zlist.types, type = "cor")
-  covcor.donors <- covcor_from_zlist(zlist.donors, type = "cor")
+  covcor.types <- covcor_from_zlist(zlist.types)
+  covcor.donors <- covcor_from_zlist(zlist.donor)
   list(zlist.types = zlist.types, zlist.donors = zlist.donors, 
        covcor.types = covcor.types, covcor.donors = covcor.donors)
 })
@@ -50,7 +49,7 @@ names(list.results) <- paste0("row", seq(nrow(dfs)))
 
 # bind results
 value.relation <- "covariance.diff.unadj.minus.adj"
-colnames.vector <- c("cell.type.compare1", "cell.type.compare2",value.relation, "donor")
+colnames.vector <- c("cell.type.compare1", "cell.type.compare2", value.relation, "donor")
 df.covar <- do.call(rbind, lapply(seq(length(list.results)), function(index){
   df.iter <- list.results[[index]][["covcor.donors"]][["lcov.diff.unadj.minus.adj"]] %>% melt()
   colnames(df.iter) <- colnames.vector
@@ -61,24 +60,49 @@ df.covar <- do.call(rbind, lapply(seq(length(list.results)), function(index){
   df.iter$s.glial <- dfs$glial[index]
   return(df.iter)
 }))
+
+# filter out variances (covar betw. identical variables) from covariances
+filter.compare.label <- df.covar$compare.label %in% c("neuron;neuron", "glial;glial")
+df.covar <- df.covar[!filter.compare.label,]
+df.var <- df.covar[filter.compare.label,]
+```
+
+Check if covariance changes for a single group across transformations (NOTE: if unchanging, likely there is bug in the above loop)
+
+```{r}
+summary(df.covar[
+  df.covar$donor=="Br2720_mid" & 
+    df.covar$compare.label=="glial;neuron",]$covariance.diff.unadj.minus.adj)
 ```
 
 Summarize results
 
 ```{r}
-ggplot(df.covar, aes(x = s.neuron, y = covariance.diff.unadj.minus.adj)) + 
+ggplot(df.covar, aes(x = s.neuron, y = covariance.diff.unadj.minus.adj, color = donor)) + 
   geom_point() + geom_line() + theme_bw() + facet_wrap(~compare.label) 
-```
 
-```{r}
 ggplot(df.covar, aes(x = s.neuron, y = covariance.diff.unadj.minus.adj, color = compare.label)) + 
   geom_point() + geom_line() + theme_bw() + facet_wrap(~donor)
-```
 
-```{r}
 ggplot(df.covar, aes(x = compare.label, y = covariance.diff.unadj.minus.adj)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(color = 'cyan', alpha = 0) + 
   theme_bw() + facet_wrap(~donor) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Show extent of covariance change for just "glial;neuron"
+
+```{r}
+filter.df <- df.covar$compare.label=="glial;neuron"
+df.filtered <- df.covar[filter.df,]
+
+ggplot(df.filtered, 
+       aes(x = compare.label, y = covariance.diff.unadj.minus.adj)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(color = 'cyan', alpha = 0) + 
+  theme_bw() + facet_wrap(~donor) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(df.filtered, 
+       aes(x = s.neuron, y = covariance.diff.unadj.minus.adj, color = donor)) + 
+  geom_point() + geom_line() + theme_bw()
 ```
 
 Variance vs. covariance
