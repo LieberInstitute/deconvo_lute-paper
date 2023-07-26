@@ -2,6 +2,7 @@
 # k2 experiment -- same reference across experiments
 #---------------------------------------------------
 # run k2 experiment
+assay.name <- "counts"
 celltype.variable <- "k2"
 sample.id.vector <- unique(colData(mae)[,1][complete.cases(mae)])
 sample.id <- sample.id.vector[1]
@@ -30,6 +31,7 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
       names(s.vector.pred),"=",s.vector.pred,collapse=",")
     prop.pred.iter$sample.id <- sample.id
     prop.pred.iter$k.type <- celltype.variable
+    prop.pred.iter$assay.name.lutearg <- assay.name
     # get true proportions
     df.rn.iter <- df.rn[df.rn$sample_id==sample.id,]
     prop.pred.iter$true.glial <- df.rn.iter[df.rn.iter$cell_type=="glial",]$true_proportion
@@ -39,5 +41,5 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
 }))
 df.s.k2.shared$experiment.type <- "shared.reference"
 df.s.k2.shared$bulk.scale.type <- "counts"
-df.s.k2.shared.counts <- df.s.k2.shared
+df.s.k2.shared.counts.counts <- df.s.k2.shared
 rm(df.s.k2.shared)

@@ -11,7 +11,6 @@
 #mae <- get(load(mae.final.filepath))
 
 # experiment variables
-assay.name <- "logcounts"
 deconvolution.algorithm <- "nnls"
 cell.type.variable <- "k2"
 

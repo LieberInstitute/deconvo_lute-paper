@@ -41,5 +41,5 @@ df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
 }))
 df.s.k2.within$experiment.type <- "within.reference"
 df.s.k2.within$bulk.scale.type <- "counts"
-df.s.k2.within.counts <- df.s.k2.within
+df.s.k2.within.counts.counts <- df.s.k2.within
 rm(df.s.k2.within)
