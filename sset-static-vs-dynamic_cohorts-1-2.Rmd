@@ -1,0 +1,211 @@
+---
+title: "covar-corr-demonstrations"
+author: "Sean Maden"
+date: "2023-07-26"
+output: html_document
+---
+
+This script shows how we to evaluate covariance/correlation relationships before/after transformations to two random variables representing expression 
+from two independent cell types.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("ggplot2", "lute", "here", "dplyr")
+sapply(libv, library, character.only = T)
+set.seed(10)
+```
+
+# Load datasets
+
+Random variables x1, y1.
+
+```{r}
+# get starting variables
+x1 <- rnbinom(n = 10, size = 10, mu = 10)  #sample(10)
+y1 <- rnbinom(n = 10, size = 10, mu = 10) #sample(10)
+```
+
+Cohort 1
+
+```{r}
+base.path <- file.path("outputs", "01_prepare-datasets")
+sce1.filename <- "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
+sce1.path <- here(base.path, sce1.filename)
+sce1 <- get(load(sce1.path))[[1]]
+```
+
+Cohort 2
+
+```{r}
+sce2.filename <- "sce-mrb_dlpfc.rda"
+sce2.path <- here(base.path, sce2.filename)
+sce2 <- get(load(sce2.path))
+sce2 <- sce2[rownames(sce2) %in% rownames(sce1),]
+```
+
+# Define transformations
+
+Static tranformation -- this is the provided s.set series.
+
+```{r}
+X <- 10
+Y <- 3
+```
+
+Dynamic transformation -- this is a function of the starting expression values as well as provided s.set series.
+
+```{r}
+adj.weight.x <- function(WeightX, WeightY, x1, y1, offset=1e-5){
+  # Transform x and y such that their correlation decreases, and their covariance remains negative?
+  # x1 : first cell type
+  # y1 : second cell type
+  fract <- WeightX/WeightY
+  (fract*y1*WeightY+offset)/(x1+offset)
+}
+get.adj <- function(x1, y1, WeightX, WeightY){
+  # pseudoalgorithm
+  # given a vector of normalizations, get the fraction, x/y
+  # now adjust vectors x1, y1 such that the ratio is achieved
+  X.adj <- adj.weight.x(WeightX = X, WeightY = Y, x1 = x1, y1 = y1)
+  Y.adj <- adj.weight.x(WeightX = Y, WeightY = X, x1 = x1, y1 = y1)
+  list(x.adj=x1*X.adj, y.adj=y1*Y.adj)
+}
+```
+
+```{r}
+# CRITICALITY CHECK: for identical terms (x1==y1), expect X.adj==X, Y.adj==Y
+X.adj <- adj.weight.x(WeightX = X, WeightY = Y, x1 = x1[1], y1 = y1[1])
+Y.adj <- adj.weight.x(WeightX = Y, WeightY = X, x1 = x1[1], y1 = y1[1])
+round(X.adj)==X
+round(Y.adj)==Y
+```
+
+# Compare static vs dynamic
+
+```{r}
+adj.xy <- get.adj(x1, y1, WeightX = X, WeightY = Y)
+x2 <- adj.xy[[1]]
+y2 <- adj.xy[[2]]
+dfp <- rbind(data.frame(x = x1, y = y1, type = rep("unadj", length(x1))),
+             data.frame(x = x2, y = y2, type = rep("dynamic", length(x2))))
+dfp <- rbind(dfp, data.frame(x = x1*X, y = y1*Y, type = rep("static", length(x1))))
+ggplot(dfp, aes(x = x, y = y, color = type)) + geom_point() + facet_wrap(~type) +
+  geom_abline(slope = 1, intercept = 0) + ggtitle("Marker expression")
+```
+
+```{r}
+# cor tests
+# unadj
+cor(dfp[dfp$type=="unadj",]$x,dfp[dfp$type=="unadj",]$y) # -0.2988827
+# static
+cor(dfp[dfp$type=="static",]$x,dfp[dfp$type=="static",]$y) # -0.2988827
+# dynamic
+cor(dfp[dfp$type=="dynamic",]$x,dfp[dfp$type=="dynamic",]$y) # [1] 0.9354588
+```
+
+```{r}
+# cov tests
+# unadj
+cov(dfp[dfp$type=="unadj",]$x,dfp[dfp$type=="unadj",]$y) # -3.7
+# static
+cov(dfp[dfp$type=="static",]$x,dfp[dfp$type=="static",]$y) # -111
+# dynamic
+cov(dfp[dfp$type=="dynamic",]$x,dfp[dfp$type=="dynamic",]$y) # 1093.662
+```
+
+# Compare static vs dynamic -- mrb cohort2 dataset
+
+```{r}
+z.unadj <- lute:::.get_z_from_sce(sce2, "counts", "k2")
+
+z.static <- lute:::.get_z_from_sce(sce2, "counts", "k2") %>%
+  lute:::.zstransform(s = c("glial" = 3, "neuron" = 10))
+
+ladj <- get.adj(x1 = z.unadj[,1], y1 = z.unadj[,2], WeightX = 3, WeightY = 10)
+
+z.dynamic <- do.call(cbind, lapply(ladj, function(type.expr){type.expr}))
+colnames(z.dynamic) <- c("glial", "neuron")
+```
+
+```{r}
+dfp <- rbind(
+  data.frame(neuron = z.unadj[,"neuron"], glial = z.unadj[,"glial"], type = rep("unadj", nrow(z.unadj))),
+  data.frame(neuron = z.static[,"neuron"], glial = z.static[,"glial"], type = rep("static", nrow(z.static)))
+)
+dfp <- rbind(dfp,
+             data.frame(
+               neuron = z.dynamic[,"neuron"], glial = z.dynamic[,"glial"], 
+               type = rep("dynamic", nrow(z.dynamic))))
+
+ggplot(dfp, aes(x = neuron, y = glial, color = type)) + 
+  geom_point() + facet_wrap(~type) +
+  geom_abline(slope = 1, intercept = 0) +
+  ggtitle("Marker expression")
+```
+
+# Compare static vs dynamic -- dlpfc cohort1 dataset
+
+```{r}
+# get z matrices
+z.unadj <- lute:::.get_z_from_sce(sce1, "counts", "k2")
+
+z.static <- lute:::.get_z_from_sce(sce1, "counts", "k2") %>%
+  lute:::.zstransform(s = c("glial" = 3, "neuron" = 10))
+
+ladj <- get.adj(x1 = z.unadj[,1], y1 = z.unadj[,2], WeightX = 3, WeightY = 10)
+z.dynamic <- do.call(cbind, lapply(ladj, function(type.expr){type.expr}))
+colnames(z.dynamic) <- c("glial", "neuron")
+```
+
+```{r}
+dfp <- rbind(
+  data.frame(neuron = z.unadj[,"neuron"], glial = z.unadj[,"glial"], type = rep("unadj", nrow(z.unadj))),
+  data.frame(neuron = z.static[,"neuron"], glial = z.static[,"glial"], type = rep("static", nrow(z.static)))
+)
+dfp <- rbind(dfp,
+             data.frame(neuron = z.dynamic[,"neuron"], glial = z.dynamic[,"glial"], 
+                        type = rep("dynamic", nrow(z.dynamic))))
+
+ggplot(dfp, aes(x = neuron, y = glial, color = type)) + 
+  geom_point() + facet_wrap(~type) +
+  geom_abline(slope = 1, intercept = 0) +
+  ggtitle("Marker expression")
+```
+
+# Compare predictions
+
+```{r}
+unique.donors <- unique(sce$Sample)
+dfp.tall <- do.call(rbind, lapply(unique.donors, function(donor.id){
+  scef <- sce[,sce$Sample==donor.id]
+  ypb <- ypb_from_sce(scef, "counts", "k2") %>% as.matrix()
+pred.unadj <- lute(z = z.unadj, y = ypb, 
+                   typemarker.algorithm = NULL)[[1]]@predictions.table
+pred.static <- lute(z = z.static, y = ypb, 
+                    typemarker.algorithm = NULL)[[1]]@predictions.table
+pred.dynamic <- lute(z = z.dynamic, y = ypb, 
+                     typemarker.algorithm = NULL)[[1]]@predictions.table
+dfp <- data.frame(value = unlist(c(pred.unadj, pred.static, pred.dynamic)),
+                  k2 = names(c(pred.unadj, pred.static, pred.dynamic)),
+                  type = c(rep("unadj", 2), rep("static", 2), rep("dynamic", 2)))
+dfp$donor.id <- donor.id
+dfp
+}))
+
+dfp.wide <- do.call(cbind, lapply(unique(dfp.tall$k2), function(celltype){
+  dfp.iter <- dfp.tall[dfp.tall$k2==celltype,][,c(1,3)]
+  colnames(dfp.iter) <- c(celltype, "type")
+  dfp.iter
+}))
+
+```
+
+```{r}
+ggplot(dfp.tall, aes(x = donor.id, y = value)) + geom_jitter() + geom_boxplot(color = "cyan") + facet_wrap(~type) + theme(axis.text.x = element_text(angle = 45,hjust=1))
+```
+
+```{r}
+ggplot(dfp.wide[,c(1,3,4)], aes(x = neuron, y = glial)) + geom_point() + 
+  geom_abline(intercept = 0, slope = 1) + facet_wrap(~type)
+```
+
