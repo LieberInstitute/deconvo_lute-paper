@@ -13,7 +13,9 @@ mae.final.filepath <- file.path("outputs", "01_prepare-datasets", new.mae.filena
 mae <- get(load(mae.final.filepath))
 ```
 
-This is to perform A/B tests on the bulk datasets using counts, RPKM-counts, logcounts.
+This notebook shows the impact of taking the log normalization (on both $Z$ and 
+$Y$) when using either non-normalized counts or RPKM (length-normalized) counts 
+for $Y$.
 
 # Load/source scripts
 
@@ -38,7 +40,11 @@ Filter relevant results.
 ```{r}
 s.set.keep <- c("glial=1,neuron=1", "glial=3,neuron=10")
 df.k2 <- df.k2[df.k2$s.set.values %in% s.set.keep,]
-# show expt table
+```
+
+Experiment table:
+
+```{r}
 expt.table <- table(df.k2$s.set.values, df.k2$experiment.type, 
                     df.k2$bulk.scale.type, df.k2$assay.name.lutearg) %>% 
   as.data.frame()
@@ -51,11 +57,11 @@ knitr::kable(expt.table)
 Experiment condition table data dictionary
 
 ```{r}
-data.dict <- list(z.reference.type = "What type of cell reference atlas was used. 'shared' is the same summary across donors and experiments, 'within' means a new reference was calculated based on each donor's own snRNAseq data.",
-                  y.expression.scale = "What type of scaling was used in the bulk RNAseq expression data. 'counts' means unadjusted counts from SPEQeasy, 'RPKM' means the same as 'counts' but with RPKM-normalization, a type of gene/transcript-length normalization.",
-                  s.pred.set.name = "Label of the s cell size scale factor set used (see plots).",
-                  s.pred.set.values = "Values of the s cell size scale factor set used.",
-                  cell.label.type = "Identifier of the cell type labels for experiments.")
+data.dict <- list(z.reference.type = "Z reference type. 'shared' : identical across donors/samples",
+                  y.expression.scale = "Bulk RNAseq scaling. 'counts' : non-normalized; 'RPKM' : length-normalized",
+                  s.pred.set.name = "Cell size scale factor set (NULL = control).",
+                  s.pred.set.values = "Cell size scale factor values.",
+                  cell.label.type = "Cell type label")
 data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(data.dict)[ii], data.dict[[ii]])}))
 knitr::kable(data.dict)
 ```
@@ -70,8 +76,19 @@ ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
   facet_wrap(~s.set.label*assay.name.lutearg*bulk.scale.type)
 ```
 
+Scatterplot, true vs. predicted, neuron
+
 ```{r}
 ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label*assay.name.lutearg)
+```
+
+Scatterplot, predicted vs. true, neuron. This is similar to Fig 2 axes in 
+Sosina et al 2021.
+
+```{r}
+ggplot(df.k2, aes(x = neuron, y = true.neuron, color = bulk.scale.type)) + theme_bw() +
   geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
   facet_wrap(~s.set.label*assay.name.lutearg)
 ```
