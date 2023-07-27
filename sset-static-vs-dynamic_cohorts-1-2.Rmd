@@ -162,9 +162,12 @@ dfp <- rbind(
   data.frame(neuron = z.unadj[,"neuron"], glial = z.unadj[,"glial"], type = rep("unadj", nrow(z.unadj))),
   data.frame(neuron = z.static[,"neuron"], glial = z.static[,"glial"], type = rep("static", nrow(z.static)))
 )
-dfp <- rbind(dfp,
-             data.frame(neuron = z.dynamic[,"neuron"], glial = z.dynamic[,"glial"], 
-                        type = rep("dynamic", nrow(z.dynamic))))
+dfp <- rbind(
+  dfp,
+  data.frame(
+    neuron = z.dynamic[,"neuron"], glial = z.dynamic[,"glial"], 
+    type = rep("dynamic", nrow(z.dynamic)))
+)
 
 ggplot(dfp, aes(x = neuron, y = glial, color = type)) + 
   geom_point() + facet_wrap(~type) +
@@ -173,39 +176,4 @@ ggplot(dfp, aes(x = neuron, y = glial, color = type)) +
 ```
 
 # Compare predictions
-
-```{r}
-unique.donors <- unique(sce$Sample)
-dfp.tall <- do.call(rbind, lapply(unique.donors, function(donor.id){
-  scef <- sce[,sce$Sample==donor.id]
-  ypb <- ypb_from_sce(scef, "counts", "k2") %>% as.matrix()
-pred.unadj <- lute(z = z.unadj, y = ypb, 
-                   typemarker.algorithm = NULL)[[1]]@predictions.table
-pred.static <- lute(z = z.static, y = ypb, 
-                    typemarker.algorithm = NULL)[[1]]@predictions.table
-pred.dynamic <- lute(z = z.dynamic, y = ypb, 
-                     typemarker.algorithm = NULL)[[1]]@predictions.table
-dfp <- data.frame(value = unlist(c(pred.unadj, pred.static, pred.dynamic)),
-                  k2 = names(c(pred.unadj, pred.static, pred.dynamic)),
-                  type = c(rep("unadj", 2), rep("static", 2), rep("dynamic", 2)))
-dfp$donor.id <- donor.id
-dfp
-}))
-
-dfp.wide <- do.call(cbind, lapply(unique(dfp.tall$k2), function(celltype){
-  dfp.iter <- dfp.tall[dfp.tall$k2==celltype,][,c(1,3)]
-  colnames(dfp.iter) <- c(celltype, "type")
-  dfp.iter
-}))
-
-```
-
-```{r}
-ggplot(dfp.tall, aes(x = donor.id, y = value)) + geom_jitter() + geom_boxplot(color = "cyan") + facet_wrap(~type) + theme(axis.text.x = element_text(angle = 45,hjust=1))
-```
-
-```{r}
-ggplot(dfp.wide[,c(1,3,4)], aes(x = neuron, y = glial)) + geom_point() + 
-  geom_abline(intercept = 0, slope = 1) + facet_wrap(~type)
-```
 
