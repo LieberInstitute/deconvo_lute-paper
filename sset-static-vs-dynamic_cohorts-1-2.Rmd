@@ -2,11 +2,14 @@
 title: "covar-corr-demonstrations"
 author: "Sean Maden"
 date: "2023-07-26"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-This script shows how we to evaluate covariance/correlation relationships before/after transformations to two random variables representing expression 
-from two independent cell types.
+This notebook compares properties of two types of cell scale transformations. 
+For details about the transformation definitions and derivation of the dynamic 
+transform, see the notebook `covar-corr-demonstrations.rmd`.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -66,8 +69,8 @@ get.adj <- function(x1, y1, WeightX, WeightY){
   # pseudoalgorithm
   # given a vector of normalizations, get the fraction, x/y
   # now adjust vectors x1, y1 such that the ratio is achieved
-  X.adj <- adj.weight.x(WeightX = X, WeightY = Y, x1 = x1, y1 = y1)
-  Y.adj <- adj.weight.x(WeightX = Y, WeightY = X, x1 = x1, y1 = y1)
+  X.adj <- adj.weight.x(WeightX = WeightX, WeightY = WeightY, x1 = x1, y1 = y1)
+  Y.adj <- adj.weight.x(WeightX = WeightY, WeightY = WeightX, x1 = x1, y1 = y1)
   list(x.adj=x1*X.adj, y.adj=y1*Y.adj)
 }
 ```
@@ -175,5 +178,79 @@ ggplot(dfp, aes(x = neuron, y = glial, color = type)) +
   ggtitle("Marker expression")
 ```
 
-# Compare predictions
+# Compare bulk
+
+Test if linear adjustment of bulk is impacted by static or dynamic transformation.
+
+```{r}
+mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae.path <- file.path(base.path, mae.filename)
+mae <- get(load(mae.path))
+```
+
+Prep inputs
+
+```{r}
+y <- assays(mae[["bulk.rnaseq"]])[[1]]
+y <- y[rownames(z.unadj),] %>% as.matrix()
+# get lm fits
+z.iter <- z.unadj
+zlist <- list(z.unadj = z.unadj, z.static = z.static, z.dynamic = z.dynamic)
+```
+
+Perform experiment
+
+```{r}
+#-----------------
+# get wide results
+#-----------------
+dfres <- do.call(rbind, lapply(seq(ncol(y)), function(index.y){
+  dflm <- data.frame(y.expr.counts = as.numeric(y[,index.y]))
+  # get df of fitted values
+  dffit <- do.call(cbind, lapply(seq(length(zlist)), function(index.z){
+    z.iter <- zlist[[index.z]]
+    dflm$type1 <- z.iter[,1]; dflm$type2 <- z.iter[,2]
+    lm(y.expr.counts~type1+type2,data=dflm)$fitted.values
+  }))
+  # format fitted results
+  colnames(dffit) <- paste0("fitted.", names(zlist))
+  z.label.iter <- names(zlist)
+  dfr <- cbind(dflm, dffit)
+  dfr$sample.id <- colnames(y)[index.y]
+  dfr$marker.id <- rownames(z.unadj)
+  return(dfr)
+}))
+# get differences by z type
+dfres$diff.z.static.unadj <- dfres$fitted.z.static-dfres$fitted.z.unadj
+dfres$diff.z.dynamic.unadj <- dfres$fitted.z.dynamic-dfres$fitted.z.unadj
+dfwide <- dfres
+
+#-----------------
+# get tall results
+#-----------------
+# dftall <- do.call(rbind, lapply(, function()))
+dftall <- reshape2::melt(dfres)
+```
+
+Plot results for single sample
+
+```{r}
+# plots the differences by z treatment
+# defines the dfp filter
+dftall.filter <- dftall$sample.id=="2107UNHS-0291_Br2720_Mid_Bulk"
+dftall.filter <- dftall.filter & dftall$variable %in% c("diff.z.static.unadj", "diff.z.dynamic.unadj")
+dfp.new <- dftall[dftall.filter,]
+ggplot(dfp.new, aes(x = variable, y = value)) + geom_jitter() + geom_boxplot(alpha = 0) + facet_wrap(~sample.id)
+
+# plots scatterplot of adj diffs by marker 
+dfwide.filter <- dfwide$sample.id=="2107UNHS-0291_Br2720_Mid_Bulk"
+dfp.new <- dfwide[dfwide.filter,]
+ggplot(dfp.new, aes(x = diff.z.static.unadj, y = diff.z.dynamic.unadj)) + 
+  geom_jitter() + geom_point() + geom_abline(slope = 1, intercept = 0) +
+  geom_text(aes(label = marker.id))
+
+# ggpairs for marker expression
+colnames.filter <- c("fitted.z.unadj", "fitted.z.static", "fitted.z.dynamic")
+pairs(dfwide[,colnames.filter])
+```
 
