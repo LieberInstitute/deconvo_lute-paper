@@ -1,5 +1,6 @@
 ---
-title: "R Notebook"
+title: "Expression scaling experiments, including SCE RPKM"
+author: "Sean Maden"
 output:
   pdf_document: default
   html_document:
@@ -103,6 +104,15 @@ data.dict <- list(z.reference.type = "Z reference type. 'shared' : identical acr
                   sce.scale = "Expression scale for sce. 'counts' : non-normalized; 'RPKM' : length-normalized")
 data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(data.dict)[ii], data.dict[[ii]])}))
 knitr::kable(data.dict)
+```
+
+# Set plot variable labels
+
+Add colnames as labels for variable values.
+
+```{r}
+colindex.vector <- c(3, 7, 11, 14)
+for(c in colindex.vector){df.k2[,c] <- paste0(colnames(df.k2)[c], ":", df.k2[,c])}
 ```
 
 # Condition 1 Summaries -- Counts and RPKM-counts
