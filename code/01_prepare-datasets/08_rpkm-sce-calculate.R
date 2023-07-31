@@ -1,5 +1,11 @@
 library(edgeR)
 
+
+# multi assay experiment path
+mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", mae.filename)
+mae <- get(load(mae.path))
+
 # load data
 sce <- mae[["sn1.rnaseq"]]
 rse <- mae[["bulk.rnaseq"]]; rse <- rse[rownames(sce),]
@@ -11,15 +17,17 @@ sce.libsize <- get(load(sce.libsize.path))
 marker.lengths <- rowData(rse)$Length
 library.sizes <- rep(1000, ncol(sce.counts))
 
-# try with full sce object
-sce.input <- DGEList(counts = sce.counts, 
-                     lib.sizes = as.numeric(sce.libsize),
+#--------------
+# full sce data
+#--------------
+# match libsize data
+ls.final <- sce.libsize[colnames(sce.counts)]
+identical(names(ls.final), colnames(sce.counts))
+# get input
+sce.input <- DGEList(counts = sce.counts, lib.size = ls.final,
                      genes = data.frame(Length=rowData(rse)$Length))
-#sce.input <- calcNormFactors(sce.input)
-sce.rpkm <- rpkm(y = sce.input, log = F)
-# returns error
-#Error in if (median(f75) < 1e-20) { : 
-#    missing value where TRUE/FALSE needed
+# get rpkm
+sce.rpkm <- rpkm(y = sce.input, gene.length = sce.input$genes$Length, log = T)
 
 #-----------------------------------
 # try with z reference dataset -- k2
@@ -31,7 +39,7 @@ libsize.vector <- sapply(unique(sce[["k2"]]), function(cell.type){
 sce.z.counts <- lute:::.get_z_from_sce(sce, "counts", "k2")
 rpkm.input <- DGEList(counts = sce.z.counts, lib.sizes = libsize.vector,
                       genes = data.frame(Length=marker.lengths))
-sce.z.rpkm <- rpkm(y = rpkm.input, log = F)
+sce.z.rpkm <- rpkm(y = rpkm.input, gene.length = rpkm.input$genes$Length, log = T)
 # save
 sce.z.rpkm.path <- file.path("./deconvo_method-paper/outputs/01_prepare-datasets/sce-z-rpkm-k2_dlpfc-cohort1.rda")
 save(sce.z.rpkm, file = sce.z.rpkm.path)
