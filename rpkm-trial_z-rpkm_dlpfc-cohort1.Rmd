@@ -15,7 +15,9 @@ mae <- get(load(mae.final.filepath))
 
 This notebook shows the impact of taking the log normalization (on both $Z$ and 
 $Y$) when using either non-normalized counts or RPKM (length-normalized) counts 
-for $Y$.
+for $Y$. 
+
+This uses the RPKM-normalized counts for the SingleCellExperiment reference expression.
 
 # Load/source scripts
 
@@ -26,6 +28,12 @@ source(file.path(base.path, "00_helper-functions.R"))
 # prep data
 source(file.path(base.path, "01-01_prepare-mae.R")) # prep mae data
 source(file.path(base.path, "01-02_prep-s-vector.R"))
+# replace sce counts
+sce.rpkm.path <- "outputs/01_prepare-datasets/sce-rpkm-counts_dlpfc-cohort1.rda"
+sce.rpkm <- get(load(sce.rpkm.path))
+assays(sce.iter)[["counts"]] <- as.matrix(sce.rpkm)
+```
+```{r}
 # run experiments
 source(file.path(base.path, "02-01-01_rse-counts_counts-yz_shared-reference-experiments.R"))
 source(file.path(base.path, "02-03-01_rse-rpkm_counts-yz_shared-reference-experiments.R"))
@@ -33,10 +41,6 @@ source(file.path(base.path, "02-01-02_rse-counts_logcounts-lutearg_shared-refere
 source(file.path(base.path, "02-03-02_rse-rpkm_logcounts-lutearg_shared-reference-experiments.R"))
 # bind results
 source(file.path(base.path, "03_prep-experiment-results_rpkm-trail_cohort1.R"))
-
-# load z rpkm-scaled
-sce.z.rpkm.path <- file.path("./outputs/01_prepare-datasets/sce-z-rpkm-k2_dlpfc-cohort1.rda")
-sce.z.rpkm <- get(load(sce.z.rpkm.path))
 ```
 
 Filter relevant results.
@@ -49,10 +53,13 @@ df.k2 <- df.k2[df.k2$s.set.values %in% s.set.keep,]
 Experiment table:
 
 ```{r}
+df.k2$sce.scale <- "rpkm"
 expt.table <- table(df.k2$s.set.values, df.k2$experiment.type, 
-                    df.k2$bulk.scale.type, df.k2$assay.name.lutearg) %>% 
+                    df.k2$bulk.scale.type, df.k2$assay.name.lutearg, 
+                    df.k2$sce.scale) %>% 
   as.data.frame()
-colnames(expt.table) <- c("s.set.values", "reference.type", "bulk.scale.type", "assay.name.lutearg", "num.results")
+colnames(expt.table) <- c("s.set.values", "reference.type", "bulk.scale.type", 
+                          "assay.name.lutearg", "num.results", "sce.scale")
 knitr::kable(expt.table)
 ```
 
@@ -65,7 +72,8 @@ data.dict <- list(z.reference.type = "Z reference type. 'shared' : identical acr
                   y.expression.scale = "Bulk RNAseq scaling. 'counts' : non-normalized; 'RPKM' : length-normalized",
                   s.pred.set.name = "Cell size scale factor set (NULL = control).",
                   s.pred.set.values = "Cell size scale factor values.",
-                  cell.label.type = "Cell type label")
+                  cell.label.type = "Cell type label",
+                  sce.scale = "Expression scale for sce")
 data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(data.dict)[ii], data.dict[[ii]])}))
 knitr::kable(data.dict)
 ```

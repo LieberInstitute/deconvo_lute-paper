@@ -29,6 +29,11 @@ sce.input <- DGEList(counts = sce.counts, lib.size = ls.final,
 # get rpkm
 sce.rpkm <- rpkm(y = sce.input, gene.length = sce.input$genes$Length, log = T)
 
+# save
+sce.name <- "sce-rpkm-counts_dlpfc-cohort1.rda"
+sce.path <- file.path("./deconvo_method-paper/outputs/01_prepare-datasets", sce.name)
+save(sce.rpkm, file = sce.path)
+
 #-----------------------------------
 # try with z reference dataset -- k2
 #-----------------------------------

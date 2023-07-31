@@ -6,6 +6,12 @@ assay.name <- "logcounts"
 celltype.variable <- "k2"
 sample.id.vector <- unique(colData(mae)[,1][complete.cases(mae)])
 sample.id <- sample.id.vector[1]
+
+# assign z rpkm to sce counts
+sce.z.rpkm.path <- file.path("./deconvo_method-paper/outputs/01_prepare-datasets/sce-rpkm-counts_dlpfc-cohort1.rda")
+sce.z.rpkm <- get(load(sce.z.rpkm.path))
+assays(sce)[["counts"]] <- sce.z.rpkm
+
 df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.index){
   # format cell sizes
   s.set.name <- names(list.s.pred)[s.index]
