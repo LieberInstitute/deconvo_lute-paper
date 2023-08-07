@@ -21,7 +21,7 @@ source(file.path(base.path, script.name))
 # get some S series
 
 ```{r}
-s.glial.series <- seq(1,100,1)
+s.glial.series <- seq(1,10,1e-1)
 s.neuron.series <- rev(s.glial.series)
 dfs.series <- do.call(rbind, lapply(seq(length(s.glial.series)), function(index1){
   do.call(rbind, lapply(s.neuron.series, function(index2){

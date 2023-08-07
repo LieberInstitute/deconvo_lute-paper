@@ -1,0 +1,165 @@
+---
+title: "s-optimize-bulk-fit_pseudobulk-cohort1"
+author: "Sean"
+date: "2023-08-02"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load
+
+```{r}
+setwd("..")
+
+# source pseudobulk k2 script
+base.path <- file.path("deconvo_method-paper", "code", "02_pseudobulk-predictions")
+script.name <- "01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R"
+source(file.path(base.path, script.name))
+```
+
+```{r}
+# load mae
+new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae.final.filepath <- file.path("outputs", "01_prepare-datasets", new.mae.filename)
+mae <- get(load(mae.final.filepath))
+```
+
+# get some S series
+
+```{r}
+s.glial.series <- seq(1,20,1)
+s.neuron.series <- rev(s.glial.series)
+dfs.series <- do.call(rbind, lapply(seq(length(s.glial.series)), function(index1){
+  do.call(rbind, lapply(seq(length(s.neuron.series)), function(index2){
+    c("glial" = s.glial.series[index1], "neuron" = s.neuron.series[index2])
+  }))
+})) %>% as.data.frame()
+plot(dfs.series$glial, dfs.series$neuron)
+```
+
+# Get results for 1 sample -- pseudobulk
+
+```{r}
+# check for results file before build
+base.path <- file.path("outputs", "11_s-optimize-noteboook")
+save.name <- paste0("df-s-optimize-results_pbfit_numiter-",
+                    nrow(dfs.series),
+                    "_1-sample-dlpfc-cohort1.rda")
+save.path <- file.path(base.path, save.name)
+# set sample id
+sample.id <- "Br2720_mid"
+sce.iter <- sce.k2[,sce.k2$Sample==sample.id]
+  
+ypb.unadj <- ypb_from_sce(sce.iter, "counts", "k2")  
+if(!file.exists(save.path)){
+  ypb.unadj <- ypb_from_sce(sce.iter, "counts", "k2")
+  z.unadj <- get_z_from_sce(sce.iter, "counts", "k2")
+  dat.unadj <- data.frame(y = ypb.unadj[,1], z1 = z.unadj[,1], 
+                          z2 = z.unadj[,2])
+  ypb.fit.unadj <- lm(y~z1+z2, data = dat.unadj)$fit
+  
+  df.res <- do.call(rbind, lapply(seq(nrow(dfs.series)), function(index){
+    message(index)
+    s.iter <- dfs.series[index,] %>% as.vector() %>% unlist()
+    z.adj <- lute:::.zstransform(z.unadj, s.iter)
+    dat.adj <- data.frame(y = ypb.unadj[,1], z1 = z.adj[,1], 
+                          z2 = z.adj[,2])
+    ypb.fit.adj <- lm(y~z1+z2, data = dat.adj)$fit
+    ypb.diff <- ypb.fit.unadj - ypb.fit.adj
+    c(mean(ypb.diff), median(ypb.diff), sd(ypb.diff), var(ypb.diff),
+      s.iter)
+  })) %>% as.data.frame()
+  colnames(df.res) <- c("mean.diff.unadj.adj", "median.diff.unadj.adj",
+                        "sd.diff.unadj.adj", "var.diff.unadj.adj",
+                        "s.glial", "s.neuron")
+  df.res$sample.id <- sample.id
+  # save
+  save(df.res, file = save.path)
+} else{
+  df.res <- get(load(save.path))
+}
+df.res.pb <- df.res
+```
+
+Plot results.
+
+```{r}
+ggplot(df.res, aes(s.neuron, s.glial)) + theme_bw() +
+  geom_raster(aes(fill = median.diff.unadj.adj)) +
+  scale_fill_gradientn(colours = rainbow(5))
+```
+
+```{r}
+df.res$abs.median.diff.unadj.adj <- abs(df.res$median.diff.unadj.adj)
+ggplot(df.res, aes(s.neuron, s.glial)) + theme_bw() +
+  geom_raster(aes(fill = abs.median.diff.unadj.adj)) +
+  scale_fill_gradientn(colours = rainbow(5))
+```
+
+# Get results for 1 sample -- real bulk
+
+```{r}
+# check for results file before build
+base.path <- file.path("outputs", "11_s-optimize-noteboook")
+save.name <- paste0("df-s-optimize-results_pbfit-ybulkrnaseq_numiter-",
+                    nrow(dfs.series),
+                    "_1-sample-dlpfc-cohort1.rda")
+save.path <- file.path(base.path, save.name)
+# set sample id
+sample.id <- "Br2720_mid"
+sce.iter <- sce.k2[,sce.k2$Sample==sample.id]
+# get y.unadj
+y.unadj <- mae[["bulk.rnaseq"]]
+y.filter <- y.unadj$batch.id2==sample.id
+y.unadj <- y.unadj[rownames(sce.iter),y.filter[1]]
+identical(rownames(y.unadj), rownames(sce.iter))
+
+if(!file.exists(save.path)){
+  ypb.unadj <- assays(y.unadj)[["counts"]]
+  z.unadj <- get_z_from_sce(sce.iter, "counts", "k2")
+  dat.unadj <- data.frame(y = ypb.unadj[,1], z1 = z.unadj[,1], 
+                          z2 = z.unadj[,2])
+  ypb.fit.unadj <- lm(y~z1+z2, data = dat.unadj)$fit
+  
+  df.res <- do.call(rbind, lapply(seq(nrow(dfs.series)), function(index){
+    message(index)
+    s.iter <- dfs.series[index,] %>% as.vector() %>% unlist()
+    z.adj <- lute:::.zstransform(z.unadj, s.iter)
+    dat.adj <- data.frame(y = ypb.unadj[,1], z1 = z.adj[,1], 
+                          z2 = z.adj[,2])
+    ypb.fit.adj <- lm(y~z1+z2, data = dat.adj)$fit
+    ypb.diff <- ypb.fit.unadj - ypb.fit.adj
+    c(mean(ypb.diff), median(ypb.diff), sd(ypb.diff), var(ypb.diff),
+      s.iter)
+  })) %>% as.data.frame()
+  colnames(df.res) <- c("mean.diff.unadj.adj", "median.diff.unadj.adj",
+                        "sd.diff.unadj.adj", "var.diff.unadj.adj",
+                        "s.glial", "s.neuron")
+  df.res$sample.id <- sample.id
+  # save
+  save(df.res, file = save.path)
+} else{
+  df.res <- get(load(save.path))
+}
+df.res.rnaseq <- df.res
+```
+
+Plot results.
+
+```{r}
+ggplot(df.res, aes(s.neuron, s.glial)) + theme_bw() +
+  geom_raster(aes(fill = median.diff.unadj.adj)) +
+  scale_fill_gradientn(colours = rainbow(5))
+```
+
+```{r}
+df.res$abs.median.diff.unadj.adj <- abs(df.res$median.diff.unadj.adj)
+ggplot(df.res, aes(s.neuron, s.glial)) + theme_bw() +
+  geom_raster(aes(fill = abs.median.diff.unadj.adj)) +
+  scale_fill_gradientn(colours = rainbow(5))
+```
