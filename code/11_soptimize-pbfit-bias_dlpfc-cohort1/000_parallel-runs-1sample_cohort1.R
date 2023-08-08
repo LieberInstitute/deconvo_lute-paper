@@ -54,6 +54,12 @@ df.res <- do.call(rbind, mclapply(seq(nrow(dfs)), # seq(nrow(dfs)),
 }))
 colnames(df.res) <- paste0(colnames(df.res), ".pred.nnls")
 df.res <- cbind(df.res, dfs)
+df.true <- sce[[celltype.variable]] %>% table() %>% prop.table() %>% as.data.frame()
+rownames(df.true) <- df.true[,1]
+df.res$glial.true <- df.true["glial",2]
+df.res$neuron.true <- df.true["neuron",2]
+df.res$bias.glial.true.pred <- df.res$glial.true - df.res$glial.pred.nnls
+df.res$bias.neuron.true.pred <- df.res$neuron.true - df.res$neuron.pred.nnls
 
 # make sequential again (i.e. cancels parallel)
 registerDoSEQ()

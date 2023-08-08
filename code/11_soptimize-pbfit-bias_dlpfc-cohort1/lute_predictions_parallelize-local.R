@@ -2,16 +2,13 @@
 
 # Author: Sean Maden
 #
-# Get full run of bias predictions.
+# Time a limited run of nnls predictions using parallelization on Windows.
 #
 
 library(snow)
 
-#------
-# setup
-#------
 # helper functions
-dfs.series <- function(s.glial.series = seq(1, 20, 1)){
+dfs.series <- function(s.glial.series = seq(1, 20, 0.2)){
   s.neuron.series <- rev(s.glial.series)
   dfs.series <- do.call(rbind, lapply(seq(length(s.glial.series)), function(index1){
     do.call(rbind, lapply(seq(length(s.neuron.series)), function(index2){
@@ -22,6 +19,7 @@ dfs.series <- function(s.glial.series = seq(1, 20, 1)){
   return(dfs.series)
 }
 dfs <- dfs.series()
+dim(dfs)
 
 # load data
 sce.markers.list.path <- file.path("deconvo_method-paper", 
@@ -30,30 +28,21 @@ sce.markers.list.path <- file.path("deconvo_method-paper",
 list.sce.markers <- get(load(sce.markers.list.path))
 sce.k2 <- list.sce.markers$k2
 
-#------------
-# main script
-#------------
 # set params
 sce <- sce.k2
 assay.name <- "counts"
 celltype.variable <- "k2"
 
-# begin parallel
+# set dfs s variable
+dfs <- dfs.series()
+
+# time a limited run
 cl <- makeCluster(detectCores())
 registerDoParallel(cl)
-
-# get full run
-df.res <- do.call(rbind, mclapply(seq(nrow(dfs)), # seq(nrow(dfs)), 
-                         function(i){
+system.time(mclapply(1:100, function(i){
   s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
-  ypb <- ypb_from_sce(sce, assay.name, celltype.variable, S = s.vector) %>% as.matrix()
-  suppressMessages(
-    lute(sce, y = ypb, celltype.variable = celltype.variable, s = s.vector,
-         typemarker.algorithm = NULL)$deconvolution.results@predictions.table
-    )
+  ypb <- ypb_from_sce(sce, assay.name, celltype.variable) %>% as.matrix()
+  suppressMessages(lute(sce.k2, y = ypb, celltype.variable = celltype.variable, 
+                        typemarker.algorithm = NULL)$deconvolution.results@predictions.table)
 }))
-colnames(df.res) <- paste0(colnames(df.res), ".pred.nnls")
-df.res <- cbind(df.res, dfs)
-
-# make sequential again (i.e. cancels parallel)
 registerDoSEQ()
