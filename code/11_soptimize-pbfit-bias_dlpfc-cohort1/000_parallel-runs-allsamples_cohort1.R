@@ -83,5 +83,6 @@ df.res.samples <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
 
 # save
 save.filename <- "df-result_s-opt-bias_cohort1.rda"
-save.path <- file.path("deconvo_method-paper", "outputs", "11_soptimize-pbfit-bias_dlpfc-cohort1", save.filename)
+save.path <- file.path("deconvo_method-paper", "outputs", 
+                       "11_soptimize-pbfit-bias_dlpfc-cohort1", save.filename)
 save(df.res.samples, file = save.path)

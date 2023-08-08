@@ -1,0 +1,49 @@
+---
+title: "S optimize bias, all samples, cohort1"
+author: "Sean Maden"
+date: "2023-08-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
+```
+
+# load results
+
+```{r}
+setwd("..")
+load.filename <- "df-result_s-opt-bias_cohort1.rda"
+load.path <- file.path("deconvo_method-paper", "outputs", "11_soptimize-pbfit-bias_dlpfc-cohort1", load.filename)
+df.res <- get(load(load.path))
+```
+
+# plot results
+
+```{r}
+dfp.bias <- list.results.soptimize$bias
+cell.types <- c("neuron", "glial")
+dfp <- rbind(data.frame(cell.type = rep("neuron", nrow(dfp.bias)), 
+                        s.factor = dfp.bias$s.neuron,
+                        bias = dfp.bias$bias.none.scaled),
+             data.frame(cell.type = rep("glial", nrow(dfp.bias)), 
+                        s.factor = dfp.bias$s.glial,
+                        bias = dfp.bias$bias.none.scaled)
+             )
+
+ggplot(dfp, aes(x = s.factor, y = bias)) + geom_point() + geom_line() +
+  facet_wrap(~cell.type)
+```
+
+Heatmap
+
+```{r}
+ggplot(dfp.bias, aes(s.neuron, s.glial)) + theme_bw() +
+  geom_raster(aes(fill = bias.none.scaled)) +
+  scale_fill_gradientn(colours = rainbow(5))
+
+ggplot(dfp.bias, aes(s.neuron, s.glial, color = bias.none.scaled)) + 
+  theme_bw() + geom_point()
+```
