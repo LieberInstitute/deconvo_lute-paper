@@ -23,7 +23,8 @@ dfs.series <- function(s.glial.series = seq(1, 20, 1)){
   return(dfs.series)
 }
 # get bias computations in parallel
-parallel_bias <- function(sce, dfs, celltype.variable = "k2", assay.name = "counts"){
+parallel_bias <- function(sce, dfs, celltype.variable = "k2", 
+                          assay.name = "counts", s.vector.ypb = c("glial" = 3, "neuron" = 10)){
   # begin parallel
   cl <- makeCluster(detectCores())
   registerDoParallel(cl)
@@ -33,7 +34,7 @@ parallel_bias <- function(sce, dfs, celltype.variable = "k2", assay.name = "coun
                              function(i){
                                s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
                                ypb <- ypb_from_sce(sce, assay.name, 
-                                                   celltype.variable, S = s.vector) %>% as.matrix()
+                                                   celltype.variable, S = s.vector.ypb) %>% as.matrix()
                                suppressMessages(
                                  lute(sce, y = ypb, celltype.variable = celltype.variable, s = s.vector,
                                       typemarker.algorithm = NULL)$deconvolution.results@predictions.table
