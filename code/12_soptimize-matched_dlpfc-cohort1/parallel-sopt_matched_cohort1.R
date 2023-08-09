@@ -4,8 +4,15 @@
 #
 # Get full run of bias predictions.
 #
+# CRUCIAL NOTES, READ THIS:
+#   * Z is the same across experiments
+#   * Y is different across experiments
+#
+#
 
-library(snow)
+
+libv <- c("snow", "dplyr", "parallel", "doParallel")
+sapply(libv, library, character.only = T)
 
 #------
 # setup
@@ -22,21 +29,23 @@ dfs.series <- function(s.glial.series = seq(1, 20, 1)){
   #plot(dfs.series$glial, dfs.series$neuron)
   return(dfs.series)
 }
+
 # get bias computations in parallel
-parallel_bias <- function(sce, dfs, celltype.variable = "k2", 
-                          assay.name = "counts", s.vector.ypb = c("glial" = 3, "neuron" = 10)){
+parallel_bias_matched <- function(sce, yunadj, dfs, 
+                                  celltype.variable = "k2",
+                                  assay.name = "counts", 
+                                  s.vector.ypb = c("glial" = 3, "neuron" = 10)){
   # begin parallel
   cl <- makeCluster(detectCores())
   registerDoParallel(cl)
   # get full run
+  yunadj <- as.matrix(yunadj)
   df.res <- do.call(rbind, 
                     mclapply(seq(nrow(dfs)), 
                              function(i){
                                s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
-                               ypb <- ypb_from_sce(sce, assay.name, 
-                                                   celltype.variable, S = s.vector.ypb) %>% as.matrix()
                                suppressMessages(
-                                 lute(sce, y = ypb, celltype.variable = celltype.variable, s = s.vector,
+                                 lute(sce, y = yunadj, celltype.variable = celltype.variable, s = s.vector,
                                       typemarker.algorithm = NULL)$deconvolution.results@predictions.table
                                )
                              }))
@@ -59,24 +68,17 @@ dfs <- dfs.series()
 #----------
 # load data
 #----------
-sce.markers.list.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", 
-                                   "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
-list.sce.markers <- get(load(sce.markers.list.path))
-sce.k2 <- list.sce.markers$k2
-
-
-
 # load mae
 new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
-mae.final.filepath <- file.path("outputs", "01_prepare-datasets", new.mae.filename)
+mae.final.filepath <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", new.mae.filename)
 mae <- get(load(mae.final.filepath))
-
+sce <- mae[["sn1.rnaseq"]]
+y.unadj <- mae[["bulk.rnaseq"]]
 
 #------------
 # main script
 #------------
 # set params
-sce <- sce.k2
 assay.name <- "counts"
 celltype.variable <- "k2"
 sample.id.variable <- "Sample"
@@ -85,7 +87,7 @@ sample.id.vector <- unique(sce[[sample.id.variable]])
 df.res.samples <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
   message(sample.id)
   sce.iter <- sce[,sce[[sample.id.variable]]==sample.id]
-  df.iter <- parallel_bias(sce.iter, dfs, 
+  df.iter <- parallel_bias_matched(sce.iter, y.unadj, dfs, 
                            celltype.variable = celltype.variable, 
                            assay.name = assay.name)
   df.iter$sample.id <- sample.id
@@ -95,5 +97,5 @@ df.res.samples <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
 # save
 save.filename <- "df-result_s-opt-bias_cohort1.rda"
 save.path <- file.path("deconvo_method-paper", "outputs", 
-                       "11_soptimize-pbfit-bias_dlpfc-cohort1", save.filename)
+                       "12_soptimize-matched_dlpfc-cohort1", save.filename)
 save(df.res.samples, file = save.path)
