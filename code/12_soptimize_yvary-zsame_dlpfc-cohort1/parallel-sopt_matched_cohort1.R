@@ -97,6 +97,9 @@ df.res.samples$cell.compartment <- y.unadj$expt_condition
 df.res.samples$block.location <- y.unadj$location
 df.res.samples$library.preparation <- y.unadj$library_prep
 
+# append data transformations
+df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
+
 # save
 save.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 save.path <- file.path("deconvo_method-paper", "outputs", 

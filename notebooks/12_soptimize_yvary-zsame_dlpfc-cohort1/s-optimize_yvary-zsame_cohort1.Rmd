@@ -27,19 +27,28 @@ load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
 df.res <- get(load(load.path))
 df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
+df.res$s.fraction.neuron.glial <- df.res$neuron/df.res$glial
+df.res$log.s.fraction <- log(df.res$s.fraction.neuron.glial)
 ```
 
 # Inspect input data
 
 This is the inspect data step
+
 ```{r}
-table(df.res$sample.id)
+table(df.res$sample.id) %>% head()
+length(unique(df.res$sample.id))
+```
+
+```{r}
+summary(df.res$s.fraction.neuron.glial)
+```
+
+```{r}
+summary(log(df.res$s.fraction.neuron.glial))
 ```
 
 # Plot results, single Y sample
-
-
-
 
 This is the filter step
 
@@ -50,9 +59,41 @@ df.plot <- df.res[df.res.filter,]
 dim(df.plot)
 ```
 
-
+Plot heatmaps
 
 ```{r}
+ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
+  geom_raster(aes(fill = error.neuron)) +
+  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
+```
+
+Plot point and lineplots
+
+```{r}
+ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
+  geom_point(alpha = 1) + geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+```
+
+Plot points with glial value as color
+
+```{r}
+ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = glial)) + 
+  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+```
+
+Plot points with s.fraction value as color
+
+```{r}
+ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = s.fraction.neuron.glial)) + 
+  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+```
+
+Plot fraction versus bias
+
+```{r}
+ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
+  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
 
 # plot results
