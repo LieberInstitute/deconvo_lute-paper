@@ -13,6 +13,8 @@ This notebooks shows results summaries from S (cell size scale factor normalizat
 * Y is varied (from real RNAseq data)
 
 ```{r setup, include=FALSE}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -25,6 +27,32 @@ load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
 df.res <- get(load(load.path))
 df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
+```
+
+# Inspect input data
+
+This is the inspect data step
+```{r}
+table(df.res$sample.id)
+```
+
+# Plot results, single Y sample
+
+
+
+
+This is the filter step
+
+```{r}
+sample.id <- df.res$sample.id[1]
+df.res.filter <- df.res$sample.id==sample.id
+df.plot <- df.res[df.res.filter,]
+dim(df.plot)
+```
+
+
+
+```{r}
 ```
 
 # plot results

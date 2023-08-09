@@ -89,9 +89,10 @@ sample.id.vector <- unique(sce[[sample.id.variable]])
 df.res.samples <- parallel_bias_matched(sce, y.unadj, dfs,
                                         celltype.variable = celltype.variable,
                                         assay.name = assay.name)
-df.res.samples$sample.id <- rownames(df.res.samples)
+
 
 # append coldata from y.unadj (see MAE data)
+df.res.samples$sample.id <- rep(colnames(y.unadj), nrow(dfs))
 df.res.samples$cell.compartment <- y.unadj$expt_condition
 df.res.samples$block.location <- y.unadj$location
 df.res.samples$library.preparation <- y.unadj$library_prep
