@@ -1,0 +1,121 @@
+---
+title: "s-optimize_yvary-zsame_cohort1"
+author: "Sean Maden"
+date: "2023-08-09"
+output: html_document
+---
+
+# Key experiment notes
+
+This notebooks shows results summaries from S (cell size scale factor normalization) optimization experiments with the following conditions:
+
+* Z is held constant (from a single snRNAseq sample).
+* Y is varied (from real RNAseq data)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load results
+
+```{r}
+setwd("..")
+setwd("..")
+load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
+load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
+df.res <- get(load(load.path))
+df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
+```
+
+# plot results
+
+```{r}
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  geom_smooth(method = "glm", se = T)
+
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
+
+ggplot(df.res, aes(x = neuron, y = bias.glial.true.pred, color = sample.id)) + 
+  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
+```
+
+heatmap
+
+```{r}
+ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
+  geom_raster(aes(fill = bias.neuron.true.pred)) +
+  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
+
+ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
+  geom_raster(aes(fill = abs.bias.neuron)) +
+  scale_fill_gradientn(colours = rainbow(5)) + 
+  facet_wrap(~sample.id) +
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
+  geom_abline(slope = 1, intercept = 0)
+
+```
+
+# Plots highlighting lowest bias values
+
+```{r}
+highlight.color <- "red"
+```
+
+Highlight minimum across blocks.
+
+```{r}
+df.res$minimum.bias <- df.res$bias.neuron.true.pred==min(df.res$abs.bias.neuron)
+# red and gray color scheme
+ggplot(df.res, aes(x = glial, y = neuron, color = minimum.bias)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
+  facet_wrap(~sample.id)
+```
+
+Highlight lowest 10th quantile across blocks.
+
+```{r}
+# quantile filter
+quant <- quantile(df.res$abs.bias.neuron, seq(0,1,0.1))
+df.res$lowest.decile.bias <- df.res$abs.bias.neuron <= quant[2]
+# red and gray color scheme
+ggplot(df.res, aes(x = glial, y = neuron, color = lowest.decile.bias)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
+  facet_wrap(~sample.id)
+```
+
+# Plots highlighting highest bias values
+
+```{r}
+highlight.color <- "blue"
+```
+
+Highlight maximum across blocks.
+
+```{r}
+df.res$maximum.bias <- df.res$abs.bias.neuron==max(df.res$abs.bias.neuron)
+# red and gray color scheme
+ggplot(df.res, aes(x = glial, y = neuron, color = maximum.bias)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
+  facet_wrap(~sample.id)
+```
+
+Highlight highest 10th quantile across blocks.
+
+```{r}
+# quantile filter
+quant <- quantile(df.res$abs.bias.neuron, seq(0,1,0.1))
+df.res$highest.decile <- df.res$abs.bias.neuron>=quant[10]
+# red and gray color scheme
+ggplot(df.res, aes(x = glial, y = neuron, color = highest.decile)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
+  facet_wrap(~sample.id)
+```
+
+
+
