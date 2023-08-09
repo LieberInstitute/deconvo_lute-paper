@@ -2,7 +2,9 @@
 title: "S optimize bias, all samples, cohort1"
 author: "Sean Maden"
 date: "2023-08-08"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -29,6 +31,12 @@ ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) +
 
 ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred)) + 
   geom_point() + geom_line() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred)) + 
+  geom_point() + geom_smooth(se = T) + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  geom_point() + geom_smooth(se = T) + geom_hline(yintercept = 0)
 ```
 
 heatmap
@@ -36,11 +44,23 @@ heatmap
 ```{r}
 ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
   geom_raster(aes(fill = bias.neuron.true.pred)) +
-  scale_fill_gradientn(colours = rainbow(5)) + 
-  facet_wrap(~sample.id)
+  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
 
 ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
   geom_raster(aes(fill = abs.bias.neuron)) +
   scale_fill_gradientn(colours = rainbow(5)) + 
-  facet_wrap(~sample.id)
+  facet_wrap(~sample.id) +
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
+
+ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
+  geom_raster(aes(fill = abs.bias.neuron)) +
+  scale_fill_gradientn(colours = rainbow(5)) + 
+  facet_wrap(~sample.id) +
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
+```
+
+Plots appending linear models
+
+```{r}
 ```
