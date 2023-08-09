@@ -27,16 +27,17 @@ df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
 
 ```{r}
 ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
-  geom_point() + geom_line() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-
-ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred)) + 
-  geom_point() + geom_line() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-
-ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred)) + 
-  geom_point() + geom_smooth(se = T) + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 
 ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
-  geom_point() + geom_smooth(se = T) + geom_hline(yintercept = 0)
+  theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  geom_smooth(method = "glm", se = T)
+
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
+
+ggplot(df.res, aes(x = neuron, y = bias.glial.true.pred, color = sample.id)) + 
+  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
 ```
 
 heatmap
@@ -51,13 +52,9 @@ ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
   geom_raster(aes(fill = abs.bias.neuron)) +
   scale_fill_gradientn(colours = rainbow(5)) + 
   facet_wrap(~sample.id) +
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
+  geom_abline(slope = 1, intercept = 0)
 
-ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
-  geom_raster(aes(fill = abs.bias.neuron)) +
-  scale_fill_gradientn(colours = rainbow(5)) + 
-  facet_wrap(~sample.id) +
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
 ```
 
 Plots appending linear models
