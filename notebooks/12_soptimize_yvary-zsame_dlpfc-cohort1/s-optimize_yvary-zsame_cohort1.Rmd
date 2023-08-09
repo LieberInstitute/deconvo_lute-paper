@@ -18,6 +18,16 @@ sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Plot settings
+
+This is the chunk that toggles plot settings
+
+```{r}
+highlight.color.low <- "red"
+highlight.color.high <- "blue"
+background.color.highlights <- "gray"
+```
+
 # Load results
 
 ```{r}
@@ -26,29 +36,21 @@ setwd("..")
 load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
 df.res <- get(load(load.path))
-df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
+```
+
+This is the chunk that sets more operants in `df.res`.
+
+```{r}
 df.res$s.fraction.neuron.glial <- df.res$neuron/df.res$glial
 df.res$log.s.fraction <- log(df.res$s.fraction.neuron.glial)
+df.res$minimum.error <- df.res$error.neuron==min(df.res$minimum.error)
+df.res$maximum.error <- df.res$error.neuron==max(df.res$maximum.error)
+deciles.error.neuron <- quantile(df.res$error.neuron, seq(0, 1, 0.1))
+df.res$minimum.decile.error <- df.res$error.neuron <= deciles.error.neuron[2]
+df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
 ```
 
-# Inspect input data
-
-This is the inspect data step
-
-```{r}
-table(df.res$sample.id) %>% head()
-length(unique(df.res$sample.id))
-```
-
-```{r}
-summary(df.res$s.fraction.neuron.glial)
-```
-
-```{r}
-summary(log(df.res$s.fraction.neuron.glial))
-```
-
-# Plot results, single Y sample
+# Plot results, first Y of type "block_position_type"
 
 This is the filter step
 
@@ -56,10 +58,20 @@ This is the filter step
 sample.id <- df.res$sample.id[1]
 df.res.filter <- df.res$sample.id==sample.id
 df.plot <- df.res[df.res.filter,]
-dim(df.plot)
 ```
 
-Plot heatmaps
+This is the inspect plot data step
+
+```{r}
+dim(df.plot)
+unique(df.plot$sample.id)
+table(df.res$sample.id) %>% head()
+length(unique(df.res$sample.id))
+summary(df.res$s.fraction.neuron.glial)
+summary(log(df.res$s.fraction.neuron.glial))
+```
+
+Plot heatmap -- error.neuron
 
 ```{r}
 ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
@@ -67,7 +79,6 @@ ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
   scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
   geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
 ```
-
 Plot point and lineplots
 
 ```{r}
@@ -95,6 +106,52 @@ Plot fraction versus bias
 ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
   geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
+
+
+# Plots across Y blocks -- all Bulk_polyA samples
+
+This is the filter step
+
+```{r}
+df.res.filter <- df.res$cell.compartment=="Bulk_polyA"
+df.plot <- df.res[df.res.filter,]
+```
+
+This is the inspect plot data step
+
+```{r}
+dim(df.plot)
+unique(df.plot$sample.id)
+table(df.res$sample.id) %>% head()
+length(unique(df.res$sample.id))
+summary(df.res$s.fraction.neuron.glial)
+summary(log(df.res$s.fraction.neuron.glial))
+```
+
+Plot heatmap -- error.neuron, lowest value
+
+```{r}
+ggplot(df.res, aes(x = glial, y = neuron, color = minimum.error)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, 
+                                               "FALSE" = background.color.highlights)) +
+  facet_wrap(~sample.id)
+```
+
+Plot heatmap -- error.neuron, lowest decile
+
+```{r}
+```
+
+Plot heatmap -- error.neuron, highest value
+
+```{r}
+```
+
+Plot heatmap -- error.neuron, highest decile
+
+```{r}
+```
+
 
 # plot results
 
