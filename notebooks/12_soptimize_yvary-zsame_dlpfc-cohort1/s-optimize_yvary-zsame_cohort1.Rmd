@@ -46,14 +46,17 @@ load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
 df.res <- get(load(load.path))
 
-# This is the chunk that sets more operants in `df.res`.
+# postprocess df.res
 df.res$s.fraction.neuron.glial <- df.res$neuron/df.res$glial
+df.res$s.fraction.neuron.glial.discrete <- as.character(round(df.res$s.fraction.neuron.glial, 2))
 df.res$log.s.fraction <- log(df.res$s.fraction.neuron.glial)
 df.res$minimum.error <- df.res$error.neuron==min(df.res$minimum.error)
 df.res$maximum.error <- df.res$error.neuron==max(df.res$maximum.error)
 deciles.error.neuron <- quantile(df.res$error.neuron, seq(0, 1, 0.1))
 df.res$minimum.decile.error <- df.res$error.neuron <= deciles.error.neuron[2]
 df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
+df.res$glial.group.label <- as.character(df.res$glial)
+df.res$neuron.group.label <- as.character(df.res$neuron)
 
 # set standard column labels
 df.res$cell.compartment.id <- df.res$library.preparation
@@ -112,81 +115,83 @@ dfp4 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
 
 # Plot filtered data
 
-Plot heatmap -- error.neuron
+HEATLUTION PLOTS
 
 ```{r, eval = F}
+# Plot heatmap -- error.neuron
 ggplot(dfp1, aes(x = glial, y = neuron)) + theme_bw() +
   geom_raster(aes(fill = error.neuron)) +
   scale_fill_gradientn(colours = rainbow(5)) + 
   geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
   ggtitle(dfp1$block.experiment)
-```
 
-Plot point and lineplots
-
-```{r, eval = F}
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
-  geom_point(alpha = 1) + geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-```
-
-Plot points with glial value as color
-
-```{r, eval = F}
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, color = glial)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-```
-
-Plot points with s.fraction value as color
-
-```{r, eval = F}
-ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = s.fraction.neuron.glial)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-```
-
-Plot fraction versus bias
-
-```{r, eval = F}
-ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-```
-
-## "sample-region-compartment-library"
-
-## "sample-compartment-library"
-
-##
-
-##
-
-Plot heatmap -- error.neuron, lowest value
-
-```{r, eval = F}
+# prep heatlution plots with highlights
 # recompute min/max/decile errors
-df.plot$minimum.error <- df.plot$error.neuron==min(df.plot$error.neuron)
-df.plot$maximum.error <- df.plot$error.neuron==max(df.plot$error.neuron)
-deciles.error.neuron <- quantile(df.plot$error.neuron, seq(0, 1, 0.1))
-df.plot$minimum.decile.error <- df.plot$error.neuron <= deciles.error.neuron[2]
-df.plot$maximum.decile.error <- df.plot$error.neuron >= deciles.error.neuron[10]
-
-
-# minimum
-ggplot(df.plot, aes(x = glial, y = neuron, color = minimum.error)) + 
+dfp1$minimum.error <- dfp1$error.neuron==min(dfp1$error.neuron)
+dfp1$maximum.error <- dfp1$error.neuron==max(dfp1$error.neuron)
+deciles.error.neuron <- quantile(dfp1$error.neuron, seq(0, 1, 0.1))
+dfp1$minimum.decile.error <- dfp1$error.neuron <= deciles.error.neuron[2]
+dfp1$maximum.decile.error <- dfp1$error.neuron >= deciles.error.neuron[10]
+# min highlights
+ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.error)) + 
   geom_point(alpha = 1) + scale_color_manual(values = c("TRUE" = highlight.color.low, 
                                                "FALSE" = background.color.highlights)) +
   facet_wrap(~anatomic.region)
-# min decile
-ggplot(df.plot, aes(x = glial, y = neuron, color = minimum.decile.error)) + 
+ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.decile.error)) + 
   geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, 
                                                "FALSE" = background.color.highlights)) +
   facet_wrap(~anatomic.region)
-# maximum
-ggplot(df.plot, aes(x = glial, y = neuron, color = maximum.error)) + 
+# max highlights
+ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.error)) + 
   geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
                                                "FALSE" = background.color.highlights)) +
   facet_wrap(~anatomic.region)
-# max decile
-ggplot(df.plot, aes(x = glial, y = neuron, color = maximum.decile.error)) + 
+ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.decile.error)) + 
   geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
                                                "FALSE" = background.color.highlights)) +
   facet_wrap(~anatomic.region)
+```
+
+
+
+
+```{r, eval = F}
+# SCATTERLUTION PLOTS
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
+  geom_point(alpha = 1) + geom_line() + theme_bw() + 
+  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+# Plot points with s.fraction value as color
+# continuous grouping
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, 
+                 color = s.fraction.neuron.glial, group = s.fraction.neuron.glial)) + 
+  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+```
+
+```{r}
+# DECONVOLINE PLOTS
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
+  geom_line() + theme_bw() + 
+  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial, color = glial)) + 
+  geom_line() + theme_bw() + 
+  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+# discrete grouping
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label, color = glial.group.label)) + 
+  geom_line() + theme_bw() + 
+  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label, color = glial.group.label)) + 
+  geom_line() + theme_bw() + 
+  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+```
+
+DECONVOCANO PLOTS
+
+```{r, eval = F}
+# DECONVOCANO_PLOTS
+# Scatterplot of fraction versus bias.
+ggplot(dfp1, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
+  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+# Scatterplot of fraction versus error
+ggplot(dfp1, aes(x = log.s.fraction, y = error.neuron)) + 
+  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
