@@ -7,7 +7,10 @@ output: html_document
 
 # Key experiment notes
 
-This notebooks shows results summaries from S (cell size scale factor normalization) optimization experiments with the following conditions:
+This notebook shows summaries from single experiment conditions.
+
+Results summaries from S (cell size scale factor normalization) optimization 
+experiments with the following conditions:
 
 * Z is held constant (from a single snRNAseq sample).
 * Y is varied (from real RNAseq data)
@@ -53,8 +56,13 @@ df.res$minimum.decile.error <- df.res$error.neuron <= deciles.error.neuron[2]
 df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
 
 # set standard column labels
-df.res$cell.compartment <- df.res$library.preparation
-df.res$library.preparation <- gsub(".*_", "", df.res$cell.compartment)
+df.res$cell.compartment.id <- df.res$library.preparation
+df.res$library.preparation.id <- gsub(".*_", "", df.res$cell.compartment)
+df.res$block.id <- df.res$sample.id.brnum
+df.res$experiment.id <- paste0(df.res$cell.compartment.id,"_",df.res$library.preparation.id)
+df.res$sample.experiment <- paste0(df.res$sample.id,"_",df.res$experiment.id)
+df.res$block.experiment <- paste0(df.res$block.id,"_",df.res$experiment.id)
+df.res$sample.compartment <- paste0(df.res$sample.id,"_",df.res$cell.compartment.id)
 
 # set plot parameters
 highlight.color.low <- "red"
@@ -80,25 +88,25 @@ This is the crucial data filter section. Could go into a script.
 Gets the first ID in the "sample-region-compartment-library" designation, saves as `dfp1`.
 
 ```{r}
-dfp1 <- parse(text=text.to.make.new.dfp("sample.labels")) %>% eval()
+dfp1 <- parse(text=text.to.make.new.dfp("block.experiment")) %>% eval()
 ```
 
-## Get plot data for "sample-compartment-library" as
+## Get plot data for `[SAMPLE]-[EXPERIMENT_CONDITION]` "sample-compartment-library" as
 
 ```{r}
-dfp2 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
+dfp2 <- parse(text=text.to.make.new.dfp("sample.experiment")) %>% eval()
 ```
 
-## Get plot data for "sample-compartment"
+## Get plot data for `[SAMPLE]-[COMPARTMENT]`
 
 ```{r}
-dfp3 <- parse(text=text.to.make.new.dfp("sample.id.brnum")) %>% eval()
+dfp3 <- parse(text=text.to.make.new.dfp("sample.compartment")) %>% eval()
 ```
 
-## Get plot data for "sample" 
+## Get plot data for `[SAMPLE]`
 
 ```{r}
-dfp3 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
+dfp4 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
 ```
 
 
@@ -107,23 +115,24 @@ dfp3 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
 Plot heatmap -- error.neuron
 
 ```{r, eval = F}
-ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
+ggplot(dfp1, aes(x = glial, y = neuron)) + theme_bw() +
   geom_raster(aes(fill = error.neuron)) +
-  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
+  scale_fill_gradientn(colours = rainbow(5)) + 
+  geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
+  ggtitle(dfp1$block.experiment)
 ```
 
 Plot point and lineplots
 
 ```{r, eval = F}
-ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
   geom_point(alpha = 1) + geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
 
 Plot points with glial value as color
 
 ```{r, eval = F}
-ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = glial)) + 
+ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, color = glial)) + 
   geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
 
