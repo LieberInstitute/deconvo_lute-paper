@@ -62,6 +62,8 @@ deconvo_heatmaps <- function(dfp1){
   heatmap6 <- ggplot(dfp1, 
                      aes(x = glial, y = neuron, color = all.highlight.categories, 
                                size = all.highlight.sizes)) + 
+    geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
+    geom_abline(slope = 1, intercept = 0) +
     geom_point() + 
     scale_color_manual(values = 
                          c("mid" = background.color.highlights, 
@@ -71,6 +73,7 @@ deconvo_heatmaps <- function(dfp1){
                            "max.dec" = highlight.color.high)) +
     scale_size_manual(values = c("min/max" = 2.5, 
                                  "min.dec/max.dec/mid" = 1))
+    
   
   #----------------
   # get return list

@@ -7,11 +7,16 @@ output: html_document
 
 # Key experiment notes
 
-This notebook shows summaries from single experiment conditions.
+This notebook shows summaries from SINGLE EXPERIMENT CONDITIONS in the bulk data.
+
+
+
+
+
+
 
 Results summaries from S (cell size scale factor normalization) optimization 
 experiments with the following conditions:
-
 * Z is held constant (from a single snRNAseq sample).
 * Y is varied (from real RNAseq data)
 
@@ -24,16 +29,27 @@ knitr::opts_chunk$set(echo = TRUE)
 Important commented text in a code chunk:
 
 ```
+#--------------------
+# Experiment Manifest
+#--------------------
 IMPORTANT: this is your sample identifier manifest
+
+DATA DICTIONARY
 * sample: Brnum, the brain identifier, specific to donor
 * position: DLPFC region, anatomic region within DLPFC region, (mid, ant, post)
 * cell.compartment: cellular compartment, (nuc, cyto, bulk)
 * library.prep: DNA library preparation type (polyA, ribozero)
 
-THESE ARE EQUIVALENT:
-[sample]-[position]-[cell.compartment]-[library.prep]
-[BLOCK_ID]-[cell.compartment]-[library.prep]
+COLUMN IDENTIFIERS
+* base identifer pattern:
+[sample.id]-[anatomic.position.id]-[cell.compartment.id]-[library.prep.id]
+
+* primary identifier consolidation
+[BLOCK_ID]-[cell.compartment.id]-[library.prep.id]
+
+* secondary identifier consolidation
 [BLOCK_ID]-[EXPERIMENT_CONDITION]
+
 ```
 
 # Load data, postprocess, and set plot parameters
@@ -117,13 +133,36 @@ dfp3 <- parse(text=text.to.make.new.dfp("sample.compartment")) %>% eval()
 dfp4 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
 ```
 
-## SUMMARIZE
+# SUMMARIZE
 
 ```{r}
 list.summaries.dfp1 <- get_data_summaries(dfp1, "block.experiment")
 list.summaries.dfp2 <- get_data_summaries(dfp2, "sample.experiment")
 list.summaries.dfp3 <- get_data_summaries(dfp3, "sample.compartment")
 list.summaries.dfp4 <- get_data_summaries(dfp4, "sample.id")
+```
+
+## `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
+
+```{r}
+list.summaries.dfp1
+```
+
+## `[SAMPLE]-[EXPERIMENT_CONDITION]`
+
+```{r}
+list.summaries.dfp2
+```
+## `[SAMPLE]-[COMPARTMENT]`
+
+```{r}
+list.summaries.dfp3
+```
+
+## `[SAMPLE]`
+
+```{r}
+list.summaries.dfp4
 ```
 
 # Plot filtered data
@@ -172,6 +211,7 @@ Highlight plots
 ```{r}
 unpack_plot_type(results.list.dfp4, "heatmap6", "heatmaps")
 ```
+
 Line plots
 
 ```{r}
