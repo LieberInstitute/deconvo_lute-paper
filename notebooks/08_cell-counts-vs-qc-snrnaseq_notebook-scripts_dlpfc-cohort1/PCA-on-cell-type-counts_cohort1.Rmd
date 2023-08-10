@@ -1,0 +1,103 @@
+---
+title: "cell-type-qc_cohort1"
+author: "Sean Maden"
+date: "2023-08-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+mae <- get(load(file.path("outputs", "01_prepare-datasets", "mae_with-rpkm_additional-data_final.rda")))
+```
+
+counts across assay types
+
+```{r}
+
+get_cell_counts <- function(sce.iter, variable){as.data.frame(table(sce.iter[[variable]]))}
+
+get_group_cell_counts <- function(sce, group.variable, celltype.variable){
+  group.id.vector <- unique(sce[[group.variable]])
+  do.call(rbind, lapply(group.id.vector, function(group.id){
+    sce.iter <- sce[,sce[[group.variable]]==group.id]
+    counts.iter <- get_cell_counts(sce.iter, celltype.variable)
+    counts.iter$group.id <- group.id
+    counts.iter
+  }))
+}
+
+get_group_cell_counts(mae[[1]], "Sample", "k2")
+
+
+
+mae_celltype_counts_by_assay <- function(
+    mae, 
+    assay.name.vector = c("sn1.rnaseq", "rnascope.image"),
+    sample.id.variable = "Sample", 
+    celltype.variable = "k2"){
+    # make a table of the following:
+    # SAMPLES (ROWS) X ASSAY-CELLTYPE (COLUMNS)
+    categories <- paste0()
+    
+    # STUFF TO GO INTO THE ARGS
+    assay.name1 <- "sn1.rnaseq"
+    assay.name2 <- "rnascope.image"
+    sce.counts <- get_group_cell_counts(mae[[1]], "Sample", "k2")
+    rnascope.counts <- get_group_cell_counts(mae[["rnascope.image"]], "Sample", "k2")
+    assay.name.vector <- c(assay.name1, assay.name2)
+    cell.types <- c("glial", "neuron")
+    
+    # get tall df
+    df.tall <- do.call(rbind, lapply(assay.name.vector, function(assay.name.iter){
+      df.iter <- get_group_cell_counts(mae[[assay.name.iter]], "Sample", "k2")
+      df.iter$assay <- assay.name.iter
+      return(df.iter)
+    }))
+    df.tall$ct.assay.label <- paste0(df.tall[,1], ";", df.tall$assay)
+    
+    # df.tall.ct
+    num.cell.types <- length(cell.types)
+    num.entries.tall <- length(which(df.tall[,1]==cell.types[1]))
+    df.tall.ct <- do.call(cbind, lapply(cell.types, function(cell.type){
+      df.tall[df.tall[,1]==cell.type, 2]
+    }))
+    df.tall.ct <- as.data.frame(df.tall.ct)
+    colnames(df.tall.ct) <- cell.types
+    df.tall.ct$assay <- df.tall[df.tall[,1]==cell.types[1],]$assay
+    df.tall.ct$group.id <- df.tall[df.tall[,1]==cell.types[1],]$group.id
+    
+    return(list(df.tall, df.tall.ct))
+}
+
+df.tall <- mae_celltype_counts_by_assay[["df.tall"]]
+
+mae_pca <- function(){
+  library(dplyr)
+  library(ggplot2)
+  mat.pca <- t(df.tall.ct[,seq(num.cell.types)])
+  pca <- prcomp(x = mat.pca)
+  
+  mat.pca <- df.tall.ct[,seq(num.cell.types)]
+  pca <- prcomp(x = mat.pca)
+  
+  
+  # check dim of outputs
+  res1 <- prcomp(df.tall.ct[,seq(num.cell.types)])$x
+  res2 <- prcomp(t(df.tall.ct[,seq(num.cell.types)]))$x
+  
+  heatmap(res1)
+  
+  pca.res <- pca$x %>% as.data.frame()
+  ggplot(pca.res, aes(x = PC1, y = PC2)) + geom_point()
+  
+}
+
+```
+
+
+
