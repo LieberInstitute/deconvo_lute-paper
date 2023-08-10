@@ -32,6 +32,9 @@ df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
 # rename abs bias colname to error
 colnames.filter <- colnames(df.res)=="abs.bias.neuron"
 colnames(df.res)[colnames.filter] <- "error.neuron"
+# add group labels
+df.res$glial.group.label <- as.character(df.res$glial)
+df.res$neuron.group.label <- as.character(df.res$neuron)
 ```
 
 # Plot results summaries
@@ -60,7 +63,35 @@ ggplot(df.res, aes(x = glial, y = bias.glial.true.pred, color = sample.id)) +
   ggtitle("Glial")
 ```
 
-Scatterplots of K2_1 by K2_1 bias, color by K2_2 cell size.
+Line plots of K2_1 by K2_1 bias, color by block ID.
+
+```{r}
+# neuron
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label)) + 
+  geom_point(alpha = 0.2) + geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Neuron")
+
+# glial
+ggplot(df.res, aes(x = glial, y = bias.glial.true.pred, color = sample.id)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Glial")
+```
+
+Scatterplots of K2_1 by K2_1 bias, color by K2_2 cell size -- discrete.
+
+```{r}
+# neuron
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = glial.group.label)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Neuron")
+
+# glial
+ggplot(df.res, aes(x = glial, y = bias.glial.true.pred, color = neuron.group.label)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Glial")
+```
+
+Scatterplots of K2_1 by K2_1 bias, color by K2_2 cell size -- continuous.
 
 ```{r}
 # neuron
