@@ -158,15 +158,32 @@ list.plots.dfp2$heatmaps$heatmap6
 
 ```{r}
 list.plots.dfp3.byregion <- deconvo_plots_list(dfp3, "anatomic.region")
-list.plots.dfp3.bylibrary <- deconvo_plots_list(dfp3, "library.preparation")
+list.plots.dfp3.bylibraryprep <- deconvo_plots_list(dfp3, "library.preparation.id")
 list.plots.dfp3.byregion$heatmaps$heatmap6
-list.plots.dfp3.bylibrary$heatmaps$heatmap6
+list.plots.dfp3.bylibraryprep$heatmaps$heatmap6
 ```
 
 ## `[SAMPLE]`
 
 ```{r}
-list.plots.dfp4 <- deconvo_plots_list(dfp4)
+facet.variable.vector <- c("anatomic.region", "library.preparation.id", "cell.compartment.id")
+results.list.dfp4 <- lapply(facet.variable.vector, function(facet.variable){
+  deconvo_plots_list(dfp4, facet.variable)
+})
+names(results.list.dfp4) <- facet.variable.vector
+```
+
+Heatmaps
+
+```{r}
+
+unpack_plot_type(results.list.dfp4, "heatmap1", "heatmaps")
+```
+
+Highlight plots
+
+```{r}
+lapply(results.list.dfp4, function(results.list.iter){results.list.iter$heatmaps$heatmap6})
 ```
 
 

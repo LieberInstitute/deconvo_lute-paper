@@ -35,6 +35,7 @@ deconvo_heatmaps <- function(dfp1, facet.variable = NULL){
     geom_raster(aes(fill = error.neuron)) +
     scale_fill_gradientn(colours = rainbow(5)) + 
     geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
+    geom_abline(slope = 1, intercept = 0) +
     ggtitle(dfp1$block.experiment)
   
   # prep heatlution plots with highlights
@@ -143,4 +144,13 @@ deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots
        scatterplots = deconvo_scatterplots(dfp),
        lineplots = deconvo_lineplots(dfp),
        deconvocanos = deconvocanos(dfp))
+}
+
+unpack_plot_type <- function(deconvo_plots_list_list, plot.name, plot.type){
+  # this is for lists of deconvo_plots_list objects
+  #
+  # notes:
+  # * replaces: lapply(results.list.dfp4, function(results.list.iter){results.list.iter$heatmaps$heatmap1})
+  #
+  lapply(results.list.dfp4, function(results.list.iter){results.list.iter[[plot.type]][[plot.name]]})
 }
