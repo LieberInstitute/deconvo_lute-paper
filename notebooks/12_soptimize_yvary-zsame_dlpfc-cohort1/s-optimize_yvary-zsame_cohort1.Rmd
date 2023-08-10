@@ -50,24 +50,25 @@ df.res$minimum.decile.error <- df.res$error.neuron <= deciles.error.neuron[2]
 df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
 ```
 
-# Plot results, first Y of type "block_position_type"
-
-This is the filter step
+# Plot results within a "sample-region-compartment-library"
 
 ```{r}
-sample.id <- df.res$sample.id[1]
-df.res.filter <- df.res$sample.id==sample.id
+# This is the filter step
+sample.id <- df.res$sample.labels[1]
+df.res.filter <- df.res$sample.labels==sample.id
 df.plot <- df.res[df.res.filter,]
-```
-
-This is the inspect plot data step
-
-```{r}
+# This is the inspect plot data step
+message("dimensions:\n")
 dim(df.plot)
+message("sample ids:\n")
 unique(df.plot$sample.id)
+message("sample id frequencies:\n")
 table(df.res$sample.id) %>% head()
+message("number of unique sample ids:\n")
 length(unique(df.res$sample.id))
+message("summary of glial values:\n")
 summary(df.res$s.fraction.neuron.glial)
+message("summary of log s.fractions:\n")
 summary(log(df.res$s.fraction.neuron.glial))
 ```
 
@@ -107,141 +108,61 @@ ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) +
   geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
 
-
-# Plots across Y blocks -- all Bulk_polyA samples
+# Plot results across regions within a "sample-compartment-library"
 
 This is the filter step
 
 ```{r}
-df.res.filter <- df.res$cell.compartment=="Bulk_polyA"
-df.plot <- df.res[df.res.filter,]
-```
-
-This is the inspect plot data step
-
-```{r}
+# This is the filter step
+cond1 <- df.res$sample.id=="Br2720"
+cond2 <- grepl(".*_Bulk$", df.res$sample.labels)
+df.plot <- df.res[cond1 & cond2,]
+# This is the inspect plot data step
+message("dimensions:\n")
 dim(df.plot)
+message("sample ids:\n")
 unique(df.plot$sample.id)
-table(df.res$sample.id) %>% head()
-length(unique(df.res$sample.id))
-summary(df.res$s.fraction.neuron.glial)
-summary(log(df.res$s.fraction.neuron.glial))
+message("sample id frequencies:\n")
+table(df.plot$sample.id) %>% head()
+message("number of unique sample ids:\n")
+length(unique(df.plot$sample.id))
+message("summary of glial values:\n")
+summary(df.plot$s.fraction.neuron.glial)
+message("summary of log s.fractions:\n")
+summary(log(df.plot$s.fraction.neuron.glial))
+
+
 ```
 
 Plot heatmap -- error.neuron, lowest value
 
 ```{r}
-ggplot(df.res, aes(x = glial, y = neuron, color = minimum.error)) + 
+# recompute min/max/decile errors
+df.plot$minimum.error <- df.plot$error.neuron==min(df.plot$error.neuron)
+df.plot$maximum.error <- df.plot$error.neuron==max(df.plot$error.neuron)
+deciles.error.neuron <- quantile(df.plot$error.neuron, seq(0, 1, 0.1))
+df.plot$minimum.decile.error <- df.plot$error.neuron <= deciles.error.neuron[2]
+df.plot$maximum.decile.error <- df.plot$error.neuron >= deciles.error.neuron[10]
+
+
+# minimum
+ggplot(df.plot, aes(x = glial, y = neuron, color = minimum.error)) + 
+  geom_point(alpha = 1) + scale_color_manual(values = c("TRUE" = highlight.color.low, 
+                                               "FALSE" = background.color.highlights)) +
+  facet_wrap(~anatomic.region)
+# min decile
+ggplot(df.plot, aes(x = glial, y = neuron, color = minimum.decile.error)) + 
   geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, 
                                                "FALSE" = background.color.highlights)) +
-  facet_wrap(~sample.id)
+  facet_wrap(~anatomic.region)
+# maximum
+ggplot(df.plot, aes(x = glial, y = neuron, color = maximum.error)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
+                                               "FALSE" = background.color.highlights)) +
+  facet_wrap(~anatomic.region)
+# max decile
+ggplot(df.plot, aes(x = glial, y = neuron, color = maximum.decile.error)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
+                                               "FALSE" = background.color.highlights)) +
+  facet_wrap(~anatomic.region)
 ```
-
-Plot heatmap -- error.neuron, lowest decile
-
-```{r}
-```
-
-Plot heatmap -- error.neuron, highest value
-
-```{r}
-```
-
-Plot heatmap -- error.neuron, highest decile
-
-```{r}
-```
-
-
-# plot results
-
-```{r}
-ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
-  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-
-ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
-  theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
-  geom_smooth(method = "glm", se = T)
-
-ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
-  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
-
-ggplot(df.res, aes(x = neuron, y = bias.glial.true.pred, color = sample.id)) + 
-  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
-```
-
-heatmap
-
-```{r}
-ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
-  geom_raster(aes(fill = bias.neuron.true.pred)) +
-  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
-
-ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
-  geom_raster(aes(fill = abs.bias.neuron)) +
-  scale_fill_gradientn(colours = rainbow(5)) + 
-  facet_wrap(~sample.id) +
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
-  geom_abline(slope = 1, intercept = 0)
-
-```
-
-# Plots highlighting lowest bias values
-
-```{r}
-highlight.color <- "red"
-```
-
-Highlight minimum across blocks.
-
-```{r}
-df.res$minimum.bias <- df.res$bias.neuron.true.pred==min(df.res$abs.bias.neuron)
-# red and gray color scheme
-ggplot(df.res, aes(x = glial, y = neuron, color = minimum.bias)) + 
-  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
-  facet_wrap(~sample.id)
-```
-
-Highlight lowest 10th quantile across blocks.
-
-```{r}
-# quantile filter
-quant <- quantile(df.res$abs.bias.neuron, seq(0,1,0.1))
-df.res$lowest.decile.bias <- df.res$abs.bias.neuron <= quant[2]
-# red and gray color scheme
-ggplot(df.res, aes(x = glial, y = neuron, color = lowest.decile.bias)) + 
-  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
-  facet_wrap(~sample.id)
-```
-
-# Plots highlighting highest bias values
-
-```{r}
-highlight.color <- "blue"
-```
-
-Highlight maximum across blocks.
-
-```{r}
-df.res$maximum.bias <- df.res$abs.bias.neuron==max(df.res$abs.bias.neuron)
-# red and gray color scheme
-ggplot(df.res, aes(x = glial, y = neuron, color = maximum.bias)) + 
-  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
-  facet_wrap(~sample.id)
-```
-
-Highlight highest 10th quantile across blocks.
-
-```{r}
-# quantile filter
-quant <- quantile(df.res$abs.bias.neuron, seq(0,1,0.1))
-df.res$highest.decile <- df.res$abs.bias.neuron>=quant[10]
-# red and gray color scheme
-ggplot(df.res, aes(x = glial, y = neuron, color = highest.decile)) + 
-  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color, "FALSE" = "gray")) +
-  facet_wrap(~sample.id)
-```
-
-
-

@@ -92,12 +92,22 @@ df.res.samples <- parallel_bias_matched(sce, y.unadj, dfs,
 
 
 # append coldata from y.unadj (see MAE data)
-df.res.samples$sample.id <- rep(colnames(y.unadj), nrow(dfs))
-df.res.samples$cell.compartment <- y.unadj$expt_condition
-df.res.samples$block.location <- y.unadj$location
-df.res.samples$library.preparation <- y.unadj$library_prep
+df.res.samples$sample.labels <- rep(colnames(y.unadj), nrow(dfs))
+df.res.samples$sample.id <- rep(gsub("_.*", "", y.unadj$batch.id), nrow(dfs))
+df.res.samples$cell.compartment <- rep(y.unadj$expt_condition, nrow(dfs))
+df.res.samples$anatomic.region <- rep(y.unadj$location, nrow(dfs))
+df.res.samples$library.preparation <- rep(y.unadj$library_prep, nrow(dfs))
+df.res.samples$sample.id.brnum <- rep(y.unadj$batch.id2, nrow(dfs))
 
 # append data transformations
+# this is the chunk that sets more operants in `df.res`
+df.res.samples$s.fraction.neuron.glial <- df.res.samples$neuron/df.res.samples$glial
+df.res.samples$log.s.fraction <- log(df.res.samples$s.fraction.neuron.glial)
+df.res.samples$minimum.error <- df.res.samples$error.neuron==min(df.res.samples$minimum.error)
+df.res.samples$maximum.error <- df.res.samples$error.neuron==max(df.res.samples$maximum.error)
+deciles.error.neuron <- quantile(df.res.samples$error.neuron, seq(0, 1, 0.1))
+df.res.samples$minimum.decile.error <- df.res.samples$error.neuron <= deciles.error.neuron[2]
+df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.error.neuron[9]
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
 # save
