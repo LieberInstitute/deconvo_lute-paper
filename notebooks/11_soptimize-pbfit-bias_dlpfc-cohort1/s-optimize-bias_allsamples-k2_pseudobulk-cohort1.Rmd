@@ -20,11 +20,18 @@ sapply(libv, library, character.only = T)
 # load results
 
 ```{r}
+# load the dataset
+setwd("..")
 setwd("..")
 load.filename <- "df-result_s-opt-bias_cohort1.rda"
-load.path <- file.path("deconvo_method-paper", "outputs", "11_soptimize-pbfit-bias_dlpfc-cohort1", load.filename)
+load.path <- file.path("outputs", "11_soptimize-pbfit-bias_dlpfc-cohort1", load.filename)
 df.res <- get(load(load.path))
 df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
+
+# do postprocessing on the dataset
+# rename abs bias colname to error
+colnames.filter <- colnames(df.res)=="abs.bias.neuron"
+colnames(df.res)[colnames.filter] <- "error.neuron"
 ```
 
 # plot results
@@ -47,10 +54,8 @@ ggplot(df.res, aes(x = neuron, y = bias.glial.true.pred, color = sample.id)) +
 heatmap
 
 ```{r}
-ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
-  geom_raster(aes(fill = bias.neuron.true.pred)) +
-  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
+
+
 
 ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
   geom_raster(aes(fill = abs.bias.neuron)) +
@@ -58,7 +63,6 @@ ggplot(df.res, aes(x = glial, y = neuron)) + theme_bw() +
   facet_wrap(~sample.id) +
   geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
   geom_abline(slope = 1, intercept = 0)
-
 ```
 
 # Plots highlighting lowest bias values
