@@ -17,8 +17,9 @@ mae <- get(load(file.path("outputs", "01_prepare-datasets", "mae_with-rpkm_addit
 
 counts across assay types
 
-```{r}
+# 1. Check linear model bias distribution
 
+```{r}
 get_cell_counts <- function(sce.iter, variable){as.data.frame(table(sce.iter[[variable]]))}
 
 get_group_cell_counts <- function(sce, group.variable, celltype.variable){
@@ -31,34 +32,38 @@ get_group_cell_counts <- function(sce, group.variable, celltype.variable){
   }))
 }
 
-get_group_cell_counts(mae[[1]], "Sample", "k2")
-
-
-
 mae_celltype_counts_by_assay <- function(
     mae, 
     assay.name.vector = c("sn1.rnaseq", "rnascope.image"),
     sample.id.variable = "Sample", 
-    celltype.variable = "k2"){
+    celltype.variable = "k2",
+    cell.types = c("glial", "neuron")){
+    #
     # make a table of the following:
     # SAMPLES (ROWS) X ASSAY-CELLTYPE (COLUMNS)
-    categories <- paste0()
+    #
+    #
     
-    # STUFF TO GO INTO THE ARGS
-    assay.name1 <- "sn1.rnaseq"
-    assay.name2 <- "rnascope.image"
-    sce.counts <- get_group_cell_counts(mae[[1]], "Sample", "k2")
-    rnascope.counts <- get_group_cell_counts(mae[["rnascope.image"]], "Sample", "k2")
-    assay.name.vector <- c(assay.name1, assay.name2)
-    cell.types <- c("glial", "neuron")
-    
+    mae <- complete.cases(mae)
+  
     # get tall df
     df.tall <- do.call(rbind, lapply(assay.name.vector, function(assay.name.iter){
-      df.iter <- get_group_cell_counts(mae[[assay.name.iter]], "Sample", "k2")
+      df.iter <- get_group_cell_counts(mae[[assay.name.iter]], 
+                                       sample.id.variable, celltype.variable)
       df.iter$assay <- assay.name.iter
       return(df.iter)
     }))
     df.tall$ct.assay.label <- paste0(df.tall[,1], ";", df.tall$assay)
+    df.tall <- df.tall[df.tall$Var1 %in% cell.types,]
+    
+    # df.tall.ct.assay
+    celltypes.assays <- unique(df.tall$ct.assay.label)
+    num.cell.types <- length(cell.types)
+    num.groups <- length(unique(df.tall$group.id))
+    df.tall.ct.assay <- do.call(cbind, lapply(celltypes.assays, function(celltype.assay){
+      df.tall[df.tall[,5]==celltype.assay, 2]
+    }))
+    df.tall.ct.assay <- as.data.frame(df.tall.ct.assay)
     
     # df.tall.ct
     num.cell.types <- length(cell.types)
@@ -71,10 +76,26 @@ mae_celltype_counts_by_assay <- function(
     df.tall.ct$assay <- df.tall[df.tall[,1]==cell.types[1],]$assay
     df.tall.ct$group.id <- df.tall[df.tall[,1]==cell.types[1],]$group.id
     
-    return(list(df.tall, df.tall.ct))
+    
+    
+    
+    colnames(df.tall.ct.assay) <- cell.types
+    df.tall.ct.assay$assay <- df.tall[df.tall[,1]==cell.types[1],]$assay
+    df.tall.ct.assay$group.id <- df.tall[df.tall[,1]==cell.types[1],]$group.id
+    
+    return(list(df.tall = df.tall, df.tall.ct = df.tall.ct))
 }
+```
 
-df.tall <- mae_celltype_counts_by_assay[["df.tall"]]
+
+
+```{r}
+df.tall <- mae_celltype_counts_by_assay(mae)[["df.tall"]]
+```
+
+# 2. Get PCA
+
+````{r}
 
 mae_pca <- function(){
   library(dplyr)
@@ -99,5 +120,9 @@ mae_pca <- function(){
 
 ```
 
+# 3. Check PCA relationships across conditions
+
+```{r}
+```
 
 
