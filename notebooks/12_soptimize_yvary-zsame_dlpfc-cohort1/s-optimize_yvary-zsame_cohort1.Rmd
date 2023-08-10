@@ -90,21 +90,9 @@ text.to.make.new.dfp <- function(variable.name="sample.id", value.index=1, dfp.i
 ```
 
 ```{r}
-# viz wrapper function
-deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R", update.stat.summaries = TRUE){
-  source(script.path)
-  
-  # gets the statistics summaries for your filtered data
-  if(update.stat.summaries){dfp <- deconvo_plot_statistics(dfp)}
-  
-  # gets the plots
-  list(heatmaps = deconvo_heatmaps(dfp, facet.variable),
-       scatterplots = deconvo_scatterplots(dfp),
-       lineplots = deconvo_lineplots(dfp),
-       deconvocanos = deconvocanos(dfp))
-}
-
-# dataset summaries function
+# viz wrapper functions
+source("deconvo_plots.R")
+# dataset summaries function(s)
 source("dataset_summaries.R")
 ```
 
@@ -176,14 +164,18 @@ names(results.list.dfp4) <- facet.variable.vector
 Heatmaps
 
 ```{r}
-
 unpack_plot_type(results.list.dfp4, "heatmap1", "heatmaps")
 ```
 
 Highlight plots
 
 ```{r}
-lapply(results.list.dfp4, function(results.list.iter){results.list.iter$heatmaps$heatmap6})
+unpack_plot_type(results.list.dfp4, "heatmap6", "heatmaps")
+```
+Line plots
+
+```{r}
+unpack_plot_type(results.list.dfp4, "lp1", "lineplots")
 ```
 
 

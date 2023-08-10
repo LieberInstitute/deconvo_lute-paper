@@ -26,7 +26,7 @@ deconvo_plot_statistics <- function(dfp1){
   return(dfp1)
 }
 
-deconvo_heatmaps <- function(dfp1, facet.variable = NULL){
+deconvo_heatmaps <- function(dfp1){
   #---------------
   # make the plots
   #---------------
@@ -75,17 +75,8 @@ deconvo_heatmaps <- function(dfp1, facet.variable = NULL){
   #----------------
   # get return list
   #----------------
-  lr <- list(heatmap1 = heatmap1, heatmap2 = heatmap2, heatmap3 = heatmap3, 
-             heatmap4 = heatmap4, heatmap5 = heatmap5, heatmap6 = heatmap6)
-  #---------------------------------------
-  # parse facet option on ALL OF THE PLOTS
-  #---------------------------------------
-  if(!is(lr, "NULL")){
-    lr <- lapply(lr, function(plot){
-      plot <- eval(parse(text = paste0("plot + facet_wrap(~",facet.variable,")")))
-    })
-  }
-  return(lr) # return
+  list(heatmap1 = heatmap1, heatmap2 = heatmap2, heatmap3 = heatmap3, 
+       heatmap4 = heatmap4, heatmap5 = heatmap5, heatmap6 = heatmap6)
 }
 
 deconvo_scatterplots <- function(dfp1){
@@ -133,17 +124,41 @@ deconvocanos <- function(dfp1){
 #
 # viz wrapper function -- NEEDS WORK
 # 
-deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R", update.stat.summaries = TRUE){
+deconvo_plots_list <- function(dfp, facet.variable = NULL, 
+                               script.path = "deconvo_plots.R", 
+                               update.stat.summaries = TRUE){
   source(script.path)
   
+  #-----------------------------------------------------
   # gets the statistics summaries for your filtered data
+  #-----------------------------------------------------
   if(update.stat.summaries){dfp <- deconvo_plot_statistics(dfp)}
   
+  #---------------
   # gets the plots
-  list(heatmaps = deconvo_heatmaps(dfp, facet.variable),
-       scatterplots = deconvo_scatterplots(dfp),
-       lineplots = deconvo_lineplots(dfp),
-       deconvocanos = deconvocanos(dfp))
+  #---------------
+  lr <- list(heatmaps = deconvo_heatmaps(dfp),
+             scatterplots = deconvo_scatterplots(dfp),
+             lineplots = deconvo_lineplots(dfp),
+             deconvocanos = deconvocanos(dfp))
+  
+  #---------------------------------------
+  # parse facet option on ALL OF THE PLOTS
+  #---------------------------------------
+  if(!is(facet.variable, "NULL")){
+    lr.labels <- names(lr)
+    lr <- lapply(lr, function(lr.plot.type){
+      plot.labels <- names(lr.plot.type)
+      lr.plot.type <- lapply(lr.plot.type, function(plot){
+        plot <- eval(parse(text = paste0("plot + facet_wrap(~",facet.variable,")")))
+      })
+      names(lr.plot.type) <- plot.labels
+      return(lr.plot.type)
+    })
+    names(lr) <- lr.labels
+  }
+  
+  return(lr)
 }
 
 unpack_plot_type <- function(deconvo_plots_list_list, plot.name, plot.type){
