@@ -5,6 +5,27 @@
 # Deconvolution plots script. Sourced by notebook for Ybulk experiment with 4 identifier conditions in the experiment.
 #
 
+deconvo_plot_statistics <- function(dfp1){
+  # postprocess dfp1
+  dfp1$s.fraction.neuron.glial <- dfp1$neuron/dfp1$glial
+  dfp1$s.fraction.neuron.glial.discrete <- as.character(round(dfp1$s.fraction.neuron.glial, 2))
+  dfp1$log.s.fraction <- log(dfp1$s.fraction.neuron.glial)
+  dfp1$minimum.error <- dfp1$error.neuron==min(dfp1$error.neuron)
+  dfp1$maximum.error <- dfp1$error.neuron==max(dfp1$error.neuron)
+  deciles.error.neuron <- quantile(dfp1$error.neuron, seq(0, 1, 0.1))
+  dfp1$minimum.decile.error <- dfp1$error.neuron <= deciles.error.neuron[2]
+  dfp1$maximum.decile.error <- dfp1$error.neuron >= deciles.error.neuron[9]
+  dfp1$glial.group.label <- as.character(dfp1$glial)
+  dfp1$neuron.group.label <- as.character(dfp1$neuron)
+  # dfp1$all.highlight.categories <- ifelse(dfp1$minimum.error, "min",ifelse(,,ifelse(,,ifelse())))
+  dfp1$all.highlight.categories <- ifelse(dfp1$minimum.error, "min", 
+                                            ifelse(dfp1$maximum.error, "max", 
+                                                   ifelse(dfp1$minimum.decile.error, "min.dec", 
+                                                          ifelse(dfp1$maximum.decile.error, "max.dec", "mid"))))
+  dfp1$all.highlight.sizes <- ifelse(dfp1$minimum.error|dfp1$maximum.error, "min/max", "min.dec/max.dec/mid")
+  return(dfp1)
+}
+
 deconvo_heatmaps <- function(dfp1, facet.variable = NULL){
   #---------------
   # make the plots
@@ -42,10 +63,13 @@ deconvo_heatmaps <- function(dfp1, facet.variable = NULL){
                                size = all.highlight.sizes)) + 
     geom_point() + 
     scale_color_manual(values = 
-                         c("bg" = background.color.highlights, 
+                         c("mid" = background.color.highlights, 
                            "min" = highlight.color.low,
-                           "max" = highlight.color.high)) +
-    scale_size_manual(values = c("min/max" = 2, "min.dec/max.dec/mid" = 1))
+                           "max" = highlight.color.high,
+                           "min.dec" = highlight.color.low,
+                           "max.dec" = highlight.color.high)) +
+    scale_size_manual(values = c("min/max" = 2.5, 
+                                 "min.dec/max.dec/mid" = 1))
   
   #----------------
   # get return list
@@ -108,8 +132,13 @@ deconvocanos <- function(dfp1){
 #
 # viz wrapper function -- NEEDS WORK
 # 
-deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R"){
+deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R", update.stat.summaries = TRUE){
   source(script.path)
+  
+  # gets the statistics summaries for your filtered data
+  if(update.stat.summaries){dfp <- deconvo_plot_statistics(dfp)}
+  
+  # gets the plots
   list(heatmaps = deconvo_heatmaps(dfp, facet.variable),
        scatterplots = deconvo_scatterplots(dfp),
        lineplots = deconvo_lineplots(dfp),

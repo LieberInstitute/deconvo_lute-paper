@@ -91,8 +91,13 @@ text.to.make.new.dfp <- function(variable.name="sample.id", value.index=1, dfp.i
 
 ```{r}
 # viz wrapper function
-deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R"){
+deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R", update.stat.summaries = TRUE){
   source(script.path)
+  
+  # gets the statistics summaries for your filtered data
+  if(update.stat.summaries){dfp <- deconvo_plot_statistics(dfp)}
+  
+  # gets the plots
   list(heatmaps = deconvo_heatmaps(dfp, facet.variable),
        scatterplots = deconvo_scatterplots(dfp),
        lineplots = deconvo_lineplots(dfp),
@@ -139,18 +144,23 @@ list.summaries.dfp4 <- get_data_summaries(dfp4, "sample.id")
 
 ```{r}
 list.plots.dfp1 <- deconvo_plots_list(dfp1, "anatomic.region")
+list.plots.dfp1$heatmaps$heatmap6
 ```
 
 ## `[SAMPLE]-[EXPERIMENT_CONDITION]`
 
 ```{r}
-list.plots.dfp2 <- deconvo_plots_list(dfp2)
+list.plots.dfp2 <- deconvo_plots_list(dfp2, "anatomic.region")
+list.plots.dfp2$heatmaps$heatmap6
 ```
 
 ## `[SAMPLE]-[COMPARTMENT]`
 
 ```{r}
-list.plots.dfp3 <- deconvo_plots_list(dfp3)
+list.plots.dfp3.byregion <- deconvo_plots_list(dfp3, "anatomic.region")
+list.plots.dfp3.bylibrary <- deconvo_plots_list(dfp3, "library.preparation")
+list.plots.dfp3.byregion$heatmaps$heatmap6
+list.plots.dfp3.bylibrary$heatmaps$heatmap6
 ```
 
 ## `[SAMPLE]`
