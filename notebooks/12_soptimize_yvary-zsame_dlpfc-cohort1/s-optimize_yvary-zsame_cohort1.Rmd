@@ -13,9 +13,24 @@ This notebooks shows results summaries from S (cell size scale factor normalizat
 * Y is varied (from real RNAseq data)
 
 ```{r setup, include=FALSE}
-libv <- c("ggplot2")
+libv <- c("ggplot2", "dplyr")
 sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+Important commented text in a code chunk:
+
+```
+IMPORTANT: this is your sample identifier manifest
+* sample: Brnum, the brain identifier, specific to donor
+* position: DLPFC region, anatomic region within DLPFC region, (mid, ant, post)
+* cell.compartment: cellular compartment, (nuc, cyto, bulk)
+* library.prep: DNA library preparation type (polyA, ribozero)
+
+THESE ARE EQUIVALENT:
+[sample]-[position]-[cell.compartment]-[library.prep]
+[BLOCK_ID]-[cell.compartment]-[library.prep]
+[BLOCK_ID]-[EXPERIMENT_CONDITION]
 ```
 
 # Load data, postprocess, and set plot parameters
@@ -37,65 +52,61 @@ deciles.error.neuron <- quantile(df.res$error.neuron, seq(0, 1, 0.1))
 df.res$minimum.decile.error <- df.res$error.neuron <= deciles.error.neuron[2]
 df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
 
+# set standard column labels
+df.res$cell.compartment <- df.res$library.preparation
+df.res$library.preparation <- gsub(".*_", "", df.res$cell.compartment)
+
 # set plot parameters
 highlight.color.low <- "red"
 highlight.color.high <- "blue"
 background.color.highlights <- "gray"
+
+# helper function
+text.to.make.new.dfp <- function(variable.name="sample.id", value.index=1, dfp.index=1){
+  text.vector1 <- paste0("id.to.get <- df.res[,'",variable.name,"'][",value.index,"]")
+  text.vector2 <- paste0("filter.variable.vector <- df.res[,'",variable.name,"']==id.to.get")
+  text.vector3 <- paste0("dfp",dfp.index," <- df.res[filter.variable.vector,]")
+  text.vector.list <- as.list(c(text.vector1, text.vector2, text.vector3))
+  return(paste0(text.vector.list, collapse = ";"))
+}
 ```
 
 # Define data subsets
 
 This is the crucial data filter section. Could go into a script.
 
-## Get plot data for "sample-region-compartment-library"
+## Get plot data for `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
 
 Gets the first ID in the "sample-region-compartment-library" designation, saves as `dfp1`.
 
 ```{r}
-variable.name <- "sample.labels"
-id.to.get <- df.res[,variable.name][1]
-filter.variable.vector <- df.res[,variable.name]==id.to.get
-dfp1 <- df.res[filter.variable.vector,]
+dfp1 <- parse(text=text.to.make.new.dfp("sample.labels")) %>% eval()
 ```
+
+## Get plot data for "sample-compartment-library" as
 
 ```{r}
-# This is the inspect plot data step
-message("dimensions:\n")
-dim(df.plot)
-message("sample ids:\n")
-unique(df.plot$sample.id)
-message("sample id frequencies:\n")
-table(df.res$sample.id) %>% head()
-message("number of unique sample ids:\n")
-length(unique(df.res$sample.id))
-message("summary of glial values:\n")
-summary(df.res$s.fraction.neuron.glial)
-message("summary of log s.fractions:\n")
-summary(log(df.res$s.fraction.neuron.glial))
+dfp2 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
 ```
 
-## Get plot data for "sample-compartment-library"
+## Get plot data for "sample-compartment"
 
 ```{r}
-# This is the filter step
-sample.id <- df.res$sample.labels[1]
-df.res.filter <- df.res$sample.labels==sample.id
-df.plot <- df.res[df.res.filter,]
+dfp3 <- parse(text=text.to.make.new.dfp("sample.id.brnum")) %>% eval()
 ```
+
+## Get plot data for "sample" 
 
 ```{r}
+dfp3 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
 ```
-
-## Get plot data for 
-
-## Get plot data for 
 
 
 # Plot filtered data
 
 Plot heatmap -- error.neuron
 
-```{r}
+```{r, eval = F}
 ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
   geom_raster(aes(fill = error.neuron)) +
   scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
@@ -104,28 +115,28 @@ ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
 
 Plot point and lineplots
 
-```{r}
+```{r, eval = F}
 ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
   geom_point(alpha = 1) + geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
 
 Plot points with glial value as color
 
-```{r}
+```{r, eval = F}
 ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = glial)) + 
   geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
 
 Plot points with s.fraction value as color
 
-```{r}
+```{r, eval = F}
 ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = s.fraction.neuron.glial)) + 
   geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
 
 Plot fraction versus bias
 
-```{r}
+```{r, eval = F}
 ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
   geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
@@ -138,37 +149,9 @@ ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) +
 
 ##
 
-# Plot results within a "sample-region-compartment-library"
-
-# Plot results across regions within a "sample-compartment-library"
-
-This is the filter step
-
-```{r}
-# This is the filter step
-cond1 <- df.res$sample.id=="Br2720"
-cond2 <- grepl(".*_Bulk$", df.res$sample.labels)
-df.plot <- df.res[cond1 & cond2,]
-# This is the inspect plot data step
-message("dimensions:\n")
-dim(df.plot)
-message("sample ids:\n")
-unique(df.plot$sample.id)
-message("sample id frequencies:\n")
-table(df.plot$sample.id) %>% head()
-message("number of unique sample ids:\n")
-length(unique(df.plot$sample.id))
-message("summary of glial values:\n")
-summary(df.plot$s.fraction.neuron.glial)
-message("summary of log s.fractions:\n")
-summary(log(df.plot$s.fraction.neuron.glial))
-
-
-```
-
 Plot heatmap -- error.neuron, lowest value
 
-```{r}
+```{r, eval = F}
 # recompute min/max/decile errors
 df.plot$minimum.error <- df.plot$error.neuron==min(df.plot$error.neuron)
 df.plot$maximum.error <- df.plot$error.neuron==max(df.plot$error.neuron)
