@@ -5,8 +5,10 @@
 # Deconvolution plots script. Sourced by notebook for Ybulk experiment with 4 identifier conditions in the experiment.
 #
 
-deconvo_heatmaps <- function(dfp1){
-  # HEATLUTION PLOTS
+deconvo_heatmaps <- function(dfp1, facet.variable = NULL){
+  #---------------
+  # make the plots
+  #---------------
   # Plot heatmap -- error.neuron
   heatmap1 <- ggplot(dfp1, aes(x = glial, y = neuron)) + theme_bw() +
     geom_raster(aes(fill = error.neuron)) +
@@ -24,22 +26,41 @@ deconvo_heatmaps <- function(dfp1){
   # min highlights
   heatmap2 <- ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.error)) + 
     geom_point(alpha = 1) + scale_color_manual(values = c("TRUE" = highlight.color.low, 
-                                                          "FALSE" = background.color.highlights)) +
-    facet_wrap(~anatomic.region)
+                                                          "FALSE" = background.color.highlights))
   heatmap3 <- ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.decile.error)) + 
     geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, 
-                                                 "FALSE" = background.color.highlights)) +
-    facet_wrap(~anatomic.region)
+                                                 "FALSE" = background.color.highlights))
   # max highlights
   heatmap4 <- ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.error)) + 
     geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
-                                                 "FALSE" = background.color.highlights)) +
-    facet_wrap(~anatomic.region)
+                                                 "FALSE" = background.color.highlights))
   heatmap5 <- ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.decile.error)) + 
     geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
-                                                 "FALSE" = background.color.highlights)) +
-    facet_wrap(~anatomic.region)
-  list(heatmap1, heatmap2, heatmap3, heatmap4)
+                                                 "FALSE" = background.color.highlights))
+  heatmap6 <- ggplot(dfp1, 
+                     aes(x = glial, y = neuron, color = all.highlight.categories, 
+                               size = all.highlight.sizes)) + 
+    geom_point() + 
+    scale_color_manual(values = 
+                         c("bg" = background.color.highlights, 
+                           "min" = highlight.color.low,
+                           "max" = highlight.color.high)) +
+    scale_size_manual(values = c("min/max" = 2, "min.dec/max.dec/mid" = 1))
+  
+  #----------------
+  # get return list
+  #----------------
+  lr <- list(heatmap1 = heatmap1, heatmap2 = heatmap2, heatmap3 = heatmap3, 
+             heatmap4 = heatmap4, heatmap5 = heatmap5, heatmap6 = heatmap6)
+  #---------------------------------------
+  # parse facet option on ALL OF THE PLOTS
+  #---------------------------------------
+  if(!is(lr, "NULL")){
+    lr <- lapply(lr, function(plot){
+      plot <- eval(parse(text = paste0("plot + facet_wrap(~",facet.variable,")")))
+    })
+  }
+  return(lr) # return
 }
 
 deconvo_scatterplots <- function(dfp1){
@@ -52,7 +73,7 @@ deconvo_scatterplots <- function(dfp1){
   sp2 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, 
                           color = s.fraction.neuron.glial, group = s.fraction.neuron.glial)) + 
     geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-  list(sp1, sp2)
+  list(sp1 = sp1, sp2 = sp2)
 }
 
 deconvo_lineplots <- function(dfp1){
@@ -70,7 +91,7 @@ deconvo_lineplots <- function(dfp1){
   lp4 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label, color = glial.group.label)) + 
     geom_line() + theme_bw() + 
     facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-  list(lp1, lp2, lp3, lp4)
+  list(lp1 = lp1, lp2 = lp2, lp3 = lp3, lp4 = lp4)
 }
 
 deconvocanos <- function(dfp1){
@@ -81,16 +102,16 @@ deconvocanos <- function(dfp1){
   # Scatterplot of fraction versus error
   cano2 <- ggplot(dfp1, aes(x = log.s.fraction, y = error.neuron)) + 
     geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-  list(cano1, cano2)
+  list(cano1 = cano1, cano2 = cano2, metadata = "GO 'CANO's!")
 }
 
 #
 # viz wrapper function -- NEEDS WORK
 # 
-deconvo_plots_list <- function(dfp, script.path = "deconvo_plots.R"){
+deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R"){
   source(script.path)
-  list(deconvo_heatmaps(dfp),
-       deconvo_scatterplots(dfp),
-       deconvo_lineplots(dfp),
-       deconvocanos(dfp))
+  list(heatmaps = deconvo_heatmaps(dfp, facet.variable),
+       scatterplots = deconvo_scatterplots(dfp),
+       lineplots = deconvo_lineplots(dfp),
+       deconvocanos = deconvocanos(dfp))
 }

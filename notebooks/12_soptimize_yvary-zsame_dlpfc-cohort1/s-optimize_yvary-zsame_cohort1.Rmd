@@ -58,6 +58,13 @@ df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
 df.res$glial.group.label <- as.character(df.res$glial)
 df.res$neuron.group.label <- as.character(df.res$neuron)
 
+# df.res$all.highlight.categories <- ifelse(df.res$minimum.error, "min",ifelse(,,ifelse(,,ifelse())))
+df.res$all.highlight.categories <- ifelse(df.res$minimum.error, "min", 
+                                          ifelse(df.res$maximum.error, "max", 
+                                                 ifelse(df.res$minimum.decile.error, "min.dec", 
+                                                        ifelse(df.res$maximum.decile.error, "max.dec", "mid"))))
+df.res$all.highlight.sizes <- ifelse(df.res$minimum.error|df.res$maximum.error, "min/max", "min.dec/max.dec/mid")
+
 # set standard column labels
 df.res$cell.compartment.id <- df.res$library.preparation
 df.res$library.preparation.id <- gsub(".*_", "", df.res$cell.compartment)
@@ -84,12 +91,12 @@ text.to.make.new.dfp <- function(variable.name="sample.id", value.index=1, dfp.i
 
 ```{r}
 # viz wrapper function
-deconvo_plots_list <- function(dfp, script.path = "deconvo_plots.R"){
+deconvo_plots_list <- function(dfp, facet.variable, script.path = "deconvo_plots.R"){
   source(script.path)
-  list(deconvo_heatmaps(dfp),
-       deconvo_scatterplots(dfp),
-       deconvo_lineplots(dfp),
-       deconvocanos(dfp))
+  list(heatmaps = deconvo_heatmaps(dfp, facet.variable),
+       scatterplots = deconvo_scatterplots(dfp),
+       lineplots = deconvo_lineplots(dfp),
+       deconvocanos = deconvocanos(dfp))
 }
 
 # dataset summaries function
@@ -131,7 +138,7 @@ list.summaries.dfp4 <- get_data_summaries(dfp4, "sample.id")
 ## `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
 
 ```{r}
-list.plots.dfp1 <- deconvo_plots_list(dfp1)
+list.plots.dfp1 <- deconvo_plots_list(dfp1, "anatomic.region")
 ```
 
 ## `[SAMPLE]-[EXPERIMENT_CONDITION]`
@@ -151,3 +158,5 @@ list.plots.dfp3 <- deconvo_plots_list(dfp3)
 ```{r}
 list.plots.dfp4 <- deconvo_plots_list(dfp4)
 ```
+
+
