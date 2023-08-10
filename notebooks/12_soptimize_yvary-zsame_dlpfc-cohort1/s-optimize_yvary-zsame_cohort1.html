@@ -359,9 +359,9 @@ display: none;
 
 <div id="key-experiment-notes" class="section level1">
 <h1>Key experiment notes</h1>
-<p>This notebooks shows results summaries from S (cell size scale factor
-normalization) optimization experiments with the following
-conditions:</p>
+<p>This notebook shows summaries from single experiment conditions.</p>
+<p>Results summaries from S (cell size scale factor normalization)
+optimization experiments with the following conditions:</p>
 <ul>
 <li>Z is held constant (from a single snRNAseq sample).</li>
 <li>Y is varied (from real RNAseq data)</li>
@@ -387,25 +387,33 @@ load.filename &lt;- &quot;df-sopt-result_yvary-zsame_cohort1.rda&quot;
 load.path &lt;- file.path(&quot;outputs&quot;, &quot;12_soptimize_yvary-zsame_dlpfc-cohort1&quot;, load.filename)
 df.res &lt;- get(load(load.path))
 
-# This is the chunk that sets more operants in `df.res`.
+# postprocess df.res
 df.res$s.fraction.neuron.glial &lt;- df.res$neuron/df.res$glial
+df.res$s.fraction.neuron.glial.discrete &lt;- as.character(round(df.res$s.fraction.neuron.glial, 2))
 df.res$log.s.fraction &lt;- log(df.res$s.fraction.neuron.glial)
 df.res$minimum.error &lt;- df.res$error.neuron==min(df.res$minimum.error)
 df.res$maximum.error &lt;- df.res$error.neuron==max(df.res$maximum.error)
 deciles.error.neuron &lt;- quantile(df.res$error.neuron, seq(0, 1, 0.1))
 df.res$minimum.decile.error &lt;- df.res$error.neuron &lt;= deciles.error.neuron[2]
 df.res$maximum.decile.error &lt;- df.res$error.neuron &gt;= deciles.error.neuron[9]
+df.res$glial.group.label &lt;- as.character(df.res$glial)
+df.res$neuron.group.label &lt;- as.character(df.res$neuron)
 
 # set standard column labels
-df.res$cell.compartment &lt;- df.res$library.preparation
-df.res$library.preparation &lt;- gsub(&quot;.*_&quot;, &quot;&quot;, df.res$cell.compartment)
+df.res$cell.compartment.id &lt;- df.res$library.preparation
+df.res$library.preparation.id &lt;- gsub(&quot;.*_&quot;, &quot;&quot;, df.res$cell.compartment)
+df.res$block.id &lt;- df.res$sample.id.brnum
+df.res$experiment.id &lt;- paste0(df.res$cell.compartment.id,&quot;_&quot;,df.res$library.preparation.id)
+df.res$sample.experiment &lt;- paste0(df.res$sample.id,&quot;_&quot;,df.res$experiment.id)
+df.res$block.experiment &lt;- paste0(df.res$block.id,&quot;_&quot;,df.res$experiment.id)
+df.res$sample.compartment &lt;- paste0(df.res$sample.id,&quot;_&quot;,df.res$cell.compartment.id)
 
 # set plot parameters
 highlight.color.low &lt;- &quot;red&quot;
 highlight.color.high &lt;- &quot;blue&quot;
 background.color.highlights &lt;- &quot;gray&quot;
 
-# helper function
+# helper functions
 text.to.make.new.dfp &lt;- function(variable.name=&quot;sample.id&quot;, value.index=1, dfp.index=1){
   text.vector1 &lt;- paste0(&quot;id.to.get &lt;- df.res[,&#39;&quot;,variable.name,&quot;&#39;][&quot;,value.index,&quot;]&quot;)
   text.vector2 &lt;- paste0(&quot;filter.variable.vector &lt;- df.res[,&#39;&quot;,variable.name,&quot;&#39;]==id.to.get&quot;)
@@ -413,117 +421,61 @@ text.to.make.new.dfp &lt;- function(variable.name=&quot;sample.id&quot;, value.i
   text.vector.list &lt;- as.list(c(text.vector1, text.vector2, text.vector3))
   return(paste0(text.vector.list, collapse = &quot;;&quot;))
 }</code></pre>
+<pre class="r"><code># viz wrapper function
+deconvo_plots_list &lt;- function(dfp, script.path = &quot;deconvo_plots.R&quot;){
+  source(script.path)
+  list(deconvo_heatmaps(dfp),
+       deconvo_scatterplots(dfp),
+       deconvo_lineplots(dfp),
+       deconvocanos(dfp))
+}
+
+# dataset summaries function
+source(&quot;dataset_summaries.R&quot;)</code></pre>
 </div>
-<div id="define-data-subsets" class="section level1">
-<h1>Define data subsets</h1>
+<div id="get-the-data-subsets-and-summaries" class="section level1">
+<h1>Get the data subsets and summaries</h1>
+<div id="filter" class="section level2">
+<h2>FILTER</h2>
 <p>This is the crucial data filter section. Could go into a script.</p>
-<div id="get-plot-data-for-sample-region-compartment-library" class="section level2">
-<h2>Get plot data for “sample-region-compartment-library”</h2>
-<p>Gets the first ID in the “sample-region-compartment-library”
-designation, saves as <code>dfp1</code>.</p>
-<pre class="r"><code>dfp1 &lt;- parse(text=text.to.make.new.dfp(&quot;sample.labels&quot;)) %&gt;% eval()</code></pre>
-<pre class="r"><code># This is the inspect plot data step
-message(&quot;dimensions:\n&quot;)</code></pre>
-<pre><code>## dimensions:</code></pre>
-<pre class="r"><code>dim(dfp1)</code></pre>
-<pre><code>## [1] 400  22</code></pre>
-<pre class="r"><code>message(&quot;sample ids:\n&quot;)</code></pre>
-<pre><code>## sample ids:</code></pre>
-<pre class="r"><code>unique(dfp1$sample.id)</code></pre>
-<pre><code>## [1] &quot;Br2720&quot;</code></pre>
-<pre class="r"><code>message(&quot;sample id frequencies:\n&quot;)</code></pre>
-<pre><code>## sample id frequencies:</code></pre>
-<pre class="r"><code>table(dfp1$sample.id) %&gt;% head()</code></pre>
-<pre><code>## 
-## Br2720 
-##    400</code></pre>
-<pre class="r"><code>message(&quot;number of unique sample ids:\n&quot;)</code></pre>
-<pre><code>## number of unique sample ids:</code></pre>
-<pre class="r"><code>length(unique(dfp1$sample.id))</code></pre>
-<pre><code>## [1] 1</code></pre>
-<pre class="r"><code>message(&quot;summary of glial values:\n&quot;)</code></pre>
-<pre><code>## summary of glial values:</code></pre>
-<pre class="r"><code>summary(dfp1$s.fraction.neuron.glial)</code></pre>
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.0500  0.5197  1.0000  1.8888  1.9250 20.0000</code></pre>
-<pre class="r"><code>message(&quot;summary of log s.fractions:\n&quot;)</code></pre>
-<pre><code>## summary of log s.fractions:</code></pre>
-<pre class="r"><code>summary(log(dfp1$s.fraction.neuron.glial))</code></pre>
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-## -2.9957 -0.6547  0.0000  0.0000  0.6547  2.9957</code></pre>
+<pre class="r"><code>## Get plot data for `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
+# Gets the first ID in the &quot;sample-region-compartment-library&quot; designation, saves as `dfp1`.
+dfp1 &lt;- parse(text=text.to.make.new.dfp(&quot;block.experiment&quot;)) %&gt;% eval()
+
+## Get plot data for `[SAMPLE]-[EXPERIMENT_CONDITION]` &quot;sample-compartment-library&quot; as
+dfp2 &lt;- parse(text=text.to.make.new.dfp(&quot;sample.experiment&quot;)) %&gt;% eval()
+
+## Get plot data for `[SAMPLE]-[COMPARTMENT]`
+dfp3 &lt;- parse(text=text.to.make.new.dfp(&quot;sample.compartment&quot;)) %&gt;% eval()
+
+## Get plot data for `[SAMPLE]`
+dfp4 &lt;- parse(text=text.to.make.new.dfp(&quot;sample.id&quot;)) %&gt;% eval()</code></pre>
 </div>
-<div id="get-plot-data-for-sample-compartment-library" class="section level2">
-<h2>Get plot data for “sample-compartment-library”</h2>
-<pre class="r"><code>dfp2 &lt;- parse(text=text.to.make.new.dfp(&quot;sample.id&quot;)) %&gt;% eval()</code></pre>
-</div>
-<div id="get-plot-data-for-sample-compartment" class="section level2">
-<h2>Get plot data for “sample-compartment”</h2>
-<pre class="r"><code>dfp3 &lt;- parse(text=text.to.make.new.dfp(&quot;sample.id.brnum&quot;)) %&gt;% eval()</code></pre>
-</div>
-<div id="get-plot-data-for-sample" class="section level2">
-<h2>Get plot data for “sample”</h2>
-<pre class="r"><code>dfp3 &lt;- parse(text=text.to.make.new.dfp(&quot;sample.id&quot;)) %&gt;% eval()</code></pre>
+<div id="summarize" class="section level2">
+<h2>SUMMARIZE</h2>
+<pre class="r"><code>list.summaries.dfp1 &lt;- get_data_summaries(dfp1, &quot;block.experiment&quot;)
+list.summaries.dfp2 &lt;- get_data_summaries(dfp2, &quot;sample.experiment&quot;)
+list.summaries.dfp3 &lt;- get_data_summaries(dfp3, &quot;sample.compartment&quot;)
+list.summaries.dfp4 &lt;- get_data_summaries(dfp4, &quot;sample.id&quot;)</code></pre>
 </div>
 </div>
 <div id="plot-filtered-data" class="section level1">
 <h1>Plot filtered data</h1>
-<p>Plot heatmap – error.neuron</p>
-<pre class="r"><code>ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
-  geom_raster(aes(fill = error.neuron)) +
-  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10)</code></pre>
-<p>Plot point and lineplots</p>
-<pre class="r"><code>ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
-  geom_point(alpha = 1) + geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)</code></pre>
-<p>Plot points with glial value as color</p>
-<pre class="r"><code>ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = glial)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)</code></pre>
-<p>Plot points with s.fraction value as color</p>
-<pre class="r"><code>ggplot(df.plot, aes(x = neuron, y = bias.neuron.true.pred, color = s.fraction.neuron.glial)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)</code></pre>
-<p>Plot fraction versus bias</p>
-<pre class="r"><code>ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)</code></pre>
-<div id="sample-region-compartment-library" class="section level2">
-<h2>“sample-region-compartment-library”</h2>
+<div id="block_id-experiment_condition" class="section level2">
+<h2><code>[BLOCK_ID]-[EXPERIMENT_CONDITION]</code></h2>
+<pre class="r"><code>list.plots.dfp1 &lt;- deconvo_plots_list(dfp1)</code></pre>
 </div>
-<div id="sample-compartment-library" class="section level2">
-<h2>“sample-compartment-library”</h2>
+<div id="sample-experiment_condition" class="section level2">
+<h2><code>[SAMPLE]-[EXPERIMENT_CONDITION]</code></h2>
+<pre class="r"><code>list.plots.dfp2 &lt;- deconvo_plots_list(dfp2)</code></pre>
 </div>
-<div id="section" class="section level2">
-<h2></h2>
+<div id="sample-compartment" class="section level2">
+<h2><code>[SAMPLE]-[COMPARTMENT]</code></h2>
+<pre class="r"><code>list.plots.dfp3 &lt;- deconvo_plots_list(dfp3)</code></pre>
 </div>
-<div id="section-1" class="section level2">
-<h2></h2>
-<p>Plot heatmap – error.neuron, lowest value</p>
-<pre class="r"><code># recompute min/max/decile errors
-df.plot$minimum.error &lt;- df.plot$error.neuron==min(df.plot$error.neuron)
-df.plot$maximum.error &lt;- df.plot$error.neuron==max(df.plot$error.neuron)
-deciles.error.neuron &lt;- quantile(df.plot$error.neuron, seq(0, 1, 0.1))
-df.plot$minimum.decile.error &lt;- df.plot$error.neuron &lt;= deciles.error.neuron[2]
-df.plot$maximum.decile.error &lt;- df.plot$error.neuron &gt;= deciles.error.neuron[10]
-
-
-# minimum
-ggplot(df.plot, aes(x = glial, y = neuron, color = minimum.error)) + 
-  geom_point(alpha = 1) + scale_color_manual(values = c(&quot;TRUE&quot; = highlight.color.low, 
-                                               &quot;FALSE&quot; = background.color.highlights)) +
-  facet_wrap(~anatomic.region)
-# min decile
-ggplot(df.plot, aes(x = glial, y = neuron, color = minimum.decile.error)) + 
-  geom_point() + scale_color_manual(values = c(&quot;TRUE&quot; = highlight.color.low, 
-                                               &quot;FALSE&quot; = background.color.highlights)) +
-  facet_wrap(~anatomic.region)
-# maximum
-ggplot(df.plot, aes(x = glial, y = neuron, color = maximum.error)) + 
-  geom_point() + scale_color_manual(values = c(&quot;TRUE&quot; = highlight.color.high, 
-                                               &quot;FALSE&quot; = background.color.highlights)) +
-  facet_wrap(~anatomic.region)
-# max decile
-ggplot(df.plot, aes(x = glial, y = neuron, color = maximum.decile.error)) + 
-  geom_point() + scale_color_manual(values = c(&quot;TRUE&quot; = highlight.color.high, 
-                                               &quot;FALSE&quot; = background.color.highlights)) +
-  facet_wrap(~anatomic.region)</code></pre>
+<div id="sample" class="section level2">
+<h2><code>[SAMPLE]</code></h2>
+<pre class="r"><code>list.plots.dfp4 &lt;- deconvo_plots_list(dfp4)</code></pre>
 </div>
 </div>
 

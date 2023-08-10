@@ -72,7 +72,7 @@ highlight.color.low <- "red"
 highlight.color.high <- "blue"
 background.color.highlights <- "gray"
 
-# helper function
+# helper functions
 text.to.make.new.dfp <- function(variable.name="sample.id", value.index=1, dfp.index=1){
   text.vector1 <- paste0("id.to.get <- df.res[,'",variable.name,"'][",value.index,"]")
   text.vector2 <- paste0("filter.variable.vector <- df.res[,'",variable.name,"']==id.to.get")
@@ -82,116 +82,72 @@ text.to.make.new.dfp <- function(variable.name="sample.id", value.index=1, dfp.i
 }
 ```
 
-# Define data subsets
+```{r}
+# viz wrapper function
+deconvo_plots_list <- function(dfp, script.path = "deconvo_plots.R"){
+  source(script.path)
+  list(deconvo_heatmaps(dfp),
+       deconvo_scatterplots(dfp),
+       deconvo_lineplots(dfp),
+       deconvocanos(dfp))
+}
+
+# dataset summaries function
+source("dataset_summaries.R")
+```
+
+# Get the data subsets and summaries
+
+## FILTER
 
 This is the crucial data filter section. Could go into a script.
 
-## Get plot data for `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
-
-Gets the first ID in the "sample-region-compartment-library" designation, saves as `dfp1`.
-
 ```{r}
+## Get plot data for `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
+# Gets the first ID in the "sample-region-compartment-library" designation, saves as `dfp1`.
 dfp1 <- parse(text=text.to.make.new.dfp("block.experiment")) %>% eval()
-```
 
 ## Get plot data for `[SAMPLE]-[EXPERIMENT_CONDITION]` "sample-compartment-library" as
-
-```{r}
 dfp2 <- parse(text=text.to.make.new.dfp("sample.experiment")) %>% eval()
-```
 
 ## Get plot data for `[SAMPLE]-[COMPARTMENT]`
-
-```{r}
 dfp3 <- parse(text=text.to.make.new.dfp("sample.compartment")) %>% eval()
-```
 
 ## Get plot data for `[SAMPLE]`
-
-```{r}
 dfp4 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
 ```
 
+## SUMMARIZE
+
+```{r}
+list.summaries.dfp1 <- get_data_summaries(dfp1, "block.experiment")
+list.summaries.dfp2 <- get_data_summaries(dfp2, "sample.experiment")
+list.summaries.dfp3 <- get_data_summaries(dfp3, "sample.compartment")
+list.summaries.dfp4 <- get_data_summaries(dfp4, "sample.id")
+```
 
 # Plot filtered data
 
-HEATLUTION PLOTS
-
-```{r, eval = F}
-# Plot heatmap -- error.neuron
-ggplot(dfp1, aes(x = glial, y = neuron)) + theme_bw() +
-  geom_raster(aes(fill = error.neuron)) +
-  scale_fill_gradientn(colours = rainbow(5)) + 
-  geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
-  ggtitle(dfp1$block.experiment)
-
-# prep heatlution plots with highlights
-# recompute min/max/decile errors
-dfp1$minimum.error <- dfp1$error.neuron==min(dfp1$error.neuron)
-dfp1$maximum.error <- dfp1$error.neuron==max(dfp1$error.neuron)
-deciles.error.neuron <- quantile(dfp1$error.neuron, seq(0, 1, 0.1))
-dfp1$minimum.decile.error <- dfp1$error.neuron <= deciles.error.neuron[2]
-dfp1$maximum.decile.error <- dfp1$error.neuron >= deciles.error.neuron[10]
-# min highlights
-ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.error)) + 
-  geom_point(alpha = 1) + scale_color_manual(values = c("TRUE" = highlight.color.low, 
-                                               "FALSE" = background.color.highlights)) +
-  facet_wrap(~anatomic.region)
-ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.decile.error)) + 
-  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, 
-                                               "FALSE" = background.color.highlights)) +
-  facet_wrap(~anatomic.region)
-# max highlights
-ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.error)) + 
-  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
-                                               "FALSE" = background.color.highlights)) +
-  facet_wrap(~anatomic.region)
-ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.decile.error)) + 
-  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
-                                               "FALSE" = background.color.highlights)) +
-  facet_wrap(~anatomic.region)
-```
-
-
-
-
-```{r, eval = F}
-# SCATTERLUTION PLOTS
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
-  geom_point(alpha = 1) + geom_line() + theme_bw() + 
-  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-# Plot points with s.fraction value as color
-# continuous grouping
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, 
-                 color = s.fraction.neuron.glial, group = s.fraction.neuron.glial)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-```
+## `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
 
 ```{r}
-# DECONVOLINE PLOTS
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
-  geom_line() + theme_bw() + 
-  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial, color = glial)) + 
-  geom_line() + theme_bw() + 
-  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-# discrete grouping
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label, color = glial.group.label)) + 
-  geom_line() + theme_bw() + 
-  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label, color = glial.group.label)) + 
-  geom_line() + theme_bw() + 
-  facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+list.plots.dfp1 <- deconvo_plots_list(dfp1)
 ```
 
-DECONVOCANO PLOTS
+## `[SAMPLE]-[EXPERIMENT_CONDITION]`
 
-```{r, eval = F}
-# DECONVOCANO_PLOTS
-# Scatterplot of fraction versus bias.
-ggplot(dfp1, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-# Scatterplot of fraction versus error
-ggplot(dfp1, aes(x = log.s.fraction, y = error.neuron)) + 
-  geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
+```{r}
+list.plots.dfp2 <- deconvo_plots_list(dfp2)
+```
+
+## `[SAMPLE]-[COMPARTMENT]`
+
+```{r}
+list.plots.dfp3 <- deconvo_plots_list(dfp3)
+```
+
+## `[SAMPLE]`
+
+```{r}
+list.plots.dfp4 <- deconvo_plots_list(dfp4)
 ```
