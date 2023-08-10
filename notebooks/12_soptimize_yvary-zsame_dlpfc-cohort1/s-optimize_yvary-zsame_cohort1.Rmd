@@ -18,29 +18,17 @@ sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Plot settings
-
-This is the chunk that toggles plot settings
+# Load data, postprocess, and set plot parameters
 
 ```{r}
-highlight.color.low <- "red"
-highlight.color.high <- "blue"
-background.color.highlights <- "gray"
-```
-
-# Load results
-
-```{r}
+# load results
 setwd("..")
 setwd("..")
 load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
 df.res <- get(load(load.path))
-```
 
-This is the chunk that sets more operants in `df.res`.
-
-```{r}
+# This is the chunk that sets more operants in `df.res`.
 df.res$s.fraction.neuron.glial <- df.res$neuron/df.res$glial
 df.res$log.s.fraction <- log(df.res$s.fraction.neuron.glial)
 df.res$minimum.error <- df.res$error.neuron==min(df.res$minimum.error)
@@ -48,15 +36,29 @@ df.res$maximum.error <- df.res$error.neuron==max(df.res$maximum.error)
 deciles.error.neuron <- quantile(df.res$error.neuron, seq(0, 1, 0.1))
 df.res$minimum.decile.error <- df.res$error.neuron <= deciles.error.neuron[2]
 df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
+
+# set plot parameters
+highlight.color.low <- "red"
+highlight.color.high <- "blue"
+background.color.highlights <- "gray"
 ```
 
-# Plot results within a "sample-region-compartment-library"
+# Define data subsets
+
+This is the crucial data filter section. Could go into a script.
+
+## Get plot data for "sample-region-compartment-library"
+
+Gets the first ID in the "sample-region-compartment-library" designation, saves as `dfp1`.
 
 ```{r}
-# This is the filter step
-sample.id <- df.res$sample.labels[1]
-df.res.filter <- df.res$sample.labels==sample.id
-df.plot <- df.res[df.res.filter,]
+variable.name <- "sample.labels"
+id.to.get <- df.res[,variable.name][1]
+filter.variable.vector <- df.res[,variable.name]==id.to.get
+dfp1 <- df.res[filter.variable.vector,]
+```
+
+```{r}
 # This is the inspect plot data step
 message("dimensions:\n")
 dim(df.plot)
@@ -72,6 +74,25 @@ message("summary of log s.fractions:\n")
 summary(log(df.res$s.fraction.neuron.glial))
 ```
 
+## Get plot data for "sample-compartment-library"
+
+```{r}
+# This is the filter step
+sample.id <- df.res$sample.labels[1]
+df.res.filter <- df.res$sample.labels==sample.id
+df.plot <- df.res[df.res.filter,]
+```
+
+```{r}
+```
+
+## Get plot data for 
+
+## Get plot data for 
+
+
+# Plot filtered data
+
 Plot heatmap -- error.neuron
 
 ```{r}
@@ -80,6 +101,7 @@ ggplot(df.plot, aes(x = glial, y = neuron)) + theme_bw() +
   scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) + 
   geom_vline(xintercept = 3) + geom_hline(yintercept = 10)
 ```
+
 Plot point and lineplots
 
 ```{r}
@@ -107,6 +129,16 @@ Plot fraction versus bias
 ggplot(df.plot, aes(x = log.s.fraction, y = bias.neuron.true.pred)) + 
   geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
 ```
+
+## "sample-region-compartment-library"
+
+## "sample-compartment-library"
+
+##
+
+##
+
+# Plot results within a "sample-region-compartment-library"
 
 # Plot results across regions within a "sample-compartment-library"
 
