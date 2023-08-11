@@ -1,0 +1,59 @@
+---
+title: "s-estimate-rnascope_yvar-image-analysis_cohort1"
+author: "Sean Maden"
+date: "2023-08-11"
+output: html_document
+---
+
+This notebook locates the position of the RNAscope S-model line in the K-dimensional field.
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "dplyr")
+sapply(libv, library, character.only = T)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+env.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", "env_yvar_notebook1.RData")
+load(env.path)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+# load mae (SEE CODE 01 OUTPUTS)
+new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae.final.filepath <- file.path("outputs", "01_prepare-datasets", new.mae.filename)
+mae <- get(load(mae.final.filepath))
+```
+
+# Get an RNAscope cell size estimate
+
+```{r}
+df.ct.info <- mae[["df.cellstat.rnascope"]]
+neuron.size <- median(as.numeric(df.ct.info["cell_size",grepl("neuron", colnames(df.ct.info))]))
+glial.size <- median(as.numeric(df.ct.info["cell_size",grepl("glial", colnames(df.ct.info))]))
+```
+
+# Draw one heatmap with model through RNAscope cell sizes
+
+```{r}
+hm <- unpack_plot_type(results.list.dfp1, "heatmap1", "heatmaps")[[1]]
+hm + geom_abline(slope = neuron.size/glial.size, intercept = 0, lty = 2, size = 3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
