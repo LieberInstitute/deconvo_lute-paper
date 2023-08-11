@@ -8,7 +8,7 @@ output: html_document
 This notebook locates the position of the RNAscope S-model line in the K-dimensional field.
 
 ```{r setup, include=FALSE}
-libv <- c("ggplot2", "dplyr")
+libv <- c("ggplot2", "dplyr", "MultiAssayExperiment")
 sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -16,8 +16,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 setwd("..")
 setwd("..")
+# load first notebook env
 env.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", "env_yvar_notebook1.RData")
 load(env.path)
+# source script to get rnascope cell sizes
+script.path <- file.path("code", "12_soptimize_yvary-zsame_dlpfc-cohort1", "02_prepare_rnascope_cellsize.R")
+source(script.path)
 ```
 
 ```{r}
