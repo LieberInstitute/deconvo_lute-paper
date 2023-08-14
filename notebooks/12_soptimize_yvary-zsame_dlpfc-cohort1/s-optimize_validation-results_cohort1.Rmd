@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # Load
 
 ```{r}
+# mae validation data subset
+validation.sample.id <- c("Br6432", "Br6522", "Br8667")
 ```
 
 # Validation summaries
