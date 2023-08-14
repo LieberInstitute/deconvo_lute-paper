@@ -1,0 +1,106 @@
+---
+title: "s-optimize_summarize-err-min-bybulk_cohort1"
+author: "Sean Maden"
+date: "2023-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Key experiment notes
+
+This notebook shows summaries from SINGLE EXPERIMENT CONDITIONS in the bulk data.
+
+Results summaries from S (cell size scale factor normalization) optimization 
+experiments with the following conditions:
+* Z is held constant (from a single snRNAseq sample).
+* Y is varied (from real RNAseq data)
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "dplyr")
+sapply(libv, library, character.only = T)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Important commented text in a code chunk:
+
+```
+#--------------------
+# Experiment Manifest
+#--------------------
+IMPORTANT: this is your sample identifier manifest
+
+DATA DICTIONARY
+* sample: Brnum, the brain identifier, specific to donor
+* position: DLPFC region, anatomic region within DLPFC region, (mid, ant, post)
+* cell.compartment: cellular compartment, (nuc, cyto, bulk)
+* library.prep: DNA library preparation type (polyA, ribozero)
+
+COLUMN IDENTIFIERS
+* base identifer pattern:
+[sample.id]-[anatomic.position.id]-[cell.compartment.id]-[library.prep.id]
+
+* primary identifier consolidation
+[BLOCK_ID]-[cell.compartment.id]-[library.prep.id]
+
+* secondary identifier consolidation
+[BLOCK_ID]-[EXPERIMENT_CONDITION]
+
+```
+
+# Load
+
+```{r}
+# load results
+setwd("..")
+setwd("..")
+load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
+load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
+df.res <- get(load(load.path))
+```
+# Get minima by label
+
+```{r}
+length(unique(df.res$sample.labels))
+labels.vector <- unique(df.res$sample.labels)
+df.min <- do.call(rbind, lapply(labels.vector, function(label.iter){
+  df.iter <- df.res[df.res$sample.labels==label.iter,]
+  df.iter[df.iter$error.neuron == min(df.iter$error.neuron),,drop=F]
+}))
+```
+
+# Plots by `sample.id`
+
+Violin plots, by sample.id
+
+```{r}
+ggplot(df.min, aes(x = sample.id, y = error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
+```
+
+# Plots by `library.prep`
+
+```{r}
+df.min$library.prep <- gsub(".*_", "", df.min$cell.compartment)
+ggplot(df.min, aes(x = library.prep, y = error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
+```
+
+# Plots by `cell.compartment`
+
+```{r}
+df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
+ggplot(df.min, aes(x = cell.compartment, y = error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
+```
+
+# Plots by `library.prep*cell.compartment`
+
+```{r}
+df.min$library.prep.x.cell.compartment <- paste0(df.min$library.prep, ";",df.min$cell.compartment)
+ggplot(df.min, aes(x = library.prep.x.cell.compartment, y = error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
