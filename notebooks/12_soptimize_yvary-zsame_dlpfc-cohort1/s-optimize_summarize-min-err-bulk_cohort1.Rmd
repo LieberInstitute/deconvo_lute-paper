@@ -3,8 +3,8 @@ title: "s-optimize_summarize-err-min-bybulk_cohort1"
 author: "Sean Maden"
 date: "2023-08-14"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -76,17 +76,21 @@ source("dataset_summaries.R")
 
 # Get minima by label
 
+Gets one unique minimum neuron error per data label.
+
 ```{r}
 length(unique(df.res$sample.labels))
 labels.vector <- unique(df.res$sample.labels)
 df.min <- do.call(rbind, lapply(labels.vector, function(label.iter){
   df.iter <- df.res[df.res$sample.labels==label.iter,]
-  df.iter[df.iter$error.neuron == min(df.iter$error.neuron),,drop=F]
+  df.iter[df.iter$error.neuron == min(df.iter$error.neuron)[1],,drop=F]
 }))
 df.min$min.error.neuron <- df.min$error.neuron
 ```
 
-## Show field-gradient plots of highest minima
+## Example field gradient heatmaps and highlight plots
+
+Shows example heatmaps and highlight plots for label IDs having the lowest and highest observed minmimum neuron errors.
 
 ```{r}
 # subset/filter
@@ -97,6 +101,7 @@ df.res.highest <- df.res[df.res.filter,]
 list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.labels")
 # plot
 list.plots.dfp1$heatmaps$heatmap1
+list.plots.dfp1$heatmaps$heatmap6
 ```
 
 ## Show field-gradient plots of lowest minima
@@ -111,9 +116,12 @@ df.res.highest <- df.res[df.res.filter,]
 list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.labels")
 # plot
 list.plots.dfp1$heatmaps$heatmap1
+list.plots.dfp1$heatmaps$heatmap6
 ```
 
-# Plots by `sample.id`
+# Plots across bulk condition groups
+
+## Plots by `sample.id`
 
 Violin plots, by sample.id
 
@@ -122,7 +130,7 @@ ggplot(df.min, aes(x = sample.id, y = min.error.neuron)) +
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
-# Plots by `library.prep`
+## Plots by `library.prep`
 
 ```{r}
 df.min$library.prep <- gsub(".*_", "", df.min$cell.compartment)
@@ -130,7 +138,7 @@ ggplot(df.min, aes(x = library.prep, y = min.error.neuron)) +
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
-# Plots by `cell.compartment`
+## Plots by `cell.compartment`
 
 ```{r}
 df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
@@ -138,14 +146,14 @@ ggplot(df.min, aes(x = cell.compartment, y = min.error.neuron)) +
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
-# Plots by `anatomic.region`
+## Plots by `anatomic.region`
 
 ```{r}
 ggplot(df.min, aes(x = anatomic.region, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
-# Plots by `library.prep*cell.compartment`
+## Plots by `library.prep*cell.compartment`
 
 ```{r}
 df.min$library.prep.x.cell.compartment <- paste0(df.min$library.prep, ";",df.min$cell.compartment)
