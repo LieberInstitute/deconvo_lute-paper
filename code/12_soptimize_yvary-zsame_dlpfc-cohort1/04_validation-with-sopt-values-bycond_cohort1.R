@@ -100,6 +100,7 @@ df.res.samples$anatomic.region <- rep(y.unadj$location, nrow(dfs))
 df.res.samples$library.type <- rep(y.unadj$library_type, nrow(dfs))
 df.res.samples$compartment_library <- rep(y.unadj$expt_condition, nrow(dfs))
 df.res.samples$sample.id.brnum <- rep(y.unadj$batch.id2, nrow(dfs))
+# append dfs info
 df.res.samples$dfs.condition.label <- rep(dfs.new$label, ncol(y.unadj))
 df.res.samples$dfs.condition.variable.name <- rep(dfs.new$variable.name, ncol(y.unadj))
 
@@ -134,6 +135,7 @@ condition_comparison_boxplots("compartment_library", "Nuc_RiboZeroGold", df.res.
 condition_comparison_boxplots("compartment_library", "Nuc_polyA", df.res.samples)
 
 # library.preparation
+df.res.samples$library.preparation <- df.res.samples$library.type
 condition_comparison_boxplots("library.preparation", "polyA", df.res.samples)
 condition_comparison_boxplots("library.preparation", "RiboZeroGold", df.res.samples)
 

@@ -35,12 +35,15 @@ parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL,
                              function(i){
                                s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
                                suppressMessages(
-                                 lute(sce, y = yunadj, celltype.variable = celltype.variable, s = s.vector,
+                                 dfi <-lute(sce, y = yunadj, celltype.variable = celltype.variable, s = s.vector,
                                       typemarker.algorithm = NULL)$deconvolution.results@predictions.table
                                )
+                               dfi$sample.label <- colnames(yunadj)
+                               dfi$glial <- s.vector["glial"]
+                               dfi$neuron <- s.vector["neuron"]
+                               return(dfi)
                              }))
   colnames(df.res) <- paste0(colnames(df.res), ".pred.nnls")
-  df.res <- cbind(df.res, dfs)
   if(is(df.true, "NULL")){
     df.true <- sce[[celltype.variable]] %>% table() %>% prop.table() %>% as.data.frame()
     rownames(df.true) <- df.true[,1]
@@ -151,14 +154,22 @@ condition_comparison_boxplots <- function(variable.name, variable.label, df.res.
   #variable.name <- "library.preparation"
   #variable.label <- "polyA"
   ggtitle.string <- paste0(variable.name,"==",variable.label)
+  
+  # filter df.res
   filter.df.res <- df.res.samples$dfs.condition.label==variable.label
   filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name==variable.name
+  df.res <- df.res.samples[filter.df.res,]
+  
   # get dfp by filter type
-  dfp1 <- df.res.samples[filter.df.res,]
-  dfp2 <- df.res.samples[!filter.df.res,]
+  # build condition filter
+  filter.condition <- df.res[,colnames(df.res) == variable.name] == variable.label
+  # get condition and !condition
+  dfp1 <- df.res[filter.condition,]
+  dfp2 <- df.res[!filter.condition,]
   dfp1$type <- "condition"
   dfp2$type <- "other"
   dfp <- rbind(dfp1, dfp2)
+  
   # new plot
   #ggplot(dfp, aes(x = type, y = error.neuron)) + 
   #  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
