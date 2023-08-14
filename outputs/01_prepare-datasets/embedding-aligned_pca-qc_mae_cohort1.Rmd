@@ -1,0 +1,164 @@
+---
+title: "embedding-aligned_pca-qc_mae_cohort1"
+author: "Sean Maden"
+date: "2023-08-11"
+output: html_document
+---
+
+Performs embedding-aligned PCA for QC of multiple assays. Currently uses `MultiAssayExperiment`. Does the following 3-step workflow:
+* 1. checks `lm` bias.
+* 2. performs PCA.
+* 3. computes PCA diffs among steps.
+
+For which we have defined:
+* 2 assay types
+* 2 steps 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("ggplot2", "MultiAssayExperiment", "dplyr")
+sapply(libv, library, character.only = T)
+```
+
+# data load
+
+load
+```{r}
+mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae <- get(load(mae.filename))
+```
+
+inspect
+```{r}
+names(mae)
+```
+
+unpack
+```{r}
+assay1 <- "sn1.rnaseq"
+assay2 <- "rnascope.image"
+celltype.variable.name <- "k2"
+
+assay.data1 <- mae[[assay1]]
+assay.data2 <- mae[[assay2]]
+# MAKE DIMS MATCH --- REMOVE THIS LATER
+assay.data2.filter <- gsub(".*_", "", assay.data2$SAMPLE_ID)=="CIRCLE"
+assay.data2 <- assay.data2[,assay.data2.filter]
+
+cell.types <- unique(
+  colData(assay.data1)[,celltype.variable.name])
+df1 <- table(
+  assay.data1$Sample,assay.data1$k2) %>% as.data.frame()
+df2 <- table(
+  assay.data2$Sample,assay.data2$k2) %>% as.data.frame()
+
+# drop extra cell types
+list.data.frames <- list(df1 = df1, df2 = df2)
+list.data.frames <- lapply(list.data.frames, function(df.iter){
+  df.iter <- df.iter[df.iter[,2] %in% cell.types,]
+  df.iter[,2] <- droplevels(df.iter[,2])
+  df.iter
+})
+# match sample ids
+sample.id.vector <- list.data.frames[[1]]$Var1
+list.data.frames <- lapply(list.data.frames, function(df.iter){
+  df.iter[order(match(df.iter[,1], sample.id.vector)),]
+})
+# check sample id matches
+vector.check.match <- lapply(list.data.frames, function(df.iter){
+  order(match(df.iter$Sample, smaple.id.vector))
+}) %>% unlist() %>% as.vector()
+if(!length(vector.check.match=="IDENTICAL"))
+
+# JUST GET 2 SAMPLES OF DATA TO BEGIN
+# filters
+filter.df1 <- df1[,1]=="Br2743_ant"
+filter.df1 <- filter.df1 | df1[,1]=="Br8492_post"
+filter.df2 <- df2[,1]=="Br2743_ant"[1:2]
+filter.df2 <- filter.df2 | df2[,1]=="Br8492_post"[1:2]
+# outputs
+df1.out <- df1[filter.df1,]
+df2.out <- df2[filter.df2,]
+df1.out <- df1.out[!is.na(df1.out[,1]),]
+df2.out <- df2.out[!is.na(df2.out[,1]),]
+```
+  
+```{r}
+#
+# PROPER MAE FILTER
+#
+
+filter.mae <- colData(mae)$sample.id %in% unique(mae[[1]]$Sample)[1:10]
+new.mae <- mae[,filter.mae]
+
+assay.data1 <- new.mae[[assay1]]
+
+assay.data2 <- new.mae[[assay2]]
+# MAKE DIMS MATCH --- REMOVE THIS LATER
+assay.data2.filter <- gsub(".*_", "", assay.data2$SAMPLE_ID)=="CIRCLE"
+assay.data2 <- assay.data2[,assay.data2.filter]
+
+cell.types <- unique(
+  colData(assay.data1)[,celltype.variable.name])
+df1 <- table(
+  assay.data1$Sample,assay.data1$k2) %>% as.data.frame()
+df2 <- table(
+  assay.data2$Sample,assay.data2$k2) %>% as.data.frame()
+df2 <- df2[!df2$Var2=="NA",]
+```
+  
+```{r}
+# get SAMPLES-by-ASSAY_CELLTYPE
+list.df.input <- list(df1 = df1.out, df2 = df2.out)
+df.out <- do.call(cbind, lapply(list.df.input, function(df.iter){
+  df.iter.out <- do.call(cbind, lapply(cell.types, function(cell.type){
+    df.iter[df.iter[,2]==cell.type,"Freq"]
+  }))
+}))
+assays <- c(assay1, assay2)
+colnames(df.out) <- paste0(rep(assays, each = length(cell.types)), ";", cell.types)
+rownames(df.out) <- unique(df1.out[,1])
+```
+
+# workflow
+
+## 1. Test bias
+
+```{r}
+cor(df.out)
+```
+
+## 2. PCA
+
+```{r}
+res.pca <- prcomp(t(df.out))
+res.pca
+```
+
+```{r}
+# GET PC PERCENTAGES
+# PLOTS
+plot.df <- as.data.frame(res.pca$x)
+colnames(plot.df) <- colnames(plot.df)
+point.labels <- rownames(plot.df)
+ggplot(plot.df, aes(x = PC1, y = PC2, label = point.labels)) + 
+  geom_point() + geom_label() + geom_label()
+```
+
+```{r}
+# additional options with:
+# library(ggfortify)
+```
+
+## 3. 
+
+```{r}
+
+# differences between cell types, by assay
+df.diff1 <- t(plot.df) %>% as.data.frame()
+sqrt(df.diff1$`sn1.rnaseq;neuron`-df.diff1$`rnascope.image;neuron` , plot.df$PC2)
+
+```
+
+# outputs
+
