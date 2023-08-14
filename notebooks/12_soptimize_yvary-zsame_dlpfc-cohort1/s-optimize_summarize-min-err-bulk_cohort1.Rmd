@@ -161,3 +161,8 @@ ggplot(df.min, aes(x = library.prep.x.cell.compartment, y = min.error.neuron)) +
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+# Summarize optimal S values
+
+```{r}
+```
