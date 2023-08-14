@@ -7,7 +7,7 @@
 
 deconvo_plot_statistics <- function(dfp1){
   # postprocess dfp1
-  dfp1$s.fraction.neuron.glial <- dfp1$neuron/dfp1$glial
+  dfp1$s.fraction.neuron.glial <- dfp1$s.neuron/dfp1$s.glial
   dfp1$s.fraction.neuron.glial.discrete <- as.character(round(dfp1$s.fraction.neuron.glial, 2))
   dfp1$log.s.fraction <- log(dfp1$s.fraction.neuron.glial)
   dfp1$minimum.error <- dfp1$error.neuron==min(dfp1$error.neuron)
@@ -15,8 +15,8 @@ deconvo_plot_statistics <- function(dfp1){
   deciles.error.neuron <- quantile(dfp1$error.neuron, seq(0, 1, 0.1))
   dfp1$minimum.decile.error <- dfp1$error.neuron <= deciles.error.neuron[2]
   dfp1$maximum.decile.error <- dfp1$error.neuron >= deciles.error.neuron[9]
-  dfp1$glial.group.label <- as.character(dfp1$glial)
-  dfp1$neuron.group.label <- as.character(dfp1$neuron)
+  dfp1$glial.group.label <- as.character(dfp1$s.glial)
+  dfp1$neuron.group.label <- as.character(dfp1$s.neuron)
   # dfp1$all.highlight.categories <- ifelse(dfp1$minimum.error, "min",ifelse(,,ifelse(,,ifelse())))
   dfp1$all.highlight.categories <- ifelse(dfp1$minimum.error, "min", 
                                             ifelse(dfp1$maximum.error, "max", 

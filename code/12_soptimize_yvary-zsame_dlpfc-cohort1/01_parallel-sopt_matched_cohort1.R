@@ -75,22 +75,27 @@ sample.id.vector <- unique(sce[[sample.id.variable]])
 sample.id.vector <- unique(y.unadj$batch.id2)
 df.res.samples <- multigroup_bias_matched(sample.id.vector[1:2], list.df.true, y.unadj, dfs, sce)
 
+head(df.res.samples)
+
+head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
+
 #df.res.samples <- parallel_bias_matched(sce, y.unadj, dfs, df.true,
 #                                        celltype.variable = celltype.variable,
 #                                        assay.name = assay.name)
 
 
 # append coldata from y.unadj (see MAE data)
-df.res.samples$sample.labels <- rep(colnames(y.unadj), nrow(dfs))
-df.res.samples$sample.id <- rep(gsub("_.*", "", y.unadj$batch.id), nrow(dfs))
-df.res.samples$cell.compartment <- rep(y.unadj$expt_condition, nrow(dfs))
-df.res.samples$anatomic.region <- rep(y.unadj$location, nrow(dfs))
-df.res.samples$library.preparation <- rep(y.unadj$library_prep, nrow(dfs))
-df.res.samples$sample.id.brnum <- rep(y.unadj$batch.id2, nrow(dfs))
+cd.ydata <- colData(y.unadj)
+#df.res.samples$sample.labels <- cd.ydata[,] rep(colnames(y.unadj), nrow(dfs))
+#df.res.samples$sample.id <- rep(gsub("_.*", "", y.unadj$batch.id), nrow(dfs))
+df.res.samples$cell.compartment <- cd.ydata[df.res.samples$sample.label,]$library_prep
+df.res.samples$anatomic.region <- cd.ydata[df.res.samples$sample.label,]$location
+df.res.samples$library.type <- cd.ydata[df.res.samples$sample.label,]$library_type
+df.res.samples$sample.id.brnum <- cd.ydata[df.res.samples$sample.label,]$batch.id2
 
 # append data transformations
 # this is the chunk that sets more operants in `df.res`
-df.res.samples$s.fraction.neuron.glial <- df.res.samples$neuron/df.res.samples$glial
+df.res.samples$s.fraction.neuron.glial <- df.res.samples$s.neuron/df.res.samples$s.glial
 df.res.samples$log.s.fraction <- log(df.res.samples$s.fraction.neuron.glial)
 df.res.samples$error.neuron <- abs(df.res.samples$bias.neuron.true.pred)
 df.res.samples$error.glial <- abs(df.res.samples$bias.glial.true.pred)

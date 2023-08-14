@@ -59,16 +59,8 @@ load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load
 df.res <- get(load(load.path))
 
 # postprocess df.res
-df.res$s.fraction.neuron.glial <- df.res$neuron/df.res$glial
-df.res$s.fraction.neuron.glial.discrete <- as.character(round(df.res$s.fraction.neuron.glial, 2))
-df.res$log.s.fraction <- log(df.res$s.fraction.neuron.glial)
-df.res$minimum.error <- df.res$error.neuron==min(df.res$minimum.error)
-df.res$maximum.error <- df.res$error.neuron==max(df.res$maximum.error)
-deciles.error.neuron <- quantile(df.res$error.neuron, seq(0, 1, 0.1))
-df.res$minimum.decile.error <- df.res$error.neuron <= deciles.error.neuron[2]
-df.res$maximum.decile.error <- df.res$error.neuron >= deciles.error.neuron[9]
-df.res$glial.group.label <- as.character(df.res$glial)
-df.res$neuron.group.label <- as.character(df.res$neuron)
+df.res$glial.group.label <- as.character(df.res$s.glial)
+df.res$neuron.group.label <- as.character(df.res$s.neuron)
 
 # df.res$all.highlight.categories <- ifelse(df.res$minimum.error, "min",ifelse(,,ifelse(,,ifelse())))
 df.res$all.highlight.categories <- ifelse(df.res$minimum.error, "min", 
