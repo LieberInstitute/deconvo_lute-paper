@@ -2,7 +2,9 @@
 title: "s-optimize_summarize-err-min-bybulk_cohort1"
 author: "Sean Maden"
 date: "2023-08-14"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -60,6 +62,22 @@ load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 load.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", load.filename)
 df.res <- get(load(load.path))
 ```
+
+# Source
+
+Source visualization and helper functions
+
+```{r}
+# set plot parameters
+highlight.color.low <- "red"
+highlight.color.high <- "blue"
+background.color.highlights <- "gray"
+# viz wrapper functions
+source("deconvo_plots.R")
+# dataset summaries function(s)
+source("dataset_summaries.R")
+```
+
 # Get minima by label
 
 ```{r}
@@ -69,6 +87,34 @@ df.min <- do.call(rbind, lapply(labels.vector, function(label.iter){
   df.iter <- df.res[df.res$sample.labels==label.iter,]
   df.iter[df.iter$error.neuron == min(df.iter$error.neuron),,drop=F]
 }))
+df.min$min.error.neuron <- df.min$error.neuron
+```
+
+## Show field-gradient plots of highest minima
+
+```{r}
+# subset/filter
+df.min.filter <- df.min$min.error.neuron==max(df.min$min.error.neuron)
+sample.label.highest <- df.min[df.min.filter,]$sample.labels[1]
+df.res.filter <- df.res$sample.labels==sample.label.highest
+df.res.highest <- df.res[df.res.filter,]
+list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.labels")
+# plot
+list.plots.dfp1$heatmaps$heatmap1
+```
+
+## Show field-gradient plots of lowest minima
+
+
+```{r}
+# subset/filter
+df.min.filter <- df.min$min.error.neuron==min(df.min$min.error.neuron)
+sample.label.highest <- df.min[df.min.filter,]$sample.labels[1]
+df.res.filter <- df.res$sample.labels==sample.label.highest
+df.res.highest <- df.res[df.res.filter,]
+list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.labels")
+# plot
+list.plots.dfp1$heatmaps$heatmap1
 ```
 
 # Plots by `sample.id`
@@ -76,7 +122,7 @@ df.min <- do.call(rbind, lapply(labels.vector, function(label.iter){
 Violin plots, by sample.id
 
 ```{r}
-ggplot(df.min, aes(x = sample.id, y = error.neuron)) + 
+ggplot(df.min, aes(x = sample.id, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
@@ -84,7 +130,7 @@ ggplot(df.min, aes(x = sample.id, y = error.neuron)) +
 
 ```{r}
 df.min$library.prep <- gsub(".*_", "", df.min$cell.compartment)
-ggplot(df.min, aes(x = library.prep, y = error.neuron)) + 
+ggplot(df.min, aes(x = library.prep, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
@@ -92,7 +138,14 @@ ggplot(df.min, aes(x = library.prep, y = error.neuron)) +
 
 ```{r}
 df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
-ggplot(df.min, aes(x = cell.compartment, y = error.neuron)) + 
+ggplot(df.min, aes(x = cell.compartment, y = min.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
+```
+
+# Plots by `anatomic.region`
+
+```{r}
+ggplot(df.min, aes(x = anatomic.region, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
@@ -100,7 +153,7 @@ ggplot(df.min, aes(x = cell.compartment, y = error.neuron)) +
 
 ```{r}
 df.min$library.prep.x.cell.compartment <- paste0(df.min$library.prep, ";",df.min$cell.compartment)
-ggplot(df.min, aes(x = library.prep.x.cell.compartment, y = error.neuron)) + 
+ggplot(df.min, aes(x = library.prep.x.cell.compartment, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
