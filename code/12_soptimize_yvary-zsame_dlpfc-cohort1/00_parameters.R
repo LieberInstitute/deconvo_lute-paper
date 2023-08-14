@@ -124,7 +124,7 @@ df.true.list <- function(df.rn, sample.id.vector, k.type, cell.types, info = "tr
   return(list.dfinfo)
 }
 
-dfs_byvariable <- function(dfs, variable.name.vector){
+dfs_byvariable <- function(df.min, variable.name.vector){
   #
   # gets the s cell scale factor summaries (medians) by variables and labels
   #
@@ -142,3 +142,28 @@ dfs_byvariable <- function(dfs, variable.name.vector){
   })) %>% as.data.frame()
   return(dfs.new)
 }
+
+condition_comparison_boxplots <- function(variable.name, variable.label, df.res.samples){
+  #
+  # gets box plot comparisons by condition and label in dfs, from a df.res object.
+  #
+  
+  #variable.name <- "library.preparation"
+  #variable.label <- "polyA"
+  ggtitle.string <- paste0(variable.name,"==",variable.label)
+  filter.df.res <- df.res.samples$dfs.condition.label==variable.label
+  filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name==variable.name
+  # get dfp by filter type
+  dfp1 <- df.res.samples[filter.df.res,]
+  dfp2 <- df.res.samples[!filter.df.res,]
+  dfp1$type <- "condition"
+  dfp2$type <- "other"
+  dfp <- rbind(dfp1, dfp2)
+  # new plot
+  #ggplot(dfp, aes(x = type, y = error.neuron)) + 
+  #  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
+  ggplot(dfp, aes(x = type, y = error.neuron)) + 
+    geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+    ggtitle(ggtitle.string)
+}
+

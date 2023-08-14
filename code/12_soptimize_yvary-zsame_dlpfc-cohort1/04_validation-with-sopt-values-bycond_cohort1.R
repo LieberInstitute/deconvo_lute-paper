@@ -71,8 +71,9 @@ df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
 df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
 
 # get new dfs as medians by experiment group category
-variable.vector <- c("anatomic.region", "cell.compartment", "compartment_library", "library.preparation")
-dfs.new <- dfs_byvariable(dfs, variable.vector)
+variable.vector <- c("", "anatomic.region", "cell.compartment", "compartment_library", 
+                     "library.preparation", "sample.id")
+dfs.new <- dfs_byvariable(df.min, variable.vector)
 
 # save 
 dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
@@ -126,69 +127,6 @@ save(df.res.samples, file = save.path)
 #--------------
 # example plots
 #--------------
-filter.df.res <- df.res.samples$dfs.condition.label=="Bulk"
-filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name=="cell.compartment"
-
-# get dfp by filter type
-dfp1 <- df.res.samples[filter.df.res,]
-dfp2 <- df.res.samples[!filter.df.res,]
-dfp1$type <- "condition"
-dfp2$type <- "other"
-dfp <- rbind(dfp1, dfp2)
-
-# plot title
-ggtitle.string <- paste0("cell.compartment==Bulk")
-
-# new plot
-ggplot(dfp, aes(x = type, y = error.neuron)) + 
-  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
-ggplot(dfp, aes(x = type, y = error.neuron)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
-  ggtitle(ggtitle.string)
-
-
-
-# plot title
-variable.name <- "cell.compartment"
-variable.label <- "Nuc"
-ggtitle.string <- paste0(variable.name,"==",variable.label)
-filter.df.res <- df.res.samples$dfs.condition.label==variable.label
-filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name==variable.name
-# get dfp by filter type
-dfp1 <- df.res.samples[filter.df.res,]
-dfp2 <- df.res.samples[!filter.df.res,]
-dfp1$type <- "condition"
-dfp2$type <- "other"
-dfp <- rbind(dfp1, dfp2)
-# new plot
-ggplot(dfp, aes(x = type, y = error.neuron)) + 
-  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
-ggplot(dfp, aes(x = type, y = error.neuron)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
-  ggtitle(ggtitle.string)
-
-# plot title
-
-condition_comparison_boxplots <- function(variable.name, variable.label, df.res.samples){
-  #variable.name <- "library.preparation"
-  #variable.label <- "polyA"
-  ggtitle.string <- paste0(variable.name,"==",variable.label)
-  filter.df.res <- df.res.samples$dfs.condition.label==variable.label
-  filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name==variable.name
-  # get dfp by filter type
-  dfp1 <- df.res.samples[filter.df.res,]
-  dfp2 <- df.res.samples[!filter.df.res,]
-  dfp1$type <- "condition"
-  dfp2$type <- "other"
-  dfp <- rbind(dfp1, dfp2)
-  # new plot
-  #ggplot(dfp, aes(x = type, y = error.neuron)) + 
-  #  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
-  ggplot(dfp, aes(x = type, y = error.neuron)) + 
-    geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
-    ggtitle(ggtitle.string)
-}
-
 # compartment_library
 condition_comparison_boxplots("compartment_library", "Bulk_RiboZeroGold", df.res.samples)
 condition_comparison_boxplots("compartment_library", "Bulk_polyA", df.res.samples)
