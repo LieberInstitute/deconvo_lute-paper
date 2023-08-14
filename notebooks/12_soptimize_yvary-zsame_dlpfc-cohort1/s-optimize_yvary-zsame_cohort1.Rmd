@@ -11,12 +11,6 @@ output:
 
 This notebook shows summaries from SINGLE EXPERIMENT CONDITIONS in the bulk data.
 
-
-
-
-
-
-
 Results summaries from S (cell size scale factor normalization) optimization 
 experiments with the following conditions:
 * Z is held constant (from a single snRNAseq sample).

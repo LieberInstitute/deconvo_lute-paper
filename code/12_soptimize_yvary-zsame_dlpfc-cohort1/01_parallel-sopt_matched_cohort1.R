@@ -73,7 +73,7 @@ sample.id.vector <- unique(sce[[sample.id.variable]])
 
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
 sample.id.vector <- unique(y.unadj$batch.id2)
-df.res.samples <- multigroup_bias_matched(sample.id.vector[1:2], list.df.true, y.unadj, dfs[seq(2),], sce)
+df.res.samples <- multigroup_bias_matched(sample.id.vector[1:2], list.df.true, y.unadj, dfs, sce)
 
 #df.res.samples <- parallel_bias_matched(sce, y.unadj, dfs, df.true,
 #                                        celltype.variable = celltype.variable,

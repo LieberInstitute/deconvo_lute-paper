@@ -39,11 +39,11 @@ parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL,
                                       typemarker.algorithm = NULL)$deconvolution.results@predictions.table
                                )
                                dfi$sample.label <- colnames(yunadj)
-                               dfi$glial <- s.vector["glial"]
-                               dfi$neuron <- s.vector["neuron"]
+                               dfi$glial <- s.vector["s.glial"]
+                               dfi$neuron <- s.vector["s.neuron"]
                                return(dfi)
                              }))
-  colnames(df.res) <- paste0(colnames(df.res), ".pred.nnls")
+  colnames(df.res)[1:2] <- paste0(colnames(df.res)[1:2], ".pred.nnls")
   if(is(df.true, "NULL")){
     df.true <- sce[[celltype.variable]] %>% table() %>% prop.table() %>% as.data.frame()
     rownames(df.true) <- df.true[,1]
