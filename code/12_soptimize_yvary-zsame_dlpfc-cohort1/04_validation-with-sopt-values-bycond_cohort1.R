@@ -90,6 +90,8 @@ for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
 df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, 
                                           y.validate, dfs, sce)
 
+# append dfs.new data
+
 # append coldata from y.unadj (see MAE data)
 y.unadj <- y.validate
 df.res.samples$sample.labels <- rep(colnames(y.unadj), nrow(dfs))
@@ -99,6 +101,8 @@ df.res.samples$anatomic.region <- rep(y.unadj$location, nrow(dfs))
 df.res.samples$library.type <- rep(y.unadj$library_type, nrow(dfs))
 df.res.samples$compartment_library <- rep(y.unadj$expt_condition, nrow(dfs))
 df.res.samples$sample.id.brnum <- rep(y.unadj$batch.id2, nrow(dfs))
+df.res.samples$dfs.condition.label <- rep(dfs.new$label, ncol(y.unadj))
+df.res.samples$dfs.condition.variable.name <- rep(dfs.new$variable.name, ncol(y.unadj))
 
 # append data transformations
 # this is the chunk that sets more operants in `df.res`
@@ -119,5 +123,90 @@ save.path <- file.path("deconvo_method-paper", "outputs",
                        "12_soptimize_yvary-zsame_dlpfc-cohort1", save.filename)
 save(df.res.samples, file = save.path)
 
+#--------------
+# example plots
+#--------------
+filter.df.res <- df.res.samples$dfs.condition.label=="Bulk"
+filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name=="cell.compartment"
+
+# get dfp by filter type
+dfp1 <- df.res.samples[filter.df.res,]
+dfp2 <- df.res.samples[!filter.df.res,]
+dfp1$type <- "condition"
+dfp2$type <- "other"
+dfp <- rbind(dfp1, dfp2)
+
+# plot title
+ggtitle.string <- paste0("cell.compartment==Bulk")
+
+# new plot
+ggplot(dfp, aes(x = type, y = error.neuron)) + 
+  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
+ggplot(dfp, aes(x = type, y = error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  ggtitle(ggtitle.string)
 
 
+
+# plot title
+variable.name <- "cell.compartment"
+variable.label <- "Nuc"
+ggtitle.string <- paste0(variable.name,"==",variable.label)
+filter.df.res <- df.res.samples$dfs.condition.label==variable.label
+filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name==variable.name
+# get dfp by filter type
+dfp1 <- df.res.samples[filter.df.res,]
+dfp2 <- df.res.samples[!filter.df.res,]
+dfp1$type <- "condition"
+dfp2$type <- "other"
+dfp <- rbind(dfp1, dfp2)
+# new plot
+ggplot(dfp, aes(x = type, y = error.neuron)) + 
+  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
+ggplot(dfp, aes(x = type, y = error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  ggtitle(ggtitle.string)
+
+# plot title
+
+condition_comparison_boxplots <- function(variable.name, variable.label, df.res.samples){
+  #variable.name <- "library.preparation"
+  #variable.label <- "polyA"
+  ggtitle.string <- paste0(variable.name,"==",variable.label)
+  filter.df.res <- df.res.samples$dfs.condition.label==variable.label
+  filter.df.res <- filter.df.res & df.res.samples$dfs.condition.variable.name==variable.name
+  # get dfp by filter type
+  dfp1 <- df.res.samples[filter.df.res,]
+  dfp2 <- df.res.samples[!filter.df.res,]
+  dfp1$type <- "condition"
+  dfp2$type <- "other"
+  dfp <- rbind(dfp1, dfp2)
+  # new plot
+  #ggplot(dfp, aes(x = type, y = error.neuron)) + 
+  #  geom_violin(draw_quantiles = 0.5) + ggtitle(ggtitle.string)
+  ggplot(dfp, aes(x = type, y = error.neuron)) + 
+    geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+    ggtitle(ggtitle.string)
+}
+
+# compartment_library
+condition_comparison_boxplots("compartment_library", "Bulk_RiboZeroGold", df.res.samples)
+condition_comparison_boxplots("compartment_library", "Bulk_polyA", df.res.samples)
+condition_comparison_boxplots("compartment_library", "Cyto_RiboZeroGold", df.res.samples)
+condition_comparison_boxplots("compartment_library", "Cyto_polyA", df.res.samples)
+condition_comparison_boxplots("compartment_library", "Nuc_RiboZeroGold", df.res.samples)
+condition_comparison_boxplots("compartment_library", "Nuc_polyA", df.res.samples)
+
+# library.preparation
+condition_comparison_boxplots("library.preparation", "polyA", df.res.samples)
+condition_comparison_boxplots("library.preparation", "RiboZeroGold", df.res.samples)
+
+# cell.compartment
+condition_comparison_boxplots("cell.compartment", "Nuc", df.res.samples)
+condition_comparison_boxplots("cell.compartment", "Cyto", df.res.samples)
+condition_comparison_boxplots("cell.compartment", "Bulk", df.res.samples)
+
+# anatomic.region
+condition_comparison_boxplots("anatomic.region", "Ant", df.res.samples)
+condition_comparison_boxplots("anatomic.region", "Mid", df.res.samples)
+condition_comparison_boxplots("anatomic.region", "Post", df.res.samples)
