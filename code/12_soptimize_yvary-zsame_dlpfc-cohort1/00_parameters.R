@@ -1,3 +1,7 @@
+
+libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr")
+sapply(libv, library, character.only = T)
+
 #------
 # setup
 #------
