@@ -49,6 +49,7 @@ sample.id.vector <- validation.sample.id
 list.df.true <- df.true.list(df.rn, sample.id.vector, "k2", c("glial", "neuron"))
 names(list.df.true) <- sample.id.vector
 
+
 #---------------------------
 # get bulk validation subset
 #---------------------------
@@ -60,8 +61,21 @@ dim(y.validate)
 #-----------
 # assign dfs
 #-----------
-df.min.train <- list.sopt.train$minima.by.label
-dfs <- data.frame(glial = df.min.train$glial, neuron = df.min.train$neuron)
+# load
+df.min <- list.sopt.train$minima.by.label
+# assign categories
+df.min$compartment_library <- df.min$cell.compartment
+df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
+df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
+
+# get new dfs as medians by experiment group category
+variable.vector <- c("anatomic.region", "cell.compartment", "compartment_library", "library.preparation")
+dfs.new <- dfs_byvariable(dfs, variable.vector)
+
+# save 
+dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
+dfs.path <- file.path("deconvo_method-paper", "outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", dfs.name)
+save(dfs.new, file = dfs.path)
 
 #---------------------------
 # get results for each s set
@@ -70,7 +84,7 @@ dfs <- data.frame(glial = df.min.train$glial, neuron = df.min.train$neuron)
 df.res.samples <- multigroup_bias_matched(validation.sample.id, 
                                           list.df.true, 
                                           y.validate, 
-                                          dfs, 
+                                          dfs.new[,c("glial", "neuron")], 
                                           sce)
 
 

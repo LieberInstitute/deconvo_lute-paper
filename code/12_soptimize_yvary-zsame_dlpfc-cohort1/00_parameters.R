@@ -98,6 +98,7 @@ rnascope_cell_info <- function(df.rn, sample.id = NULL, k.type = NULL, cell.type
   df.ct <- df.rn[,filter.condition.vector]
   return(df.ct)
 }
+
 df.true.list <- function(df.rn, sample.id.vector, k.type, cell.types, info = "true_proportion"){
   #
   #
@@ -114,9 +115,29 @@ df.true.list <- function(df.rn, sample.id.vector, k.type, cell.types, info = "tr
   })
   list.dfinfo <- lapply(list.dfinfo, function(dfinfo){
     dfinfo <- as.data.frame(dfinfo["true_proportion",,drop=F])
+    dfinfo <- dfinfo[,seq(length(cell.types))]
     colnames(dfinfo) <- cell.types
     return(dfinfo)
   })
   names(list.dfinfo) <- sample.id.vector
   return(list.dfinfo)
+}
+
+dfs_byvariable <- function(dfs, variable.name.vector){
+  #
+  # gets the s cell scale factor summaries (medians) by variables and labels
+  #
+  dfs.new <- do.call(rbind, lapply(variable.name.vector, function(variable.name){
+    unique.labels <- unique(df.min[,variable.name])
+    dfs.iter <- do.call(rbind, lapply(unique.labels, function(label.iter){
+      df.iter <- df.min[df.min[,variable.name]==label.iter,]
+      matrix(c(median(df.iter[,"glial"]), 
+               median(df.iter[,"neuron"]), 
+               label.iter), nrow = 1)
+    })) %>% as.data.frame()
+    colnames(dfs.iter) <- c("glial", "neuron", "label")
+    dfs.iter$variable.name <- variable.name
+    return(dfs.iter)
+  })) %>% as.data.frame()
+  return(dfs.new)
 }
