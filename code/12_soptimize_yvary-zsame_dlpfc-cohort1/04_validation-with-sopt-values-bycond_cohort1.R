@@ -71,7 +71,7 @@ df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
 df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
 
 # get new dfs as medians by experiment group category
-variable.vector <- c("", "anatomic.region", "cell.compartment", "compartment_library", 
+variable.vector <- c("anatomic.region", "cell.compartment", "compartment_library", 
                      "library.preparation", "sample.id")
 dfs.new <- dfs_byvariable(df.min, variable.vector)
 
@@ -90,8 +90,6 @@ for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
 df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, 
                                           y.validate, dfs, sce)
-
-# append dfs.new data
 
 # append coldata from y.unadj (see MAE data)
 y.unadj <- y.validate
@@ -148,3 +146,8 @@ condition_comparison_boxplots("cell.compartment", "Bulk", df.res.samples)
 condition_comparison_boxplots("anatomic.region", "Ant", df.res.samples)
 condition_comparison_boxplots("anatomic.region", "Mid", df.res.samples)
 condition_comparison_boxplots("anatomic.region", "Post", df.res.samples)
+
+# sample id
+condition_comparison_boxplots("sample.id", "Br2720", df.res.samples)
+condition_comparison_boxplots("sample.id", "Br6423", df.res.samples)
+condition_comparison_boxplots("sample.id", "Br6432", df.res.samples)
