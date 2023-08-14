@@ -3,11 +3,13 @@ title: "s-optimize_summarize-err-min-bybulk_cohort1"
 author: "Sean Maden"
 date: "2023-08-14"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
+libv <- c("ggplot2", "dplyr")
+sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -19,12 +21,6 @@ Results summaries from S (cell size scale factor normalization) optimization
 experiments with the following conditions:
 * Z is held constant (from a single snRNAseq sample).
 * Y is varied (from real RNAseq data)
-
-```{r setup, include=FALSE}
-libv <- c("ggplot2", "dplyr")
-sapply(libv, library, character.only = T)
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 Important commented text in a code chunk:
 
