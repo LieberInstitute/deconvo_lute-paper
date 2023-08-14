@@ -41,22 +41,24 @@ list.sopt.train <- get(load(sopt.path))
 sample.id <- "Br8492_post"
 sce <- sce[,sce$Sample == sample.id]
 
-#---------------------------------
-# define the true cell proportions
-#---------------------------------
-df.rn <- mae[["df.cellstat.rnascope"]]
-sample.id.vector <- validation.sample.id
-list.df.true <- df.true.list(df.rn, sample.id.vector, "k2", c("glial", "neuron"))
-names(list.df.true) <- sample.id.vector
-
-
 #---------------------------
 # get bulk validation subset
 #---------------------------
 y.validate <- mae[["bulk.rnaseq"]]
 bulk.validate.filter <- y.validate$BrNum %in% validation.sample.id
 y.validate <- y.validate[,bulk.validate.filter]
+y.validate <- y.validate[rownames(sce),]
 dim(y.validate)
+
+#---------------------------------
+# define the true cell proportions
+#---------------------------------
+df.rn <- mae[["df.cellstat.rnascope"]]
+#sample.id.vector <- validation.sample.id
+
+sample.id.vector <- unique(y.validate$batch.id2)
+list.df.true <- df.true.list(df.rn, sample.id.vector, "k2", c("glial", "neuron"))
+names(list.df.true) <- sample.id.vector
 
 #-----------
 # assign dfs
@@ -77,26 +79,45 @@ dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
 dfs.path <- file.path("deconvo_method-paper", "outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", dfs.name)
 save(dfs.new, file = dfs.path)
 
+# set numeric df for runs
+dfs <- dfs.new[,c("glial", "neuron")]
+for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
+
 #---------------------------
 # get results for each s set
 #---------------------------
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
-df.res.samples <- multigroup_bias_matched(validation.sample.id, 
-                                          list.df.true, 
-                                          y.validate, 
-                                          dfs.new[,c("glial", "neuron")], 
-                                          sce)
+df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, 
+                                          y.validate, dfs, sce)
 
+# append coldata from y.unadj (see MAE data)
+y.unadj <- y.validate
+df.res.samples$sample.labels <- rep(colnames(y.unadj), nrow(dfs))
+df.res.samples$sample.id <- rep(gsub("_.*", "", y.unadj$batch.id), nrow(dfs))
+df.res.samples$cell.compartment <- rep(y.unadj$library_prep, nrow(dfs))
+df.res.samples$anatomic.region <- rep(y.unadj$location, nrow(dfs))
+df.res.samples$library.type <- rep(y.unadj$library_type, nrow(dfs))
+df.res.samples$compartment_library <- rep(y.unadj$expt_condition, nrow(dfs))
+df.res.samples$sample.id.brnum <- rep(y.unadj$batch.id2, nrow(dfs))
 
-# set params (SEE PROJECT NOTES)
-assay.name <- "counts"
-celltype.variable <- "k2"
-sample.id.variable <- "Sample"
-sample.id.vector <- unique(sce[[sample.id.variable]])
+# append data transformations
+# this is the chunk that sets more operants in `df.res`
+df.res.samples$s.fraction.neuron.glial <- df.res.samples$neuron/df.res.samples$glial
+df.res.samples$log.s.fraction <- log(df.res.samples$s.fraction.neuron.glial)
+df.res.samples$error.neuron <- abs(df.res.samples$bias.neuron.true.pred)
+df.res.samples$error.glial <- abs(df.res.samples$bias.glial.true.pred)
+df.res.samples$minimum.error <- df.res.samples$error.neuron==min(df.res.samples$error.neuron)
+df.res.samples$maximum.error <- df.res.samples$error.neuron==max(df.res.samples$error.neuron)
+deciles.error.neuron <- quantile(df.res.samples$error.neuron, seq(0, 1, 0.1))
+df.res.samples$minimum.decile.error <- df.res.samples$error.neuron <= deciles.error.neuron[2]
+df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.error.neuron[9]
+df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
-
-
-
+# save/export
+save.filename <- "df-sopt-result-validation_yvary-zsame_cohort1.rda"
+save.path <- file.path("deconvo_method-paper", "outputs", 
+                       "12_soptimize_yvary-zsame_dlpfc-cohort1", save.filename)
+save(df.res.samples, file = save.path)
 
 
 

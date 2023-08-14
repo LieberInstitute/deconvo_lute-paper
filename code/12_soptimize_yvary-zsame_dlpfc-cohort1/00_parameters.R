@@ -61,6 +61,7 @@ multigroup_bias_matched <- function(sample.id.vector, df.true.list, y.unadj, dfs
                                     celltype.variable = "k2", assay.name = "counts", 
                                     s.vector.ypb = c("glial" = 3, "neuron" = 10)){
   df.res <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
+    message(sample.id)
     y.iter <- y.unadj[,colData(y.unadj)[,y.group.name]==sample.id]
     df.true.iter <- df.true.list[[sample.id]] %>% t() %>% as.data.frame()
     #colnames(df.true.iter.transpose) <- colnames(df.true.list[[sample.id]])
