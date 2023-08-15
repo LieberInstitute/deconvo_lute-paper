@@ -68,7 +68,7 @@ df.min$library.prep.x.cell.compartment <- paste0(df.min$library.prep, ";",df.min
 # Plots -- compare glial vs neuron distributions across groupings
 
 ```{r}
-dfp <- rbind(data.frame(s.train = df.min$glial), data.frame(s.train = df.min$neuron))
+dfp <- rbind(data.frame(s.train = df.min$s.glial), data.frame(s.train = df.min$s.neuron))
 dfp$cell.type <- c(rep("glial", nrow(df.min)), rep("neuron", nrow(df.min)))
 # assign groups
 dfp$library.prep <- c(df.min$library.prep, df.min$library.prep)
@@ -106,13 +106,13 @@ ggplot(dfp, aes(x = cell.type, y = s.train)) +
 
 ```{r}
 # scatter
-ggplot(df.min, aes(x = glial, y = neuron)) + geom_point(alpha = 0.5) +
+ggplot(df.min, aes(x = s.glial, y = s.neuron)) + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0)
-ggplot(df.min, aes(x = glial, y = neuron)) + geom_point(alpha = 0.5) +
+ggplot(df.min, aes(x = s.glial, y = s.neuron)) + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0) + facet_wrap(~cell.compartment)
-ggplot(df.min, aes(x = glial, y = neuron)) + geom_point(alpha = 0.5) +
+ggplot(df.min, aes(x = s.glial, y = s.neuron)) + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0) + facet_wrap(~library.prep)
-ggplot(df.min, aes(x = glial, y = neuron)) + geom_point(alpha = 0.5) +
+ggplot(df.min, aes(x = s.glial, y = s.neuron)) + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0) + facet_wrap(~library.prep.x.cell.compartment)
 ```
 

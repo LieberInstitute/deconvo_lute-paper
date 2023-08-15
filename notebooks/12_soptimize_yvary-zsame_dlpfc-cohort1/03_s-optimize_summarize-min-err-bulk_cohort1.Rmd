@@ -3,8 +3,8 @@ title: "s-optimize_summarize-err-min-bybulk_cohort1"
 author: "Sean Maden"
 date: "2023-08-14"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -88,6 +88,13 @@ df.min <- do.call(rbind, lapply(labels.vector, function(label.iter){
 df.min$min.error.neuron <- df.min$error.neuron
 ```
 
+```{r}
+# filter outlying high error
+dim(df.min)
+df.min <- df.min[df.min$min.error.neuron<0.2,]
+dim(df.min)
+```
+
 ## Example field gradient heatmaps and highlight plots
 
 Shows example heatmaps and highlight plots for label IDs having the lowest and highest observed minmimum neuron errors.
@@ -98,8 +105,8 @@ df.min.filter <- df.min$min.error.neuron==max(df.min$min.error.neuron)
 sample.label.highest <- df.min[df.min.filter,]$sample.label[1]
 df.res.filter <- df.res$sample.label==sample.label.highest
 df.res.highest <- df.res[df.res.filter,]
-list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.label")
 # plot
+list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.label")
 list.plots.dfp1$heatmaps$heatmap1
 list.plots.dfp1$heatmaps$heatmap6
 ```
@@ -127,7 +134,8 @@ Violin plots, by sample.id
 
 ```{r}
 ggplot(df.min, aes(x = sample.id, y = min.error.neuron)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ## Plots by `library.type`
@@ -160,9 +168,4 @@ df.min$library.prep.x.cell.compartment <- paste0(df.min$library.type, ";",df.min
 ggplot(df.min, aes(x = library.prep.x.cell.compartment, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-# Summarize optimal S values
-
-```{r}
 ```
