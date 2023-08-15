@@ -3,8 +3,8 @@ title: "s-optimize_summarize-err-min-bybulk_cohort1"
 author: "Sean Maden"
 date: "2023-08-14"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -79,10 +79,10 @@ source("dataset_summaries.R")
 Gets one unique minimum neuron error per data label.
 
 ```{r}
-length(unique(df.res$sample.labels))
-labels.vector <- unique(df.res$sample.labels)
+length(unique(df.res$sample.label))
+labels.vector <- unique(df.res$sample.label)
 df.min <- do.call(rbind, lapply(labels.vector, function(label.iter){
-  df.iter <- df.res[df.res$sample.labels==label.iter,]
+  df.iter <- df.res[df.res$sample.label==label.iter,]
   df.iter[df.iter$error.neuron == min(df.iter$error.neuron)[1],,drop=F]
 }))
 df.min$min.error.neuron <- df.min$error.neuron
@@ -95,10 +95,10 @@ Shows example heatmaps and highlight plots for label IDs having the lowest and h
 ```{r}
 # subset/filter
 df.min.filter <- df.min$min.error.neuron==max(df.min$min.error.neuron)
-sample.label.highest <- df.min[df.min.filter,]$sample.labels[1]
-df.res.filter <- df.res$sample.labels==sample.label.highest
+sample.label.highest <- df.min[df.min.filter,]$sample.label[1]
+df.res.filter <- df.res$sample.label==sample.label.highest
 df.res.highest <- df.res[df.res.filter,]
-list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.labels")
+list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.label")
 # plot
 list.plots.dfp1$heatmaps$heatmap1
 list.plots.dfp1$heatmaps$heatmap6
@@ -110,10 +110,10 @@ list.plots.dfp1$heatmaps$heatmap6
 ```{r}
 # subset/filter
 df.min.filter <- df.min$min.error.neuron==min(df.min$min.error.neuron)
-sample.label.highest <- df.min[df.min.filter,]$sample.labels[1]
-df.res.filter <- df.res$sample.labels==sample.label.highest
+sample.label.highest <- df.min[df.min.filter,]$sample.label[1]
+df.res.filter <- df.res$sample.label==sample.label.highest
 df.res.highest <- df.res[df.res.filter,]
-list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.labels")
+list.plots.dfp1 <- deconvo_plots_list(df.res.highest, "sample.label")
 # plot
 list.plots.dfp1$heatmaps$heatmap1
 list.plots.dfp1$heatmaps$heatmap6
@@ -130,11 +130,11 @@ ggplot(df.min, aes(x = sample.id, y = min.error.neuron)) +
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
-## Plots by `library.prep`
+## Plots by `library.type`
 
 ```{r}
 df.min$library.prep <- gsub(".*_", "", df.min$cell.compartment)
-ggplot(df.min, aes(x = library.prep, y = min.error.neuron)) + 
+ggplot(df.min, aes(x = library.type, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
 ```
 
@@ -156,7 +156,7 @@ ggplot(df.min, aes(x = anatomic.region, y = min.error.neuron)) +
 ## Plots by `library.prep*cell.compartment`
 
 ```{r}
-df.min$library.prep.x.cell.compartment <- paste0(df.min$library.prep, ";",df.min$cell.compartment)
+df.min$library.prep.x.cell.compartment <- paste0(df.min$library.type, ";",df.min$cell.compartment)
 ggplot(df.min, aes(x = library.prep.x.cell.compartment, y = min.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))

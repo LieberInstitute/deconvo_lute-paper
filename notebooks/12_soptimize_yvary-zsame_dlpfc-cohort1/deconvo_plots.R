@@ -31,7 +31,7 @@ deconvo_heatmaps <- function(dfp1){
   # make the plots
   #---------------
   # Plot heatmap -- error.neuron
-  heatmap1 <- ggplot(dfp1, aes(x = glial, y = neuron)) + theme_bw() +
+  heatmap1 <- ggplot(dfp1, aes(x = s.glial, y = s.neuron)) + theme_bw() +
     geom_raster(aes(fill = error.neuron)) +
     scale_fill_gradientn(colours = rainbow(5)) + 
     geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
@@ -46,21 +46,21 @@ deconvo_heatmaps <- function(dfp1){
   dfp1$minimum.decile.error <- dfp1$error.neuron <= deciles.error.neuron[2]
   dfp1$maximum.decile.error <- dfp1$error.neuron >= deciles.error.neuron[10]
   # min highlights
-  heatmap2 <- ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.error)) + 
+  heatmap2 <- ggplot(dfp1, aes(x = s.glial, y = s.neuron, color = minimum.error)) + 
     geom_point(alpha = 1) + scale_color_manual(values = c("TRUE" = highlight.color.low, 
                                                           "FALSE" = background.color.highlights))
-  heatmap3 <- ggplot(dfp1, aes(x = glial, y = neuron, color = minimum.decile.error)) + 
+  heatmap3 <- ggplot(dfp1, aes(x = s.glial, y = s.neuron, color = minimum.decile.error)) + 
     geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, 
                                                  "FALSE" = background.color.highlights))
   # max highlights
-  heatmap4 <- ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.error)) + 
+  heatmap4 <- ggplot(dfp1, aes(x = s.glial, y = s.neuron, color = maximum.error)) + 
     geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
                                                  "FALSE" = background.color.highlights))
-  heatmap5 <- ggplot(dfp1, aes(x = glial, y = neuron, color = maximum.decile.error)) + 
+  heatmap5 <- ggplot(dfp1, aes(x = s.glial, y = s.neuron, color = maximum.decile.error)) + 
     geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.high, 
                                                  "FALSE" = background.color.highlights))
   heatmap6 <- ggplot(dfp1, 
-                     aes(x = glial, y = neuron, color = all.highlight.categories, 
+                     aes(x = s.glial, y = s.neuron, color = all.highlight.categories, 
                                size = all.highlight.sizes)) + 
     geom_vline(xintercept = 3) + geom_hline(yintercept = 10) +
     geom_abline(slope = 1, intercept = 0) +
@@ -84,12 +84,12 @@ deconvo_heatmaps <- function(dfp1){
 
 deconvo_scatterplots <- function(dfp1){
   # SCATTERLUTION PLOTS
-  sp1 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
+  sp1 <- ggplot(dfp1, aes(x = s.neuron, y = bias.neuron.true.pred, group = s.glial)) + 
     geom_point(alpha = 1) + geom_line() + theme_bw() + 
     facet_wrap(~sample.id) + geom_hline(yintercept = 0)
   # Plot points with s.fraction value as color
   # continuous grouping
-  sp2 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, 
+  sp2 <- ggplot(dfp1, aes(x = s.neuron, y = bias.neuron.true.pred, 
                           color = s.fraction.neuron.glial, group = s.fraction.neuron.glial)) + 
     geom_point(size = 2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0)
   list(sp1 = sp1, sp2 = sp2)
@@ -97,17 +97,17 @@ deconvo_scatterplots <- function(dfp1){
 
 deconvo_lineplots <- function(dfp1){
   # DECONVOLINE PLOTS
-  lp1 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial)) + 
+  lp1 <- ggplot(dfp1, aes(x = s.neuron, y = bias.neuron.true.pred, group = s.glial)) + 
     geom_line() + theme_bw() + 
     facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-  lp2 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial, color = glial)) + 
+  lp2 <- ggplot(dfp1, aes(x = s.neuron, y = bias.neuron.true.pred, group = s.glial, color = s.glial)) + 
     geom_line() + theme_bw() + 
     facet_wrap(~sample.id) + geom_hline(yintercept = 0)
   # discrete grouping
-  lp3 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label, color = glial.group.label)) + 
+  lp3 <- ggplot(dfp1, aes(x = s.neuron, y = bias.neuron.true.pred, group = s.glial.group.label, color = s.glial.group.label)) + 
     geom_line() + theme_bw() + 
     facet_wrap(~sample.id) + geom_hline(yintercept = 0)
-  lp4 <- ggplot(dfp1, aes(x = neuron, y = bias.neuron.true.pred, group = glial.group.label, color = glial.group.label)) + 
+  lp4 <- ggplot(dfp1, aes(x = s.neuron, y = bias.neuron.true.pred, group = s.glial.group.label, color = s.glial.group.label)) + 
     geom_line() + theme_bw() + 
     facet_wrap(~sample.id) + geom_hline(yintercept = 0)
   list(lp1 = lp1, lp2 = lp2, lp3 = lp3, lp4 = lp4)

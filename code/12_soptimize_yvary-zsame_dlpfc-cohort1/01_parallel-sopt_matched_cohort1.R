@@ -73,17 +73,14 @@ sample.id.vector <- unique(sce[[sample.id.variable]])
 
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
 sample.id.vector <- unique(y.unadj$batch.id2)
-df.res.samples <- multigroup_bias_matched(sample.id.vector[1:2], list.df.true, y.unadj, dfs, sce)
-
+df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, dfs, sce)
+# inspect
 head(df.res.samples)
-
 head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
 
-#df.res.samples <- parallel_bias_matched(sce, y.unadj, dfs, df.true,
-#                                        celltype.variable = celltype.variable,
-#                                        assay.name = assay.name)
-
-
+#--------------------
+# postprocess results
+#--------------------
 # append coldata from y.unadj (see MAE data)
 cd.ydata <- colData(y.unadj)
 #df.res.samples$sample.labels <- cd.ydata[,] rep(colnames(y.unadj), nrow(dfs))
