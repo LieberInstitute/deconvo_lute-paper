@@ -12,9 +12,11 @@
 libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr")
 sapply(libv, library, character.only = T)
 
+folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
+assay.name <- "logcounts"
+
 # source
-script.path <- file.path("deconvo_method-paper", "code", 
-                         "12_soptimize_yvary-zsame_dlpfc-cohort1", "00_parameters.R")
+script.path <- file.path("deconvo_method-paper", "code", folder.name, "00_parameters.R")
 source(script.path)
 
 #----------
@@ -66,8 +68,23 @@ sample.id.variable <- "Sample"
 sample.id.vector <- unique(sce[[sample.id.variable]])
 
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
+#sample.id.vector <- unique(y.unadj$batch.id2)
+#df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, dfs, sce)
+
+
+# get subset
+sample.indices <- seq(2)
+dfs.indices <- seq(2)
+y.unadj.indices <- seq(2)
+
 sample.id.vector <- unique(y.unadj$batch.id2)
-df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, dfs, sce)
+df.res.samples <- multigroup_bias_matched(sample.id.vector[sample.indices], 
+                                          list.df.true, y.unadj[,y.unadj.indices], 
+                                          dfs[dfs.indices,], sce, assay.name = assay.name)
+df.res.samples$error.neuron <- abs(df.res.samples$bias.neuron.true.pred)
+
+
+
 # inspect
 head(df.res.samples)
 head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
@@ -98,7 +115,6 @@ df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.er
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
 # save
-folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
 save.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
 save.path <- file.path("deconvo_method-paper", "outputs", folder.name, save.filename)
 save(df.res.samples, file = save.path)
