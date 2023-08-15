@@ -81,15 +81,14 @@ dfs.path <- file.path("deconvo_method-paper", "outputs", "12_soptimize_yvary-zsa
 save(dfs.new, file = dfs.path)
 
 # set numeric df for runs
-dfs <- dfs.new[,c("glial", "neuron")]
+dfs <- dfs.new[,c("s.glial", "s.neuron")]
 for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
 
 #---------------------------
 # get results for each s set
 #---------------------------
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
-df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, 
-                                          y.validate, dfs, sce)
+df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.validate, dfs, sce)
 
 # append coldata from y.unadj (see MAE data)
 y.unadj <- y.validate
@@ -106,7 +105,7 @@ df.res.samples$dfs.condition.variable.name <- rep(dfs.new$variable.name, ncol(y.
 
 # append data transformations
 # this is the chunk that sets more operants in `df.res`
-df.res.samples$s.fraction.neuron.glial <- df.res.samples$neuron/df.res.samples$glial
+df.res.samples$s.fraction.neuron.glial <- df.res.samples$s.neuron/df.res.samples$s.glial
 df.res.samples$log.s.fraction <- log(df.res.samples$s.fraction.neuron.glial)
 df.res.samples$error.neuron <- abs(df.res.samples$bias.neuron.true.pred)
 df.res.samples$error.glial <- abs(df.res.samples$bias.glial.true.pred)
