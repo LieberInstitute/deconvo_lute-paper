@@ -135,11 +135,11 @@ dfs_byvariable <- function(df.min, variable.name.vector){
     unique.labels <- unique(df.min[,variable.name])
     dfs.iter <- do.call(rbind, lapply(unique.labels, function(label.iter){
       df.iter <- df.min[df.min[,variable.name]==label.iter,]
-      matrix(c(median(df.iter[,"glial"]), 
-               median(df.iter[,"neuron"]), 
+      matrix(c(median(df.iter[,"s.glial"]), 
+               median(df.iter[,"s.neuron"]), 
                label.iter), nrow = 1)
     })) %>% as.data.frame()
-    colnames(dfs.iter) <- c("glial", "neuron", "label")
+    colnames(dfs.iter) <- c("s.glial", "s.neuron", "label")
     dfs.iter$variable.name <- variable.name
     return(dfs.iter)
   })) %>% as.data.frame()
