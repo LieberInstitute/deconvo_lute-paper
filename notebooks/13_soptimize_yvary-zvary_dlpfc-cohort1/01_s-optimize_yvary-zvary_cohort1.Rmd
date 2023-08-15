@@ -3,8 +3,8 @@ title: "s-optimize_yvary-zsame_cohort1"
 author: "Sean Maden"
 date: "2023-08-09"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 # Key experiment notes
@@ -13,8 +13,10 @@ This notebook shows summaries from SINGLE EXPERIMENT CONDITIONS in the bulk data
 
 Results summaries from S (cell size scale factor normalization) optimization 
 experiments with the following conditions:
-* Z is varied with Y sample ID (from a single snRNAseq sample).
-* Y is varied with Z sample ID (from real RNAseq data)
+
+* Z is varied with sample ID (from a single snRNAseq sample).
+
+* Y is varied with sample ID (from real RNAseq data)
 
 ```{r setup, include=FALSE}
 libv <- c("ggplot2", "dplyr")

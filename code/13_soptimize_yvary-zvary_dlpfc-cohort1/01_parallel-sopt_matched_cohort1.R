@@ -68,7 +68,16 @@ names(list.df.true) <- sample.id.vector
 sample.id.vector <- unique(sce[[sample.id.variable]])
 sample.id.vector <- sample.id.vector[sample.id.vector %in% names(list.df.true)]
 # subset
-sample.id.vector <- sample.id.vector[1:3]
+sample.id.vector <- sample.id.vector
+
+# get logcounts
+# set logcounts y
+y.unadj <- mae[["bulk.rnaseq"]]
+y.unadj <- lute:::se_to_eset(y.unadj, "counts")
+y.unadj <- lute:::eset_to_se(y.unadj, "counts")
+y.unadj <- logNormCounts(y.unadj)
+# get sce logcounts
+sce <- logNormCounts(sce)
 
 # run parallel deconvo experiments
 df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, 

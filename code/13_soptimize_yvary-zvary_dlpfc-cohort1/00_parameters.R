@@ -20,25 +20,27 @@ dfs.series <- function(s.glial.series = seq(1, 20, 1)){
 
 # parallel_bias_matched
 # get bias computations in parallel (THIS SCRIPT, AND A FEW OTHERS)
-parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL, 
+parallel_bias_matched <- function(sce.iter, y.iter, dfs, df.true = NULL, 
                                   celltype.variable = "k2", assay.name = "counts", 
                                   s.vector.ypb = c("glial" = 3, "neuron" = 10)){
   # begin parallel
   cl <- makeCluster(detectCores())
   registerDoParallel(cl)
   # get full run
-  if(is(yunadj, "RangedSummarizedExperiment")){
-    yunadj <- assays(yunadj)[[1]] %>% as.matrix()
+  if(is(y.iter, "RangedSummarizedExperiment")|is(y.iter, "SummarizedExperiment")){
+    y.iter <- assays(y.iter)[[assay.name]] %>% as.matrix()
   }
   df.res <- do.call(rbind, 
                     mclapply(seq(nrow(dfs)), 
                              function(i){
                                s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
                                suppressMessages(
-                                 dfi <-lute(sce, y = yunadj, celltype.variable = celltype.variable, s = s.vector,
-                                            assay.name = assay.name, typemarker.algorithm = NULL)$deconvolution.results@predictions.table
+                                 dfi <- lute(sce.iter, y = y.iter, 
+                                            celltype.variable = celltype.variable, 
+                                            s = s.vector, assay.name = assay.name, 
+                                            typemarker.algorithm = NULL)$deconvolution.results@predictions.table
                                )
-                               dfi$sample.label <- colnames(yunadj)
+                               dfi$sample.label <- colnames(y.iter)
                                dfi$s.glial <- s.vector["glial"]
                                dfi$s.neuron <- s.vector["neuron"]
                                return(dfi)
@@ -61,8 +63,7 @@ parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL,
 # wraps parallel_bias_matched for multiple groups, uses df.true.list
 multigroup_bias_matched <- function(sample.id.vector, df.true.list, y.unadj, dfs, sce, 
                                     y.group.name = "batch.id2", sce.group.name = "Sample",
-                                    celltype.variable = "k2", assay.name = "counts", 
-                                    s.vector.ypb = c("glial" = 3, "neuron" = 10)){
+                                    celltype.variable = "k2", assay.name = "counts"){
   df.res <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
     message(sample.id)
     sce.iter <- sce[,sce[[sce.group.name]]==sample.id]
@@ -70,7 +71,7 @@ multigroup_bias_matched <- function(sample.id.vector, df.true.list, y.unadj, dfs
     df.true.iter <- df.true.list[[sample.id]] %>% t() %>% as.data.frame()
     #colnames(df.true.iter.transpose) <- colnames(df.true.list[[sample.id]])
     df.res.iter <- parallel_bias_matched(sce.iter, y.iter, dfs, df.true.iter, 
-                                         celltype.variable, assay.name, s.vector.ypb)
+                                         celltype.variable, assay.name)
     df.res.iter$sample.id <- sample.id
     return(df.res.iter)
   }))
