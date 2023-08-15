@@ -12,7 +12,10 @@
 libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr")
 sapply(libv, library, character.only = T)
 
+# sets variables
 folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
+celltype.variable <- "k2"
+sample.id.variable <- "Sample"
 assay.name <- "logcounts"
 
 # source
@@ -61,31 +64,17 @@ names(list.df.true) <- sample.id.vector
 #------------
 # main script
 #------------
-# set params (SEE PROJECT NOTES)
-assay.name <- "counts"
-celltype.variable <- "k2"
-sample.id.variable <- "Sample"
+# set target sample ids and filter on available true proportions
 sample.id.vector <- unique(sce[[sample.id.variable]])
+sample.id.vector <- sample.id.vector[sample.id.vector %in% names(list.df.true)]
+# subset
+sample.id.vector <- sample.id.vector[1:3]
 
-# this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
-#sample.id.vector <- unique(y.unadj$batch.id2)
-#df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, dfs, sce)
+# run parallel deconvo experiments
+df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, 
+                                          dfs, sce, assay.name = assay.name)
 
-
-# get subset
-sample.indices <- seq(2)
-dfs.indices <- seq(2)
-y.unadj.indices <- seq(2)
-
-sample.id.vector <- unique(y.unadj$batch.id2)
-df.res.samples <- multigroup_bias_matched(sample.id.vector[sample.indices], 
-                                          list.df.true, y.unadj[,y.unadj.indices], 
-                                          dfs[dfs.indices,], sce, assay.name = assay.name)
-df.res.samples$error.neuron <- abs(df.res.samples$bias.neuron.true.pred)
-
-
-
-# inspect
+# inspect results
 head(df.res.samples)
 head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
 
