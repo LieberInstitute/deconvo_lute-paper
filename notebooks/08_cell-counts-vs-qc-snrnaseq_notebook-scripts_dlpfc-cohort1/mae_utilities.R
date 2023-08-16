@@ -166,8 +166,11 @@ new_mae_with_filters <- function(mae, platform.name = "rnascope.image",
   #assay.name <- "Nucleus_Area"
   #sample.id.variable <- "Sample"
   #old.platform.names.keep <- c("sn1.rnaseq", "rnascope.image")
-  new.platform.names <- paste0(platform.name, "_filter-", 
-                               tolower(assay.name),"_value-", value.filter.vector)
+  
+  # get new platform names
+  new.platform.names <- paste0(platform.name, "_value-", value.filter.vector)
+  #new.platform.names <- paste0(platform.name, "_filter-", 
+  #                             tolower(assay.name),"_value-", value.filter.vector)
   
   # list of old platform objects
   old.platform.object.keep <- lapply(old.platform.names.keep, function(platform.name){

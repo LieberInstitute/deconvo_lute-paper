@@ -74,6 +74,8 @@ jsamples <- unique(colData(mae.filtered)$sample.id)
 
 Total cell types analyzed: `r kcelltypes`.
 
+Total sample/block IDs analyzed: `r length(jsamples)`.
+
 Total platforms analyzed: `r nplatforms`.
 
 Unique platform names: `r platform.names`.
@@ -99,16 +101,12 @@ by fitting a linear model to predict each variable using the remaining variables
 variable identity is "PLATFORM_CELLTYPE", so there are `r nplatforms*kcelltypes` 
 total variables.
 
+## Cell type quantities
+
 Correlations and scatter plots of cell type quantities.
 
 ```{r}
 ggpairs(df.lm.quantity, progress = F) + ggtitle("Cell type quantities")
-```
-
-Correlations and scatter plots of cell type proportions.
-
-```{r}
-ggpairs(df.lm.proportion, progress = F) + ggtitle("Cell type proportions")
 ```
 
 Residual correlations and distributions by predictor, from cell type counts.
@@ -119,6 +117,14 @@ ggpairs(df.res.quantity, progress = F) +
   ggtitle(paste0("Residuals, ", celltype.quantity.title))
 ```
 
+## Cell type quantities
+
+Correlations and scatter plots of cell type proportions.
+
+```{r, fig.width=18}
+ggpairs(df.lm.proportion, progress = F) + ggtitle("Cell type proportions")
+```
+
 Residual correlations and distributions by predictor, from cell type proportions
 
 ```{r}
@@ -126,7 +132,6 @@ df.res.proportion <- get_dfres(df.lm.proportion)
 ggpairs(df.res.proportion, progress = F) + 
   ggtitle(paste0("Residuals, cell type proportions", celltype.proportion.title))
 ```
-
 
 # 2. Get PCA
 
