@@ -16,9 +16,8 @@ sapply(libv, library, character.only = TRUE)
 ```{r}
 setwd("..")
 setwd("..")
-mae <- get(
-  load(
-    file.path("outputs", "01_prepare-datasets", "mae_with-rpkm_additional-data_final.rda")))
+mae <- get(load(file.path("outputs", "01_prepare-datasets",
+                          "mae_with-rpkm_additional-data_final.rda")))
 
 script.path <- file.path("notebooks",
                          "08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1",
@@ -36,20 +35,24 @@ Get quantity data frames.
 
 ```{r}
 # get sample ids
-sample.id.vector <- intersect(unique(mae[[1]]$Sample), unique(mae[[6]]$Sample))
+sample.id.vector <- intersect(unique(mae[["sn1.rnaseq"]]$Sample), 
+                              unique(mae[["rnascope.image"]]$Sample))
 filter.mae <- colData(mae)[,"sample.id"] %in% sample.id.vector
 mae.filtered <- mae[,filter.mae,]
 
 # get group quantity df datasets
-list.quantity <- get_mae_quantity_bygroup(mae.filtered)
-list.proportions <- get_mae_quantity_bygroup(mae.filtered, quantity.type = "proportions")
+list.quantity <- get_mae_quantity_bygroup(mae.filtered, object.name.vector = names(mae))
+list.proportions <- get_mae_quantity_bygroup(mae.filtered, quantity.type = "proportions",
+                                             object.name.vector = names(mae))
 
 # get analysis datasets
-df.lm.quantity <- list.quantity$qdf.wide[,seq(4)]
-df.lm.proportion <- list.proportions$qdf.wide[,seq(4)]
+df.lm.quantity <- list.quantity$qdf.wide[,seq(10)]
+df.lm.proportion <- list.proportions$qdf.wide[,seq(10)]
 # convert variables to numeric
-for(c in seq(ncol(df.lm.quantity))){df.lm.quantity[,c]<-as.numeric(df.lm.quantity[,c])}
-for(c in seq(ncol(df.lm.proportion))){df.lm.proportion[,c]<-as.numeric(df.lm.proportion[,c])}
+for(c in seq(ncol(df.lm.quantity))){
+  df.lm.quantity[,c]<-as.numeric(df.lm.quantity[,c])}
+for(c in seq(ncol(df.lm.proportion))){
+  df.lm.proportion[,c]<-as.numeric(df.lm.proportion[,c])}
 ```
 
 # 1. Check linear model bias distribution
@@ -57,8 +60,8 @@ for(c in seq(ncol(df.lm.proportion))){df.lm.proportion[,c]<-as.numeric(df.lm.pro
 Pairs plots
 
 ```{r}
-ggpairs(df.lm.quantity[,seq(4)]) + ggtitle("QUANTITY")
-ggpairs(df.lm.proportion[,seq(4)]) + ggtitle("PROPORTION")
+ggpairs(df.lm.quantity) + ggtitle("QUANTITY")
+ggpairs(df.lm.proportion) + ggtitle("PROPORTION")
 ```
 
 Get bias data and plot
@@ -80,31 +83,9 @@ ggpairs(df.res)
 # 2. Get PCA
 
 ````{r}
-
-
-
-
-mae_pca <- function(){
-  library(dplyr)
-  library(ggplot2)
-  mat.pca <- t(df.tall.ct[,seq(num.cell.types)])
-  pca <- prcomp(x = mat.pca)
-  
-  mat.pca <- df.tall.ct[,seq(num.cell.types)]
-  pca <- prcomp(x = mat.pca)
-  
-  
-  # check dim of outputs
-  res1 <- prcomp(df.tall.ct[,seq(num.cell.types)])$x
-  res2 <- prcomp(t(df.tall.ct[,seq(num.cell.types)]))$x
-  
-  heatmap(res1)
-  
-  pca.res <- pca$x %>% as.data.frame()
-  ggplot(pca.res, aes(x = PC1, y = PC2)) + geom_point()
-  
-}
-
+# get pca results
+pca_results_format(df.lm.quantity)
+pca_results_format(df.lm.proportion)
 ```
 
 # 3. Check PCA relationships across conditions

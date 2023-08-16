@@ -149,7 +149,8 @@ plot_bias <- function(df.lm.quantity){
   ggpairs(df.res)
 }
 
-new_mae_with_filters <- function(mae, platform.name = "rnascope.image", 
+new_mae_with_filters <- function(mae, platform.name = "rnascope.image",
+                                 sample.id.variable = "Sample",
                                  assay.name = "Nucleus_Area",
                                  value.filter.vector = c(100, 75, 50),
                                  old.platform.names.keep = c("sn1.rnaseq",
@@ -220,4 +221,33 @@ new_mae_with_filters <- function(mae, platform.name = "rnascope.image",
                                         mae.out$colData, mae.out$sampleMap)
   
   return(mae.out.final)
+}
+
+
+#
+#
+#
+#
+pca_results_format <- function(df){
+  #
+  # example:
+  # pca_results_format(df)
+  #
+  library(ggplot2)
+  library(GGally)
+  matrix.pca <- as.matrix(df)
+  results.pca <- prcomp(x = matrix.pca)
+  summary.pca <- summary(pca)
+  # get data to plot
+  plot.data.pca <- as.data.frame(results.pca$x)
+  colnames(plot.data.pca) <- paste0(colnames(plot.data.pca), 
+                                    " (", round(summary.pca$importance[2,], 2), "%)")
+  # plot object
+  ggpairs.plot <- ggpairs(plot.data.pca)
+  # return
+  results.list <- list(results.pca = results.pca,
+                       summary.pca = summary.pca,
+                       plot.data.pca = plot.data.pca,
+                       ggpairs.plot = ggpairs.plot)
+  return(return.list)
 }
