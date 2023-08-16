@@ -70,11 +70,14 @@ for(c in seq(ncol(df.lm.proportion))){
 Pairs plots
 
 ```{r}
-ggpairs(df.lm.quantity) + ggtitle("QUANTITY")
-ggpairs(df.lm.proportion) + ggtitle("PROPORTION")
+ggpairs(df.lm.quantity, progress = F) + ggtitle("QUANTITY")
 ```
 
-Get bias data and plot
+```{r}
+ggpairs(df.lm.proportion, progress = F) + ggtitle("PROPORTION")
+```
+
+Plot residuals across linear models
 
 ```{r}
 column.index.vector <- seq(ncol(df.lm.quantity))
@@ -87,7 +90,7 @@ df.res <- do.call(cbind, lapply(column.index.vector, function(col.index){
 df.res <- as.data.frame(df.res)
 colnames(df.res) <- colnames(df.lm.quantity)
 # plot residuals
-ggpairs(df.res)
+ggpairs(df.res, progress = F) + ggtitle("RESIDUALS")
 ```
 
 # 2. Get PCA
@@ -102,9 +105,41 @@ plots.list.proportion <- pca_scatterplots_bygroups(pca.results.proportion)
 
 ```
 
+```{r}
+plots.list.quantity$plot1
+plots.list.quantity$plot2
+plots.list.quantity$plot3
+```
+
+```{r}
+plots.list.proportion$plot1
+plots.list.proportion$plot2
+plots.list.proportion$plot3
+```
+
 # 3. Check PCA relationships across conditions
 
 ```{r}
 ```
 
+# Export environment
 
+```{r}
+setwd("..")
+setwd("..")
+# remove large objects
+rm(mae)
+rm(mae.filter)
+rm(mae.final)
+# save
+folder.name <- "08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1"
+env.name <- "mae-pca-3steps_rnascope-nucleus-size-filters_cohort1.RData"
+env.path <- file.path("outputs", folder.name, env.name)
+save.image(file = env.path)
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```

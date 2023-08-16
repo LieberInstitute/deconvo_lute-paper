@@ -237,7 +237,7 @@ pca_results_format <- function(df){
   library(GGally)
   matrix.pca <- as.matrix(df)
   results.pca <- prcomp(x = matrix.pca)
-  summary.pca <- summary(pca)
+  summary.pca <- summary(results.pca)
   # get data to plot
   plot.data.pca <- as.data.frame(results.pca$x)
   colnames(plot.data.pca) <- paste0(colnames(plot.data.pca), 
@@ -264,13 +264,13 @@ pca_scatterplots_bygroups <- function(pca.results.object){
   
   # get plot data and format
   # get pca results to plot
-  dfp <- pca.results.quantity$plot.data.pca
+  dfp <- pca.results.object$plot.data.pca
   xaxis.lab <- colnames(dfp)[1]
   yaxis.lab <- colnames(dfp)[2]
   colnames(dfp)[1:2] <- c("pc1", "pc2")
   # get grouping variables
-  df.input <- pca.results.quantity$input.df
-  dfp$group <- colnames(df.input)
+  df.input <- pca.results.object$input.df
+  dfp$group <- rownames(df.input)
   dfp$platform <- gsub(";.*", "", dfp$group)
   dfp$celltype <- gsub(".*;", "", dfp$group)
   
