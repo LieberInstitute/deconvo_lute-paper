@@ -26,6 +26,12 @@ script.path <- file.path("notebooks",
 source(script.path)
 ```
 
+Append absolute cell size filters.
+
+```{r}
+mae <- new_mae_with_filters(mae)
+```
+
 Get quantity data frames.
 
 ```{r}
@@ -67,17 +73,16 @@ df.res <- do.call(cbind, lapply(column.index.vector, function(col.index){
 }))
 df.res <- as.data.frame(df.res)
 colnames(df.res) <- colnames(df.lm.quantity)
-
 # plot residuals
-ggplot(df.res, )
-
-
-
+ggpairs(df.res)
 ```
 
 # 2. Get PCA
 
 ````{r}
+
+
+
 
 mae_pca <- function(){
   library(dplyr)

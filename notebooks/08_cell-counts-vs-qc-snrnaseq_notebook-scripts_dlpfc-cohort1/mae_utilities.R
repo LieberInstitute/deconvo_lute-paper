@@ -134,3 +134,90 @@ get_mae_quantity_bygroup <- function(mae, group.variable.name = "sample.id",
   list.return.all.qdf <- list(qdf.tall = qdf.all, qdf.wide = qdf.wide)
   return(list.return.all.qdf)
 }
+
+plot_bias <- function(df.lm.quantity){
+  column.index.vector <- seq(ncol(df.lm.quantity))
+  df.res <- do.call(cbind, lapply(column.index.vector, function(col.index){
+    df.lm.iter <- data.frame(return.variable = df.lm.quantity[,col.index])
+    col.seq.include <- column.index.vector[column.index.vector==!col.index]
+    df.lm.iter <- cbind(df.lm.iter, df.lm.quantity[,col.seq.include])
+    lm(return.variable ~ . , data = df.lm.iter)$residuals
+  }))
+  df.res <- as.data.frame(df.res)
+  colnames(df.res) <- colnames(df.lm.quantity)
+  # plot residuals
+  ggpairs(df.res)
+}
+
+new_mae_with_filters <- function(mae, platform.name = "rnascope.image", 
+                                 assay.name = "Nucleus_Area",
+                                 value.filter.vector = c(100, 75, 50),
+                                 old.platform.names.keep = c("sn1.rnaseq",
+                                                             "rnascope.image")){
+  #
+  # example:
+  # new_mae_with_filters(mae)
+  #
+  #
+  
+  #value.filter.vector <- c(100, 75, 50)
+  #platform.name <- "rnascope.image"
+  #assay.name <- "Nucleus_Area"
+  #sample.id.variable <- "Sample"
+  #old.platform.names.keep <- c("sn1.rnaseq", "rnascope.image")
+  new.platform.names <- paste0(platform.name, "_filter-", 
+                               tolower(assay.name),"_value-", value.filter.vector)
+  
+  # list of old platform objects
+  old.platform.object.keep <- lapply(old.platform.names.keep, function(platform.name){
+    mae[[platform.name]]
+  })
+  names(old.platform.object.keep) <- old.platform.names.keep
+  # list of new platform objects
+  mae.data <- mae[[platform.name]]
+  new.platform.object.list <- lapply(value.filter.vector, function(filter.value){
+    #filter.value <- cell.size.filters[1]
+    new.data.name <- paste0(platform.name, "_filter", filter.value)
+    filter.data.columns <- assays(mae.data)[[assay.name]] >= filter.value
+    filter.data.columns <- as.vector(filter.data.columns[1,])
+    mae.data.filtered <- mae.data[,filter.data.columns]
+    # mae[[new.data.name]] <- mae.data.filtered
+    mae.data.filtered
+  })
+  names(new.platform.object.list) <- new.platform.names
+  
+  # get output experiment list
+  # bind lists
+  output.platform.list <- append(old.platform.object.keep, new.platform.object.list)
+  names(output.platform.list) <- c(names(old.platform.object.keep),
+                                   names(new.platform.object.list))
+  experiment.list.out <- ExperimentList(output.platform.list)
+  
+  # get sample map
+  samplemap.old.keep <- sampleMap(mae)
+  filter.samplemap.old <- samplemap.old.keep$assay %in% old.platform.names.keep
+  samplemap.old.keep <- samplemap.old.keep[filter.samplemap.old,]
+  samplemap.new <- do.call(rbind, lapply(seq(length(new.platform.object.list)),
+                                         function(index){
+                                           name <- names(new.platform.object.list)[index]
+                                           item <- new.platform.object.list[[index]]
+                                           data.frame(assay = rep(name, ncol(item)),
+                                                      colname = colnames(item),
+                                                      primary = item[[sample.id.variable]])
+                                           
+                                           
+                                         }))
+  samplemap.out <- rbind(samplemap.old.keep, samplemap.new)
+  samplemap.out <- DataFrame(samplemap.out)
+  
+  #  get coldata
+  coldata.out <- colData(mae)
+  
+  # get output mae
+  mae.out <- prepMultiAssay(ExperimentList = experiment.list.out, 
+                            sampleMap = samplemap.out, colData = coldata.out)
+  mae.out.final <- MultiAssayExperiment(mae.out$experiments, 
+                                        mae.out$colData, mae.out$sampleMap)
+  
+  return(mae.out.final)
+}
