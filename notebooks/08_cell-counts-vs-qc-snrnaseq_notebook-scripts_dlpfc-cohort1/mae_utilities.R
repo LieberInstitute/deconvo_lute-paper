@@ -245,9 +245,45 @@ pca_results_format <- function(df){
   # plot object
   ggpairs.plot <- ggpairs(plot.data.pca)
   # return
-  results.list <- list(results.pca = results.pca,
+  return.list <- list(input.df = df,
+                      results.pca = results.pca,
                        summary.pca = summary.pca,
                        plot.data.pca = plot.data.pca,
                        ggpairs.plot = ggpairs.plot)
+  return(return.list)
+}
+
+#
+#
+#
+pca_scatterplots_bygroups <- function(pca.results.object){
+  #
+  #
+  #
+  #
+  
+  # get plot data and format
+  # get pca results to plot
+  dfp <- pca.results.quantity$plot.data.pca
+  xaxis.lab <- colnames(dfp)[1]
+  yaxis.lab <- colnames(dfp)[2]
+  colnames(dfp)[1:2] <- c("pc1", "pc2")
+  # get grouping variables
+  df.input <- pca.results.quantity$input.df
+  dfp$group <- colnames(df.input)
+  dfp$platform <- gsub(";.*", "", dfp$group)
+  dfp$celltype <- gsub(".*;", "", dfp$group)
+  
+  # get plot objects
+  # plot first 2 pcs
+  plot.group1 <- ggplot(dfp, aes(x = pc1, y = pc2, color = group)) + geom_point()
+  plot.group2 <- ggplot(dfp, aes(x = pc1, y = pc2, color = platform)) + geom_point()
+  plot.group3 <- ggplot(dfp, aes(x = pc1, y = pc2, color = celltype)) + geom_point()
+  plot.group1 <- plot.group1 + xlab(xaxis.lab) + ylab(yaxis.lab)
+  plot.group2 <- plot.group2 + xlab(xaxis.lab) + ylab(yaxis.lab)
+  plot.group3 <- plot.group3 + xlab(xaxis.lab) + ylab(yaxis.lab)
+  
+  # return
+  return.list <- list(plot1 = plot.group1, plot2 = plot.group2, plot3 = plot.group3)
   return(return.list)
 }

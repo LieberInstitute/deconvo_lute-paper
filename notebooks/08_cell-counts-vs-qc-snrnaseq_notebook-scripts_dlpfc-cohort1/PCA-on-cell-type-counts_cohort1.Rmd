@@ -13,12 +13,22 @@ sapply(libv, library, character.only = TRUE)
 
 # Prepare MAE data
 
+Load MAE data
+
 ```{r}
 setwd("..")
 setwd("..")
+# load mae data
 mae <- get(load(file.path("outputs", "01_prepare-datasets",
                           "mae_with-rpkm_additional-data_final.rda")))
+```
 
+Source utilities
+
+```{r}
+setwd("..")
+setwd("..")
+# source mae utilties
 script.path <- file.path("notebooks",
                          "08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1",
                          "mae_utilities.R")
@@ -84,8 +94,12 @@ ggpairs(df.res)
 
 ````{r}
 # get pca results
-pca_results_format(df.lm.quantity)
-pca_results_format(df.lm.proportion)
+pca.results.quantity <- pca_results_format(t(df.lm.quantity))
+pca.results.proportion <- pca_results_format(t(df.lm.proportion))
+
+plots.list.quantity <- pca_scatterplots_bygroups(pca.results.quantity)
+plots.list.proportion <- pca_scatterplots_bygroups(pca.results.proportion)
+
 ```
 
 # 3. Check PCA relationships across conditions
