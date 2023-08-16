@@ -17,6 +17,94 @@ mae <- get(
     file.path("outputs", "01_prepare-datasets", "mae_with-rpkm_additional-data_final.rda")))
 ```
 
+```{r}
+
+#
+# MAE.day -- standards for MultiAssayExperiments and similar object class types
+#
+
+assay_by_object_list <- function(mae, name.vector, assay.names.catch = c("counts", "Nucleus_Area")){
+  #
+  # get_assay_name_list
+  # 
+  assay.name.list <- lapply(name.vector, function(name.iter){
+    assays.list.iter <- names(assays(mae[[name.iter]]))
+    assays.list.iter[assays.list.iter %in% assay.names.catch]
+  })
+  names(assay.name.list) <- name.vector 
+  return(assay.name.list)
+}
+
+map_column_quantity_options <- function(object, object.label, column.variable.name){
+  se.cond <- is(object, "SingleCellExperiment")|is(object, "SummarizedExperiment")|is(object, "ExpressionSet")
+  if(se.cond){ # classes containing coldata
+    quantity.df <- as.data.frame(table(colData(object)[,column.variable.name]))
+    
+  } else{
+    stop("unrecognized object class.")
+  }
+  quantity.df$mae.object.name <- object.label
+  return(quantity.df)
+  return(FALSE)
+}
+
+get_mae_column_quantity <- function(mae, object.name.vector = c("sn1.rnaseq", "rnascope.image"), 
+                                    column.variable.levels = c("glial", "neuron"),
+                                    quantity.type = "counts", column.variable.name = "k2",
+                                    return.type = "data.frame"){
+  #
+  # example:
+  # get_mae_column_quantity(mae, c("sn1.rnaseq", "rnascope.image"), c("glial", "neuron"), "counts", "k2")
+  # get_mae_column_quantity(mae, c("sn1.rnaseq", "rnascope.image"), c("glial", "neuron"), "proportions", "k2")
+  #
+  #
+  #
+  
+  # check for valid object names
+  object.name.vector <- object.name.vector[object.name.vector %in% names(mae)]
+  column.quantity.list <- lapply(object.name.vector, function(object.name){
+    quantity.df <- map_column_quantity_options(mae[[object.name]], object.name, column.variable.name)
+    quantity.df$quantity.type <- quantity.type
+    quantity.df$cell.type.variable.name <- column.variable.name
+    return(quantity.df)
+  })
+  # parse quantity.df options
+  if(!is(column.variable.levels, "NULL")){
+    column.quantity.list <- lapply(column.quantity.list, function(quantity.df){
+      quantity.df[quantity.df[,1] %in% column.variable.levels,]
+    })
+  }
+  if(quantity.type=="proportions"){
+    column.quantity.list <- lapply(column.quantity.list, function(quantity.df){
+      quantity.df[,2] <- quantity.df[,2]/sum(quantity.df[,2])
+      quantity.df
+    })
+  }
+  # parse return options
+  if(!return.type=="list"){
+    return.object <- as.data.frame(do.call(rbind, column.quantity.list))
+    colnames(return.object) <- c("cell.type", "quantity", "mae.object.name", 
+                                 "quantity.type", "cell.type.variable.name")
+  } else{
+    return.object <- column.quantity.list
+  }
+  return(return.object)
+}
+
+get_mae_column_quantity_bygroup <- function(mae, group.variable.name, ...){
+  quantity.matrix <- do.call(rbind, lapply(group.name.list, function(group.name){
+    mae.iter <- mae.iter
+    get_mae_column_quantity(mae.iter, ...)
+  }))
+  quantity.df <- as.data.frame(quantity.matrix)
+  
+}
+
+
+
+
+```
+
 counts across assay types
 
 # 1. Check linear model bias distribution
