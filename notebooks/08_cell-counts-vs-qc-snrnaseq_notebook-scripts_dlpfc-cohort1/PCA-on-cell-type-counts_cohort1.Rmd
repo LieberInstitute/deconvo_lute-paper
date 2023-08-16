@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+libv <- c("GGally", "ggplot2")
+sapply(libv, library, character.only = TRUE)
 ```
 
 # Prepare MAE data
@@ -24,13 +26,6 @@ script.path <- file.path("notebooks",
 source(script.path)
 ```
 
-Source helper functions
-
-```{r}
-
-
-```
-
 Get quantity data frames.
 
 ```{r}
@@ -42,20 +37,16 @@ mae.filtered <- mae[,filter.mae,]
 # get group quantity df datasets
 list.quantity <- get_mae_quantity_bygroup(mae.filtered)
 list.proportions <- get_mae_quantity_bygroup(mae.filtered, quantity.type = "proportions")
-```
 
-# 1. Check linear model bias distribution
-
-```{r}
-library(GGally)
-
+# get analysis datasets
 df.lm.quantity <- list.quantity$qdf.wide[,seq(4)]
 df.lm.proportion <- list.proportions$qdf.wide[,seq(4)]
-
-# convert to numeric
+# convert variables to numeric
 for(c in seq(ncol(df.lm.quantity))){df.lm.quantity[,c]<-as.numeric(df.lm.quantity[,c])}
 for(c in seq(ncol(df.lm.proportion))){df.lm.proportion[,c]<-as.numeric(df.lm.proportion[,c])}
 ```
+
+# 1. Check linear model bias distribution
 
 Pairs plots
 
@@ -64,78 +55,24 @@ ggpairs(df.lm.quantity[,seq(4)]) + ggtitle("QUANTITY")
 ggpairs(df.lm.proportion[,seq(4)]) + ggtitle("PROPORTION")
 ```
 
-```{r}
-get_cell_counts <- function(sce.iter, variable){as.data.frame(table(sce.iter[[variable]]))}
-
-get_group_cell_counts <- function(sce, group.variable, celltype.variable){
-  group.id.vector <- unique(sce[[group.variable]])
-  do.call(rbind, lapply(group.id.vector, function(group.id){
-    sce.iter <- sce[,sce[[group.variable]]==group.id]
-    counts.iter <- get_cell_counts(sce.iter, celltype.variable)
-    counts.iter$group.id <- group.id
-    counts.iter
-  }))
-}
-
-mae_celltype_counts_by_assay <- function(
-    mae, 
-    assay.name.vector = c("sn1.rnaseq", "rnascope.image"),
-    sample.id.variable = "Sample", 
-    celltype.variable = "k2",
-    cell.types = c("glial", "neuron")){
-    #
-    # make a table of the following:
-    # SAMPLES (ROWS) X ASSAY-CELLTYPE (COLUMNS)
-    #
-    #
-    
-    mae <- complete.cases(mae)
-  
-    # get tall df
-    df.tall <- do.call(rbind, lapply(assay.name.vector, function(assay.name.iter){
-      df.iter <- get_group_cell_counts(mae[[assay.name.iter]], 
-                                       sample.id.variable, celltype.variable)
-      df.iter$assay <- assay.name.iter
-      return(df.iter)
-    }))
-    df.tall$ct.assay.label <- paste0(df.tall[,1], ";", df.tall$assay)
-    df.tall <- df.tall[df.tall$Var1 %in% cell.types,]
-    
-    # df.tall.ct.assay
-    celltypes.assays <- unique(df.tall$ct.assay.label)
-    num.cell.types <- length(cell.types)
-    num.groups <- length(unique(df.tall$group.id))
-    df.tall.ct.assay <- do.call(cbind, lapply(celltypes.assays, function(celltype.assay){
-      df.tall[df.tall[,5]==celltype.assay, 2]
-    }))
-    df.tall.ct.assay <- as.data.frame(df.tall.ct.assay)
-    
-    # df.tall.ct
-    num.cell.types <- length(cell.types)
-    num.entries.tall <- length(which(df.tall[,1]==cell.types[1]))
-    df.tall.ct <- do.call(cbind, lapply(cell.types, function(cell.type){
-      df.tall[df.tall[,1]==cell.type, 2]
-    }))
-    df.tall.ct <- as.data.frame(df.tall.ct)
-    colnames(df.tall.ct) <- cell.types
-    df.tall.ct$assay <- df.tall[df.tall[,1]==cell.types[1],]$assay
-    df.tall.ct$group.id <- df.tall[df.tall[,1]==cell.types[1],]$group.id
-    
-    
-    
-    
-    colnames(df.tall.ct.assay) <- cell.types
-    df.tall.ct.assay$assay <- df.tall[df.tall[,1]==cell.types[1],]$assay
-    df.tall.ct.assay$group.id <- df.tall[df.tall[,1]==cell.types[1],]$group.id
-    
-    return(list(df.tall = df.tall, df.tall.ct = df.tall.ct))
-}
-```
-
-
+Get bias data and plot
 
 ```{r}
-df.tall <- mae_celltype_counts_by_assay(mae)[["df.tall"]]
+column.index.vector <- seq(ncol(df.lm.quantity))
+df.res <- do.call(cbind, lapply(column.index.vector, function(col.index){
+  df.lm.iter <- data.frame(return.variable = df.lm.quantity[,col.index])
+  col.seq.include <- column.index.vector[column.index.vector==!col.index]
+  df.lm.iter <- cbind(df.lm.iter, df.lm.quantity[,col.seq.include])
+  lm(return.variable ~ . , data = df.lm.iter)$residuals
+}))
+df.res <- as.data.frame(df.res)
+colnames(df.res) <- colnames(df.lm.quantity)
+
+# plot residuals
+ggplot(df.res, )
+
+
+
 ```
 
 # 2. Get PCA
