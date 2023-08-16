@@ -105,32 +105,32 @@ total variables.
 
 Correlations and scatter plots of cell type quantities.
 
-```{r}
+```{r, fig.width=15, fig.height=15}
 ggpairs(df.lm.quantity, progress = F) + ggtitle("Cell type quantities")
 ```
 
 Residual correlations and distributions by predictor, from cell type counts.
 
-```{r}
+```{r, fig.width=15, fig.height=15}
 df.res.quantity <- get_dfres(df.lm.quantity)
 ggpairs(df.res.quantity, progress = F) + 
   ggtitle(paste0("Residuals, ", celltype.quantity.title))
 ```
 
-## Cell type quantities
+## Cell type proportions
 
 Correlations and scatter plots of cell type proportions.
 
-```{r, fig.width=18}
+```{r, fig.width=15, fig.height=15}
 ggpairs(df.lm.proportion, progress = F) + ggtitle("Cell type proportions")
 ```
 
 Residual correlations and distributions by predictor, from cell type proportions
 
-```{r}
+```{r, fig.width=15, fig.height=15}
 df.res.proportion <- get_dfres(df.lm.proportion)
 ggpairs(df.res.proportion, progress = F) + 
-  ggtitle(paste0("Residuals, cell type proportions", celltype.proportion.title))
+  ggtitle(paste0("Residuals, ", celltype.proportion.title))
 ```
 
 # 2. Get PCA
