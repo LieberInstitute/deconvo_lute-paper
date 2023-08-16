@@ -287,3 +287,26 @@ pca_scatterplots_bygroups <- function(pca.results.object){
   return.list <- list(plot1 = plot.group1, plot2 = plot.group2, plot3 = plot.group3)
   return(return.list)
 }
+
+#
+#
+#
+
+get_dfres <- function(df.lm){
+  #
+  # Get residuals from fitting linear models with each variable (column) as a predictor.
+  #
+  #
+  
+  # get residuals data
+  column.index.vector <- seq(ncol(df.lm))
+  df.res <- do.call(cbind, lapply(column.index.vector, function(col.index){
+    df.lm.iter <- data.frame(return.variable = df.lm[,col.index])
+    col.seq.include <- column.index.vector[column.index.vector==!col.index]
+    df.lm.iter <- cbind(df.lm.iter, df.lm[,col.seq.include])
+    lm(return.variable ~ . , data = df.lm.iter)$residuals
+  }))
+  df.res <- as.data.frame(df.res)
+  colnames(df.res) <- colnames(df.lm)
+  return(df.res)
+}

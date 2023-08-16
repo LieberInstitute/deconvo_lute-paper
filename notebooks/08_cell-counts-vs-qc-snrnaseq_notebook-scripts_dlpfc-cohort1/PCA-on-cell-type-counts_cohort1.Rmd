@@ -2,13 +2,19 @@
 title: "cell-type-qc_cohort1"
 author: "Sean Maden"
 date: "2023-08-10"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("GGally", "ggplot2")
+libv <- c("GGally", "ggplot2", "MultiAssayExperiment")
 sapply(libv, library, character.only = TRUE)
+
+# plot params
+celltype.quantity.title <- "Cell type quantities"
+celltype.proportion.title <- "Cell type proportions"
 ```
 
 # Prepare MAE data
@@ -18,11 +24,13 @@ Load MAE data
 ```{r}
 setwd("..")
 setwd("..")
+
 # load mae filtered data
 folder.name <- "08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1"
 mae.filtered.name <- "mae_rnascope-filtered_cohort1.rda"
 mae.filtered.path <- file.path("outputs", folder.name, mae.filtered.name)
 mae <- get(load(mae.filtered.path))
+
 # source mae utilities
 script.name <- "mae_utilities.R"
 script.path <- file.path("notebooks", folder.name, script.name)
@@ -33,7 +41,9 @@ Get cell quantities and proportions.
 
 ```{r}
 # filter mae on shared sample ids
-sample.id.vector <- intersect(unique(mae[["sn1.rnaseq"]]$Sample), unique(mae[["rnascope.image"]]$Sample))
+sample.id.vector.sn <- unique(mae[["sn1.rnaseq"]]$Sample)
+sample.id.vector.rnascope <- unique(mae[["rnascope.image"]]$Sample)
+sample.id.vector <- intersect(sample.id.vector.sn, sample.id.vector.rnascope)
 filter.mae <- colData(mae)[,"sample.id"] %in% sample.id.vector
 mae.filtered <- mae[,filter.mae,]
 
@@ -55,13 +65,11 @@ for(c in seq(ncol(df.lm.proportion))){
 # Summarize platform data
 
 ```{r}
+# summary variables
 kcelltypes <- length(unique(list.quantity$qdf.tall$cell.type))
-kcelltypes
-
 nplatforms <- length(mae.filtered)
-nplatforms
-
 platform.names <- names(mae.filtered)
+jsamples <- unique(colData(mae.filtered)$sample.id)
 ```
 
 Total cell types analyzed: `r kcelltypes`.
@@ -70,7 +78,9 @@ Total platforms analyzed: `r nplatforms`.
 
 Unique platform names: `r platform.names`.
 
-Dimensions of each platform object in filtered `MultiAssayExperiment`.
+Unique samples/block ids: `r jsamples`.
+
+Dimensions of each platform object in filtered `MultiAssayExperiment`:
 
 ```{r}
 for(index in seq(length(mae.filtered))){
@@ -85,66 +95,67 @@ for(index in seq(length(mae.filtered))){
 This section inspects the linearity of the variables to be analyzed by PCA. Key properties 
 include correlation (a.k.a. "collinearity") of each variable pair. We also wish to 
 inspect the residuals of linear models of the datasets, which we perform systematically
-by fitting a linear model to predict each variable using the remaining variables. 
+by fitting a linear model to predict each variable using the remaining variables. Here, 
+variable identity is "PLATFORM_CELLTYPE", so there are `r nplatforms*kcelltypes` 
+total variables.
 
-The variable identity is "PLATFORM_CELLTYPE", so we have `r nplatforms*ncelltypes` total variables.
-
-Show cell quantities by platform name.
-
-```{r}
-ggpairs(df.lm.quantity, progress = F) + ggtitle("QUANTITY")
-```
+Correlations and scatter plots of cell type quantities.
 
 ```{r}
-ggpairs(df.lm.proportion, progress = F) + ggtitle("PROPORTION")
+ggpairs(df.lm.quantity, progress = F) + ggtitle("Cell type quantities")
 ```
 
-Plot residuals across linear models
+Correlations and scatter plots of cell type proportions.
 
 ```{r}
-column.index.vector <- seq(ncol(df.lm.quantity))
-df.res <- do.call(cbind, lapply(column.index.vector, function(col.index){
-  df.lm.iter <- data.frame(return.variable = df.lm.quantity[,col.index])
-  col.seq.include <- column.index.vector[column.index.vector==!col.index]
-  df.lm.iter <- cbind(df.lm.iter, df.lm.quantity[,col.seq.include])
-  lm(return.variable ~ . , data = df.lm.iter)$residuals
-}))
-df.res <- as.data.frame(df.res)
-colnames(df.res) <- colnames(df.lm.quantity)
-# plot residuals
-ggpairs(df.res, progress = F) + ggtitle("RESIDUALS")
+ggpairs(df.lm.proportion, progress = F) + ggtitle("Cell type proportions")
 ```
+
+Residual correlations and distributions by predictor, from cell type counts.
+
+```{r}
+df.res.quantity <- get_dfres(df.lm.quantity)
+ggpairs(df.res.quantity, progress = F) + 
+  ggtitle(paste0("Residuals, ", celltype.quantity.title))
+```
+
+Residual correlations and distributions by predictor, from cell type proportions
+
+```{r}
+df.res.proportion <- get_dfres(df.lm.proportion)
+ggpairs(df.res.proportion, progress = F) + 
+  ggtitle(paste0("Residuals, cell type proportions", celltype.proportion.title))
+```
+
 
 # 2. Get PCA
 
-````{r}
+```{r}
 # get pca results
 pca.results.quantity <- pca_results_format(t(df.lm.quantity))
 pca.results.proportion <- pca_results_format(t(df.lm.proportion))
-
 plots.list.quantity <- pca_scatterplots_bygroups(pca.results.quantity)
 plots.list.proportion <- pca_scatterplots_bygroups(pca.results.proportion)
-
 ```
 
+## Cell type quantities results
+
+View scatterplots, cell type quantities.
+
 ```{r}
-plots.list.quantity$plot1
-plots.list.quantity$plot2
-plots.list.quantity$plot3
+plots.list.quantity$plot1 + ggtitle(celltype.quantity.title)
+plots.list.quantity$plot2 + ggtitle(celltype.quantity.title)
+plots.list.quantity$plot3 + ggtitle(celltype.quantity.title)
 ```
 
-```{r}
-plots.list.proportion$plot1
-plots.list.proportion$plot2
-plots.list.proportion$plot3
-```
+## Cell type proportions results
 
-# 3. Comparative PCA -- variances explained in top component
+View scatterplots, cell type proportions.
 
 ```{r}
-pca.cond1 <- alksdsa
-pca.cond2 <- adfndsalk
-lm()
+plots.list.proportion$plot1 + ggtitle(celltype.proportion.title)
+plots.list.proportion$plot2 + ggtitle(celltype.proportion.title)
+plots.list.proportion$plot3 + ggtitle(celltype.proportion.title)
 ```
 
 # Export environment
