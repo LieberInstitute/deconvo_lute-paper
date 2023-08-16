@@ -18,42 +18,29 @@ Load MAE data
 ```{r}
 setwd("..")
 setwd("..")
-# load mae data
-mae <- get(load(file.path("outputs", "01_prepare-datasets",
-                          "mae_with-rpkm_additional-data_final.rda")))
-```
-
-Source utilities
-
-```{r}
-setwd("..")
-setwd("..")
-# source mae utilties
-script.path <- file.path("notebooks",
-                         "08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1",
-                         "mae_utilities.R")
+# load mae filtered data
+folder.name <- "08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1"
+mae.filtered.name <- "mae_rnascope-filtered_cohort1.rda"
+mae.filtered.path <- file.path("outputs", folder.name, mae.filtered.name)
+mae <- get(load(mae.filtered.path))
+# source mae utilities
+script.name <- "mae_utilities.R"
+script.path <- file.path("notebooks", folder.name, script.name)
 source(script.path)
 ```
 
-Append absolute cell size filters.
+Get cell quantities and proportions.
 
 ```{r}
-mae <- new_mae_with_filters(mae)
-```
-
-Get quantity data frames.
-
-```{r}
-# get sample ids
-sample.id.vector <- intersect(unique(mae[["sn1.rnaseq"]]$Sample), 
-                              unique(mae[["rnascope.image"]]$Sample))
+# filter mae on shared sample ids
+sample.id.vector <- intersect(unique(mae[["sn1.rnaseq"]]$Sample), unique(mae[["rnascope.image"]]$Sample))
 filter.mae <- colData(mae)[,"sample.id"] %in% sample.id.vector
 mae.filtered <- mae[,filter.mae,]
 
 # get group quantity df datasets
-list.quantity <- get_mae_quantity_bygroup(mae.filtered, object.name.vector = names(mae))
+list.quantity <- get_mae_quantity_bygroup(mae.filtered, object.name.vector = names(mae.filtered))
 list.proportions <- get_mae_quantity_bygroup(mae.filtered, quantity.type = "proportions",
-                                             object.name.vector = names(mae))
+                                             object.name.vector = names(mae.filtered))
 
 # get analysis datasets
 df.lm.quantity <- list.quantity$qdf.wide[,seq(10)]
@@ -65,9 +52,44 @@ for(c in seq(ncol(df.lm.proportion))){
   df.lm.proportion[,c]<-as.numeric(df.lm.proportion[,c])}
 ```
 
-# 1. Check linear model bias distribution
+# Summarize platform data
 
-Pairs plots
+```{r}
+kcelltypes <- length(unique(list.quantity$qdf.tall$cell.type))
+kcelltypes
+
+nplatforms <- length(mae.filtered)
+nplatforms
+
+platform.names <- names(mae.filtered)
+```
+
+Total cell types analyzed: `r kcelltypes`.
+
+Total platforms analyzed: `r nplatforms`.
+
+Unique platform names: `r platform.names`.
+
+Dimensions of each platform object in filtered `MultiAssayExperiment`.
+
+```{r}
+for(index in seq(length(mae.filtered))){
+  message(names(mae.filtered)[index], ", dims:")
+  print(dim(mae.filtered[[index]]))
+  message("\n")
+}
+```
+
+# 1. Inspect linearity of features for PCA
+
+This section inspects the linearity of the variables to be analyzed by PCA. Key properties 
+include correlation (a.k.a. "collinearity") of each variable pair. We also wish to 
+inspect the residuals of linear models of the datasets, which we perform systematically
+by fitting a linear model to predict each variable using the remaining variables. 
+
+The variable identity is "PLATFORM_CELLTYPE", so we have `r nplatforms*ncelltypes` total variables.
+
+Show cell quantities by platform name.
 
 ```{r}
 ggpairs(df.lm.quantity, progress = F) + ggtitle("QUANTITY")
@@ -117,9 +139,12 @@ plots.list.proportion$plot2
 plots.list.proportion$plot3
 ```
 
-# 3. Check PCA relationships across conditions
+# 3. Comparative PCA -- variances explained in top component
 
 ```{r}
+pca.cond1 <- alksdsa
+pca.cond2 <- adfndsalk
+lm()
 ```
 
 # Export environment
