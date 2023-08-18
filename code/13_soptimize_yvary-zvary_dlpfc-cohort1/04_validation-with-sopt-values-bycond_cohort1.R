@@ -100,16 +100,11 @@ df.res.samples <- multigroup_bias_matched(validation.sample.id.vector, list.df.t
 
 # append coldata from y.unadj (see MAE data)
 y.unadj <- y.validate
-df.res.samples$sample.labels <- rep(colnames(y.unadj), nrow(dfs))
-df.res.samples$sample.id <- rep(gsub("_.*", "", y.unadj$batch.id), nrow(dfs))
-df.res.samples$cell.compartment <- rep(y.unadj$library_prep, nrow(dfs))
-df.res.samples$anatomic.region <- rep(y.unadj$location, nrow(dfs))
-df.res.samples$library.type <- rep(y.unadj$library_type, nrow(dfs))
-df.res.samples$compartment_library <- rep(y.unadj$expt_condition, nrow(dfs))
-df.res.samples$sample.id.brnum <- rep(y.unadj$batch.id2, nrow(dfs))
-# append dfs info
-df.res.samples$dfs.condition.label <- rep(dfs.new$label, ncol(y.unadj))
-df.res.samples$dfs.condition.variable.name <- rep(dfs.new$variable.name, ncol(y.unadj))
+cd.ydata <- colData(y.unadj)
+df.res.samples$cell.compartment <- cd.ydata[df.res.samples$sample.label,]$library_prep
+df.res.samples$anatomic.region <- cd.ydata[df.res.samples$sample.label,]$location
+df.res.samples$library.type <- cd.ydata[df.res.samples$sample.label,]$library_type
+df.res.samples$sample.id.brnum <- cd.ydata[df.res.samples$sample.label,]$batch.id2
 
 # append data transformations
 # this is the chunk that sets more operants in `df.res`
@@ -125,38 +120,7 @@ df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.er
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
 # save/export
-save.filename <- "df-sopt-result-validation_yvary-zsame_cohort1.rda"
+save.filename <- "df-sopt-result-validation_yvary-zvary_cohort1.rda"
 save.path <- file.path("deconvo_method-paper", "outputs", 
                        "12_soptimize_yvary-zsame_dlpfc-cohort1", save.filename)
 save(df.res.samples, file = save.path)
-
-#--------------
-# example plots
-#--------------
-# compartment_library
-condition_comparison_boxplots("compartment_library", "Bulk_RiboZeroGold", df.res.samples)
-condition_comparison_boxplots("compartment_library", "Bulk_polyA", df.res.samples)
-condition_comparison_boxplots("compartment_library", "Cyto_RiboZeroGold", df.res.samples)
-condition_comparison_boxplots("compartment_library", "Cyto_polyA", df.res.samples)
-condition_comparison_boxplots("compartment_library", "Nuc_RiboZeroGold", df.res.samples)
-condition_comparison_boxplots("compartment_library", "Nuc_polyA", df.res.samples)
-
-# library.preparation
-df.res.samples$library.preparation <- df.res.samples$library.type
-condition_comparison_boxplots("library.preparation", "polyA", df.res.samples)
-condition_comparison_boxplots("library.preparation", "RiboZeroGold", df.res.samples)
-
-# cell.compartment
-condition_comparison_boxplots("cell.compartment", "Nuc", df.res.samples)
-condition_comparison_boxplots("cell.compartment", "Cyto", df.res.samples)
-condition_comparison_boxplots("cell.compartment", "Bulk", df.res.samples)
-
-# anatomic.region
-condition_comparison_boxplots("anatomic.region", "Ant", df.res.samples)
-condition_comparison_boxplots("anatomic.region", "Mid", df.res.samples)
-condition_comparison_boxplots("anatomic.region", "Post", df.res.samples)
-
-# sample id
-condition_comparison_boxplots("sample.id", "Br2720", df.res.samples)
-condition_comparison_boxplots("sample.id", "Br6423", df.res.samples)
-condition_comparison_boxplots("sample.id", "Br6432", df.res.samples)
