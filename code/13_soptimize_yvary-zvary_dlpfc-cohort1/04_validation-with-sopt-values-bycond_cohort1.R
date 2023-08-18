@@ -17,10 +17,21 @@ source(script.path)
 # load
 #-----
 # get all mae
-mae.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_with-rpkm_additional-data_final.rda")
+mae.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_final.rda")
 mae <- get(load(mae.path))
+
 # get sce marker data
-sce <- mae[["sn1.rnaseq"]] # training marker expression
+# sce <- mae[["sn1.validate.rnaseq"]] # training marker expression
+sce <- get(
+  load(
+    file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "list-sce-validate_markers-k-2-3-4_cohort1.rda")))[["k2"]]
+sce <- sce[,!colData(sce)$k2=="other"]
+
+# get df.rn from mae
+mae.dfrn.path <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", "mae_with-rpkm_additional-data_final.rda")
+mae.dfrn <- get(load(mae.dfrn.path))
+df.rn <- mae.dfrn[["df.cellstat.rnascope"]]
+rm(mae.dfrn)
 
 #-----------------------
 # filter validation data
@@ -41,6 +52,7 @@ list.sopt.train <- get(load(sopt.path))
 # get bulk validation subset
 #---------------------------
 y.validate <- mae[["bulk.rnaseq"]]
+rownames(y.validate) <- rowData(y.validate)$Symbol
 bulk.validate.filter <- y.validate$BrNum %in% validation.sample.id.vector
 y.validate <- y.validate[,bulk.validate.filter]
 y.validate <- y.validate[rownames(sce),]
@@ -50,7 +62,7 @@ dim(y.validate)
 #---------------------------------
 # define the true cell proportions
 #---------------------------------
-df.rn <- mae[["df.cellstat.rnascope"]]
+# df.rn <- mae[["df.cellstat.rnascope"]]
 validation.sample.id.vector <- unique(y.validate$batch.id2)
 list.df.true <- df.true.list(df.rn, validation.sample.id.vector, "k2", c("glial", "neuron"))
 names(list.df.true) <- validation.sample.id.vector
@@ -83,6 +95,7 @@ for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
 # get results for each s set
 #---------------------------
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
+validation.sample.id.vector <- validation.sample.id.vector[validation.sample.id.vector %in% sce$Sample]
 df.res.samples <- multigroup_bias_matched(validation.sample.id.vector, list.df.true, y.validate, dfs, sce)
 
 # append coldata from y.unadj (see MAE data)

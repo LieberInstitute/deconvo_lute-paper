@@ -33,7 +33,7 @@ parallel_bias_matched <- function(sce.iter, y.iter, dfs, df.true = NULL,
   df.res <- do.call(rbind, 
                     mclapply(seq(nrow(dfs)), 
                              function(i){
-                               s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
+                               s.vector <- c("glial" = dfs$s.glial[i], "neuron" = dfs$s.neuron[i])
                                suppressMessages(
                                  dfi <- lute(sce.iter, y = y.iter, 
                                             celltype.variable = celltype.variable, 
