@@ -16,6 +16,8 @@ sapply(libv, library, character.only = TRUE)
 #--------------------
 # load snrnaseq data
 load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+# load snrnaseq validation data
+load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/list-sce-validate_k-2-3-4-markers_cohort1.rda")
 # load bulk data
 load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/rse-gene-filter.rda")
 # load rnascope image data
@@ -34,6 +36,13 @@ sce1 <- lscef[[1]]
 sce2 <- lscef[[2]]
 sce3 <- lscef[[3]]
 rm(lscef)
+# isolate snrnaseq sce data -- VALIDATION
+lscef.validate <- list.sce.validate.markers
+sce1.validate <- lscef.validate[[1]]
+sce2.validate <- lscef.validate[[2]]
+sce3.validate <- lscef.validate[[3]]
+rm(list.sce.validate.markers)
+rm(lscef.validate)
 
 # make sce with image data
 img <- halo.output.table
@@ -62,32 +71,42 @@ gc()
 # indicies for subsetting
 bulk.index <- seq(ncol(rse.filter))
 sn.index <- seq(ncol(sce1))
+sn.validate.index <- seq(ncol(sce1.validate))
 img.index <- seq(ncol(sce.img))
 
 # mae prep
-# coldata
-coldata <- DataFrame(data.frame(sample.id = unique(c(sn.sce.subset[[sample.id.snrnaseq]],
-                                                     bulk.rse.subset[[sample.id.bulk]],
-                                                     img.sce.subset[[sample.id.halo]]))))
+
 # get subsets
 bulk.rse.subset <- rse.filter[,bulk.index]
 sn.sce.subset <- sce1[,sn.index]
+sn.sce.validate.subset <- sce1.validate[,sn.validate.index]
 img.sce.subset <- sce.img[,img.index]
+
+# coldata
+coldata <- DataFrame(data.frame(sample.id = unique(c(sn.sce.subset[[sample.id.snrnaseq]],
+                                                     sn.sce.validate.subset[[sample.id.snrnaseq]],
+                                                     bulk.rse.subset[[sample.id.bulk]],
+                                                     img.sce.subset[[sample.id.halo]]))))
+
 # make maplist
 sn1.map <- data.frame(colname = colnames(sn.sce.subset), 
                       primary = sn.sce.subset[[sample.id.snrnaseq]])
+sn1.validate.map <- data.frame(colname = colnames(sn.sce.validate.subset), 
+                      primary = sn.sce.validate.subset[[sample.id.snrnaseq]])
 bulk.map <- data.frame(colname = colnames(bulk.rse.subset), 
                        primary = bulk.rse.subset[[sample.id.bulk]])
 image.map <- data.frame(colname = colnames(img.sce.subset), 
                         primary = img.sce.subset[[sample.id.halo]])
-listmap <- list(sn1.rnaseq = sn1.map, 
+listmap <- list(sn1.rnaseq = sn1.map,
+                sn1.validate.rnaseq = sn1.validate.map,
                 bulk.rnaseq = bulk.map, 
                 rnascope.image = image.map)
 dfmap <- listToMap(listmap) # make new sampleMap object
 rownames(dfmap) <- dfmap$primary
 object.list2 <- list(bulk.rnaseq = bulk.rse.subset, 
                      sn1.rnaseq = sn.sce.subset, 
-                     rnascope.image = img.sce.subset)   
+                     sn1.validate.rnaseq = sn.sce.validate.subset, 
+                     rnascope.image = img.sce.subset)
 experiment.list <- ExperimentList(object.list2)
 rownames(coldata) <- coldata$sample.id
 mae <- prepMultiAssay(ExperimentList = experiment.list, sampleMap = dfmap, colData = coldata)
