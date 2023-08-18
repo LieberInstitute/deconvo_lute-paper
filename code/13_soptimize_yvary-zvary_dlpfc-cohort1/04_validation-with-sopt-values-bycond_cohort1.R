@@ -120,7 +120,7 @@ df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.er
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
 # save/export
+folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
 save.filename <- "df-sopt-result-validation_yvary-zvary_cohort1.rda"
-save.path <- file.path("deconvo_method-paper", "outputs", 
-                       "12_soptimize_yvary-zsame_dlpfc-cohort1", save.filename)
+save.path <- file.path("deconvo_method-paper", "outputs", folder.name, save.filename)
 save(df.res.samples, file = save.path)
