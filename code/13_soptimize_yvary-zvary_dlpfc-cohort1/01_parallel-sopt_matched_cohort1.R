@@ -52,6 +52,7 @@ y.unadj <- mae[["bulk.rnaseq"]]
 # get s vector series (THIS SCRIPT)
 #----------------------------------
 dfs <- dfs.series()
+colnames(dfs) <- paste0("s.", colnames(dfs))
 
 #---------------------------------
 # define the true cell proportions
@@ -80,8 +81,7 @@ y.unadj <- logNormCounts(y.unadj)
 sce <- logNormCounts(sce)
 
 # run parallel deconvo experiments
-df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, 
-                                          dfs, sce, assay.name = assay.name)
+df.res.samples <- multigroup_bias_matched(sample.id.vector[1:2], list.df.true, y.unadj, dfs, sce, assay.name = assay.name)
 
 # inspect results
 head(df.res.samples)
@@ -113,6 +113,6 @@ df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.er
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
 # save
-save.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
+save.filename <- "df-sopt-result_yvary-zvary_cohort1.rda"
 save.path <- file.path("deconvo_method-paper", "outputs", folder.name, save.filename)
 save(df.res.samples, file = save.path)

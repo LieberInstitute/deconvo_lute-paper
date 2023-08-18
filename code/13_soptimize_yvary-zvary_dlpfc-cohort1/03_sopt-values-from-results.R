@@ -2,7 +2,7 @@
 
 # Author: Sean Maden
 #
-# Gets the optimal s cell size factor values from run results.
+# Gets the optimal s cell size factor values from TRAINING run results.
 #
 
 library(ggplot2)
@@ -11,7 +11,7 @@ library(ggplot2)
 # load
 #-----
 folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
-load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
+load.filename <- "df-sopt-result_yvary-zvary_cohort1.rda"
 load.path <- file.path("deconvo_method-paper", "outputs", folder.name, load.filename)
 df.res <- get(load(load.path))
 
@@ -36,6 +36,42 @@ list.sopt <- lapply(labels.vector, function(label.iter){
 })
 names(list.sopt) <- labels.vector
 
+
+#------------------
+# save results list
+#------------------
+# get results list to save
+lr <- list(results = df.res, minima.by.label = df.min, sopt.values.by.label = list.sopt)
+
+# saves minima with results
+lr.filename <- "list-sopt-values_results-yvar_cohort1.rda"
+results.list.path <- file.path("deconvo_method-paper", "outputs", folder.name, lr.filename)
+save(lr, file = results.list.path)
+
+#------------------------------------
+# save median sopt.train by condition
+#------------------------------------
+# load
+df.min <- list.sopt.train$minima.by.label
+# assign categories
+df.min$compartment_library <- df.min$cell.compartment
+df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
+df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
+# get new dfs as medians by experiment group category
+variable.vector <- c("anatomic.region", "cell.compartment", "compartment_library", "library.preparation", "sample.id")
+dfs.new <- dfs_byvariable(df.min, variable.vector)
+
+# save 
+dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
+dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
+save(dfs.new, file = dfs.path)
+# set numeric df for runs
+dfs <- dfs.new[,c("s.glial", "s.neuron")]
+for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
+
+
+
+
 #---------------
 # plot summaries
 #---------------
@@ -55,21 +91,6 @@ ggplot(df.min, aes(x = s.glial, y = s.neuron)) + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0)
 ggplot(df.min, aes(x = s.glial, y = s.neuron)) + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0) + facet_wrap(~cell.compartment)
-
-#------------------
-# save results list
-#------------------
-# get results list to save
-lr <- list(results = df.res, minima.by.label = df.min, sopt.values.by.label = list.sopt)
-
-# saves minima with results
-lr.filename <- "list-sopt-values_results-yvar_cohort1.rda"
-results.list.path <- file.path("deconvo_method-paper", "outputs", folder.name, lr.filename)
-save(lr, file = results.list.path)
-
-
-
-
 
 
 

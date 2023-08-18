@@ -70,26 +70,7 @@ names(list.df.true) <- validation.sample.id.vector
 #-----------
 # assign dfs
 #-----------
-# load
-df.min <- list.sopt.train$minima.by.label
-# assign categories
-df.min$compartment_library <- df.min$cell.compartment
-df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
-df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
 
-# get new dfs as medians by experiment group category
-variable.vector <- c("anatomic.region", "cell.compartment", "compartment_library", 
-                     "library.preparation", "sample.id")
-dfs.new <- dfs_byvariable(df.min, variable.vector)
-
-# save 
-dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
-dfs.path <- file.path("deconvo_method-paper", "outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", dfs.name)
-save(dfs.new, file = dfs.path)
-
-# set numeric df for runs
-dfs <- dfs.new[,c("s.glial", "s.neuron")]
-for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
 
 #---------------------------
 # get results for each s set
@@ -97,6 +78,10 @@ for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
 validation.sample.id.vector <- validation.sample.id.vector[validation.sample.id.vector %in% sce$Sample]
 df.res.samples <- multigroup_bias_matched(validation.sample.id.vector, list.df.true, y.validate, dfs, sce)
+
+# append s scale factor info
+df.res.samples$s.variable.label <- rep(dfs.new$label, each = ncol(y.validate))
+df.res.samples$s.variable.name <- rep(dfs.new$variable.name, each = ncol(y.validate))
 
 # append coldata from y.unadj (see MAE data)
 y.unadj <- y.validate
