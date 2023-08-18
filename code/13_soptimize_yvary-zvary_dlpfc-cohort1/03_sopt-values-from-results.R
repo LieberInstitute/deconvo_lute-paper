@@ -5,7 +5,8 @@
 # Gets the optimal s cell size factor values from TRAINING run results.
 #
 
-library(ggplot2)
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
 
 #-----
 # load
@@ -44,15 +45,19 @@ names(list.sopt) <- labels.vector
 lr <- list(results = df.res, minima.by.label = df.min, sopt.values.by.label = list.sopt)
 
 # saves minima with results
-lr.filename <- "list-sopt-values_results-yvar_cohort1.rda"
+lr.filename <- "list-sopt-values_results-yvar-zvary_cohort1.rda"
 results.list.path <- file.path("deconvo_method-paper", "outputs", folder.name, lr.filename)
 save(lr, file = results.list.path)
 
-#------------------------------------
-# save median sopt.train by condition
-#------------------------------------
+#----------------------------------------------------
+# save median sopt.train by condition -- UNSUPERVISED
+#----------------------------------------------------
 # load
-df.min <- list.sopt.train$minima.by.label
+df.min <- lr$minima.by.label
+# source function: dfs_byvariable()
+folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
+script.path <- file.path("deconvo_method-paper", "code", folder.name, "00_parameters.R")
+source(script.path)
 # assign categories
 df.min$compartment_library <- df.min$cell.compartment
 df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
@@ -65,17 +70,32 @@ dfs.new <- dfs_byvariable(df.min, variable.vector)
 dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
 dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
 save(dfs.new, file = dfs.path)
-# set numeric df for runs
-dfs <- dfs.new[,c("s.glial", "s.neuron")]
-for(c in seq(ncol(dfs))){dfs[,c] <- as.numeric(dfs[,c])}
 
+#-------------------------------------------------------
+# save median sopt.train by condition -- SEMI-SUPERVISED
+#-------------------------------------------------------
+# load
+df.min <- lr$minima.by.label
+# source function: dfs_byvariable()
+folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
+script.path <- file.path("deconvo_method-paper", "code", folder.name, "00_parameters.R")
+source(script.path)
+# assign categories
+df.min$compartment_library <- df.min$cell.compartment
+df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
+df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
+# get new dfs as medians by experiment group category
+variable.vector <- c("anatomic.region", "cell.compartment", "compartment_library", "library.preparation", "sample.id")
+dfs.new <- dfs_byvariable(df.min, variable.vector)
 
-
+# save 
+dfs.name <- "dfs-medians-bygroup-training_SUPERVISED-FILTER_yvar-zsame_cohort1.rda"
+dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
+save(dfs.new, file = dfs.path)
 
 #---------------
 # plot summaries
 #---------------
-
 dfp <- rbind(data.frame(s.train = df.min$s.glial), data.frame(s.train = df.min$s.neuron))
 dfp$cell.type <- c(rep("glial", nrow(df.min)), rep("neuron", nrow(df.min)))
 

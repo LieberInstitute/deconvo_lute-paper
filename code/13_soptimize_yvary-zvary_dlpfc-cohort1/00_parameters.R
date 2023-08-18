@@ -41,8 +41,7 @@ parallel_bias_matched <- function(sce.iter, y.iter, dfs, df.true = NULL,
                                             typemarker.algorithm = NULL)$deconvolution.results@predictions.table
                                )
                                dfi$sample.label <- colnames(y.iter)
-                               dfi$s.glial <- s.vector["glial"]
-                               dfi$s.neuron <- s.vector["neuron"]
+                               dfi <- cbind(dfi, dfs[i,]) # append all dfs data
                                return(dfi)
                              }))
   colnames(df.res)[1:2] <- paste0(colnames(df.res)[1:2], ".pred.nnls")
