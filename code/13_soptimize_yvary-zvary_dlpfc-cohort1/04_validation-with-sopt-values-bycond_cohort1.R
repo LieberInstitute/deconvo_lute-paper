@@ -67,22 +67,22 @@ names(list.df.true) <- validation.sample.id.vector
 # assign dfs
 #-----------
 # load 
-dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
+dfs.name <- "dfs-medians-bygroup-training_yvar-zvary_cohort1.rda"
 dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
 dfs <- get(load(dfs.path))
 # assign colnames
-colnames(dfs.new) <- c("s.glial", "s.neuron", "s.train.variable.label", "s.train.variable.name", "s.training.type")
+colnames(dfs) <- c("s.glial", "s.neuron", "s.train.variable.label", "s.train.variable.name", "s.training.type")
 
 # set numeric df for runs
 s.col.index <- 1:2
-for(c in s.col.index){dfs.new[,c] <- as.numeric(dfs.new[,c])}
+for(c in s.col.index){dfs[,c] <- as.numeric(dfs[,c])}
 
 #---------------------------
 # get results for each s set
 #---------------------------
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
 validation.sample.id.vector <- validation.sample.id.vector[validation.sample.id.vector %in% sce$Sample]
-df.res.samples <- multigroup_bias_matched(validation.sample.id.vector[1:2], list.df.true, y.validate, dfs.new, sce)
+df.res.samples <- multigroup_bias_matched(validation.sample.id.vector, list.df.true, y.validate, dfs, sce)
 
 # append coldata from y.unadj (see MAE data)
 y.unadj <- y.validate
@@ -106,7 +106,6 @@ df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.er
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
 # save/export
-folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
 save.filename <- "df-sopt-result-validation_yvary-zvary_cohort1.rda"
 save.path <- file.path("deconvo_method-paper", "outputs", folder.name, save.filename)
 save(df.res.samples, file = save.path)

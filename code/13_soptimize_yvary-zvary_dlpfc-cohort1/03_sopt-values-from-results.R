@@ -51,7 +51,7 @@ dfs.sopt.supervised$train.type <- "supervised"
 dfs.sopt.train <- rbind(dfs.sopt.unsupervised, dfs.sopt.supervised)
 
 # save
-dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
+dfs.name <- "dfs-medians-bygroup-training_yvar-zvary_cohort1.rda"
 dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
 save(dfs.sopt.train, file = dfs.path)
 
