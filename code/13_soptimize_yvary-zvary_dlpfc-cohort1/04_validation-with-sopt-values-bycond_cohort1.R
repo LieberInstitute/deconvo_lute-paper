@@ -43,10 +43,6 @@ cd.mae <- colData(mae)
 filter.validate.mae <- grepl(paste0(validation.sample.id.vector,collapse = "|"),cd.mae$sample.id)
 table(filter.validate.mae)
 mae <- mae[,filter.validate.mae,]
-# load the best performing s cell size scale factors
-sopt.path <- file.path("deconvo_method-paper", "outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", 
-                       "list-sopt-values_results-yvar_cohort1.rda")
-list.sopt.train <- get(load(sopt.path))
 
 #---------------------------
 # get bulk validation subset
@@ -73,9 +69,10 @@ names(list.df.true) <- validation.sample.id.vector
 # load 
 dfs.name <- "dfs-medians-bygroup-training_yvar-zsame_cohort1.rda"
 dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
-dfs.new <- get(load(dfs.path))
+dfs <- get(load(dfs.path))
 # assign colnames
-colnames(dfs.new) <- c("s.glial", "s.neuron", "s.train.variable.label", "s.train.variable.name")
+colnames(dfs.new) <- c("s.glial", "s.neuron", "s.train.variable.label", "s.train.variable.name", "s.training.type")
+
 # set numeric df for runs
 s.col.index <- 1:2
 for(c in s.col.index){dfs.new[,c] <- as.numeric(dfs.new[,c])}
@@ -86,36 +83,6 @@ for(c in s.col.index){dfs.new[,c] <- as.numeric(dfs.new[,c])}
 # this is the chunk that makes the results df (CHECK CRUCIAL NOTES)
 validation.sample.id.vector <- validation.sample.id.vector[validation.sample.id.vector %in% sce$Sample]
 df.res.samples <- multigroup_bias_matched(validation.sample.id.vector[1:2], list.df.true, y.validate, dfs.new, sce)
-
-# append s scale factor info
-# assign dfs.new variable
-dfs.new$s.value.string <- paste0(dfs.new$s.glial,";",dfs.new$s.neuron)
-# get df.res.samples vector
-s.value.vector <- paste0(df.res.samples$s.glial,";",df.res.samples$s.neuron)
-# get new df.res variable
-new.dfres.s.variable.name <- new.dfres.s.variable.label <- rep("NA", nrow(df.res.samples))
-for(s.value.string in unique(s.value.vector)){
-  message(s.value.string)
-  # filter dfs
-  filter.dfs <- dfs.new$s.value.string==s.value.string
-  dfs.new.filtered <- dfs.new[filter.dfs,]
-  # assign new values
-  variable.value <- paste0(unique(dfs.new.filtered$variable.name), collapse = ";")
-  variable.label <- paste0(unique(dfs.new.filtered$label), collapse = ";")
-  # update new df.res variables
-  filter.dfres.variable <- s.value.vector==s.value.string
-  new.dfres.s.variable.name[filter.dfres.variable] <- variable.value
-  new.dfres.s.variable.label[filter.dfres.variable] <- variable.label
-}
-df.res.samples$s.variable.name <- new.dfres.s.variable.name
-df.res.samples$s.variable.label <- new.dfres.s.variable.label
-
-for(value in s.value.vector){
-  new.s.variable <- c()
-}
-
-df.res.samples$s.variable.label <- rep(dfs.new$label, each = ncol(y.validate))
-df.res.samples$s.variable.name <- rep(dfs.new$variable.name, each = ncol(y.validate))
 
 # append coldata from y.unadj (see MAE data)
 y.unadj <- y.validate
