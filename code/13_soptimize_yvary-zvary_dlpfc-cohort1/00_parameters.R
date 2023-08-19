@@ -132,8 +132,10 @@ dfs_byvariable <- function(df.min, variable.name.vector){
   #
   # gets the s cell scale factor summaries (medians) by variables and labels
   #
+  
   dfs.new <- do.call(rbind, lapply(variable.name.vector, function(variable.name){
-    unique.labels <- unique(df.min[,variable.name])
+    unique.labels <- unique(df.min[,variable.name])  
+    
     dfs.iter <- do.call(rbind, lapply(unique.labels, function(label.iter){
       df.iter <- df.min[df.min[,variable.name]==label.iter,]
       matrix(c(median(df.iter[,"s.glial"]), 
@@ -179,3 +181,29 @@ condition_comparison_boxplots <- function(variable.name, variable.label, df.res.
     ggtitle(ggtitle.string)
 }
 
+get_dfcond <- function(df.res.filtered){
+  #
+  # gets condition-matched and -unmatched validation error summaries
+  #
+  
+  # condition filter
+  filter.cond <- gsub(";.*", "", condition.vector.train) %in% colnames(df.res.filtered)
+  condition.vector.train <- condition.vector.train[filter.cond]
+  # get condition summaries
+  df.cond <- do.call(rbind, lapply(condition.vector.train, function(condition.iter){
+    message(condition.iter)
+    # get validation condition status from train s factor labels
+    dfres.filter.train <- df.res.filtered[df.res.filtered$s.train.condition==condition.iter,]
+    train.varname <- unique(dfres.filter.train$s.train.variable.name)
+    # get validation condition filter
+    train.varlabel <- unique(dfres.filter.train$s.train.variable.label)
+    validation.match.filter <- dfres.filter.train[,train.varname]==train.varlabel
+    # get return df
+    data.frame(condition = condition.iter,
+               median.val.matched.error = 
+                 median(dfres.filter.train$error.neuron[validation.match.filter]),
+               median.val.unmatched.error = 
+                 median(dfres.filter.train$error.neuron[!validation.match.filter]))
+  }))
+  df.cond
+}

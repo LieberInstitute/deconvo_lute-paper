@@ -16,6 +16,7 @@ folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
 load.filename <- "df-sopt-result_yvary-zvary_cohort1.rda"
 load.path <- file.path("deconvo_method-paper", "outputs", folder.name, load.filename)
 df.res <- get(load(load.path))
+
 # source function: dfs_byvariable()
 script.path <- file.path("deconvo_method-paper", "code", folder.name, "00_parameters.R")
 source(script.path)
@@ -31,9 +32,6 @@ df.min <- do.call(rbind, lapply(labels.vector, function(label.iter){
   df.min.iter[1,]
 }))
 df.min$min.error.neuron <- df.min$error.neuron
-df.min$compartment_library <- df.min$cell.compartment
-df.min$library.preparation <- gsub(".*_", "", df.min$cell.compartment)
-df.min$cell.compartment <- gsub("_.*", "", df.min$cell.compartment)
 
 # differentiate df.min data for sopt summaries
 df.min.unsupervised <- df.min
@@ -42,8 +40,9 @@ df.min.supervised <- df.min[filter.supervision,]
 
 # get sopt median summaries
 # note: get new dfs as medians by experiment group category
-variable.vector <- c("anatomic.region", "cell.compartment", "compartment_library", 
-                     "library.preparation", "sample.id")
+variable.vector <- c("anatomic.region", "cell.compartment", 
+                     "cell.compartment.library.type", 
+                     "library.type", "sample.id")
 dfs.sopt.unsupervised <- dfs_byvariable(df.min.unsupervised, variable.vector)
 dfs.sopt.supervised <- dfs_byvariable(df.min.supervised, variable.vector)
 dfs.sopt.unsupervised$train.type <- "unsupervised"

@@ -70,10 +70,8 @@ names(list.df.true) <- validation.sample.id.vector
 dfs.name <- "dfs-medians-bygroup-training_yvar-zvary_cohort1.rda"
 dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
 dfs <- get(load(dfs.path))
-# assign colnames
+# format columns
 colnames(dfs) <- c("s.glial", "s.neuron", "s.train.variable.label", "s.train.variable.name", "s.training.type")
-
-# set numeric df for runs
 s.col.index <- 1:2
 for(c in s.col.index){dfs[,c] <- as.numeric(dfs[,c])}
 

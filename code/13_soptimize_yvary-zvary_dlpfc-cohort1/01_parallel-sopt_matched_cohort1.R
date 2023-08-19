@@ -81,7 +81,7 @@ y.unadj <- logNormCounts(y.unadj)
 sce <- logNormCounts(sce)
 
 # run parallel deconvo experiments
-df.res.samples <- multigroup_bias_matched(sample.id.vector[1:2], list.df.true, y.unadj, dfs, sce, assay.name = assay.name)
+df.res.samples <- multigroup_bias_matched(sample.id.vector, list.df.true, y.unadj, dfs, sce, assay.name = assay.name)
 
 # inspect results
 head(df.res.samples)
@@ -98,6 +98,8 @@ df.res.samples$cell.compartment <- cd.ydata[df.res.samples$sample.label,]$librar
 df.res.samples$anatomic.region <- cd.ydata[df.res.samples$sample.label,]$location
 df.res.samples$library.type <- cd.ydata[df.res.samples$sample.label,]$library_type
 df.res.samples$sample.id.brnum <- cd.ydata[df.res.samples$sample.label,]$batch.id2
+df.res.samples$cell.compartment.library.type <- paste0(df.res.samples$cell.compartment, 
+                                                       ";", df.res.samples$library.type)
 
 # append data transformations
 # this is the chunk that sets more operants in `df.res`
