@@ -67,7 +67,7 @@ names(list.df.true) <- validation.sample.id.vector
 # assign dfs
 #-----------
 # load 
-dfs.name <- "dfs-medians-bygroup-training_yvar-zvary_cohort1.rda"
+dfs.name <- "dfs-medians-bygroup-training_yvary-zvary_cohort1.rda"
 dfs.path <- file.path("deconvo_method-paper", "outputs", folder.name, dfs.name)
 dfs <- get(load(dfs.path))
 # format columns

@@ -7,7 +7,7 @@ sapply(libv, library, character.only = T)
 #------
 # helper functions
 # get series of s cell size factors (THIS SCRIPT, AND A FEW OTHERS)
-dfs.series <- function(s.glial.series = seq(1, 20, 0.1)){
+dfs.series <- function(s.glial.series = seq(1, 10, 0.2)){
   s.neuron.series <- rev(s.glial.series)
   dfs.series <- do.call(rbind, lapply(seq(length(s.glial.series)), function(index1){
     do.call(rbind, lapply(seq(length(s.neuron.series)), function(index2){
