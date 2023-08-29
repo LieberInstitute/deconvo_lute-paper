@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-libv <- c("ggplot2", "dplyr", "scuttle")
+libv <- c("ggplot2", "dplyr", "scuttle", "MultiAssayExperiment", "SingleCellExperiment")
 sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 folder.name <- "14_compare-expt-conditions-cohort1"
@@ -17,8 +17,6 @@ folder.name <- "14_compare-expt-conditions-cohort1"
 mae.path <- "C:/Users/User/Documents/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/mae_y-rpkm_z-validate_cohort1.rda"
 mae <- get(load(mae.path))
 ```
-
-
 
 ```{r, include = FALSE}
 # load
@@ -103,6 +101,7 @@ for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 k2.1a.result.list <- kmatch_experiment(k.variable.name = k.variable.name,
                               sce = sce, 
                               dfs.train = dfs.rn,
+                              validate.dfs = FALSE,
                               sample.id.vector = sample.id.vector, 
                               list.df.true = list.df.true,
                               y.eset = y.unadj, y.train = y.train, 
@@ -113,9 +112,11 @@ k2.1a.result.path <- "k2_1a_rnsizes_result_list.rda"
 save(k2.1a.result.list, file = k2.1a.result.path)
 ```
 
+## Summarize matched RNAscope sizes results -- train
+
 Tabular results summary
 
-```{r}
+```{r, include = FALSE}
 df.res1 <- k2.1a.result.list$crossval.unmatched.result$df.res.train
 df.res2 <- k2.1a.result.list$crossval.matched.result$df.res.train
 
@@ -129,8 +130,6 @@ df.res$y.expt.condition <- cd.ytrain[df.res$y.sample.label,]$expt_condition
 df.res$cell.compartment <- cd.ytrain[df.res$y.sample.label,]$library_prep
 df.res$library.type <- cd.ytrain[df.res$y.sample.label,]$library_type
 ```
-
-## Summarize matched RNAscope sizes results
 
 Summaries by sample id, treatment
 
@@ -159,31 +158,58 @@ dft <- aggregate(error.neuron.true.pred~sample.id*experiment.type, data = df.res
 colnames(dft)[3] <- paste0("median.", colnames(dft)[3])
 
 ggplot(dft, aes(x = experiment.type, y = median.error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
-  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
-  ggtitle("S RNAscope matched")
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") + ggtitle("S RNAscope matched")
 ```
 
-## Summarize all RNAscope sizes results
+## Summarize matched RNAscope sizes results -- validate
+
+Tabular results summary
+
+```{r, include = FALSE}
+df.res1 <- k2.1a.result.list$crossval.unmatched.result$df.res.validate
+df.res2 <- k2.1a.result.list$crossval.matched.result$df.res.validate
+
+df.res1$experiment.type <- "matched"
+df.res2$experiment.type <- "unmatched"
+df.res <- as.data.frame(rbind(df.res1, df.res2))
+
+colnames(df.res)[6] <- "dfs.rn.sample.id"
+cd.ytrain <- colData(y.validate)
+df.res$y.expt.condition <- cd.ytrain[df.res$y.sample.label,]$expt_condition
+df.res$cell.compartment <- cd.ytrain[df.res$y.sample.label,]$library_prep
+df.res$library.type <- cd.ytrain[df.res$y.sample.label,]$library_type
+```
+
+Summaries by sample id, treatment
 
 ```{r}
-dft.all <- df.res[,c("y.sample.label", "sample.id", "error.neuron.true.pred", "experiment.type")]
-sample.id.variable <- unique(dft.all$sample.id)
-expt.name.variable <- unique(dft.all$experiment.type)
-
-# by sample.id, experiment
-error.summary.vector <- do.call(rbind, lapply(sample.id.variable, function(sample.id){
-  filter <- dft.all$sample.id==sample.id
-  do.call(rbind, lapply(expt.name.variable, function(type.name){
-    filter.name <- filter & dft.all$experiment.type==type.name
-    median(as.numeric(dft.all[filter.name,]$error.neuron.true.pred))
-  }))
-}))
-dft <- data.frame(median.error.neuron = error.summary.vector,
-           sample.id = rep(sample.id.variable, each = length(expt.name.variable)),
-           expt.name = rep(expt.name.variable, length(sample.id.variable)))
-ggplot(dft, aes(x = expt.name, y = median.error.neuron)) + geom_violin(draw_quantiles = 0.5)
-ggplot(dft, aes(x = expt.name, y = median.error.neuron)) + geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan")
+df.res.filt <- df.res[df.res$sample.id == df.res$dfs.rn.sample.id,]
+dim(df.res.filt)
+# get facet summaries
+ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~y.expt.condition)
+ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~cell.compartment)
+ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~library.type)
+ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~sample.id)
 ```
+
+Summaries by sample id
+
+```{r}
+dft <- aggregate(error.neuron.true.pred~sample.id*experiment.type, data = df.res.filt, FUN = "median")
+colnames(dft)[3] <- paste0("median.", colnames(dft)[3])
+
+ggplot(dft, aes(x = experiment.type, y = median.error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") + ggtitle("S RNAscope matched")
+```
+
 
 # Session info
 

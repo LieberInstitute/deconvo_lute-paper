@@ -212,12 +212,15 @@ crossvalidate_validate <- function(data, dfs.validate){
 crossvalidate_soptimization <- function(list.soptimize.data, 
                                         s.step.validate = 10,
                                         facet.variable = NULL, 
+                                        validate.dfs = TRUE,
                                         update.stat.summaries = TRUE,
                                         draw.min.err.line = TRUE,
                                         plot.results = FALSE){
   #
   #
   # crossvalidate_soptimization
+  #
+  # validate.dfs : whether to validate dfs based on training results.
   #
   #
   # list.soptimize.data <- get_soptimize_data_list(num.types = 3, size.step = 2)
@@ -226,10 +229,17 @@ crossvalidate_soptimization <- function(list.soptimize.data,
   # crossvalidate.results$plot.list.results$`type1;type2`$heatmaps$heatmap1
   # crossvalidate.results$plot.list.results$`type1;type2`$heatmaps$heatmap6
   #
-  
   data <- list.soptimize.data
+  
+  # parse training
   train.result <- crossvalidate_train(data, s.step.validate)
-  validate.result <- crossvalidate_validate(data, train.result[["dfs.validate"]])
+  # parse validation
+  if(validate.dfs){
+    dfs.for.validate <- train.result[["dfs.validate"]]
+  } else{
+    dfs.for.validate <- data$dfs
+  }
+  validate.result <- crossvalidate_validate(data, dfs.for.validate)
   # return list
   lr <- list(df.res.train = train.result[["df.res.train"]],
              df.res.validate = validate.result[["df.res.validate"]])
@@ -253,6 +263,7 @@ crossvalidate_soptimization <- function(list.soptimize.data,
 kmatch_experiment <- function(k.variable.name = "k2",
                               sce = sce, 
                               dfs.train = NULL,
+                              validate.dfs = TRUE,
                               sample.id.vector = sample.id.vector, 
                               list.df.true = list.df.true, 
                               y.eset = y.unadj, y.train = y.train, 
@@ -260,6 +271,10 @@ kmatch_experiment <- function(k.variable.name = "k2",
                               assay.name = assay.name, 
                               group.name = group.name,
                               plot.option = FALSE){
+  #
+  # validate.dfs : whether to update dfs based on training results.
+  #
+  
   k.cell.type.vector <- unique(sce[[k.variable.name]])
   num.types <- length(k.cell.type.vector)
   if(is(dfs.train, "NULL")){
@@ -285,10 +300,12 @@ kmatch_experiment <- function(k.variable.name = "k2",
                                        matched.sce = FALSE)
   # get results
   message("getting matched results...")
-  crossval.unmatched.result <- crossvalidate_soptimization(list.expt, plot.results = plot.option)
+  crossval.unmatched.result <- 
+    crossvalidate_soptimization(list.expt, validate.dfs = validate.dfs, plot.results = plot.option)
   message("getting unmatched results...")
   list.expt$metadata$matched.sce <- TRUE
-  crossval.matched.result <- crossvalidate_soptimization(list.expt, plot.results = plot.option)
+  crossval.matched.result <- 
+    crossvalidate_soptimization(list.expt, validate.dfs = validate.dfs, plot.results = plot.option)
   # return
   lr <- list(list.expt = list.expt,
              crossval.unmatched.result = crossval.unmatched.result,
