@@ -257,7 +257,7 @@ plots.list.proportion$plot3 + ggtitle(celltype.proportion.title)
 
 # PCA not including full RNAscope after post-processing 
 
-This repeats the PCA analysis, excluding the full RNAscope data from post-processing.
+This repeats the PCA analysis, excluding the full post-processed RNAscope data (i.e. not having cell size filters).
 
 ```{r, include = F}
 # remove assay "rn.assay.name"
@@ -292,11 +292,11 @@ plots.list.proportion$plot2 + ggtitle(celltype.proportion.title)
 plots.list.proportion$plot3 + ggtitle(celltype.proportion.title)
 ```
 
-```
-
 # Export environment
 
-```{r}
+Exports the environment to file `"mae-pca-3steps_rnascope-nucleus-size-filters_cohort1.RData"`.
+
+```{r, include = FALSE}
 setwd("..")
 setwd("..")
 # remove large objects
