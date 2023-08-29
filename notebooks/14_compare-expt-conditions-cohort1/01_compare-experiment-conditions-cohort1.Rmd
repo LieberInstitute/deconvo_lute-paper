@@ -87,17 +87,17 @@ sample.id.vector <- unique(sce$sample.id)
 * $Z$ : Matched or unmatched expression
 
 ```{r, include = F}
-k2.result.list <- kmatch_experiment(k.variable.name = "k2",
+k2.1a.result.list <- kmatch_experiment(k.variable.name = k.variable.name,
                               sce = sce, 
                               sample.id.vector = sample.id.vector, 
                               list.df.true = list.df.true,
                               y.eset = y.unadj, y.train = y.train, 
                               y.validate = y.validate, 
                               assay.name = assay.name.lute, 
-                              group.name = group.name.experiment,
-                              plot.option = TRUE)
+                              group.name = group.name.experiment)
 
-k2.result.plots <- kmatch_experiment_plots(k2.result.list)
+k2.1a.result.path <- "k2_1a_result_list.rda"
+save(k2.1a.result.list, file = k2.1a.result.path)
 ```
 
 ## Experiment 1B.
@@ -107,19 +107,19 @@ k2.result.plots <- kmatch_experiment_plots(k2.result.list)
 * $Z$ : Matched or unmatched expression
 
 ```{r}
-list.df.true <- lapply(list.df.true, function(item){return()})
-names(list.df.true) <- names(list.df.true)
-k2.result.list <- kmatch_experiment(k.variable.name = "k2",
+list.df.true.1b <- lapply(list.df.true, function(item){return(NULL)})
+names(list.df.true.1b) <- names(list.df.true.1b)
+k2.1b.result.list <- kmatch_experiment(k.variable.name = k.variable.name,
                               sce = sce, 
                               sample.id.vector = sample.id.vector, 
-                              list.df.true = list(), dfs = dfs,
+                              list.df.true = list.df.true.1b,
                               y.eset = y.unadj, y.train = y.train, 
                               y.validate = y.validate, 
                               assay.name = assay.name, 
-                              celltype.variable = k.variable.name, 
                               group.name = group.name)
 
-k2.result.plots <- kmatch_experiment_plots(k2.result.list)
+k2.1b.result.path <- "k2_1b_result_list.rda"
+save(k2.1b.result.list, file = k2.1b.result.path)
 ```
 
 ## Experiment 1C.
