@@ -252,6 +252,7 @@ crossvalidate_soptimization <- function(list.soptimize.data,
 #-------------------------------
 kmatch_experiment <- function(k.variable.name = "k2",
                               sce = sce, 
+                              dfs.train = NULL,
                               sample.id.vector = sample.id.vector, 
                               list.df.true = list.df.true, 
                               y.eset = y.unadj, y.train = y.train, 
@@ -261,8 +262,10 @@ kmatch_experiment <- function(k.variable.name = "k2",
                               plot.option = FALSE){
   k.cell.type.vector <- unique(sce[[k.variable.name]])
   num.types <- length(k.cell.type.vector)
-  # define dfs.train
-  dfs.train <- get_dfs(num.types, min.size = 1, max.size = 5, size.step = 1)
+  if(is(dfs.train, "NULL")){
+    # define dfs.train
+    dfs.train <- get_dfs(num.types, min.size = 1, max.size = 5, size.step = 1)
+  }
   colnames(dfs.train) <- paste0("s.", k.cell.type.vector)
   if(is(list.df.true, "NULL")){
     y.sample.id.vector <- unique(y.unadj[[y.group.variable.name]])
