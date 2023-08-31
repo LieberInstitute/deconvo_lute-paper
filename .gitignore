@@ -26,3 +26,4 @@ outputs/01_prepare-datasets/rse_gene.Rdata
 outputs/01_prepare-datasets/halo-outputs_updated.Rdata
 outputs/12_soptimize_yvary-zsame_dlpfc-cohort1/env_yvar_notebook1.RDataTmp
 outputs/08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1/mae-pca-3steps_rnascope-nucleus-size-filters_cohort1.RData
+*.RData

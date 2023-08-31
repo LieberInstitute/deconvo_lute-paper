@@ -12,13 +12,15 @@ libv <- c("ggplot2", "dplyr", "scuttle", "MultiAssayExperiment", "SingleCellExpe
 sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 folder.name <- "14_compare-expt-conditions-cohort1"
+```
+
+```{r, include = FALSE, eval = FALSE}
+folder.name <- "14_compare-expt-conditions-cohort1"
 
 # load assays
 mae.path <- "C:/Users/User/Documents/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/mae_y-rpkm_z-validate_cohort1.rda"
 mae <- get(load(mae.path))
-```
 
-```{r, include = FALSE}
 # load
 setwd("..")
 setwd("..")
@@ -38,7 +40,7 @@ sapply(script.paths, source)
 
 # Setup experiment parameters
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 # assay parameters
 assay.name.lute <- "logcounts"
 group.name.experiment <- "sample.id"
@@ -55,7 +57,7 @@ cd.mae$sample.id.new <- gsub("_.*", "", cd.mae$sample.id)
 
 Set up the snRNAseq data with K markers.
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 # sce
 sce <- mae[["sn1.all.rnaseq"]]
 sce <- logNormCounts(sce)
@@ -97,7 +99,7 @@ for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 * $Z$ : Matched or unmatched expression, grouped by `sample.id`.
 * $S$ : Tests sizes from RNAscope cell sizes, grouped by `sample.id`.
 
-```{r, include = F}
+```{r, include = F, eval = F}
 k2.1a.result.list <- kmatch_experiment(k.variable.name = k.variable.name,
                               sce = sce, 
                               dfs.train = dfs.rn,
@@ -116,7 +118,10 @@ save(k2.1a.result.list, file = k2.1a.result.path)
 
 Tabular results summary
 
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
+env.path <- "k2_1a_rnsizes_result_list.rda"
+load(env.path)
+
 df.res1 <- k2.1a.result.list$crossval.unmatched.result$df.res.train
 df.res2 <- k2.1a.result.list$crossval.matched.result$df.res.train
 
@@ -133,41 +138,8 @@ df.res$library.type <- cd.ytrain[df.res$y.sample.label,]$library_type
 df.res.train <- df.res
 ```
 
-Summaries by sample id, treatment
-
-```{r}
-df.res.filt <- df.res[df.res$sample.id == df.res$dfs.rn.sample.id,]
-dim(df.res.filt)
-# get facet summaries
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
-  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
-  ggtitle("S RNAscope matched") + facet_wrap(~y.expt.condition)
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
-  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
-  ggtitle("S RNAscope matched") + facet_wrap(~cell.compartment)
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
-  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
-  ggtitle("S RNAscope matched") + facet_wrap(~library.type)
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
-  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
-  ggtitle("S RNAscope matched") + facet_wrap(~sample.id)
-```
-
-Summaries by sample id
-
-```{r}
-dft <- aggregate(error.neuron.true.pred~sample.id*experiment.type, data = df.res.filt, FUN = "median")
-colnames(dft)[3] <- paste0("median.", colnames(dft)[3])
-
-ggplot(dft, aes(x = experiment.type, y = median.error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
-  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") + ggtitle("S RNAscope matched")
-```
-
-## Summarize matched RNAscope sizes results -- validate
-
-Tabular results summary
-
-```{r, include = FALSE}
+```{r, include = FALSE, eval = F}
+# get the validation results for plotting
 df.res1 <- k2.1a.result.list$crossval.unmatched.result$df.res.validate
 df.res2 <- k2.1a.result.list$crossval.matched.result$df.res.validate
 
@@ -184,39 +156,105 @@ df.res$library.type <- cd.ytrain[df.res$y.sample.label,]$library_type
 df.res.validate <- df.res
 ```
 
-Summaries by sample id, treatment
+# Export env
+
+```{r, include = F, eval = F}
+# save the notebook env
+env.name <- "02_notebook.RData"
+env.path <- env.name # file.path("outputs", folder.name, env.name)
+save.image(file = env.path)
+```
+
+# Results
+
+```{r, include = T}
+# load env with plot entities
+setwd("..")
+setwd("..")
+env.name <- "02_notebook.RData"
+env.path <- file.path("outputs", "14_compare-expt-conditions-cohort1", env.name)
+load(file=env.path)
+```
+
+## Boxplots
+
+### Training results
+
+Training summaries by sample id, treatment
 
 ```{r}
 df.res.filt <- df.res[df.res$sample.id == df.res$dfs.rn.sample.id,]
 dim(df.res.filt)
 # get facet summaries
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
   ggtitle("S RNAscope matched") + facet_wrap(~y.expt.condition)
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
   ggtitle("S RNAscope matched") + facet_wrap(~cell.compartment)
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
   ggtitle("S RNAscope matched") + facet_wrap(~library.type)
-ggplot(df.res.filt, aes(x = experiment.type, y = error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
   ggtitle("S RNAscope matched") + facet_wrap(~sample.id)
 ```
 
-Summaries by sample id
+Training summaries by sample id
 
 ```{r}
 dft <- aggregate(error.neuron.true.pred~sample.id*experiment.type, data = df.res.filt, FUN = "median")
 colnames(dft)[3] <- paste0("median.", colnames(dft)[3])
 
-ggplot(dft, aes(x = experiment.type, y = median.error.neuron.true.pred)) + geom_jitter(alpha = 0.5) + 
+ggplot(dft, aes(x = experiment.type, 
+                y = median.error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") + ggtitle("S RNAscope matched")
 ```
 
-# Compare matched vs. unmatched S RNAscope scaling results
+### Validation results
+
+Validation summaries by sample id, treatment
+
+```{r}
+df.res.filt <- df.res[df.res$sample.id == df.res$dfs.rn.sample.id,]
+dim(df.res.filt)
+# get facet summaries
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~y.expt.condition)
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~cell.compartment)
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~library.type)
+ggplot(df.res.filt, aes(x = experiment.type, 
+                        y = error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") +
+  ggtitle("S RNAscope matched") + facet_wrap(~sample.id)
+```
+
+Validation summaries by sample id
+
+```{r}
+dft <- aggregate(error.neuron.true.pred~sample.id*experiment.type, data = df.res.filt, FUN = "median")
+colnames(dft)[3] <- paste0("median.", colnames(dft)[3])
+
+ggplot(dft, aes(x = experiment.type, y = median.error.neuron.true.pred, color = sample.id)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + xlab("Z reference type") + ggtitle("S RNAscope matched")
+```
+
+### Compare matched vs. unmatched S RNAscope scaling results
 
 Summaries by groups
+
 ```{r}
 df.res.train$group <- "train"
 df.res.validate$group <- "validate"
@@ -225,29 +263,80 @@ df.res.all$s.rn.match <- df.res.all$dfs.rn.sample.id==df.res.all$sample.id
 df.res.all$match.by.group <- paste0(df.res.all$s.rn.match,";", df.res.all$group)
 
 # xaxis : match.by.group
-ggplot(df.res.all, aes(x = match.by.group, y = error.neuron.true.pred)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~group)
-ggplot(df.res.all, aes(x = match.by.group, y = error.neuron.true.pred)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~sample.id)
-ggplot(df.res.all, aes(x = match.by.group, y = error.neuron.true.pred)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~y.expt.condition)
+ggplot(df.res.all, aes(x = match.by.group, y = error.neuron.true.pred, color = sample.id)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~group) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggplot(df.res.all, aes(x = match.by.group, y = error.neuron.true.pred, color = sample.id)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~sample.id) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggplot(df.res.all, aes(x = match.by.group, y = error.neuron.true.pred, color = sample.id)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~y.expt.condition) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 Aggregate summaries
+
 ```{r}
 dft.res.all <- aggregate(error.neuron.true.pred~s.rn.match+group+sample.id, 
                          data = df.res.all, FUN = "median")
 dft.res.all
-ggplot(dft.res.all, aes(x = s.rn.match, y = error.neuron.true.pred)) + 
+ggplot(dft.res.all, aes(x = s.rn.match, y = error.neuron.true.pred, color = sample.id)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~group)
 ```
 
-# Export env
+## Scatterplots
+
+### Training
 
 ```{r}
-setwd("..")
-setwd("..")
-save.image(file = file.path("outputs", folder.name, "02_only-rnascope-sizes_compare-experiment-conditions-cohort1 - Cop"))
+dfp <- df.res.train
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~y.expt.condition)
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~cell.compartment)
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~library.type)
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~sample.id)
+```
+
+### Validation
+
+```{r}
+dfp <- df.res.validate
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~y.expt.condition)
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~cell.compartment)
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~library.type)
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~sample.id)
+```
+
+### Matched vs. not matched RNAscope
+
+```{r}
+dfp <- df.res.all
+
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0) + xlim(0, 1) + ylim(0, 1) + facet_wrap(~match.by.group)
 ```
 
 # Session info

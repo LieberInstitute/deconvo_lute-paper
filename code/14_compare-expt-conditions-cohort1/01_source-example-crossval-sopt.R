@@ -131,7 +131,7 @@ get_list_df_true <- function(num.samples = 2, num.types = 2, prop.step = 1e-1){
 #-----------------------------
 # get cross-validation results
 #-----------------------------
-crossvalidate_train <- function(data, s.step.validate = 10){
+crossvalidate_train <- function(data, s.step.validate = 50){
   #
   # crossvalidate_train
   # data : experiment data
@@ -210,7 +210,7 @@ crossvalidate_validate <- function(data, dfs.validate){
 }
 
 crossvalidate_soptimization <- function(list.soptimize.data, 
-                                        s.step.validate = 10,
+                                        s.step.validate = 50,
                                         facet.variable = NULL, 
                                         validate.dfs = TRUE,
                                         update.stat.summaries = TRUE,
@@ -519,7 +519,8 @@ multigroup_bias_matched <- function(sample.id.vector, list.df.true, y.unadj, dfs
                                            assay.name = assay.name,
                                            with.parallel = with.parallel)
       df.res.iter$sample.id <- sample.id
-    }, finally = return(df.res.iter))
+      df.res.iter
+    })
   }))
   return(df.res)
 }
