@@ -30,7 +30,7 @@ Shows the following pseudobulk experiment: Shuffle $Z$, $S$, $P$, where
 #libv <- c("ggplot2", "dplyr")
 #sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr")
+libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
 sapply(libv, library, character.only = T)
 #
 
@@ -190,6 +190,7 @@ get_dfcond <- function(df.res.filtered){
 
 
 ```{r}
+
 # source the parallelize functions
 setwd("..")
 setwd("..")
@@ -347,12 +348,6 @@ sample.id.vector <- sample.id.vector[sample.id.vector %in% names(list.df.true)]
 
 # get logcounts
 #library(scuttle)
-# set logcounts y
-#y.unadj <- mae[["bulk.rnaseq"]]
-#y.unadj <- lute:::se_to_eset(y.unadj, "counts")
-#y.unadj <- lute:::eset_to_se(y.unadj, "counts")
-#y.unadj <- logNormCounts(y.unadj)
-# get sce logcounts
 sce <- logNormCounts(sce)
 
 
@@ -368,44 +363,51 @@ sce <- logNormCounts(sce)
 sce[["sample.id"]] <- sce[["Sample"]]
 sce[["celltype"]] <- sce[["k2"]]
 sample.id.vector <- names(list.df.true)[1:11]
-df.res.samples <- multigroup_bias_matched(
+
+#---------------------------
+# experiments pt1. shuffle s
+#---------------------------
+df.res.samples.pt1 <- multigroup_bias_matched(
   sample.id.vector, list.df.true, y.unadj, dfs.rn, sce, assay.name = assay.name)
-df.res.samples$sn.rn.sample.id <- rep(dfs.rn$sample.id, length(sample.id.vector))
-```
+df.res.samples.pt1$sn.rn.sample.id <- rep(dfs.rn$sample.id, length(sample.id.vector))
 
-```{r}
-setwd("..")
-setwd("..")
-#list.files()
-#list.files(file.path("outputs",
-#                     "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"))
-df.res.path <- file.path("outputs", 
-                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1",
-                         "01_df_res_samples.rda")
-save(df.res.samples, file = df.res.path)
-```
+#---------------------------
+# experiments pt1. shuffle z
+#---------------------------
+# make sce.missmatch
 
-```{r}
+df.res.samples.pt2 <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
+  # remove matched sample
+  filter.sce.iter <- sce[["sample.id"]]==sample.id
+  sce.iter <- sce[,!filter.sce.iter]
+  
+  # assign true df list
+  colnames(y.unadj) <- sample.id
+  
+  # 
+  names(list.df.true) <- sample.id
+  
+  df.res.samples.pt2 <- multigroup_bias_matched(
+    sample.id.vector, list.df.true, y.unadj, 
+    dfs.rn, sce, assay.name = assay.name)
+  
+  
+  
+  
+}))
+
+df.res.samples.pt2 <- multigroup_bias_matched(
+  sample.id.vector, list.df.true, y.unadj, dfs.rn, sce, assay.name = assay.name)
+df.res.samples.pt2$sn.rn.sample.id <- rep(dfs.rn$sample.id, length(sample.id.vector))
+
+
+
 ```
 
 ```{r}
 # inspect results
 head(df.res.samples)
-head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
-
-#--------------------
-# postprocess results
-#--------------------
-# append coldata from y.unadj (see MAE data)
-cd.ydata <- colData(y.unadj)
-#df.res.samples$sample.labels <- cd.ydata[,] rep(colnames(y.unadj), nrow(dfs))
-#df.res.samples$sample.id <- rep(gsub("_.*", "", y.unadj$batch.id), nrow(dfs))
-df.res.samples$cell.compartment <- cd.ydata[df.res.samples$sample.label,]$library_prep
-df.res.samples$anatomic.region <- cd.ydata[df.res.samples$sample.label,]$location
-df.res.samples$library.type <- cd.ydata[df.res.samples$sample.label,]$library_type
-df.res.samples$sample.id.brnum <- cd.ydata[df.res.samples$sample.label,]$batch.id2
-df.res.samples$cell.compartment.library.type <- paste0(df.res.samples$cell.compartment, 
-                                                       ";", df.res.samples$library.type)
+# head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
 
 # append data transformations
 # this is the chunk that sets more operants in `df.res`
@@ -421,14 +423,16 @@ df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.er
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
 # save
-save.filename <- "df-sopt-result_yvary-zvary_cohort1.rda"
-save.path <- file.path("deconvo_method-paper", "outputs", folder.name, save.filename)
-save(df.res.samples, file = save.path)
-
+setwd("..")
+setwd("..")
+df.res.path <- file.path("outputs", 
+                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1",
+                         "01_df_res_samples.rda")
+save(df.res.samples, file = df.res.path)
 ```
 
 ```{r}
-env.name <- ""
+env.name <- "01_run-experiment.RData"
 # Save environment/Session info
 setwd("..")
 setwd("..")
