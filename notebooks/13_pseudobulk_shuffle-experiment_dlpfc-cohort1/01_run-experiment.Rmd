@@ -305,6 +305,7 @@ for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 # using rnascope sizes
 #------------------------------------------------------------------------
 unique.sample.id.vector <- unique(sce[["Sample"]])
+unique.sample.id.vector <- unique.sample.id.vector[unique.sample.id.vector %in% dfs.rn$sample.id]
 y.unadj <- do.call(cbind, 
                          lapply(unique.sample.id.vector, function(sample.id){
                            dfs.filter <- dfs.rn[dfs.rn[,"sample.id"]==sample.id,]
@@ -313,15 +314,23 @@ y.unadj <- do.call(cbind,
                                         "Sample", S = as.numeric(dfs.filter[,seq(2)]))
 }))
 colnames(y.unadj) <- unique.sample.id.vector
+y.unadj <- SummarizedExperiment(assays = list(counts = as.matrix(y.unadj)))
+cd.y <- data.frame(sample.id = unique.sample.id.vector)
+rownames(cd.y) <- unique.sample.id.vector
+colData(y.unadj) <- DataFrame(cd.y)
+y.unadj <- scuttle::logNormCounts(y.unadj)
 
 #--------------------------------
 # get list.df.true, rnascope data
 #--------------------------------
 celltype.variable <- k.variable.name <- "k2"
-sce <- sce[,!sce[[celltype.variable]]=="other"]
+filter.sce <- !sce[[celltype.variable]]=="other"
+sce <- sce[,filter.sce]
 unique.types <- unique(sce[[celltype.variable]])
-list.df.true <- df.true.list(df.rn, colnames(y.unadj), celltype.variable, 
-                             unique.types)
+list.df.true <- df.true.list(
+  df.rn, colnames(y.unadj), celltype.variable, unique.types)
+
+
 
 ```
 
@@ -337,12 +346,12 @@ sample.id.vector <- unique(sce[[sample.id.variable]])
 sample.id.vector <- sample.id.vector[sample.id.vector %in% names(list.df.true)]
 
 # get logcounts
-library(scuttle)
+#library(scuttle)
 # set logcounts y
-y.unadj <- mae[["bulk.rnaseq"]]
-y.unadj <- lute:::se_to_eset(y.unadj, "counts")
-y.unadj <- lute:::eset_to_se(y.unadj, "counts")
-y.unadj <- logNormCounts(y.unadj)
+#y.unadj <- mae[["bulk.rnaseq"]]
+#y.unadj <- lute:::se_to_eset(y.unadj, "counts")
+#y.unadj <- lute:::eset_to_se(y.unadj, "counts")
+#y.unadj <- logNormCounts(y.unadj)
 # get sce logcounts
 sce <- logNormCounts(sce)
 
@@ -355,13 +364,31 @@ sce <- logNormCounts(sce)
 
 
 ```{r}
-
-sample.id.vector <- names(list.df.true)[1:11]
-
 # run parallel deconvo experiments
+sce[["sample.id"]] <- sce[["Sample"]]
+sce[["celltype"]] <- sce[["k2"]]
+sample.id.vector <- names(list.df.true)[1:11]
 df.res.samples <- multigroup_bias_matched(
   sample.id.vector, list.df.true, y.unadj, dfs.rn, sce, assay.name = assay.name)
+df.res.samples$sn.rn.sample.id <- rep(dfs.rn$sample.id, length(sample.id.vector))
+```
 
+```{r}
+setwd("..")
+setwd("..")
+#list.files()
+#list.files(file.path("outputs",
+#                     "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"))
+df.res.path <- file.path("outputs", 
+                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1",
+                         "01_df_res_samples.rda")
+save(df.res.samples, file = df.res.path)
+```
+
+```{r}
+```
+
+```{r}
 # inspect results
 head(df.res.samples)
 head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
