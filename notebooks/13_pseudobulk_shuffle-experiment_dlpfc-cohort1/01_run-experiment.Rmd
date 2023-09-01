@@ -3,8 +3,8 @@ title: "Pseudobulk shuffle experiment"
 author: "Sean Maden"
 date: "2023-08-09"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 Shows the following pseudobulk experiment: Shuffle $Z$, $S$, $P$, where
@@ -37,9 +37,9 @@ sapply(libv, library, character.only = T)
 
 ```
 
+# Run experiment
 
-
-```{r}
+```{r, include = F, eval = F}
 
 #------
 # setup
@@ -189,7 +189,7 @@ get_dfcond <- function(df.res.filtered){
 ```
 
 
-```{r}
+```{r, include = F, eval = F}
 
 # source the parallelize functions
 setwd("..")
@@ -205,7 +205,7 @@ source(script.path)
 
 
 
-```{r}
+```{r, include = F, eval = F}
 
 
 setwd("..")
@@ -221,7 +221,7 @@ assay.name <- "logcounts"
 
 
 
-```{r}
+```{r, include = F, eval = F}
 
 
 setwd("..")
@@ -243,7 +243,7 @@ mae <- get(load(mae.path))
 
 
 
-```{r}
+```{r, include = F, eval = F}
 #
 # remove validation samples
 dim(mae[["bulk.rnaseq"]])
@@ -278,7 +278,7 @@ sce <- mae[["sn1.rnaseq"]]
 
 
 
-```{r}
+```{r, include = F, eval = F}
 
 
 setwd("..")
@@ -328,8 +328,8 @@ celltype.variable <- k.variable.name <- "k2"
 filter.sce <- !sce[[celltype.variable]]=="other"
 sce <- sce[,filter.sce]
 unique.types <- unique(sce[[celltype.variable]])
-list.df.true <- df.true.list(
-  df.rn, colnames(y.unadj), celltype.variable, unique.types)
+#list.df.true <- df.true.list(
+#  df.rn, colnames(y.unadj), celltype.variable, unique.types)
 
 
 
@@ -337,7 +337,7 @@ list.df.true <- df.true.list(
 
 
 
-```{r}
+```{r, include = F, eval = F}
 
 #------------
 # main script
@@ -358,11 +358,18 @@ sce <- logNormCounts(sce)
 
 
 
-```{r}
+```{r, include = F, eval = F}
 # run parallel deconvo experiments
 sce[["sample.id"]] <- sce[["Sample"]]
 sce[["celltype"]] <- sce[["k2"]]
-sample.id.vector <- names(list.df.true)[1:11]
+# list.df.true
+list.df.true <- lapply(unique.sample.id.vector, function(sample.id){
+  as.data.frame(t(as.matrix(
+    prop.table(table(sce[,sce[["sample.id"]]==sample.id]$k2)))))
+})
+names(list.df.true) <- unique.sample.id.vector
+# sample.id.vector
+sample.id.vector <- intersect(unique(sce[["sample.id"]]), names(list.df.true))
 
 #---------------------------
 # experiments pt1. shuffle s
@@ -430,7 +437,7 @@ df.res.samples.pt3 <- as.data.frame(df.res.samples.pt3)
 
 ```
 
-```{r}
+```{r, include = F, eval = F}
 # save environment
 setwd("..")
 setwd("..")
@@ -528,43 +535,7 @@ ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) +
   xlim(0, 1) + ylim(0, 1) +
   facet_wrap(~z.matched)
 ```
-
-```{r}
-# inspect results
-head(df.res.samples)
-# head(df.res.samples[df.res.samples$sample.label=="2107UNHS-0291_Br2720_Mid_Bulk",])
-
-# append data transformations
-# this is the chunk that sets more operants in `df.res`
-df.res.samples$s.fraction.neuron.glial <- df.res.samples$s.neuron/df.res.samples$s.glial
-df.res.samples$log.s.fraction <- log(df.res.samples$s.fraction.neuron.glial)
-df.res.samples$error.neuron <- abs(df.res.samples$bias.neuron.true.pred)
-df.res.samples$error.glial <- abs(df.res.samples$bias.glial.true.pred)
-df.res.samples$minimum.error <- df.res.samples$error.neuron==min(df.res.samples$error.neuron)
-df.res.samples$maximum.error <- df.res.samples$error.neuron==max(df.res.samples$error.neuron)
-deciles.error.neuron <- quantile(df.res.samples$error.neuron, seq(0, 1, 0.1))
-df.res.samples$minimum.decile.error <- df.res.samples$error.neuron <= deciles.error.neuron[2]
-df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.error.neuron[9]
-df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
-
-# save
-setwd("..")
-setwd("..")
-df.res.path <- file.path("outputs", 
-                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1",
-                         "01_df_res_samples.rda")
-save(df.res.samples, file = df.res.path)
-```
-
-```{r}
-env.name <- "01_run-experiment.RData"
-# Save environment/Session info
-setwd("..")
-setwd("..")
-folder.name <- "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"
-env.path <- file.path("outputs", folder.name, env.name)
-save.image(file = env.path)
-```
+# Session info
 
 ```{r}
 sessionInfo()

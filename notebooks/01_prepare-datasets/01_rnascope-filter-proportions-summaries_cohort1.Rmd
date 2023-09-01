@@ -1,0 +1,209 @@
+---
+title: "RNAscope filter proportions, summaries"
+author: "Sean Maden"
+date: "2023-09-01"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+env.name <- "01_rnascope-filter-proportions-summaries.RData"
+env.path <- file.path("outputs", "01_prepare-datasets", env.name)
+if(file.exists(env.path)){
+  knitr::opts_chunk$set(echo = F, eval = F, include = F)
+  save.image(file = env.path)
+} else{
+  knitr::opts_chunk$set(echo = TRUE)
+}
+```
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", 
+          "ggforce", "MultiAssayExperiment", "SingleCellExperiment")
+sapply(libv, library, character.only = TRUE)
+# load rnascope image data
+load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/halo-outputs_updated.Rdata")
+# rnascope: make sce with image data
+sample.id.halo <- "Sample"
+img <- halo.output.table
+new.img.colnames <- paste0("cell", seq(nrow(img)))
+img.data.colnames <- c("Nucleus_Area", "AKT3_Copies", "Cell_Area", 
+                       "DAPI_Nucleus_Intensity", "DAPI_Cytoplasm_Intensity")
+img.coldata.colnames <- c("SAMPLE_ID", sample.id.halo, "cell_type", "Slide", 
+                          "XMin", "XMax", "YMin", "YMax")
+img.list <- lapply(img.data.colnames, function(colname){
+  new.data <- img[,colname] %>% as.matrix() %>% t()
+  colnames(new.data) <- new.img.colnames
+  new.data
+})
+names(img.list) <- img.data.colnames
+# gets data as sce
+sce.img <- SingleCellExperiment(assays = img.list)
+img.coldata <- DataFrame(img[,img.coldata.colnames])
+rownames(img.coldata) <- new.img.colnames
+colData(sce.img) <- img.coldata
+rm(halo.output.table)
+# append k label categories
+cd <- colData(sce.img)
+cd$k2 <- ifelse(grepl("Excit|Inhib", cd$cell_type), "neuron",
+                ifelse(grepl("Endo|Oligo|Micro", cd$cell_type), "glial", "NA"))
+colData(sce.img) <- cd
+# filter na values
+rnascope <- sce.img[,!sce.img$k2=="NA"]
+gc()
+
+# helper functions
+rnascope_properties <- function(sce.img.filter){
+  # get filtered rnascope properties in terms of k cell types
+  rnascope <- sce.img.filter1
+  sample.id.vector <- unique(rnascope$Sample)
+  df.rnascope.kdata <- do.call(rbind, lapply("k2", 
+                                             function(cell.type.variable){
+    do.call(rbind, lapply(sample.id.vector, function(sample.id){
+      rnf <- rnascope[,rnascope$Sample==sample.id]
+      # proportions
+      df.prop <- table(rnf[[cell.type.variable]], rnf$Sample) %>% prop.table()
+      # counts
+      df.count <- table(rnf[[cell.type.variable]], rnf$Sample)
+      # sizes
+      df.size <- aggregate(data.frame(area = assays(rnf)[["Nucleus_Area"]][1,]), 
+                           by = list(cell_type = rnf[[cell.type.variable]]), FUN = "median")
+      # combine and format output
+      df.iter <- cbind(df.prop, cbind(df.size, df.count))
+      df.iter <- df.iter[,c(1,2,3,5,8)]
+      colnames(df.iter) <- c("cell_type", "sample_id", 
+                             "true_proportion", "cell_size", "cell_count")
+      df.iter$k.label <- cell.type.variable
+      df.iter
+    }))
+  }))
+  rownames(df.rnascope.kdata) <- paste0(df.rnascope.kdata$sample_id,";",
+                                        df.rnascope.kdata$cell_type, ";",
+                                        df.rnascope.kdata$k.label)
+  # make transpose
+  df.rn.filter <- t(df.rnascope.kdata)
+  return(df.rn.filter)
+}
+```
+
+# Main script
+
+First filter. Nucleus size 78 microns, Circle and Star, 6 cell type labels.
+
+```{r}
+max.nucleus.size <- 75
+sample.id.vector <- unique(rnascope[[sample.id.halo]])
+filter.sce.size <- assays(sce.img)[["Nucleus_Area"]] <= max.nucleus.size
+sce.img.filter1 <- sce.img[,filter.sce.size]
+df.rn.filter1 <- rnascope_properties(sce.img.filter1)
+```
+
+Second filter. Nucleus size 78 microns, Circle and Star, 3 cell type labels
+
+```{r}
+cell.types.keep <- c("Excit", "Inhib", "Oligo")
+filter.sce.cd <- colData(sce.img.filter1)$cell_type %in% cell.types.keep
+sce.img.filter2 <- sce.img.filter1[,filter.sce.cd]
+df.rn.filter2 <- rnascope_properties(sce.img.filter2)
+```
+
+Third filter. Nucleus size 78 microns, Circle, 2 cell type labels.
+
+```{r}
+cell.types.keep <- c("Excit", "Oligo")
+filter.sce.cd <- colData(sce.img.filter1)$cell_type %in% cell.types.keep
+sce.img.filter3 <- sce.img.filter1[,filter.sce.cd]
+df.rn.filter3 <- rnascope_properties(sce.img.filter3)
+```
+
+# Summarize cell type proportions by filter
+
+Get tall table of sample ids by filter ids.
+
+```{r, eval = T}
+cell.types.vector <- c("glial", "neuron")
+list.sce.img <- list("filter1" = sce.img.filter1, 
+                     "filter2" = sce.img.filter2, 
+                     "filter3" = sce.img.filter3)
+df.res.filters <- do.call(rbind, lapply(seq(length(list.sce.img)), function(index){
+  filter.name <- names(list.sce.img)[index]
+  sce.img <- list.sce.img[[filter.name]]
+  sce.img <- sce.img[,sce.img[["k2"]] %in% cell.types.vector]
+  sample.id.vector <- unique(sce.img$Sample)
+  df.res.all <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
+    df.res <- prop.table(table(sce.img[,sce.img$Sample==sample.id]$k2))
+    df.res <- as.data.frame(t(as.matrix(df.res)))
+    df.res$sample.id <- sample.id
+    if(ncol(df.res)==3){df.res}
+  }))
+  df.res.all$filter.name <- filter.name
+  df.res.all
+}))
+df.res.filters <- as.data.frame(df.res.filters)
+```
+
+Scatterplots of glial proportion vs. neuron proportion.
+
+```{r, eval = T}
+ggplot(df.res.filters, aes(x = glial, y = neuron, color = sample.id)) + 
+  geom_point() + facet_wrap(~filter.name) + xlim(0, 1) + ylim(0, 1) +
+  geom_abline(slope = 1, intercept = 0) + ggtitle("Cell proportion") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(df.res.filters, aes(x = glial, y = neuron, color = filter.name)) + 
+  geom_point() + facet_wrap(~sample.id) + xlim(0, 1) + ylim(0, 1) +
+  geom_abline(slope = 1, intercept = 0) + ggtitle("Cell proportion") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Violin plots of neuron proportion.
+
+```{r, eval = T}
+ggplot(df.res.filters, aes(x = sample.id, y = neuron, color = sample.id)) + 
+  geom_violin(draw_quantiles = 0.5) + geom_jitter() + facet_wrap(~filter.name) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 0.3)
+
+ggplot(df.res.filters, aes(x = filter.name, y = neuron, color = filter.name)) + 
+  geom_violin(draw_quantiles = 0.5) + geom_jitter() + facet_wrap(~sample.id) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 0.3)
+```
+
+## Subregion analysis
+
+Get plots with additional facet on the brain subregion.
+
+```{r, eval = T}
+df.res.filters$subregion <- gsub(".*_", "", df.res.filters$sample.id)
+
+ggplot(df.res.filters, aes(x = glial, y = neuron, color = sample.id)) + 
+  geom_point() + facet_wrap(~subregion*filter.name) + xlim(0, 1) + ylim(0, 1) +
+  geom_abline(slope = 1, intercept = 0) + ggtitle("Cell proportion") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(df.res.filters, aes(x = sample.id, y = neuron, color = sample.id)) + 
+  geom_violin(draw_quantiles = 0.5) + geom_jitter() + facet_wrap(~filter.name*subregion) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 0.3)
+
+```
+
+# Save environment, session info
+
+```{r}
+setwd("..")
+setwd("..")
+env.name <- "01_rnascope-filter-proportions-summaries.RData"
+env.path <- file.path("outputs", "01_prepare-datasets", env.name)
+save.image(file = env.path)
+#
+sessionInfo()
+```
+
+
+
+
+

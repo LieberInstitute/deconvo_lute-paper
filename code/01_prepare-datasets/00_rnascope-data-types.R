@@ -59,19 +59,22 @@ sce.img <- sce.img[,filter.sce.size]
 #--------------------------------------------------
 # update sce.img with klabel categories
 # get true proportions from rnascope data
+filter.sce.cd <- sce.img[["cell_type"]] %in% c("Oligo", "Excit")
+sce.img <- sce.img[,filter.sce.cd]
 rnascope <- sce.img
 cd <- colData(rnascope)
-cd$k2 <- cd$k3 <- cd$k4 <- "NA"
+# cd$k2 <- cd$k3 <- cd$k4 <- "NA"
+
 # append k label categories
 cd$k2 <- ifelse(grepl("Excit|Inhib", cd$cell_type), "neuron",
                 ifelse(grepl("Endo|Oligo|Micro", cd$cell_type), "glial", "NA"))
-cd$k3 <- ifelse(grepl("Excit", cd$cell_type), "Excit",
-                ifelse(grepl("Inhib", cd$cell_type), "Inhib", 
-                       ifelse(grepl("Endo|Oligo|Micro", cd$cell_type), "glial", "NA")))
-cd$k4 <- ifelse(grepl("Excit", cd$cell_type), "Excit",
-                ifelse(grepl("Inhib", cd$cell_type), "Inhib", 
-                       ifelse(grepl("Oligo", cd$cell_type), "Oligo", 
-                              ifelse(grepl("Micro|Endo", cd$cell_type), "non_oligo_glial", "NA"))))
+#cd$k3 <- ifelse(grepl("Excit", cd$cell_type), "Excit",
+#                ifelse(grepl("Inhib", cd$cell_type), "Inhib", 
+#                       ifelse(grepl("Endo|Oligo|Micro", cd$cell_type), "glial", "NA")))
+#cd$k4 <- ifelse(grepl("Excit", cd$cell_type), "Excit",
+#                ifelse(grepl("Inhib", cd$cell_type), "Inhib", 
+#                       ifelse(grepl("Oligo", cd$cell_type), "Oligo", 
+#                              ifelse(grepl("Micro|Endo", cd$cell_type), "non_oligo_glial", "NA"))))
 # reassign coldata to sce.img
 colData(sce.img) <- cd
 
@@ -80,7 +83,9 @@ sample.id.vector <- unique(rnascope$Sample)
 # filter na values
 rnascope <- sce.img[,!sce.img$k2=="NA"]
 # get all kdata
-df.rnascope.kdata <- do.call(rbind, lapply(c("k2", "k3", "k4"), function(cell.type.variable){
+cell.type.variables.vector <- "k2" # c("k2", "k3", "k4")
+df.rnascope.kdata <- do.call(rbind, lapply(cell.type.variables.vector, 
+                                           function(cell.type.variable){
   do.call(rbind, lapply(sample.id.vector, function(sample.id){
     rnf <- rnascope[,rnascope$Sample==sample.id]
     # proportions
