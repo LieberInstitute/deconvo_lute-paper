@@ -375,26 +375,25 @@ df.res.samples.pt1$sn.rn.sample.id <- rep(dfs.rn$sample.id, length(sample.id.vec
 # experiments pt1. shuffle z
 #---------------------------
 # make sce.missmatch
-
-df.res.samples.pt2 <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
-  # remove matched sample
-  filter.sce.iter <- sce[["sample.id"]]==sample.id
-  sce.iter <- sce[,!filter.sce.iter]
-  
-  # assign true df list
-  colnames(y.unadj) <- sample.id
-  
-  # 
-  names(list.df.true) <- sample.id
-  
-  df.res.samples.pt2 <- multigroup_bias_matched(
-    sample.id.vector, list.df.true, y.unadj, 
+df.res.samples.pt2 <- do.call(rbind, lapply(sample.id.vector, function(sample.id.iter){
+  message("beginning iteration for sample: ", sample.id.iter)
+  # get repeated y.unadj
+  y.unadj.iter <- matrix(
+    rep(assays(y.unadj[,sample.id.iter])[["counts"]], ncol(y.unadj)), 
+    ncol = ncol(y.unadj)
+  )
+  colnames(y.unadj.iter) <- colnames(y.unadj)
+  rownames(y.unadj.iter) <- rownames(y.unadj)
+  y.unadj.iter <- SummarizedExperiment(assays = list(counts = y.unadj.iter))
+  colData(y.unadj.iter) <- colData(y.unadj)
+  y.unadj.iter <- logNormCounts(y.unadj.iter)
+  df.res <- multigroup_bias_matched(
+    sample.id.vector, list.df.true, y.unadj.iter, 
     dfs.rn, sce, assay.name = assay.name)
-  
-  
-  
-  
+  df.res$y.sample.id <- sample.id.iter
+  return(df.res)
 }))
+df.res.samples.pt2 <- as.data.frame(df.res.samples.pt2)
 
 df.res.samples.pt2 <- multigroup_bias_matched(
   sample.id.vector, list.df.true, y.unadj, dfs.rn, sce, assay.name = assay.name)
