@@ -57,66 +57,6 @@ dfs.series <- function(s.glial.series = seq(1, 10, 0.2)){
   return(dfs.series)
 }
 
-# parallel_bias_matched
-# get bias computations in parallel (THIS SCRIPT, AND A FEW OTHERS)
-parallel_bias_matched <- function(sce.iter, y.iter, dfs, df.true = NULL, 
-                                  celltype.variable = "k2", assay.name = "counts", 
-                                  s.vector.ypb = c("glial" = 3, "neuron" = 10)){
-  # begin parallel
-  cl <- makeCluster(detectCores())
-  registerDoParallel(cl)
-  # get full run
-  if(is(y.iter, "RangedSummarizedExperiment")|is(y.iter, "SummarizedExperiment")){
-    y.iter <- assays(y.iter)[[assay.name]] %>% as.matrix()
-  }
-  df.res <- do.call(rbind, 
-                    mclapply(seq(nrow(dfs)), 
-                             function(i){
-                               s.vector <- c("glial" = dfs$s.glial[i], "neuron" = dfs$s.neuron[i])
-                               suppressMessages(
-                                 dfi <- lute(sce.iter, y = y.iter, 
-                                            celltype.variable = celltype.variable, 
-                                            s = s.vector, assay.name = assay.name, 
-                                            typemarker.algorithm = NULL)$deconvolution.results@predictions.table
-                               )
-                               dfi$sample.label <- colnames(y.iter)
-                               dfi <- cbind(dfi, dfs[i,]) # append all dfs data
-                               return(dfi)
-                             }))
-  colnames(df.res)[1:2] <- paste0(colnames(df.res)[1:2], ".pred.nnls")
-  if(is(df.true, "NULL")){
-    df.true <- sce[[celltype.variable]] %>% table() %>% prop.table() %>% as.data.frame()
-    rownames(df.true) <- df.true[,1]
-  }
-  df.res$glial.true <- as.numeric(df.true["glial",1])
-  df.res$neuron.true <- as.numeric(df.true["neuron",1])
-  df.res$bias.glial.true.pred <- df.res$glial.true - df.res$glial.pred.nnls
-  df.res$bias.neuron.true.pred <- df.res$neuron.true - df.res$neuron.pred.nnls
-  # make sequential again (i.e. cancels parallel)
-  registerDoSEQ()
-  return(df.res)
-}
-
-# multigroup_bias_matched
-# wraps parallel_bias_matched for multiple groups, uses df.true.list
-multigroup_bias_matched <- function(sample.id.vector, df.true.list, y.unadj, dfs, sce, 
-                                    y.group.name = "batch.id2", sce.group.name = "Sample",
-                                    celltype.variable = "k2", assay.name = "counts"){
-  df.res <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
-    message(sample.id)
-    sce.iter <- sce[,sce[[sce.group.name]]==sample.id]
-    y.iter <- y.unadj[,colData(y.unadj)[,y.group.name]==sample.id]
-    df.true.iter <- df.true.list[[sample.id]] %>% t() %>% as.data.frame()
-    #colnames(df.true.iter.transpose) <- colnames(df.true.list[[sample.id]])
-    df.res.iter <- parallel_bias_matched(sce.iter, y.iter, dfs, df.true.iter, 
-                                         celltype.variable, assay.name)
-    df.res.iter$sample.id <- sample.id
-    return(df.res.iter)
-  }))
-  return(df.res)
-}
-
-
 # get true cell proportions info
 rnascope_cell_info <- function(df.rn, sample.id = NULL, k.type = NULL, cell.types = NULL){
   #
@@ -246,6 +186,19 @@ get_dfcond <- function(df.res.filtered){
   }))
   df.cond
 }
+```
+
+
+```{r}
+# source the parallelize functions
+setwd("..")
+setwd("..")
+list.files(file.path("code", 
+                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"))
+script.path <- file.path("code", 
+                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", 
+                         "01_source-example-crossval-sopt.R")
+source(script.path)
 
 ```
 
@@ -403,6 +356,7 @@ sce <- logNormCounts(sce)
 
 ```{r}
 
+sample.id.vector <- names(list.df.true)[1:11]
 
 # run parallel deconvo experiments
 df.res.samples <- multigroup_bias_matched(
