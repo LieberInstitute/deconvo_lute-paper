@@ -191,7 +191,7 @@ dfp.bias <- do.call(rbind, lapply(seq(nrow(dfs.series)),
                                       s.vector = s.vector, algorithm.name = "nnls", 
                                       return.dimensions = "wide"
                                     ))
-                                    return(df.res.iter)                            
+                                    return(df.res.iter)
                                   }))
 dfp.bias$s.neuron <- dfs.series$neuron
 dfp.bias$s.glial <- dfs.series$glial

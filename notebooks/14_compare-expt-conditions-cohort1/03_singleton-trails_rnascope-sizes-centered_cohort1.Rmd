@@ -1,5 +1,5 @@
 ---
-title: "03_singleton-trails_rnascope-size-based_cohort1"
+title: "03_singleton-trials_ranscope-size-based_cohort1"
 author: "Sean Maden"
 date: "2023-08-30"
 output:
@@ -155,6 +155,7 @@ ggplot(df.hparam.res, aes(x = s.range, y = min.error.validate)) +
   geom_point() + geom_line() + ggtitle("Hyperparameter: s.range\nfacet: s.step.validate") +
   facet_wrap(~s.step.validate)
 ```
+
 Plots with `s.step.train` on the x-axis.
 
 ```{r}
@@ -162,6 +163,7 @@ ggplot(df.hparam.res, aes(x = s.step.train, y = min.error.validate, group = s.ra
   geom_point() + geom_line() + ggtitle("Hyperparameter: s.step.train\nfacet: s.range") + 
   facet_wrap(~s.range)
 ```
+
 Plots with `s.step.validate` on the x-axis.
 
 ```{r}
@@ -169,17 +171,18 @@ ggplot(df.hparam.res, aes(x = s.step.validate, y = min.error.validate)) +
   geom_point() + geom_line() + ggtitle("Hyperparameter: s.step.validate\nfacet: s.range") +
   facet_wrap(~s.range)
 ```
+
 Plots of `min.error.train` (x-axis) vs. `min.error.validate` (y-axis).
 
 ```{r}
 ggplot(df.hparam.res, aes(x = min.error.train, y = min.error.validate)) + 
   geom_point() + geom_line() + ggtitle("Facet: s.range") +
-  geom_abline(slope = 1, intercept = 0) +
+  geom_abline(slope = 1, intercept = 0) + xlim(0, 1) + ylim(0, 1) +
   facet_wrap(~s.range)
 
 ggplot(df.hparam.res, aes(x = min.error.train, y = min.error.validate)) + 
   geom_point() + geom_line() + ggtitle("Facet: s.range") +
-  geom_abline(slope = 1, intercept = 0)
+  geom_abline(slope = 1, intercept = 0) + xlim(0, 1) + ylim(0, 1)
 ```
 
 Plots with `time.elapsed` on the y-axis.

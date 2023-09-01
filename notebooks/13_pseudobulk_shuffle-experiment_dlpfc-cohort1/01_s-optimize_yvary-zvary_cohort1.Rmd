@@ -1,0 +1,204 @@
+---
+title: "Pseudobulk shuffle experiment"
+author: "Sean Maden"
+date: "2023-08-09"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+Shows the following experiment: Shuffle $Z$, $S$, $P$
+
+# Key experiment notes
+
+This notebook shows summaries from SINGLE EXPERIMENT CONDITIONS in the bulk 
+data. Results summaries from S (cell size scale factor normalization) optimization 
+experiments with the following conditions:
+
+* Z is varied with sample ID (from a single snRNA-seq sample).
+* Y is varied with sample ID (from real RNA-seq data).
+
+```{r setup, include=FALSE}
+
+
+libv <- c("ggplot2", "dplyr")
+sapply(libv, library, character.only = T)
+knitr::opts_chunk$set(echo = TRUE)
+folder.name <- "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"
+
+
+```
+
+# Load data, postprocess, and set plot parameters
+
+```{r}
+# load results
+setwd("..")
+setwd("..")
+load.filename <- "df-sopt-result_yvary-zsame_cohort1.rda"
+load.path <- file.path("outputs", folder.name, load.filename)
+df.res <- get(load(load.path))
+
+# postprocess df.res
+df.res$glial.group.label <- as.character(df.res$s.glial)
+df.res$neuron.group.label <- as.character(df.res$s.neuron)
+
+# df.res$all.highlight.categories <- ifelse(df.res$minimum.error, "min",ifelse(,,ifelse(,,ifelse())))
+df.res$all.highlight.categories <- ifelse(df.res$minimum.error, "min", 
+                                          ifelse(df.res$maximum.error, "max", 
+                                                 ifelse(df.res$minimum.decile.error, "min.dec", 
+                                                        ifelse(df.res$maximum.decile.error, "max.dec", "mid"))))
+df.res$all.highlight.sizes <- ifelse(
+  df.res$minimum.error|df.res$maximum.error, "min/max", "min.dec/max.dec/mid")
+
+# set standard column labels
+df.res$cell.compartment.id <- df.res$library.preparation
+df.res$library.preparation.id <- gsub(".*_", "", df.res$cell.compartment)
+df.res$block.id <- df.res$sample.id.brnum
+df.res$experiment.id <- paste0(df.res$cell.compartment.id,"_",df.res$library.preparation.id)
+df.res$sample.experiment <- paste0(df.res$sample.id,"_",df.res$experiment.id)
+df.res$block.experiment <- paste0(df.res$block.id,"_",df.res$experiment.id)
+df.res$sample.compartment <- paste0(df.res$sample.id,"_",df.res$cell.compartment.id)
+
+# set plot parameters
+highlight.color.low <- "red"
+highlight.color.high <- "blue"
+background.color.highlights <- "gray"
+
+# helper functions
+text.to.make.new.dfp <- function(variable.name="sample.id", value.index=1, dfp.index=1){
+  text.vector1 <- paste0("id.to.get <- df.res[,'",variable.name,"'][",value.index,"]")
+  text.vector2 <- paste0("filter.variable.vector <- df.res[,'",variable.name,"']==id.to.get")
+  text.vector3 <- paste0("dfp",dfp.index," <- df.res[filter.variable.vector,]")
+  text.vector.list <- as.list(c(text.vector1, text.vector2, text.vector3))
+  return(paste0(text.vector.list, collapse = ";"))
+}
+```
+
+```{r}
+# viz wrapper functions
+source("deconvo_plots.R")
+# dataset summaries function(s)
+source("dataset_summaries.R")
+```
+
+# Get the data subsets and summaries
+
+## FILTER
+
+This is the crucial data filter section. Could go into a script.
+
+```{r}
+## Get plot data for `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
+# Gets the first ID in the "sample-region-compartment-library" designation, saves as `dfp1`.
+dfp1 <- parse(text=text.to.make.new.dfp("block.experiment")) %>% eval()
+
+## Get plot data for `[SAMPLE]-[EXPERIMENT_CONDITION]` "sample-compartment-library" as
+dfp2 <- parse(text=text.to.make.new.dfp("sample.experiment")) %>% eval()
+
+## Get plot data for `[SAMPLE]-[COMPARTMENT]`
+dfp3 <- parse(text=text.to.make.new.dfp("sample.compartment")) %>% eval()
+
+## Get plot data for `[SAMPLE]`
+dfp4 <- parse(text=text.to.make.new.dfp("sample.id")) %>% eval()
+```
+
+# SUMMARIZE
+
+```{r}
+list.summaries.dfp1 <- get_data_summaries(dfp1, "block.experiment")
+list.summaries.dfp2 <- get_data_summaries(dfp2, "sample.experiment")
+list.summaries.dfp3 <- get_data_summaries(dfp3, "sample.compartment")
+list.summaries.dfp4 <- get_data_summaries(dfp4, "sample.id")
+```
+
+## `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
+
+```{r}
+list.summaries.dfp1
+```
+
+## `[SAMPLE]-[EXPERIMENT_CONDITION]`
+
+```{r}
+list.summaries.dfp2
+```
+## `[SAMPLE]-[COMPARTMENT]`
+
+```{r}
+list.summaries.dfp3
+```
+
+## `[SAMPLE]`
+
+```{r}
+list.summaries.dfp4
+```
+
+# Plot filtered data
+
+## `[BLOCK_ID]-[EXPERIMENT_CONDITION]`
+
+```{r}
+list.plots.dfp1 <- deconvo_plots_list(dfp1, "anatomic.region")
+list.plots.dfp1$heatmaps$heatmap6
+```
+
+## `[SAMPLE]-[EXPERIMENT_CONDITION]`
+
+```{r}
+list.plots.dfp2 <- deconvo_plots_list(dfp2, "anatomic.region")
+list.plots.dfp2$heatmaps$heatmap6
+```
+
+## `[SAMPLE]-[COMPARTMENT]`
+
+```{r}
+list.plots.dfp3.byregion <- deconvo_plots_list(dfp3, "anatomic.region")
+list.plots.dfp3.bylibraryprep <- deconvo_plots_list(dfp3, "library.preparation.id")
+list.plots.dfp3.byregion$heatmaps$heatmap6
+list.plots.dfp3.bylibraryprep$heatmaps$heatmap6
+```
+
+## `[SAMPLE]`
+
+```{r}
+facet.variable.vector <- c("anatomic.region", "library.preparation.id", "cell.compartment")
+results.list.dfp4 <- lapply(facet.variable.vector, function(facet.variable){
+  deconvo_plots_list(dfp4, facet.variable)
+})
+names(results.list.dfp4) <- facet.variable.vector
+```
+
+Heatmaps
+
+```{r}
+unpack_plot_type(results.list.dfp4, "heatmap1", "heatmaps")
+```
+
+Highlight plots
+
+```{r}
+unpack_plot_type(results.list.dfp4, "heatmap6", "heatmaps")
+```
+
+Line plots
+
+```{r}
+unpack_plot_type(results.list.dfp4, "lp1", "lineplots")
+unpack_plot_type(results.list.dfp4, "lp2", "lineplots")
+```
+
+
+# Save environment/Session info
+```{r}
+setwd("..")
+setwd("..")
+env.path <- file.path("outputs", "12_soptimize_yvary-zsame_dlpfc-cohort1", "env_yvar_notebook1.RData")
+save.image(file = env.path)
+```
+```{r}
+sessionInfo()
+```
+
+

@@ -1,0 +1,142 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+libv <- c("ggplot2", "dplyr", "ComplexHeatmap")
+sapply(libv, library, character.only = T)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+# load
+folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
+file.name <- "df-sopt-result-validation_yvary-zvary_cohort1.rda"
+df.res.path <- file.path("outputs", folder.name, file.name)
+df.res <- get(load(df.res.path))
+```
+
+# Dataset summaries
+
+Summarizing the results of validation analyses:
+
+```{r}
+summary(df.res$error.neuron)
+```
+
+The minimum observed neuron error was: `r min(df.res$erorr.neuron)`
+
+The minimum oberved neuron error by experiment condition was:
+
+```{r}
+df.res$experiment.condition <- paste0(df.res$cell.compartment, ";", df.res$library.type)
+for(condition in unique(df.res$experiment.condition)){
+  message(condition, ":\n")
+  print(summary(df.res[df.res$experiment.condition==condition,]$error.neuron))
+  message("\n")
+}
+```
+
+# Heatmap of outcomes, where axes are validation sample by condition
+
+Heatmap of outcomes (VALIDATION_LABEL X TRAIN_CONDITION)
+
+```{r}
+df.res$s.train.condition <- paste0(df.res$s.train.variable.name, ";", df.res$s.train.variable.label)
+ggplot(df.res, aes(x = sample.label, y = s.train.condition, fill = error.neuron)) + 
+  geom_tile() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_wrap(~s.training.type)
+```
+
+Boxplots of neuron error.
+
+```{r}
+ggplot(df.res, aes(x = s.training.type, y = error.neuron)) + geom_jitter() + 
+  geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~library.type)
+
+ggplot(df.res, aes(x = s.training.type, y = error.neuron)) + geom_jitter() + 
+  geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~anatomic.region)
+
+ggplot(df.res, aes(x = s.training.type, y = error.neuron)) + geom_jitter() + 
+  geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~cell.compartment)
+
+ggplot(df.res, aes(x = s.training.type, y = error.neuron)) + geom_jitter() + 
+  geom_boxplot(color = "cyan", alpha = 0) + facet_wrap(~experiment.condition)
+```
+
+Scatterplots.
+
+```{r}
+# GET DF TALL
+# assign new condition label
+new.label <- paste0(df.res$sample.label, ";", df.res$experiment.condition, ";", df.res$s.train.condition)
+df.res$new.label <- new.label
+dim(df.res)
+df.freq <- as.data.frame(table(df.res$new.label))
+label.keep <- as.character(df.freq[df.freq[,2]>1,1])
+df.res.new <- df.res[df.res$new.label %in% label.keep,]
+dim(df.res.new)
+df.res <- df.res.new
+# 
+filter.dfres.supervised <- df.res$s.training.type=="supervised"
+filter.dfres.unsupervised <- df.res$s.training.type=="unsupervised"
+# subset
+df.res.super <- df.res[filter.dfres.supervised,]
+df.res.unsuper <- df.res[filter.dfres.unsupervised,]
+#
+# match on condition label
+label.overlap <- intersect(df.res.super$new.label, df.res.unsuper$new.label)
+df.res.super <- df.res.super[df.res.super$new.label %in% label.overlap,]
+df.res.unsuper <- df.res.unsuper[df.res.unsuper$new.label %in% label.overlap,]
+match.index.vector <- order(match(df.res.super$new.label, df.res.unsuper$new.label))
+df.res.super <- df.res.super[match.index.vector,]
+identical(df.res.super$new.label, df.res.unsuper$new.label)
+
+# PLOT
+dfp.err <- data.frame(unsupervised = df.res.super$error.neuron,
+                      supervised = df.res.unsuper$error.neuron,
+                      experiment.condition = c(df.res.super$experiment.condition, df.res.unsuper$experiment.condition),
+                      library.type = c(df.res.super$library.type, df.res.unsuper$library.type),
+                      cell.compartment = c(df.res.super$cell.compartment, df.res.unsuper$cell.compartment),
+                      anatomic.region = c(df.res.super$anatomic.region, df.res.unsuper$anatomic.region))
+#
+ggplot(dfp.err, aes(x = unsupervised, y = supervised)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0)
+#
+ggplot(dfp.err, aes(x = unsupervised, y = supervised)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~experiment.condition)
+#
+ggplot(dfp.err, aes(x = unsupervised, y = supervised)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~cell.compartment)
+#
+ggplot(dfp.err, aes(x = unsupervised, y = supervised)) + 
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~anatomic.region)
+```
+
+
+# Get validation condition match/unmatch summaries
+
+```{r}
+condition.vector.train <- unique(df.res$s.train.condition)
+condition.vector.train <- condition.vector.train[!grepl("sample.id", condition.vector.train)]
+table(condition.vector.train)
+
+
+#condition.vector.train <- paste0(df.res$s.train.condition)
+#condition.vector.validation <- paste0(df.res$experiment.condition, ";", df.res$anatomic.region)
+#table(condition.vector)
+```
+
+```{r}
+get_dfcond(df.res[df.res$s.training.type=="unsupervised",])
+get_dfcond(df.res[df.res$s.training.type=="supervised",])
+```
+
+
+

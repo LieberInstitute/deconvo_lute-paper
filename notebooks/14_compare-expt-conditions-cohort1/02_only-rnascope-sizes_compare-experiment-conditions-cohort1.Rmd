@@ -18,7 +18,8 @@ folder.name <- "14_compare-expt-conditions-cohort1"
 folder.name <- "14_compare-expt-conditions-cohort1"
 
 # load assays
-mae.path <- "C:/Users/User/Documents/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/mae_y-rpkm_z-validate_cohort1.rda"
+mae.filename <- "mae_y-rpkm_z-validate_cohort1.rda"
+mae.path <- file.path("C:/Users/User/Documents/GitHub/deconvo_method-paper/outputs/01_prepare-datasets", mae.filename)
 mae <- get(load(mae.path))
 
 # load
@@ -101,15 +102,15 @@ for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 
 ```{r, include = F, eval = F}
 k2.1a.result.list <- kmatch_experiment(k.variable.name = k.variable.name,
-                              sce = sce, 
-                              dfs.train = dfs.rn,
-                              validate.dfs = FALSE,
-                              sample.id.vector = sample.id.vector, 
-                              list.df.true = list.df.true,
-                              y.eset = y.unadj, y.train = y.train, 
-                              y.validate = y.validate, 
-                              assay.name = assay.name.lute, 
-                              group.name = group.name.experiment)
+                                        sce = sce, 
+                                        dfs.train = dfs.rn,
+                                        validate.dfs = FALSE,
+                                        sample.id.vector = sample.id.vector, 
+                                        list.df.true = list.df.true,
+                                        y.eset = y.unadj, y.train = y.train, 
+                                        y.validate = y.validate, 
+                                        assay.name = assay.name.lute, 
+                                        group.name = group.name.experiment)
 k2.1a.result.path <- "k2_1a_rnsizes_result_list.rda"
 save(k2.1a.result.list, file = k2.1a.result.path)
 ```
@@ -337,6 +338,20 @@ dfp <- df.res.all
 
 ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0) + xlim(0, 1) + ylim(0, 1) + facet_wrap(~match.by.group)
+```
+
+# Mean and variance summaries
+
+## Heatmaps of medians and variances
+
+```{r}
+library(ComplexHeatmap)
+
+```
+
+## Scatterplots of medians and variances
+
+```{r}
 ```
 
 # Session info

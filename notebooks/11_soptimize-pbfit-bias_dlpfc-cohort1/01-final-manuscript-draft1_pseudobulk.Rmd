@@ -1,0 +1,45 @@
+---
+title: "Pseudobulk"
+author: "Sean Maden"
+date: "2023-09-01"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+
+
+setwd("..")
+setwd("..")
+script.path <- file.path("code", 
+                         "11_soptimize-pbfit-bias_dlpfc-cohort1", 
+                         "01_000_parallel-runs-allsamples_cohort1.R")
+source(script.path)
+
+#list.files(file.path("code", 
+#                         "11_soptimize-pbfit-bias_dlpfc-cohort1"))
+
+# * shuffle the signature references
+# * shuffle the rnascope cell sizes
+# * shuffle the rnascope cell proportions
+
+```
+
+# systematic tests
+
+* shuffle the signature references
+
+```{r}
+```
+
+* shuffle the rnascope cell sizes
+
+```{r}
+```
+
+* shuffle the rnascope cell proportions
+
+```{r}
+```
