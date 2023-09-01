@@ -430,7 +430,27 @@ df.res.samples.pt3 <- as.data.frame(df.res.samples.pt3)
 
 ```
 
+```{r}
+# save environment
+setwd("..")
+setwd("..")
+env.path <- file.path("notebooks", 
+                      "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", 
+                      "01_run-experiment.RData")
+save.image(file = env.path)
+```
+
 # Experiment summaries
+
+```{r}
+# load env
+setwd("..")
+setwd("..")
+env.path <- file.path("notebooks", 
+                      "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", 
+                      "01_run-experiment.RData")
+load(env.path)
+```
 
 Experiment 1
 
@@ -438,9 +458,10 @@ Experiment 1
 message("All runs:")
 summary(df.res.samples.pt1$error.neuron.true.pred)
 filter.matched <- df.res.samples.pt1$sample.id==df.res.samples.pt1$sn.rn.sample.id
-message("Z/S-matched runs:")
+df.res.samples.pt1$s.matched <- filter.matched
+message("S-matched runs:")
 summary(df.res.samples.pt1[filter.matched,]$error.neuron.true.pred)
-message("Z/S-unmatched runs:")
+message("S-unmatched runs:")
 summary(df.res.samples.pt1[!filter.matched,]$error.neuron.true.pred)
 ```
 
@@ -451,6 +472,7 @@ Experiment 2
 message("All runs:")
 summary(df.res.samples.pt2$error.neuron.true.pred)
 filter.matched <- df.res.samples.pt2$sample.id==df.res.samples.pt2$y.sample.id
+df.res.samples.pt2$zs.matched <- filter.matched
 message("Z/S-matched runs:")
 summary(df.res.samples.pt2[filter.matched,]$error.neuron.true.pred)
 message("Z/S-unmatched runs:")
@@ -461,11 +483,50 @@ summary(df.res.samples.pt2[!filter.matched,]$error.neuron.true.pred)
 Experiment 3
 
 ```{r}
+message("All runs:")
+summary(df.res.samples.pt3$error.neuron.true.pred)
+filter.matched <- df.res.samples.pt3$sample.id==df.res.samples.pt3$ys.sample.id
+df.res.samples.pt3$z.matched <- filter.matched
+message("Z-matched runs:")
+summary(df.res.samples.pt3[filter.matched,]$error.neuron.true.pred)
+message("Z-unmatched runs:")
+summary(df.res.samples.pt3[!filter.matched,]$error.neuron.true.pred)
 ```
 
 # Plot results
 
 ```{r}
+library(ggplot2)
+```
+
+Experiment 1
+
+```{r}
+dfp <- df.res.samples.pt1
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) +
+  facet_wrap(~s.matched)
+```
+
+Experiment 2
+
+```{r}
+dfp <- df.res.samples.pt2
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) +
+  facet_wrap(~zs.matched)
+```
+
+Experiment 3
+
+```{r}
+dfp <- df.res.samples.pt3
+ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  xlim(0, 1) + ylim(0, 1) +
+  facet_wrap(~z.matched)
 ```
 
 ```{r}

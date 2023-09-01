@@ -32,12 +32,27 @@ img.list <- lapply(img.data.colnames, function(colname){
   new.data
 })
 names(img.list) <- img.data.colnames
+
 sce.img <- SingleCellExperiment(assays = img.list)
 img.coldata <- DataFrame(img[,img.coldata.colnames])
 rownames(img.coldata) <- new.img.colnames
 colData(sce.img) <- img.coldata
 rm(halo.output.table)
 gc()
+
+#-------------------------------------
+# absolute cell size filter on rowdata
+#-------------------------------------
+max.nucleus.size <- 75
+filter.sce.size <- assays(sce.img)[["Nucleus_Area"]] <= max.nucleus.size
+sce.img <- sce.img[,filter.sce.size]
+
+#-----------------------------
+# cell types filter on coldata
+#-----------------------------
+#cell.types.keep <- c("Excit", "Inhib", "Oligo")
+#filter.sce.cd <- colData(sce.img)$cell_type %in% cell.types.keep
+#sce.img <- sce.img[,filter.sce.cd]
 
 #--------------------------------------------------
 # df.rn: get additional rnascope data.frame objects
