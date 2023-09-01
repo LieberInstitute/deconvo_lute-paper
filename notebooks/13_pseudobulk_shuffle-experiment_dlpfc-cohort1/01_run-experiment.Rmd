@@ -366,13 +366,15 @@ sample.id.vector <- names(list.df.true)[1:11]
 
 #---------------------------
 # experiments pt1. shuffle s
+# i.e. Ypbj, Sj/!j, Zj
 #---------------------------
 df.res.samples.pt1 <- multigroup_bias_matched(
   sample.id.vector, list.df.true, y.unadj, dfs.rn, sce, assay.name = assay.name)
 df.res.samples.pt1$sn.rn.sample.id <- rep(dfs.rn$sample.id, length(sample.id.vector))
 
 #---------------------------
-# experiments pt1. shuffle z
+# experiments pt2. shuffle z
+# i.e. Ypbj, Sj/!j, Zj/!j
 #---------------------------
 # make sce.missmatch
 df.res.samples.pt2 <- do.call(rbind, lapply(sample.id.vector, function(sample.id.iter){
@@ -387,20 +389,83 @@ df.res.samples.pt2 <- do.call(rbind, lapply(sample.id.vector, function(sample.id
   y.unadj.iter <- SummarizedExperiment(assays = list(counts = y.unadj.iter))
   colData(y.unadj.iter) <- colData(y.unadj)
   y.unadj.iter <- logNormCounts(y.unadj.iter)
-  df.res <- multigroup_bias_matched(
+  df.res <- suppressMessages(multigroup_bias_matched(
     sample.id.vector, list.df.true, y.unadj.iter, 
-    dfs.rn, sce, assay.name = assay.name)
+    dfs.rn, sce, assay.name = assay.name))
   df.res$y.sample.id <- sample.id.iter
   return(df.res)
 }))
 df.res.samples.pt2 <- as.data.frame(df.res.samples.pt2)
 
-df.res.samples.pt2 <- multigroup_bias_matched(
-  sample.id.vector, list.df.true, y.unadj, dfs.rn, sce, assay.name = assay.name)
-df.res.samples.pt2$sn.rn.sample.id <- rep(dfs.rn$sample.id, length(sample.id.vector))
+#---------------------------
+# experiments pt3. shuffle z
+# i.e. Ypbj, Sj, Zj/!j
+#---------------------------
+# make sce.missmatch
+df.res.samples.pt3 <- do.call(rbind, lapply(sample.id.vector, function(sample.id.iter){
+  message("beginning iteration for sample: ", sample.id.iter)
+  # get repeated y.unadj
+  y.unadj.iter <- matrix(
+    rep(assays(y.unadj[,sample.id.iter])[["counts"]], ncol(y.unadj)), 
+    ncol = ncol(y.unadj)
+  )
+  colnames(y.unadj.iter) <- colnames(y.unadj)
+  rownames(y.unadj.iter) <- rownames(y.unadj)
+  y.unadj.iter <- SummarizedExperiment(assays = list(counts = y.unadj.iter))
+  colData(y.unadj.iter) <- colData(y.unadj)
+  y.unadj.iter <- logNormCounts(y.unadj.iter)
+  # get repeated dfs
+  dfs.rn.sample.iter <- dfs.rn[dfs.rn$sample.id==sample.id.iter,]
+  dfs.rn.iter <- as.data.frame(
+    matrix(rep(dfs.rn.sample.iter, nrow(dfs.rn)), ncol = 3, byrow = T))
+  colnames(dfs.rn.iter) <- colnames(dfs.rn)
+  # run new experiment
+  df.res <- suppressMessages(multigroup_bias_matched(
+    sample.id.vector, list.df.true, y.unadj.iter, 
+    dfs.rn, sce, assay.name = assay.name))
+  df.res$ys.sample.id <- sample.id.iter
+  return(df.res)
+}))
+df.res.samples.pt3 <- as.data.frame(df.res.samples.pt3)
+
+```
+
+# Experiment summaries
+
+Experiment 1
+
+```{r}
+message("All runs:")
+summary(df.res.samples.pt1$error.neuron.true.pred)
+filter.matched <- df.res.samples.pt1$sample.id==df.res.samples.pt1$sn.rn.sample.id
+message("Z/S-matched runs:")
+summary(df.res.samples.pt1[filter.matched,]$error.neuron.true.pred)
+message("Z/S-unmatched runs:")
+summary(df.res.samples.pt1[!filter.matched,]$error.neuron.true.pred)
+```
 
 
+Experiment 2
 
+```{r}
+message("All runs:")
+summary(df.res.samples.pt2$error.neuron.true.pred)
+filter.matched <- df.res.samples.pt2$sample.id==df.res.samples.pt2$y.sample.id
+message("Z/S-matched runs:")
+summary(df.res.samples.pt2[filter.matched,]$error.neuron.true.pred)
+message("Z/S-unmatched runs:")
+summary(df.res.samples.pt2[!filter.matched,]$error.neuron.true.pred)
+```
+
+
+Experiment 3
+
+```{r}
+```
+
+# Plot results
+
+```{r}
 ```
 
 ```{r}
