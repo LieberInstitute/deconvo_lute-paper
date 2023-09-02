@@ -7,39 +7,30 @@ output:
   html_document: default
 ---
 
+```{r}
+setwd("..")
+setwd("..")
+env.name <- "01_run-experiment.RData"
+env.path <- file.path("notebooks", "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", env.name)
+if(file.exists(env.path)){
+  knitr::opts_chunk$set(echo = F, eval = F, include = F)
+  load(file = env.path)
+} else{
+  knitr::opts_chunk$set(echo = T)
+}
+```
+
 Shows the following pseudobulk experiment: Shuffle $Z$, $S$, $P$, where
 
-* $Z$ : shuffled across all sources
-* $S$ : shuffled across all sources
-
-# Key experiment notes
-
 ```{r setup, include=FALSE}
-
-
-#!/usr/bin/env R
-#
-# Author: Sean Maden
-#
-# Get full run of bias predictions.
-#
-# CRUCIAL NOTES, READ THIS:
-#   * Z is the same across experiments
-#   * Y is different across experiments
-#
-#libv <- c("ggplot2", "dplyr")
-#sapply(libv, library, character.only = T)
 knitr::opts_chunk$set(echo = TRUE)
 libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
 sapply(libv, library, character.only = T)
-#
-
-
 ```
 
 # Run experiment
 
-```{r, include = F, eval = F}
+```{r}
 
 #------
 # setup
@@ -188,46 +179,11 @@ get_dfcond <- function(df.res.filtered){
 }
 ```
 
-
-```{r, include = F, eval = F}
-
-# source the parallelize functions
+```{r}
 setwd("..")
 setwd("..")
-list.files(file.path("code", 
-                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"))
-script.path <- file.path("code", 
-                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", 
-                         "01_source-example-crossval-sopt.R")
-source(script.path)
+# list.files(file.path("deconvo_method-paper", "outputs"))
 
-```
-
-
-
-```{r, include = F, eval = F}
-
-
-setwd("..")
-setwd("..")
-# sets variables
-folder.name <- "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"
-celltype.variable <- "k2"
-sample.id.variable <- "Sample"
-assay.name <- "logcounts"
-
-
-```
-
-
-
-```{r, include = F, eval = F}
-
-
-setwd("..")
-setwd("..")
-list.files(file.path(
-  "deconvo_method-paper", "outputs"))
 #----------
 # load data
 #----------
@@ -238,12 +194,22 @@ mae.path <- file.path( # "deconvo_method-paper",
 list.files()
 mae <- get(load(mae.path))
 
+# source the parallelize functions
+list.files(file.path("code", 
+                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"))
+script.path <- file.path("code", 
+                         "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", 
+                         "01_source-example-crossval-sopt.R")
+source(script.path)
+# sets variables
+folder.name <- "13_pseudobulk_shuffle-experiment_dlpfc-cohort1"
+celltype.variable <- "k2"
+sample.id.variable <- "Sample"
+assay.name <- "logcounts"
 
 ```
 
-
-
-```{r, include = F, eval = F}
+```{r}
 #
 # remove validation samples
 dim(mae[["bulk.rnaseq"]])
@@ -278,7 +244,7 @@ sce <- mae[["sn1.rnaseq"]]
 
 
 
-```{r, include = F, eval = F}
+```{r}
 
 
 setwd("..")
@@ -335,31 +301,9 @@ unique.types <- unique(sce[[celltype.variable]])
 
 ```
 
-
-
-```{r, include = F, eval = F}
-
-#------------
-# main script
-#------------
-# set target sample ids and filter on available true proportions
-sample.id.vector <- unique(sce[[sample.id.variable]])
-sample.id.vector <- sample.id.vector[sample.id.vector %in% names(list.df.true)]
-
-# get logcounts
-#library(scuttle)
-sce <- logNormCounts(sce)
-
-
-
-
-
-```
-
-
-
-```{r, include = F, eval = F}
+```{r}
 # run parallel deconvo experiments
+sce <- logNormCounts(sce)
 sce[["sample.id"]] <- sce[["Sample"]]
 sce[["celltype"]] <- sce[["k2"]]
 # list.df.true
@@ -437,7 +381,7 @@ df.res.samples.pt3 <- as.data.frame(df.res.samples.pt3)
 
 ```
 
-```{r, include = F, eval = F}
+```{r}
 # save environment
 setwd("..")
 setwd("..")
@@ -449,19 +393,9 @@ save.image(file = env.path)
 
 # Experiment summaries
 
-```{r}
-# load env
-setwd("..")
-setwd("..")
-env.path <- file.path("notebooks", 
-                      "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", 
-                      "01_run-experiment.RData")
-load(env.path)
-```
-
 Experiment 1
 
-```{r}
+```{r, eval = T, include = T}
 message("All runs:")
 summary(df.res.samples.pt1$error.neuron.true.pred)
 filter.matched <- df.res.samples.pt1$sample.id==df.res.samples.pt1$sn.rn.sample.id
@@ -475,7 +409,7 @@ summary(df.res.samples.pt1[!filter.matched,]$error.neuron.true.pred)
 
 Experiment 2
 
-```{r}
+```{r, eval = T, include = T}
 message("All runs:")
 summary(df.res.samples.pt2$error.neuron.true.pred)
 filter.matched <- df.res.samples.pt2$sample.id==df.res.samples.pt2$y.sample.id
@@ -489,7 +423,7 @@ summary(df.res.samples.pt2[!filter.matched,]$error.neuron.true.pred)
 
 Experiment 3
 
-```{r}
+```{r, eval = T, include = T}
 message("All runs:")
 summary(df.res.samples.pt3$error.neuron.true.pred)
 filter.matched <- df.res.samples.pt3$sample.id==df.res.samples.pt3$ys.sample.id
@@ -502,43 +436,42 @@ summary(df.res.samples.pt3[!filter.matched,]$error.neuron.true.pred)
 
 # Plot results
 
-```{r}
+```{r, eval = T, include = T}
 library(ggplot2)
 ```
 
 Experiment 1
 
-```{r}
+```{r, eval = T, include = T}
 dfp <- df.res.samples.pt1
 ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) +
   xlim(0, 1) + ylim(0, 1) +
-  facet_wrap(~s.matched)
+  facet_wrap(~s.matched) + ggtitle("Experiment 1")
 ```
 
 Experiment 2
 
-```{r}
+```{r, eval = T, include = T}
 dfp <- df.res.samples.pt2
 ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) +
   xlim(0, 1) + ylim(0, 1) +
-  facet_wrap(~zs.matched)
+  facet_wrap(~zs.matched) + ggtitle("Experiment 2")
 ```
 
 Experiment 3
 
-```{r}
+```{r, eval = T, include = T}
 dfp <- df.res.samples.pt3
 ggplot(dfp, aes(x = neuron.true, y = neuron.pred.nnls, color = sample.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) +
   xlim(0, 1) + ylim(0, 1) +
-  facet_wrap(~z.matched)
+  facet_wrap(~z.matched) + ggtitle("Experiment 3")
 ```
-# Session info
 
-```{r}
+# Save environment/session info
+
+```{r, eval = T, include = T}
 sessionInfo()
 ```
-
-
