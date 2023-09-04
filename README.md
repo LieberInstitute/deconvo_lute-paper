@@ -34,9 +34,14 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure 2F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, DLPFC Cohort2.
 
 * Figure 3
-[Figure 3A](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K2 labels
-[Figure 3B](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K3 labels
-[Figure 3C](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K4 labels
+[Figure 3A](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_check-rnascope-pseudobulk_cohort1.rmd) Shuffle S
+[Figure 3B](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_rnascope-pseudobulk-shuffle-iter-final_cohort1.rmd) Shuffle S
+[Figure 3C](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_shuffle-zpb_rnascope-sce-pseudobulk_cohort1.rmd) Shuffle Zpb
+
+* Figure 4
+[Figure 4A](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K2 labels
+[Figure 4B](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K3 labels
+[Figure 4C](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K4 labels
 
 * Supplemental Figure S1
 [Figure S1A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 1.
