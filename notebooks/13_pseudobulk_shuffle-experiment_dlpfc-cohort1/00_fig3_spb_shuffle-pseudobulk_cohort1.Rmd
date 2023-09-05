@@ -5,10 +5,9 @@ date: "2023-09-03"
 output: html_document
 ---
 
-Notebook showing a pseudobulk experiment. Notebook showing impact of same 
-empirical RNAscope adjustment across multiple Z sources. Note, this is not the 
-same as the shuffle experiment, as the S RNAscope adjustment is used to make the 
-pseudobulks across each Z source.
+This notebook shows a pseudobulk shuffle experiment in which $S_{pseudobulk}$ is shuffled.
+
+# Load
 
 ```{r setup, include=FALSE}
 setwd("..")
@@ -58,19 +57,21 @@ source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudo
 # 
 ```
 
-
-
-
-```{r}
+```{r, include=FALSE}
 sce.k2 <- sce
 sample.id.variable <- "Sample"
 assay.name <- "logcounts"
 celltype.variable <- "k2"
 algorithm.name <- "nnls"
 return.dimensions <- "tall"
-index <- 2
-sample.id.vector <- unique(sce.k2[[sample.id.variable]])
-sample.id.iter <- sample.id.vector[index]
+```
+
+# High neuron proportion
+
+The $S_{pseudobulk}$ sample has high neuron proportion.
+
+```{r, include = FALSE}
+sample.id.iter <- "Br3942_mid"
 s.vector <- dfs.rn[dfs.rn$sample.id==sample.id.iter,]
 s.vector <- c("glial" = as.numeric(s.vector[1]), "neuron" = as.numeric(s.vector[2]))
 dfp.tall <- get_ypb_experiment_series(sce.k2, 
@@ -81,17 +82,50 @@ dfp.tall <- get_ypb_experiment_series(sce.k2,
                                       algorithm.name = algorithm.name, 
                                       return.dimensions = return.dimensions)
 dfp.tall$s.sample.id <- sample.id.iter
-
-#dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample", 
-#                                      celltype.variable = "k2", assay.name = "logcounts",
-#                                      s.vector = c("glial" = 3, "neuron" = 10),
-#                                      algorithm.name = "nnls", return.dimensions = "wide")
-
 dfp.tall$matched.szy <- dfp.tall$s.sample.id==dfp.tall$sample.id
-
 ```
 
-```{r}
+```{r, include=TRUE}
 ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type)
+```
+
+Save formatted plot.
+
+```{r, include = FALSE}
+```
+
+# Low neuron proportion
+
+The $S_{pseudobulk}$ sample has low neuron proportion.
+
+```{r, include = FALSE}
+sample.id.iter <- "Br2743_ant"
+s.vector <- dfs.rn[dfs.rn$sample.id==sample.id.iter,]
+s.vector <- c("glial" = as.numeric(s.vector[1]), "neuron" = as.numeric(s.vector[2]))
+dfp.tall <- get_ypb_experiment_series(sce.k2, 
+                                      sample.id.variable = sample.id.variable,
+                                      celltype.variable = celltype.variable, 
+                                      assay.name = assay.name,
+                                      s.vector = s.vector,
+                                      algorithm.name = algorithm.name, 
+                                      return.dimensions = return.dimensions)
+dfp.tall$s.sample.id <- sample.id.iter
+dfp.tall$matched.szy <- dfp.tall$s.sample.id==dfp.tall$sample.id
+```
+
+```{r, include=TRUE}
+ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type)
+```
+
+Save formatted plot.
+
+```{r, include = FALSE}
+```
+
+# Session info
+
+```{r, include = FALSE}
+sessionInfo()
 ```

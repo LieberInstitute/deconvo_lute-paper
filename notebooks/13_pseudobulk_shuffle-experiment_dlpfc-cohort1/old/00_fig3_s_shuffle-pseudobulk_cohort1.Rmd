@@ -4,10 +4,12 @@ author: "Sean Maden"
 date: "2023-09-03"
 output: html_document
 ---
-This is the final RNAscope shuffle experiment. Here, the pseudobulks are all made using matched 
-empirical cell size scale factors, then *S* is shuffled.
 
-```{r setup, include=FALSE}
+This notebook shows a pseudobulk shuffle experiment in which $S_{deconvolution}$ is shuffled.
+
+# Load
+
+```{r setup, include = FALSE}
 setwd("..")
 setwd("..")
 env.name <- "00_check-rnascope-pseudobulk_cohort1.RData"
@@ -55,10 +57,7 @@ source("deconvo_method-paper/code/13_pseudobulk_shuffle-experiment_dlpfc-cohort1
 # 
 ```
 
-
-
-
-```{r}
+```{r, include = FALSE}
 sce.k2 <- sce
 sample.id.variable <- "Sample"
 assay.name <- "logcounts"
@@ -71,7 +70,11 @@ sample.id.iter <- sample.id.vector[index]
 s.data.frame <- dfs.rn
 ```
 
-```{r}
+# High neuron proportion sample
+
+The $S_{deconvolution}$ sample has high neuron proportion.
+
+```{r, include = FALSE}
 s.scale.sample.id <- "Br3942_mid"
 dfp.tall <- get_ypb_experiment_series_shuffle(sce.k2, 
                                               sample.id.s.scale.shuffle.reference = s.scale.sample.id,
@@ -89,8 +92,54 @@ dfp.tall <- get_ypb_experiment_series_shuffle(sce.k2,
 dfp.tall$matched.szy <- dfp.tall$s.sample.id.pred.all==dfp.tall$sample.id
 ```
 
-```{r}
+```{r, include = TRUE}
 ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
   ggtitle(paste0("S scale id: ", s.scale.sample.id))
+```
+
+Save formatted plot.
+
+```{r, include = FALSE}
+
+```
+
+# Low neuron proportion sample
+
+The $S_{deconvolution}$ sample has low neuron proportion.
+
+```{r, include = FALSE}
+s.scale.sample.id <- "Br2743_ant"
+dfp.tall <- get_ypb_experiment_series_shuffle(sce.k2, 
+                                              sample.id.s.scale.shuffle.reference = s.scale.sample.id,
+                                              sample.id.variable = sample.id.variable,
+                                              celltype.variable = celltype.variable,
+                                              assay.name = assay.name,
+                                              s.data.frame = s.data.frame,
+                                              algorithm.name = algorithm.name,
+                                              return.dimensions = return.dimensions)
+# dfp.tall$s.sample.id <- sample.id.iter
+#dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample", 
+#                                      celltype.variable = "k2", assay.name = "logcounts",
+#                                      s.vector = c("glial" = 3, "neuron" = 10),
+#                                      algorithm.name = "nnls", return.dimensions = "wide")
+dfp.tall$matched.szy <- dfp.tall$s.sample.id.pred.all==dfp.tall$sample.id
+```
+
+```{r, include = TRUE}
+ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
+  ggtitle(paste0("S scale id: ", s.scale.sample.id))
+```
+
+Save formatted plot. 
+
+```{r, include = FALSE}
+
+```
+
+# Session info
+
+```{r, include = FALSE}
+sessionInfo()
 ```
