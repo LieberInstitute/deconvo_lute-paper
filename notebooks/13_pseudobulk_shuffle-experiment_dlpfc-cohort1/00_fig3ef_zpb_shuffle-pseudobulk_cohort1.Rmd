@@ -10,7 +10,7 @@ This notebook shows a pseudobulk shuffle experiment in which $Z_{pseudobulk}$ is
 ```{r setup, include=FALSE}
 setwd("..")
 setwd("..")
-env.name <- "00_check-rnascope-pseudobulk_cohort1.RData"
+env.name <- "00_fig3ef_zpb_shuffle-pseudobulk_cohort1.RData"
 env.path <- file.path("notebooks", "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", env.name)
 if(file.exists(env.path)){
   knitr::opts_chunk$set(echo = F, eval = F, include = F)
@@ -55,9 +55,6 @@ source("deconvo_method-paper/code/13_pseudobulk_shuffle-experiment_dlpfc-cohort1
 # 
 ```
 
-
-
-
 ```{r}
 sce.k2 <- sce
 sample.id.variable <- "Sample"
@@ -95,7 +92,7 @@ dfp.tall.high <- dfp.tall
 ```{r, include = TRUE}
 ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.z)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("Z deconvo id: ", zpb.sample.id))
+  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id))
 ```
 
 Save formatted plot. 
@@ -108,7 +105,7 @@ jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
 
 ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
   geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("Z deconvo id: ", zpb.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
 
 dev.off()
 
@@ -136,7 +133,7 @@ dfp.tall.low <- dfp.tall
 ```{r, include = TRUE}
 ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.z)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("Z deconvo id: ", zpb.sample.id))
+  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id))
 ```
 
 Save formatted plot. 
@@ -149,14 +146,21 @@ jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
 
 ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
   geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("Z deconvo id: ", zpb.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
 
 dev.off()
 
 ```
 
-# Session info
+# Notebook end content
+
+Save environment, session info.
 
 ```{r, include = FALSE}
+# save env image
+env.name <- "00_fig3ef_zpb_shuffle-pseudobulk_cohort1.RData"
+env.path <- file.path("notebooks", "13_pseudobulk_shuffle-experiment_dlpfc-cohort1", env.name)
+save.image(file = env.path)
+# print session info
 sessionInfo()
 ```
