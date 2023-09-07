@@ -1,0 +1,219 @@
+---
+title: "02_rnascope_image-vs-proportion-filter"
+author: "Sean Maden"
+date: "2023-09-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+env.name <- "01_rnascope-filter-proportions-summaries.RData"
+env.path <- file.path("outputs", "01_prepare-datasets", env.name)
+if(file.exists(env.path)){
+  knitr::opts_chunk$set(echo = F, eval = F, include = F)
+  save.image(file = env.path)
+} else{
+  knitr::opts_chunk$set(echo = TRUE)
+}
+```
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", 
+          "ggforce", "MultiAssayExperiment", "SingleCellExperiment")
+sapply(libv, library, character.only = TRUE)
+```
+
+Get HALO image data as `singleCellExperiment`.
+
+```{r}
+# load rnascope image data
+load("~/GitHub/deconvo_method-paper/outputs/01_prepare-datasets/halo-outputs_updated.Rdata")
+# rnascope: make sce with image data
+sample.id.halo <- "Sample"
+img <- halo.output.table
+new.img.colnames <- paste0("cell", seq(nrow(img)))
+img.data.colnames <- c("Nucleus_Area", "AKT3_Copies", "Cell_Area", 
+                       "DAPI_Nucleus_Intensity", "DAPI_Cytoplasm_Intensity")
+img.coldata.colnames <- c("SAMPLE_ID", sample.id.halo, "cell_type", "Slide", 
+                          "XMin", "XMax", "YMin", "YMax")
+img.list <- lapply(img.data.colnames, function(colname){
+  new.data <- img[,colname] %>% as.matrix() %>% t()
+  colnames(new.data) <- new.img.colnames
+  new.data
+})
+names(img.list) <- img.data.colnames
+# gets data as sce
+sce.img <- SingleCellExperiment(assays = img.list)
+cd.colnames <- c("SAMPLE_ID", "Sample", "BrNum", "Position", "cell_type", "AKT3_Copies", "XMin", "XMax", "YMin", "YMax")
+cd.img <- DataFrame(halo.output.table[,cd.colnames])
+rownames(cd.img) <- new.img.colnames
+colData(sce.img) <- cd.img
+```
+
+# Compare output image vs. proportions labels
+
+```{r}
+dim(sce.img)
+```
+
+```{r}
+sample.id <- "Br6432_ant"
+experiment.id <- "STAR"
+filter.sce <- sce.img$Sample==sample.id & 
+  grepl(paste0(".*_", experiment.id, "$"), sce.img$SAMPLE_ID)
+sce.filt <- sce.img[,filter.sce]
+dim(sce.filt)
+```
+
+Plot single image.
+
+```{r}
+dfp <- data.frame(nucleus_area = assays(sce.filt)[["Nucleus_Area"]][1,],
+                  xmin = sce.filt$XMin, xmax = sce.filt$XMax,
+                  ymin = sce.filt$YMin, ymax = sce.filt$YMax,
+                  cell_type = sce.filt$cell_type,
+                  point.index.id = colnames(sce.filt))
+# apply colors
+dfp$is.neuron <- ifelse(dfp$cell_type %in% c("Inhib", "Excit"), TRUE, FALSE)
+dfp$is.glial <- ifelse(dfp$cell_type %in% c("Oligo", "Astro", "Micro"), TRUE, FALSE)
+dfp$is.oligo <- ifelse(dfp$cell_type %in% c("Oligo"), TRUE, FALSE)
+dfp$is.other <- ifelse(dfp$cell_type %in% c("Other"), TRUE, FALSE)
+```
+
+Show full tissue plots.
+
+```{r}
+ggplot(dfp, (aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))) + 
+  geom_rect(alpha = 0.5) + theme_bw()
+
+ggplot(dfp, (aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, color = is.neuron))) + 
+  geom_rect(alpha = 0.5) + theme_bw()
+
+ggplot(dfp, (aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, color = is.glial))) + 
+  geom_rect(alpha = 0.5) + theme_bw()
+
+ggplot(dfp, (aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, color = is.oligo))) + 
+  geom_rect(alpha = 0.5) + theme_bw()
+
+ggplot(dfp, (aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, color = is.other))) + 
+  geom_rect(alpha = 0.5) + theme_bw()
+```
+
+Show full plots with exclusions.
+
+```{r}
+# Helper functions
+
+exclude_coordinates <- function(dfp, exclusion.decile = 1){
+  xrange <- max(dfp$xmax)-min(dfp$xmin)
+  yrange <- max(dfp$ymax)-min(dfp$ymin)
+  xrange.q <- quantile(seq(0, xrange, 1), 
+                       probs = seq(0, 1, 0.1))[[1+exclusion.decile]]
+  yrange.q <- quantile(seq(0, yrange, 1),
+                       probs = seq(0, 1, 0.1))[[1+exclusion.decile]]
+  xint.low.q <- min(dfp$xmin)+xrange.q
+  xint.high.q <- max(dfp$xmax)-xrange.q
+  yint.low.q <- min(dfp$ymin)+yrange.q
+  yint.high.q <- max(dfp$ymax)-yrange.q
+  # get filtered dfp
+  filter.xcoord <- dfp$xmin > xint.low.q & dfp$xmax < xint.high.q
+  filter.ycoord <- dfp$ymin > yint.low.q & dfp$ymax < yint.high.q
+  dfp.filter <- dfp[filter.xcoord & filter.ycoord,]
+  # draw full plot with axis intercept lines indicating exclusions
+  new.plot1 <- ggplot(dfp, 
+                     (aes
+                      (xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax))) + 
+    geom_rect(alpha = 0.5) + theme_bw() +
+    geom_hline(yintercept = yint.low.q) + geom_hline(yintercept = yint.high.q) +
+    geom_vline(xintercept = xint.low.q) + geom_vline(xintercept = xint.high.q) +
+    ggtitle(paste0("Quantile = ", 10*exclusion.decile, "%"))
+  # highlight excluded points
+  dfp$excluded <- ifelse(
+    dfp$point.index.id %in% dfp.filter$point.index.id, FALSE, TRUE)
+  new.plot2 <- ggplot(dfp, 
+                     (aes
+                      (xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax,
+                        color = excluded))) + 
+    geom_rect(alpha = 0.5) + theme_bw() +
+    geom_hline(yintercept = yint.low.q) + geom_hline(yintercept = yint.high.q) +
+    geom_vline(xintercept = xint.low.q) + geom_vline(xintercept = xint.high.q) +
+    ggtitle(paste0("Quantile = ", 10*exclusion.decile, "%"))
+  # return
+  lr <- list(new.plot1 = new.plot1, 
+              new.plot2 = new.plot2, 
+              dfp.filter = dfp.filter)
+  return(lr)
+}
+
+cell_type_barplots <- function(dfp){
+  dfp.bp <- as.data.frame(table(dfp$cell_type))
+  colnames(dfp.bp) <- c("cell_type", "cells")
+  dfp.bp[,2] <- as.numeric(dfp.bp[,2])
+  dfp.bp$percent <- paste0(round(100*dfp.bp[,2]/sum(dfp.bp[,2]), 1), "%")
+  dfp.bp$sample <- rep("sample", nrow(dfp.bp))
+  new.plot1 <- ggplot(dfp.bp, aes(x = sample, y = cells, fill = cell_type)) + 
+    geom_bar(stat = "identity", position = "stacked") + 
+    theme_bw()
+  new.plot2 <- ggplot(dfp.bp, aes(x = cell_type, y = cells, fill = cell_type)) + 
+    geom_bar(stat = "identity", position = "dodge") + 
+    geom_text(aes(label = percent), vjust = 0) +
+    theme_bw()
+  lr <- list(new.plot1 = new.plot1, new.plot2 = new.plot2)
+  return(lr)
+}
+
+```
+
+Show decile exclusions.
+
+```{r}
+exclude_coordinates(dfp, 1)$new.plot2
+exclude_coordinates(dfp, 2)$new.plot2
+exclude_coordinates(dfp, 3)$new.plot2
+exclude_coordinates(dfp, 4)$new.plot2
+```
+
+Get cell type proportions by decile exclusion.
+
+```{r}
+exclude_coordinates(dfp, 1)$new.plot2
+exclude_coordinates(dfp, 2)$new.plot2
+exclude_coordinates(dfp, 3)$new.plot2
+exclude_coordinates(dfp, 4)$new.plot2
+```
+
+Show full plots with exclusions and cell type proportions.
+
+```{r}
+list.results <- lapply(c(1,2,4), function(decile.filter){
+  list.filter.result <- exclude_coordinates(dfp, decile.filter)
+  barplots.filter <- cell_type_barplots(list.filter.result$dfp.filter)
+  new.filter.plot <- list.filter.result$new.plot2
+  new.barplot1 <- barplots.filter$new.plot1 + ggtitle("")
+  new.barplot2 <- barplots.filter$new.plot2 + ggtitle("")
+  list(new.filter.plot, new.barplot1, new.barplot2)
+})
+```
+
+Show 3 plots side-by-side.
+
+```{r}
+eval.str <- paste0(
+  "list.results[[",seq(length(list.results)), "]][[1]],",
+  "list.results[[",seq(length(list.results)), "]][[2]],",
+  "list.results[[",seq(length(list.results)), "]][[3]]", 
+  collapse = ",")
+eval.str <- paste0("grid.arrange(", eval.str, ", ncol = length(list.results[[1]]))")
+eval(parse(text = eval.str))
+```
+
+Show stacked barplots, percentage and cell counts scales.
+
+```{r}
+```
+
+
+
+
+
+

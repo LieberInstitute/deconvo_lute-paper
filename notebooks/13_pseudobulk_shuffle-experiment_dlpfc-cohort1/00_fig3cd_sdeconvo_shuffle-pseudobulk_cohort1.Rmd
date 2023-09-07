@@ -84,19 +84,28 @@ dfp.tall <- get_ypb_experiment_series_shuffle(sce.k2,
                                               s.data.frame = s.data.frame,
                                               algorithm.name = algorithm.name,
                                               return.dimensions = return.dimensions)
-dfp.tall$matched.szy <- dfp.tall$s.sample.id.pred.all==dfp.tall$sample.id
+dfp.tall$matched.id <- dfp.tall$s.sample.id.pred.all==dfp.tall$sample.id
+dfp.tall.high <- dfp.tall
 ```
 
 ```{r, include = TRUE}
-ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
+ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S scale id: ", s.scale.sample.id))
+  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.id))
 ```
 
 Save formatted plot.
 
 ```{r, include = FALSE}
+new.plot.filename <- "fig3_shuffle-sdeconvo_high-proportion_cohort1.jpg"
 
+jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+
+ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+
+dev.off()
 ```
 
 # Low neuron proportion sample
@@ -113,19 +122,28 @@ dfp.tall <- get_ypb_experiment_series_shuffle(sce.k2,
                                               s.data.frame = s.data.frame,
                                               algorithm.name = algorithm.name,
                                               return.dimensions = return.dimensions)
-dfp.tall$matched.szy <- dfp.tall$s.sample.id.pred.all==dfp.tall$sample.id
+dfp.tall$matched.id <- dfp.tall$s.sample.id.pred.all==dfp.tall$sample.id
+dfp.tall.low <- dfp.tall
 ```
 
 ```{r, include = TRUE}
-ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
+ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S scale id: ", s.scale.sample.id))
+  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.id))
 ```
 
 Save formatted plot. 
 
 ```{r, include = FALSE}
+new.plot.filename <- "fig3_shuffle-sdeconvo_low-proportion_cohort1.jpg"
 
+jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+
+ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+
+dev.off()
 ```
 
 # Session info

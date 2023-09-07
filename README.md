@@ -34,9 +34,10 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure 2F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, DLPFC Cohort2.
 
 * Figure 3
-[Figure 3A](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_check-rnascope-pseudobulk_cohort1.rmd) Shuffle S
-[Figure 3B](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_rnascope-pseudobulk-shuffle-iter-final_cohort1.rmd) Shuffle S
-[Figure 3C](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_shuffle-zpb_rnascope-sce-pseudobulk_cohort1.rmd) Shuffle Zpb
+[Figure 3A-B](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3ab_spb_shuffle-pseudobulk_cohort1.rmd) Shuffle $S_{pseudobulk}$
+[Figure 3C-D](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3cd_sdeconvo_shuffle-pseudobulk_cohort1.rmd) Shuffle $S_{deconvolution}$
+[Figure 3E-F](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3ef_zpb_shuffle-pseudobulk_cohort1.rmd) Shuffle $Z_{pseudobulk}$
+[Figure 3G-H](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3ef_zdeconvo_shuffle-pseudobulk_cohort1.rmd) Shuffle $Z_{deconvolution}$
 
 * Figure 4
 [Figure 4A](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K2 labels

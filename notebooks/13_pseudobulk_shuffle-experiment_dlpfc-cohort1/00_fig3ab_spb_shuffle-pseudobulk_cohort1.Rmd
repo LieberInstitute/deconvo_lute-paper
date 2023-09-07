@@ -82,17 +82,31 @@ dfp.tall <- get_ypb_experiment_series(sce.k2,
                                       algorithm.name = algorithm.name, 
                                       return.dimensions = return.dimensions)
 dfp.tall$s.sample.id <- sample.id.iter
-dfp.tall$matched.szy <- dfp.tall$s.sample.id==dfp.tall$sample.id
+dfp.tall$matched.id <- dfp.tall$s.sample.id==dfp.tall$sample.id
+dfp.tall.high <- dfp.tall
 ```
 
 ```{r, include=TRUE}
-ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type)
+sample.id.iter <- "Br3942_mid"
+ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
+  ggtitle(paste0("S_pseudobulk id :", sample.id.iter))
 ```
 
 Save formatted plot.
 
 ```{r, include = FALSE}
+sample.id.iter <- "Br3942_mid"
+
+new.plot.filename <- "fig3_shuffle-spb_high-proportion_cohort1.jpg"
+
+jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+
+ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S pseudobulk id: ", sample.id.iter)) + xlim(0.2, 1) + ylim(0.2, 1)
+
+dev.off()
 ```
 
 # Low neuron proportion
@@ -111,17 +125,31 @@ dfp.tall <- get_ypb_experiment_series(sce.k2,
                                       algorithm.name = algorithm.name, 
                                       return.dimensions = return.dimensions)
 dfp.tall$s.sample.id <- sample.id.iter
-dfp.tall$matched.szy <- dfp.tall$s.sample.id==dfp.tall$sample.id
+dfp.tall$matched.id <- dfp.tall$s.sample.id==dfp.tall$sample.id
+dfp.tall.low <- dfp.tall
 ```
 
 ```{r, include=TRUE}
-ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.szy)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type)
+sample.id.iter <- "Br2743_ant"
+ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
+  ggtitle(paste0("S_pseudobulk id: ", sample.id.iter))
 ```
 
 Save formatted plot.
 
 ```{r, include = FALSE}
+sample.id.iter <- "Br2743_ant"
+
+new.plot.filename <- "fig3_shuffle-spb_low-proportion_cohort1.jpg"
+
+jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+
+ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S pseudobulk id: ", sample.id.iter)) + xlim(0.2, 1) + ylim(0.2, 1)
+
+dev.off()
 ```
 
 # Session info

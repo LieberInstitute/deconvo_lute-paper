@@ -5,7 +5,9 @@ date: "2023-09-03"
 output: html_document
 ---
 
-This notebook shows a pseudobulk shuffle experiment in which $Z_{pseudobulk}$ is shuffled.
+This notebook shows a pseudobulk shuffle experiment in which $Z_{deconvolution}$ is shuffled.
+
+# Load
 
 ```{r setup, include=FALSE}
 setwd("..")
@@ -55,31 +57,27 @@ source("deconvo_method-paper/code/13_pseudobulk_shuffle-experiment_dlpfc-cohort1
 # 
 ```
 
-
-
-
-```{r}
-sce.k2 <- sce
+```{r, include=FALSE}
 sample.id.variable <- "Sample"
 assay.name <- "logcounts"
 celltype.variable <- "k2"
 algorithm.name <- "nnls"
 return.dimensions <- "tall"
 index <- 2
-sample.id.vector <- unique(sce.k2[[sample.id.variable]])
+sample.id.vector <- unique(sce[[sample.id.variable]])
 sample.id.iter <- sample.id.vector[index]
 s.data.frame <- dfs.rn
 ```
 
 # High neuron proportion sample
 
-The $Z_{deconvolution}$ sample has high neuron proportion.
+The $Z_{pseudobulk}$ sample has high neuron proportion.
 
 ```{r, include = FALSE}
 zpb.sample.id <- "Br3942_mid"
-sce.foriter <- sce.k2
-sce.deconvo <- sce.k2[,sce.k2$Sample==zpb.sample.id]
-dfp.tall <- get_ypb_experiment_series_shuffle_zpb(sce.foriter, 
+sce.foriter <- sce
+sce.deconvo <- sce[,sce$Sample==zpb.sample.id]
+dfp.tall <- get_ypb_experiment_series_shuffle_zdeconvo(sce.foriter, 
                                                   sce.deconvo,
                                                   sample.id.variable = sample.id.variable,
                                                   celltype.variable = celltype.variable,
@@ -88,29 +86,41 @@ dfp.tall <- get_ypb_experiment_series_shuffle_zpb(sce.foriter,
                                                   return.dimensions = return.dimensions)
 
 dfp.tall$z.deconvo.sample.id <- zpb.sample.id
-dfp.tall$matched.z <- dfp.tall$sample.id == dfp.tall$z.deconvo.sample.id
+dfp.tall$matched.id <- dfp.tall$sample.id == dfp.tall$z.deconvo.sample.id
 dfp.tall.high <- dfp.tall
 ```
 
 ```{r, include = TRUE}
-ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.z)) + 
+ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("Z deconvo id: ", zpb.sample.id))
+  ggtitle(paste0("Z_pseudobulk id: ", zpb.sample.id))
 ```
 
 Save formatted plot. 
 
 ```{r, include = FALSE}
+zpb.sample.id <- "Br3942_mid"
 
+new.plot.filename <- "fig3_shuffle-zdeconvo_high-proportion_cohort1.jpg"
+
+jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+
+ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("Z deconvo id: ", sample.id.iter)) + xlim(0.2, 1) + ylim(0.2, 1)
+
+dev.off()
 ```
 
 # Low neuron sample
+
+The $Z_{pseudobulk}$ sample has low neuron proportion.
 
 ```{r, include = FALSE}
 zpb.sample.id <- "Br2743_ant"
 sce.foriter <- sce.k2
 sce.deconvo <- sce.k2[,sce.k2$Sample==zpb.sample.id]
-dfp.tall <- get_ypb_experiment_series_shuffle_zpb(sce.foriter, 
+dfp.tall <- get_ypb_experiment_series_shuffle_zdeconvo(sce.foriter, 
                                                   sce.deconvo,
                                                   sample.id.variable = sample.id.variable,
                                                   celltype.variable = celltype.variable,
@@ -119,19 +129,30 @@ dfp.tall <- get_ypb_experiment_series_shuffle_zpb(sce.foriter,
                                                   return.dimensions = return.dimensions)
 
 dfp.tall$z.deconvo.sample.id <- zpb.sample.id
-dfp.tall$matched.z <- dfp.tall$sample.id == dfp.tall$z.deconvo.sample.id
+dfp.tall$matched.id <- dfp.tall$sample.id == dfp.tall$z.deconvo.sample.id
 dfp.tall.low <- dfp.tall
 ```
 
 ```{r, include = TRUE}
-ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.z)) + 
+ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("Z deconvo id: ", zpb.sample.id))
+  ggtitle(paste0("Z_pseudobulk id: ", zpb.sample.id))
 ```
 
 Save formatted plot. 
 
 ```{r, include = FALSE}
+sample.id.iter <- "Br2743_ant"
+
+new.plot.filename <- "fig3_shuffle-spb_low-proportion_cohort1.jpg"
+
+jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+
+ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S pseudobulk id: ", sample.id.iter)) + xlim(0.2, 1) + ylim(0.2, 1)
+
+dev.off()
 ```
 
 # Session info
