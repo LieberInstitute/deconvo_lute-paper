@@ -26,13 +26,13 @@ sapply(libv, library, character.only = TRUE)
 # load prepped assays
 #--------------------
 # load snrnaseq data
-load("./data/inputs/00_preprocess/list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
-load("./data/inputs/00_preprocess/list-sce-validate_markers-k-2-3-4_cohort1.rda")
+load("./outputs/00_preprocess/list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+load("./outputs/00_preprocess/list-sce-validate_k-2-3-4-markers_cohort1.rda")
 # load bulk data
-load("./data/inputs/00_preprocess/rse-gene-filter.rda")
-load("./data/inputs/00_preprocess/rse-rpkmCounts_Human_DLPFC_Deconvolution_n113.rda")
+load("./outputs/00_preprocess/rse-gene-filter.rda")
+load("./outputs/00_preprocess/rse-rpkmCounts_Human_DLPFC_Deconvolution_n113.rda")
 # load rnascope image data
-load("./data/outputs/00_preprocess/halo-outputs_updated.Rdata")
+load("./outputs/00_preprocess/halo-outputs_updated.Rdata")
 
 
 #------------------
@@ -89,14 +89,6 @@ make_sce_all <- function(sce.train, sce.validate){
   return(sce.all)
 }
 
-#-------------------------------------------
-# write the sample ids for train, validation
-#-------------------------------------------
-sample.id.train <- unique(sce1[[sample.id.snrnaseq]])
-sample.id.validate <- unique(sce1.validate[[sample.id.snrnaseq]])
-list.sample.id.snrnaseq <- list(train = sample.id.train, validation = sample.id.validate)
-save(list.sample.id.snrnaseq, file = "data/outputs/00_preprocess/list_snrnaseq_sampleid.rda")
-
 #------------------------------------
 # snrnaseq: isolate snrnaseq sce data
 #------------------------------------
@@ -117,6 +109,16 @@ rm(list.sce.validate.markers)
 sce1.all <- make_sce_all(sce1, sce1.validate)
 sce2.all <- make_sce_all(sce2, sce2.validate)
 sce3.all <- make_sce_all(sce3, sce3.validate)
+
+#-------------------------------------------
+# write the sample ids for train, validation
+#-------------------------------------------
+sample.id.train <- unique(sce1[[sample.id.snrnaseq]])
+sample.id.validate <- unique(sce1.validate[[sample.id.snrnaseq]])
+list.sample.id.snrnaseq <- list(train = sample.id.train, validation = sample.id.validate)
+
+# save
+save(list.sample.id.snrnaseq, file = "outputs/00_preprocess/list_snrnaseq_sampleid.rda")
 
 #--------------------------------------------
 # bulk: isolate bulk rnaseq marker expression
@@ -215,8 +217,8 @@ rownames(df.rnascope.kdata) <- paste0(df.rnascope.kdata$sample_id,";",
 df.rnascope.kdata <- t(df.rnascope.kdata)
 
 # save rnascope data objects
-save(sce.img, file = "./data/outputs/00_preprocess/sce_img.rda")
-save(df.rnascope.kdata, file = "./data/outputs/00_preprocess/df_rnascope_kdata.rda")
+save(sce.img, file = "outputs/00_preprocess/sce_img.rda")
+save(df.rnascope.kdata, file = "outputs/00_preprocess/df_rnascope_kdata.rda")
 
 #-------------
 # mae: coldata
@@ -272,19 +274,17 @@ dfrn.map <- data.frame(colname = colnames(df.rnascope.kdata),
 # make mappings list, then map df
 
 listmap <- list(
-  snrnaseq.k2.all = sn1.all.map, # snrnaseq
+  snrnaseq.k2.all = sn.k2.map, # snrnaseq
                 
-  snrnaseq.k3.all = sn2.all.map, 
+  snrnaseq.k3.all = sn.k3.map, 
                 
-  snrnaseq.k4.all = sn3.all.map,
+  snrnaseq.k4.all = sn.k4.map,
                 
   bulk.rnaseq = bulk.map, # bulk
                 
   bulk.rpkm.rnaseq = bulk.rpkm.map, # bulk, rpkm
-                
-  rnascope.image = image.map, # rnascope
-                
-  df.cellstat.rnascope = dfrn.map
+               
+  cell.sizes = dfrn.map
   
   )
 
@@ -294,30 +294,47 @@ rownames(dfmap) <- dfmap$primary
 
 # get object list
 object.list <- list(
-  sn1.rnaseq = sce1, 
-  sn2.rnaseq = sce2, 
-  sn3.rnaseq = sce3, 
-  sn1.validate.rnaseq = sce1.validate, 
-  sn2.validate.rnaseq = sce2.validate, 
-  sn3.validate.rnaseq = sce3.validate, 
-  sn1.all.rnaseq = sce1.all, 
-  sn2.all.rnaseq = sce2.all, 
-  sn3.all.rnaseq = sce3.all, 
+  
+  snrnaseq.k2.all = sce1.all, 
+  
+  snrnaseq.k3.all = sce2.all, 
+  
+  snrnaseq.k4.all = sce3.all, 
+  
   bulk.rnaseq = rse.filter,
+  
   bulk.rpkm.rnaseq = rse.rpkm,
-  rnascope.image = sce.img,
-  df.cellstat.rnascope = df.rnascope.kdata %>% as.matrix())
+  
+  cell.sizes = df.rnascope.kdata %>% as.matrix()
+  
+  )
+
 experiment.list <- ExperimentList(object.list)
+
 rownames(coldata) <- coldata$sample.id
 
 # get mae datasets
-mae <- prepMultiAssay(ExperimentList = experiment.list, 
-                      sampleMap = dfmap, colData = coldata)
+mae <- prepMultiAssay(
+  
+  ExperimentList = experiment.list, 
+                      
+  
+  sampleMap = dfmap, colData = coldata
+  
+  )
 
 # get final mae type object
-mae.final <- MultiAssayExperiment(mae$experiments, 
-                                  mae$colData, 
-                                  mae$sampleMap)
+mae.final <- MultiAssayExperiment(
+  
+  mae$experiments, 
+                                  
+  
+  mae$colData, 
+                                  
+  
+  mae$sampleMap
+  
+  )
 
 
 
@@ -335,8 +352,8 @@ upsetSamples(mae.final)
 mae.final[,colData(mae.final)$sample.id=="Br8492_mid",]
 
 # inspect, with basic summaries
-experiments(mae)
-colData(mae)
+names(mae.final)
+colData(mae.final)
 
 #-----
 # save
@@ -345,6 +362,6 @@ colData(mae)
 # set new mae filename
 new.mae.filename <- "mae_allsamples.rda"
 
-mae.final.filepath <- here("data", "outputs", "00_preprocess", new.mae.filename)
+mae.final.filepath <- here("outputs", "01_mae", new.mae.filename)
 
 save(mae.final, file = mae.final.filepath)
