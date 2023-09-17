@@ -13,21 +13,21 @@ libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr")
 sapply(libv, library, character.only = T)
 
 # sets variables
-folder.name <- "13_soptimize_yvary-zvary_dlpfc-cohort1"
+folder.name <- "03_shuffle"
 celltype.variable <- "k2"
 sample.id.variable <- "Sample"
 assay.name <- "logcounts"
 
 # source
-script.path <- file.path("deconvo_method-paper", "code", folder.name, "00_parameters.R")
+script.path <- file.path("scripts", folder.name, "00_parameters.R")
 source(script.path)
 
 #----------
 # load data
 #----------
 # load mae (SEE CODE 01 OUTPUTS)
-new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
-mae.final.filepath <- file.path("deconvo_method-paper", "outputs", "01_prepare-datasets", new.mae.filename)
+new.mae.filename <- "mae_allsamples.rda"
+mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 mae <- get(load(mae.final.filepath))
 
 # remove validation samples
@@ -57,7 +57,7 @@ colnames(dfs) <- paste0("s.", colnames(dfs))
 #---------------------------------
 # define the true cell proportions
 #---------------------------------
-df.rn <- mae[["df.cellstat.rnascope"]]
+df.rn <- mae[["cell.sizes"]]
 sample.id.vector <- unique(y.unadj$batch.id2)
 list.df.true <- df.true.list(df.rn, sample.id.vector, "k2", c("glial", "neuron"))
 names(list.df.true) <- sample.id.vector

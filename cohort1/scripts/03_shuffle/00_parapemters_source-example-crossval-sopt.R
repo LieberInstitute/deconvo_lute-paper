@@ -8,9 +8,6 @@
 libv <- c("lute")
 sapply(libv, library, character.only = T)
 
-#scripts.vector <- c("00_source_example-soptimize-framework-lute.R", "00_source-deconvo-plots.R")
-#sapply(scripts.vector, source)
-
 #--------------------------
 # manage experiment factors
 #--------------------------

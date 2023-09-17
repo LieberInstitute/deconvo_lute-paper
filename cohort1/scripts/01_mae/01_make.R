@@ -362,6 +362,6 @@ colData(mae.final)
 # set new mae filename
 new.mae.filename <- "mae_allsamples.rda"
 
-mae.final.filepath <- here("outputs", "01_mae", new.mae.filename)
+mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 
 save(mae.final, file = mae.final.filepath)
