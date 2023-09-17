@@ -1,0 +1,14 @@
+---
+title: "Pseudobulk predictions, K2,3,4"
+output: html_notebook
+---
+
+```{r}
+subfolder <- gsub(".*\\/", "", getwd())
+setwd("..")
+setwd("..")
+# list.files()
+scripts.path <- file.path("scripts", subfolder)
+scripts <- file.path(scripts.path, list.files(scripts.path))
+sapply(scripts, source)
+```

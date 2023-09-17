@@ -1,4 +1,3 @@
-
 data/lcsv_halo.rda
 data/halo/lcsv_halo.rda
 outputs/07_cell-size-estimates/df-cellsize_all-samples_sce.rda
@@ -27,3 +26,8 @@ outputs/01_prepare-datasets/halo-outputs_updated.Rdata
 outputs/12_soptimize_yvary-zsame_dlpfc-cohort1/env_yvar_notebook1.RDataTmp
 outputs/08_cell-counts-vs-qc-snrnaseq_notebook-scripts_dlpfc-cohort1/mae-pca-3steps_rnascope-nucleus-size-filters_cohort1.RData
 *.RData
+
+cohort1\data\inputs\00_preprocess\list-scef_markers-k2-k3-k4_ro1-dlpfc.rda
+cohort1\data\inputs\00_preprocess\sce-mrb_dlpfc.rda
+cohort1\data\outputs\03_shuffle\01_run-experiment.RData
+
