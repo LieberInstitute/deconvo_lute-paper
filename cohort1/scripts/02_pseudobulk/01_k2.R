@@ -39,3 +39,7 @@ ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() +
 # jitterbox -- jittered points and boxplots of absolute errors
 ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + ggtitle("Neuron")
+
+# save environment
+
+save.image("./env/02_pseudobulk/01_k2.RData")

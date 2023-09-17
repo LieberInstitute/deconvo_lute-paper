@@ -1,14 +1,54 @@
 ---
-title: "Pseudobulk predictions, K2,3,4"
-output: html_notebook
+title: "Pseudobulk k2 with and without cell size rescaling"
+author: "Sean Maden"
+date: "2023-09-17"
+output: html_document
 ---
 
-```{r}
-subfolder <- gsub(".*\\/", "", getwd())
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
-# list.files()
-scripts.path <- file.path("scripts", subfolder)
-scripts <- file.path(scripts.path, list.files(scripts.path))
-sapply(scripts, source)
+list.files()
+load("./env/02_pseudobulk/01_k2.RData")
 ```
+
+# Figure 2A 
+
+```{r}
+new.plot <- ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True proportion") + ylab("Predicted proportion") +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) + ggtitle("Neuron")
+new.plot
+```
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.name <- "fig2a.jpg"
+jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
+     width = 6, height = 3, units = "in", res = 400)
+new.plot
+dev.off()
+```
+
+# Figure S1
+
+```{r}
+new.plot <- ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + 
+  geom_jitter(alpha = 0.5) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + ggtitle("Neuron")
+```
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.name <- "figs1a.jpg"
+jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
+     width = 4, height = 2.5, units = "in", res = 400)
+new.plot
+dev.off()
+```
+

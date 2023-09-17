@@ -15,10 +15,10 @@ sapply(libv, library, character.only = TRUE)
 #------------
 
 # save path
-save.path <- file.path("data", "outputs", "02_pseudobulk")
+save.path <- file.path("outputs", "02_pseudobulk")
 
 # cohort data
-sce.markers.list.path <- file.path("data", "outputs", "00_preprocess", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
+sce.markers.list.path <- file.path("outputs", "00_preprocess", "list-scef_markers-k2-k3-k4_ro1-dlpfc.rda")
 
 #------------
 
