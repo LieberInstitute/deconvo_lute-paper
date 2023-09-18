@@ -2,7 +2,9 @@
 title: "Shuffles S pseudobulk term"
 author: "Sean Maden"
 date: "2023-09-03"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -15,8 +17,10 @@ This notebook shows a pseudobulk shuffle experiment in which $S_{pseudobulk}$ is
 ```{r setup, include=FALSE}
 # dependencies
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
+libv <- c("snow", "ggplot2", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
 sapply(libv, library, character.only = T)
+###
+point.color <- "641DD2"
 ```
 ```{r}
 setwd("..")
