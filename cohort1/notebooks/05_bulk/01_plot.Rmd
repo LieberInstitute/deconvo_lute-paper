@@ -10,11 +10,13 @@ This is to perform A/B tests on the bulk datasets using counts, RPKM-counts, log
 
 ```{r}
 knitr::opts_chunk$set(fig.width=10, fig.height=10)
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
 ```
 ```{r}
 setwd("..")
 setwd("..")
-load("./outputs/05_bulk/k2_results.rda")
+load("./env/05_bulk/01_run_script.RData")
 ```
 
 # Experiment summaries
@@ -49,49 +51,74 @@ data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(
 knitr::kable(data.dict)
 ```
 
+# Experiment condition summaries
 
-# Condition 1 Summaries -- Counts and RPKM-counts
-
-Proportions scatterplots
-
-```{r}
-ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
-  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~experiment.type*s.set.label)
-```
+Proportions scatterplots.
 
 ```{r}
-ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
-  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~s.set.label)
+new.plot.scatter <- ggplot(df.k2, 
+                           aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + 
+  theme_bw() + geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~experiment.type*assay.name.lutearg)
+
+new.plot.scatter
 ```
+
+Save plot
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.path <- "./figures/05_bulk/figs2_scatter.jpg"
+jpeg(new.plot.path, width = 6, height = 5, res = 400, units = "in")
+new.plot.scatter
+dev.off()
+```
+
+# Jittered boxplots
 
 Absolute errors, organized by S cell size scale factor set ID.
 
 ```{r}
-# absolute errors
-ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
+new.plot.jitterbox <- ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
-  facet_wrap(~s.set.label) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  facet_wrap(~assay.name.lutearg) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot.jitterbox
 ```
+
+Save plot
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.path <- "./figures/05_bulk/figs2b_jitterbox1.jpg"
+jpeg(new.plot.path, width = 6, height = 5, res = 400, units = "in")
+new.plot.jitterbox
+dev.off()
+```
+
+# Errors by sample id and condition
 
 Absolute errors, organized by sample ID.
 
 ```{r}
-# errors by sample
-ggplot(df.k2, aes(x = s.set.label, y = abs.error.neuron)) + 
-  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
-  facet_wrap(~sample.id) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+new.plot.jitter.cond <- ggplot(df.k2, aes(x = bulk.sample.condition, y = abs.error.neuron, color = sample.id)) + 
+  geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "black") + theme_bw() +
+  facet_wrap(~experiment.type) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot.jitter.cond
 ```
 
-# Condition 2 Summaries -- Counts and RPKM-counts
+Save plot
 
 ```{r}
-```
-
-```{r}
-```
-
-```{r}
+setwd("..")
+setwd("..")
+new.plot.path <- "./figures/05_bulk/figs2c_jitterbox2_condition.jpg"
+jpeg(new.plot.path, width = 6, height = 4, res = 400, units = "in")
+new.plot.jitter.cond
+dev.off()
 ```
 
