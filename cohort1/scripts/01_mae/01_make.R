@@ -105,6 +105,19 @@ sce3.validate <- lscef.validate[[3]]
 rm(lscef.validate)
 rm(list.sce.validate.markers)
 
+# append cell type category names
+celltypevar <- "cellType_broad_hc"
+# define marker categories
+sce1.validate[["k2"]] <- ifelse(grepl("^Excit.*|^Inhib.*", sce1.validate[[celltypevar]]), 
+                      "neuron", "glial")
+sce2.validate[["k3"]] <- ifelse(grepl("^Excit.*", sce2.validate[[celltypevar]]), "Excit", 
+                      ifelse(grepl("^Inhib.*", sce2.validate[[celltypevar]]), 
+                             "Inhib", "glial"))
+sce3.validate[["k4"]] <- ifelse(grepl("^Excit.*", sce3.validate[[celltypevar]]), "Excit", 
+                      ifelse(grepl("^Inhib.*", sce3.validate[[celltypevar]]), "Inhib", 
+                             ifelse(grepl("^Oligo$", sce3.validate[[celltypevar]]), "Oligo", 
+                                    "non_oligo_glial")))
+
 # all (train + validate)
 sce1.all <- make_sce_all(sce1, sce1.validate)
 sce2.all <- make_sce_all(sce2, sce2.validate)
