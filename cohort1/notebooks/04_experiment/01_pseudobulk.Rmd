@@ -27,7 +27,10 @@ Save plot
 ```{r}
 setwd("..")
 setwd("..")
+new.plot.path <- "./figures/04_experiment/fig4a_heatmap.jpg"
+jpeg(new.plot.path, width = 5.5, height = 4, units = "in", res = 400)
 list.plots.dfp1$heatmaps$heatmap1
+dev.off()
 ```
 
 # Decile heatmaps
@@ -35,4 +38,23 @@ list.plots.dfp1$heatmaps$heatmap1
 Save plot
 
 ```{r}
+setwd("..")
+setwd("..")
+new.plot.path <- "./figures/04_experiment/fig4b_deciles.jpg"
+jpeg(new.plot.path, width = 5.5, height = 4, units = "in", res = 400)
+list.plots.dfp1$heatmaps$heatmap6
+dev.off()
+```
+
+# Error by s.fraction
+
+Save plot
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.path <- "./figures/04_experiment/fig4c_errorfraction.jpg"
+jpeg(new.plot.path, width = 5.5, height = 4, units = "in", res = 400)
+list.plots.dfp1$deconvocanos$cano2
+dev.off()
 ```
