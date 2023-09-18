@@ -1,0 +1,143 @@
+---
+title: "Expression scaling experiments, including SCE RPKM"
+author: "Sean Maden"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r}
+# set large figure dimensions
+knitr::opts_chunk$set(fig.width=10, fig.height=10)
+
+# load mae 
+new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae.final.filepath <- file.path("outputs", "01_prepare-datasets", new.mae.filename)
+mae <- get(load(mae.final.filepath))
+```
+
+This notebook shows the impact of taking the log normalization (on both $Z$ and 
+$Y$) when using either non-normalized counts or RPKM (length-normalized) counts 
+for $Y$. 
+
+This uses the RPKM-normalized counts for the SingleCellExperiment reference expression.
+
+# Load/source scripts
+
+```{r, message=F,warning=F,error=F}
+base.path <- file.path("code", "07_bulk-scale-abtest_dlpfc-cohort1")
+# prep dependencies
+source(file.path(base.path, "00_helper-functions.R"))
+# prep data
+source(file.path(base.path, "01-01_prepare-mae.R")) # prep mae data
+source(file.path(base.path, "01-02_prep-s-vector.R"))
+#----------------------------
+# experiments with sce counts
+#----------------------------
+# run experiments
+source(file.path(base.path, "02-01-01_rse-counts_counts-yz_shared-reference-experiments.R"))
+source(file.path(base.path, "02-03-01_rse-rpkm_counts-yz_shared-reference-experiments.R"))
+source(file.path(base.path, "02-01-02_rse-counts_logcounts-lutearg_shared-reference-experiments.R"))
+source(file.path(base.path, "02-03-02_rse-rpkm_logcounts-lutearg_shared-reference-experiments.R"))
+# bind results
+source(file.path(base.path, "03_prep-experiment-results_rpkm-trail_cohort1.R"))
+# assign results
+df.k2.counts <- df.k2
+df.k2.counts$sce.scale <- "counts"
+
+#---------------------------------
+# experiments with sce RPKM counts
+#---------------------------------
+# replace sce counts
+sce.rpkm.path <- "outputs/01_prepare-datasets/sce-rpkm-counts_dlpfc-cohort1.rda"
+sce.rpkm <- get(load(sce.rpkm.path))
+assays(sce.iter)[["counts"]] <- as.matrix(sce.rpkm)
+sce.iter <- logNormCounts(sce.iter)
+# run experiments
+source(file.path(base.path, "02-01-01_rse-counts_counts-yz_shared-reference-experiments.R"))
+source(file.path(base.path, "02-03-01_rse-rpkm_counts-yz_shared-reference-experiments.R"))
+source(file.path(base.path, "02-01-02_rse-counts_logcounts-lutearg_shared-reference-experiments.R"))
+source(file.path(base.path, "02-03-02_rse-rpkm_logcounts-lutearg_shared-reference-experiments.R"))
+# bind results
+source(file.path(base.path, "03_prep-experiment-results_rpkm-trail_cohort1.R"))
+# assign results
+df.k2.rpkm <- df.k2
+df.k2.rpkm$sce.scale <- "rpkm"
+
+#-----------------
+# bind all results
+#-----------------
+df.k2 <- rbind(df.k2.counts, df.k2.rpkm)
+```
+
+Filter relevant results.
+
+```{r}
+s.set.keep <- c("glial=1,neuron=1", "glial=3,neuron=10")
+df.k2 <- df.k2[df.k2$s.set.values %in% s.set.keep,]
+```
+
+Experiment table:
+
+```{r}
+expt.table <- table(df.k2$s.set.values, df.k2$experiment.type, 
+                    df.k2$bulk.scale.type, df.k2$assay.name.lutearg, 
+                    df.k2$sce.scale) %>% 
+  as.data.frame()
+colnames.vector <- c("s.set.values", "reference.type", "bulk.scale.type", 
+                          "assay.name.lutearg", "sce.scale")
+colnames(expt.table) <- c(colnames.vector, "num.results")
+knitr::kable(expt.table)
+```
+
+# Experiment condition data dictionary
+
+Experiment condition table data dictionary
+
+```{r}
+data.dict <- list(z.reference.type = "Z reference type. 'shared' : identical across donors/samples",
+                  y.expression.scale = "Bulk RNAseq scaling. 'counts' : non-normalized; 'RPKM' : length-normalized",
+                  s.pred.set.name = "Cell size scale factor set (NULL = control).",
+                  s.pred.set.values = "Cell size scale factor values.",
+                  cell.label.type = "Cell type label",
+                  sce.scale = "Expression scale for sce. 'counts' : non-normalized; 'RPKM' : length-normalized")
+data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(data.dict)[ii], data.dict[[ii]])}))
+knitr::kable(data.dict)
+```
+
+# Set plot variable labels
+
+Add colnames as labels for variable values.
+
+```{r}
+colindex.vector <- c(3, 7, 11, 14)
+for(c in colindex.vector){df.k2[,c] <- paste0(colnames(df.k2)[c], ":", df.k2[,c])}
+```
+
+# Condition 1 Summaries -- Counts and RPKM-counts
+
+Proportions scatterplots
+
+```{r}
+ggplot(df.k2, aes(x = true.neuron, y = neuron)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label*assay.name.lutearg*bulk.scale.type*sce.scale, ncol = 2)
+```
+
+Scatterplot, true vs. predicted, neuron
+
+```{r}
+ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label*assay.name.lutearg*sce.scale)
+```
+
+Scatterplot, predicted vs. true, neuron. This is similar to Fig 2 axes in 
+Sosina et al 2021.
+
+```{r}
+ggplot(df.k2, aes(x = neuron, y = true.neuron, color = bulk.scale.type)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label*assay.name.lutearg*sce.scale)
+```

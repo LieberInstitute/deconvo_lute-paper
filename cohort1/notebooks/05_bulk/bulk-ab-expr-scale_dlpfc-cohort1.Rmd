@@ -1,0 +1,112 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+# load mae 
+new.mae.filename <- "mae_with-rpkm_additional-data_final.rda"
+mae.final.filepath <- file.path("outputs", "01_prepare-datasets", new.mae.filename)
+mae <- get(load(mae.final.filepath))
+```
+
+This is to perform A/B tests on the bulk datasets using counts, RPKM-counts, logcounts.
+
+# Load/source scripts
+
+```{r, message=F,warning=F,error=F}
+base.path <- file.path("code", "07_bulk-scale-abtest_dlpfc-cohort1")
+# prep dependencies
+source(file.path(base.path, "00_helper-functions.R"))
+# prep data
+source(file.path(base.path, "01-01_prepare-mae.R")) # prep mae data
+source(file.path(base.path, "01-02_prep-s-vector.R"))
+# run experiments
+source(file.path(base.path, "02-01_rse-counts_shared-reference-experiments.R"))
+source(file.path(base.path, "02-02_rse-counts_within-reference-experiments.R"))
+source(file.path(base.path, "02-03_rse-rpkm_shared-reference-experiments.R"))
+source(file.path(base.path, "02-04_rse-rpkm_within-reference-experiments.R"))
+# bind results
+source(file.path(base.path, "03_prep-experiment-results.R"))
+```
+
+# Experiment summaries
+
+Overall experiment design table with conditions tested.
+
+```{r}
+expt <- data.frame(z.reference.type = c("shared", "within", "shared", "within"),
+                   y.expression.scale = c("counts", "counts", "RPKM", "RPKM"))
+expt <- do.call(rbind, lapply(seq(length(list.s.pred)), function(ii){
+  expt.iter <- expt
+  expt.iter$s.pred.set.name <- names(list.s.pred)[ii]
+  expt.iter$s.pred.set.values <- paste0(names(list.s.pred[[ii]]), ":", 
+                                        list.s.pred[[ii]],collapse = ";")
+  expt.iter
+}))
+expt$cell.label.type <- "k2"
+
+# table visualization
+knitr::kable(expt)
+```
+
+Experiment condition table data dictionary
+
+```{r}
+data.dict <- list(z.reference.type = "What type of cell reference atlas was used. 'shared' is the same summary across donors and experiments, 'within' means a new reference was calculated based on each donor's own snRNAseq data.",
+                  y.expression.scale = "What type of scaling was used in the bulk RNAseq expression data. 'counts' means unadjusted counts from SPEQeasy, 'RPKM' means the same as 'counts' but with RPKM-normalization, a type of gene/transcript-length normalization.",
+                  s.pred.set.name = "Label of the s cell size scale factor set used (see plots).",
+                  s.pred.set.values = "Values of the s cell size scale factor set used.",
+                  cell.label.type = "Identifier of the cell type labels for experiments.")
+data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(data.dict)[ii], data.dict[[ii]])}))
+knitr::kable(data.dict)
+```
+
+
+# Condition 1 Summaries -- Counts and RPKM-counts
+
+Proportions scatterplots
+
+```{r}
+ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~experiment.type*s.set.label)
+```
+
+```{r}
+ggplot(df.k2, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + theme_bw() +
+  geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label)
+```
+
+Absolute errors, organized by S cell size scale factor set ID.
+
+```{r}
+# absolute errors
+ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~s.set.label) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Absolute errors, organized by sample ID.
+
+```{r}
+# errors by sample
+ggplot(df.k2, aes(x = s.set.label, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~sample.id) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Condition 2 Summaries -- Counts and RPKM-counts
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+

@@ -1,0 +1,183 @@
+---
+title: "S optimize bias, all samples, cohort1"
+author: "Sean Maden"
+date: "2023-08-08"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Key experiment notes
+
+This experiment utilizes the same Y, Z, P definition scheme as the pseudobulk experiments 02 scripts.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
+```
+
+# load results
+
+```{r}
+# load the dataset
+setwd("..")
+setwd("..")
+load.filename <- "pseudobulk-results.rda"
+load.path <- file.path("outputs", "04_experiment", load.filename)
+df.res <- get(load(load.path))
+df.res$abs.bias.neuron <- abs(df.res$bias.neuron.true.pred)
+```
+
+```{r}
+# do postprocessing on the dataset
+# rename abs bias colname to error
+colnames.filter <- colnames(df.res)=="abs.bias.neuron"
+colnames(df.res)[colnames.filter] <- "error.neuron"
+# add group labels
+df.res$glial.group.label <- as.character(df.res$glial)
+df.res$neuron.group.label <- as.character(df.res$neuron)
+# append highlight values
+df.res$minimum.error <- df.res$error.neuron==min(df.res$error.neuron)
+df.res$maximum.error <- df.res$error.neuron==max(df.res$error.neuron)
+# assign deciles
+quant <- quantile(df.res$error.neuron, seq(0,1,0.1))
+df.res$lowest.decile.error <- df.res$error.neuron <= quant[2]
+df.res$highest.decile.error <- df.res$error.neuron>=quant[10]
+
+# plot params
+# highlight colors
+highlight.color.low <- "red"
+highlight.color.high <- "blue"
+highlight.color.background <- "gray"
+```
+
+# Plot results summaries
+
+Heatmap of k2 scale factors (field axes) by error (gradient).
+
+```{r}
+ggplot(df.res, aes(x = neuron, y = glial)) + theme_bw() +
+  geom_raster(aes(fill = error.neuron)) +
+  scale_fill_gradientn(colours = rainbow(5)) + facet_wrap(~sample.id) +
+  geom_hline(yintercept = 3) + geom_vline(xintercept = 10) +
+  geom_abline(slope = 1, intercept = 0)
+```
+
+Scatterplots of K2_1 by K2_1 bias, color by block ID.
+
+```{r}
+# neuron
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Neuron")
+
+# glial
+ggplot(df.res, aes(x = glial, y = bias.glial.true.pred, color = sample.id)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Glial")
+```
+
+Line plots of K2_1 by K2_1 bias, group by K2_2 factor, facet by block ID.
+
+```{r}
+# neuron
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, 
+                   group = glial.group.label, color = glial.group.label)) + 
+  geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Neuron")
+
+# glial
+ggplot(df.res, aes(x = glial, y = bias.glial.true.pred, 
+                   group = neuron.group.label, color = neuron.group.label)) + 
+  geom_line() + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Glial")
+```
+
+Scatterplots of K2_1 by K2_1 bias, color by K2_2 cell size -- discrete.
+
+```{r}
+# neuron
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = glial.group.label)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Neuron")
+
+# glial
+ggplot(df.res, aes(x = glial, y = bias.glial.true.pred, color = neuron.group.label)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Glial")
+```
+
+Scatterplots of K2_1 by K2_1 bias, color by K2_2 cell size -- continuous.
+
+```{r}
+# neuron
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = glial)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Neuron")
+
+# glial
+ggplot(df.res, aes(x = glial, y = bias.glial.true.pred, color = neuron)) + 
+  geom_point(alpha = 0.2) + theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  ggtitle("Glial")
+```
+
+
+# Plot error highlights
+
+Highlight lowest and highest error values.
+
+Highlight minimum and lowest decile error.
+
+```{r}
+# minimum
+ggplot(df.res, aes(x = neuron, y = glial, color = minimum.error)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, "FALSE" = highlight.color.background)) +
+  facet_wrap(~sample.id) + 
+  geom_abline(slope = 1, intercept = 0) + geom_hline(yintercept = 3) + geom_vline(xintercept = 10)
+
+# lowest decile
+ggplot(df.res, aes(x = neuron, y = glial, color = lowest.decile.error)) + 
+  geom_point() + scale_color_manual(values = c("TRUE" = highlight.color.low, "FALSE" = highlight.color.background)) +
+  facet_wrap(~sample.id) +
+  geom_abline(slope = 1, intercept = 0) + geom_hline(yintercept = 3) + geom_vline(xintercept = 10)
+```
+
+Highlight maximum and highest decile error.
+
+```{r}
+# maximum
+ggplot(df.res, aes(x = neuron, y = glial, color = maximum.error)) + geom_point() + 
+  scale_color_manual(values = c("TRUE" = highlight.color.high, "FALSE" = highlight.color.background)) +
+  facet_wrap(~sample.id) +
+  geom_abline(slope = 1, intercept = 0) + geom_hline(yintercept = 3) + geom_vline(xintercept = 10)
+
+# maximum decile
+ggplot(df.res, aes(x = neuron, y = glial, color = highest.decile.error)) + geom_point() + 
+  scale_color_manual(values = c("TRUE" = highlight.color.high, "FALSE" = highlight.color.background)) +
+  facet_wrap(~sample.id) +
+  geom_abline(slope = 1, intercept = 0) + geom_hline(yintercept = 3) + geom_vline(xintercept = 10)
+```
+# Smooth lines section
+
+This section shows smooth line summaries of the simulations. These can help to 
+explain the suitability of the field for potential optimization, i.e. stochastic 
+gradient descent.
+
+Smooth lines by block ID.
+
+```{r}
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  theme_bw() + facet_wrap(~sample.id) + geom_hline(yintercept = 0) +
+  geom_smooth(method = "glm", se = T)
+```
+
+```{r}
+ggplot(df.res, aes(x = neuron, y = bias.neuron.true.pred, color = sample.id)) + 
+  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
+```
+
+```{r}
+ggplot(df.res, aes(x = neuron, y = bias.glial.true.pred, color = sample.id)) + 
+  theme_bw() + geom_smooth(method = "glm", se = T) + geom_hline(yintercept = 0)
+```

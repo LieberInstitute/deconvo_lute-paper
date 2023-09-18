@@ -48,7 +48,7 @@ sce <- mae[["snrnaseq.k2.all"]]
 #------------
 sample.id.vector <- unique(sce[["Sample"]])
 y.unadj.counts <- do.call(cbind, lapply(sample.id.vector, function(sample.id){
-  ypb_from_sce(sce, "counts", "k2")
+  ypb_from_sce(sce, "counts", "k2", S = c("glial" = 3, "neuron" = 10))
 }))
 colnames(y.unadj.counts) <- sample.id.vector
 
@@ -112,7 +112,43 @@ df.res.samples$minimum.decile.error <- df.res.samples$error.neuron <= deciles.er
 df.res.samples$maximum.decile.error <- df.res.samples$error.neuron >= deciles.error.neuron[9]
 df.res.samples$error.neuron <- df.res.samples$bias.neuron.true.pred %>% abs()
 
-# save
+# save results table
 save.filename <- "pseudobulk-results.rda"
-save.path <- file.path("deconvo_method-paper", "outputs", "04_experiment", save.filename)
+save.path <- file.path("outputs", "04_experiment", save.filename)
 save(df.res.samples, file = save.path)
+
+
+#------------------
+# get results plots
+#------------------
+df.res <- df.res.samples
+# do postprocessing on the dataset
+# rename abs bias colname to error
+colnames.filter <- colnames(df.res)=="abs.bias.neuron"
+colnames(df.res)[colnames.filter] <- "error.neuron"
+# add group labels
+df.res$glial.group.label <- "glial"
+df.res$neuron.group.label <- "neuron"
+# append highlight values
+df.res$minimum.error <- df.res$error.neuron==min(df.res$error.neuron)
+df.res$maximum.error <- df.res$error.neuron==max(df.res$error.neuron)
+# assign deciles
+quant <- quantile(df.res$error.neuron, seq(0,1,0.1))
+df.res$lowest.decile.error <- df.res$error.neuron <= quant[2]
+df.res$highest.decile.error <- df.res$error.neuron>=quant[10]
+
+# plot params
+# highlight colors
+highlight.color.low <- "red"
+highlight.color.high <- "blue"
+highlight.color.background <- "gray"
+
+# source plot functions
+source("./scripts/04_experiment/00_dataset_summaries.R")
+source("./scripts/04_experiment/00_deconvo_plots.R")
+
+list.plots.dfp1 <- deconvo_plots_list(df.res, "sample.id")
+
+# save env
+save.image(file = "./env/04_experiment/01_run_script.RData")
+
