@@ -1,0 +1,101 @@
+---
+title: "Shuffles S pseudobulk term"
+author: "Sean Maden"
+date: "2023-09-03"
+output: html_document
+---
+
+
+Shuffles the $S_{pseudobulk}$ term from 1 sample. Uses 1 sample with high and 1 sample with low neuron proportion.
+
+This notebook shows a pseudobulk shuffle experiment in which $S_{pseudobulk}$ is shuffled.
+
+# Load
+
+```{r setup, include=FALSE}
+# dependencies
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
+sapply(libv, library, character.only = T)
+```
+```{r}
+setwd("..")
+setwd("..")
+env.name <- "00_fig3ab_script.RData"
+load(file.path("env", "03_shuffle", env.name))
+```
+
+# High neuron proportion
+
+```{r, include=TRUE}
+sample.id.iter.high <- "Br3942_mid"
+new.plot.experiment.high <- ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
+  ggtitle(paste0("S_pseudobulk id :", sample.id.iter.high))
+new.plot.experiment.high
+```
+
+Save formatted plot.
+
+```{r}
+new.plot.filename <- "fig3a.jpg"
+new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
+###
+new.plot.high.save <- ggplot(dfp.tall.high, 
+                            aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S pseudobulk id: ", sample.id.iter.high)) + 
+  xlim(0.2, 1) + ylim(0.2, 1)
+###
+new.plot.high.save
+```
+
+```{r, include = FALSE}
+setwd("..")
+setwd("..")
+jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
+new.plot.high.save
+dev.off()
+```
+
+# Low neuron proportion
+
+The $S_{pseudobulk}$ sample has low neuron proportion.
+
+```{r, include=TRUE}
+ggplot(dfp.tall.low, 
+       aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
+  ggtitle(paste0("S_pseudobulk id: ", sample.id.iter.low))
+```
+
+Save formatted plot.
+
+```{r}
+new.plot.filename <- "fig3b.jpg"
+new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
+###
+new.plot.low.save <- ggplot(dfp.tall.low, 
+                            aes(x = neuron.true, y = neuron.pred, shape = matched.id)) +
+  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S pseudobulk id: ", sample.id.iter.low)) + xlim(0.2, 1) + ylim(0.2, 1)
+###
+new.plot.low.save
+```
+
+```{r, include = FALSE}
+setwd("..")
+setwd("..")
+###
+jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
+new.plot.low.save
+dev.off()
+```
+
+# Session info
+
+```{r, include = FALSE}
+sessionInfo()
+```
