@@ -17,38 +17,33 @@ sapply(libv, library, character.only = T)
 setwd("..")
 setwd("..")
 env.name <- "00_fig3cd_script.RData"
-env.path <- file.path("notebooks", "03_shuffle", env.name)
+env.path <- file.path("env", "03_shuffle", env.name)
 load(env.path)
-```
-
-```{r, include = FALSE}
-
 ```
 
 # High neuron proportion sample
 
 The $S_{deconvolution}$ sample has high neuron proportion.
 
-```{r, include = FALSE}
-
-```
-
 ```{r, include = TRUE}
 ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.id))
+  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.high))
 ```
 
 Save formatted plot.
 
 ```{r, include = FALSE}
-new.plot.filename <- "fig3c.jpg"
+setwd("..")
+setwd("..")
 
-jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+new.plot.path <- file.path("figures", "03_shuffle", "fig3c.jpg")
+
+jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
 
 ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
   geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("S deconvo id: ", s.scale.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.high)) + xlim(0.2, 1) + ylim(0.2, 1)
 
 dev.off()
 ```
@@ -57,27 +52,26 @@ dev.off()
 
 The $S_{deconvolution}$ sample has low neuron proportion.
 
-```{r, include = FALSE}
-
-```
-
 ```{r, include = TRUE}
 ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.id))
+  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.id.low))
 ```
 
 Save formatted plot. 
 
 ```{r, include = FALSE}
+setwd("..")
+setwd("..")
+
 new.plot.filename <- "fig3d.jpg"
 new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
 
-jpeg(new.plot.filename, width = 5, height = 3, units = "in", res = 400)
+jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
 
 ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
   geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("S deconvo id: ", s.scale.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.id.low)) + xlim(0.2, 1) + ylim(0.2, 1)
 
 dev.off()
 ```

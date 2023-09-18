@@ -52,7 +52,7 @@ sce <- sce[,sce[[sample.id.variable]] %in% sample.id.train]
 # experiment: high neuron proportion
 #
 #-----------------------------------
-s.scale.sample.id <- "Br3942_mid"
+s.scale.sample.id <- s.scale.sample.high <- "Br3942_mid"
 dfp.tall <- get_ypb_experiment_series_shuffle(sce.k2, 
                                               sample.id.s.scale.shuffle.reference = s.scale.sample.id,
                                               sample.id.variable = sample.id.variable,
@@ -70,7 +70,7 @@ dfp.tall.high <- dfp.tall
 # experiment: low neuron proportion
 #
 #-----------------------------------
-s.scale.sample.id <- "Br2743_ant"
+s.scale.sample.id <- s.scale.sample.id.low <- "Br2743_ant"
 dfp.tall <- get_ypb_experiment_series_shuffle(sce.k2, 
                                               sample.id.s.scale.shuffle.reference = s.scale.sample.id,
                                               sample.id.variable = sample.id.variable,
