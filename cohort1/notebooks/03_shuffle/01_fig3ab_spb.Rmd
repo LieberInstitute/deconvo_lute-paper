@@ -17,10 +17,11 @@ This notebook shows a pseudobulk shuffle experiment in which $S_{pseudobulk}$ is
 ```{r setup, include=FALSE}
 # dependencies
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("snow", "ggplot2", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
+libv <- c("snow", "ggplot2", "dplyr", "parallel", 
+          "doParallel", "lute", "dplyr", "scuttle")
 sapply(libv, library, character.only = T)
 ###
-point.color <- "641DD2"
+point.color <- "purple"
 ```
 ```{r}
 setwd("..")
@@ -46,8 +47,10 @@ new.plot.filename <- "fig3a.jpg"
 new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
 ###
 new.plot.high.save <- ggplot(dfp.tall.high, 
-                            aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
-  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+                            aes(x = neuron.true, y = neuron.pred, 
+                                shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5, colour = point.color) + 
+  geom_abline(slope = 1, intercept = 0) + 
   facet_wrap(~type) + theme_bw() +
   ggtitle(paste0("S pseudobulk id: ", sample.id.iter.high)) + 
   xlim(0.2, 1) + ylim(0.2, 1)
@@ -81,8 +84,10 @@ new.plot.filename <- "fig3b.jpg"
 new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
 ###
 new.plot.low.save <- ggplot(dfp.tall.low, 
-                            aes(x = neuron.true, y = neuron.pred, shape = matched.id)) +
-  geom_point(size = 5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+                            aes(x = neuron.true, y = neuron.pred, 
+                                shape = matched.id)) +
+  geom_point(size = 5, alpha = 0.5, color = point.color) + 
+  geom_abline(slope = 1, intercept = 0) +
   facet_wrap(~type) + theme_bw() +
   ggtitle(paste0("S pseudobulk id: ", sample.id.iter.low)) + xlim(0.2, 1) + ylim(0.2, 1)
 ###

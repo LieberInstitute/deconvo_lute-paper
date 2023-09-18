@@ -11,10 +11,11 @@ This notebook shows a pseudobulk shuffle experiment in which $Z_{pseudobulk}$ is
 
 ```{r}
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
+libv <- c("snow", "ggplot2", "dplyr", "parallel", 
+          "doParallel", "lute", "dplyr", "scuttle")
 sapply(libv, library, character.only = T)
 ###
-point.color <- "ABFD1C"
+point.color <- "limegreen"
 ###
 setwd("..")
 setwd("..")
@@ -36,6 +37,15 @@ ggplot(dfp.tall.high,
 
 Save formatted plot. 
 
+```{r}
+new.plot.high <- ggplot(dfp.tall.high, 
+       aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
+  geom_point(size = 5, alpha = 0.5, colour = point.color) + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id.high)) + xlim(0.2, 1) + ylim(0.2, 1)
+new.plot.high
+```
+
 ```{r, include = FALSE}
 
 setwd("..")
@@ -45,11 +55,7 @@ new.plot.path <- file.path("figures", "03_shuffle", "fig3e.jpg")
 
 jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
 
-ggplot(dfp.tall.high, 
-       aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
-  geom_point(size = 5, alpha = 0.5, color = point.color) + 
-  geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id.high)) + xlim(0.2, 1) + ylim(0.2, 1)
+new.plot.high
 
 dev.off()
 
@@ -66,6 +72,15 @@ ggplot(dfp.tall.low,
 
 Save formatted plot. 
 
+```{r}
+new.plot.low <- ggplot(dfp.tall.low, 
+       aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
+  geom_point(size = 5, alpha = 0.5, colour = point.color) + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+new.plot.low
+```
+
 ```{r, include = FALSE}
 
 setwd("..")
@@ -75,9 +90,7 @@ new.plot.path <- file.path("figures", "03_shuffle", "fig3f.jpg")
 
 jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
 
-ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
-  geom_point(size = 5, alpha = 0.5, color = point.color) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+new.plot.low
 
 dev.off()
 
