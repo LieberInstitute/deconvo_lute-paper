@@ -44,7 +44,9 @@ colnames(dfs.rn)[3] <- sample.id.variable.rn
 for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 
 # filter training samples
-
+sample.id.train.path <- file.path("outputs", "00_preprocess", "list_snrnaseq_sampleid.rda")
+sample.id.train <- get(load(sample.id.train.path))[["train"]]
+sce <- sce[,sce[[sample.id.variable]] %in% sample.id.train]
 
 #-----------------------------------
 #
@@ -65,11 +67,6 @@ dfp.tall$s.sample.id <- sample.id.iter
 dfp.tall$matched.id <- dfp.tall$s.sample.id==dfp.tall$sample.id
 dfp.tall.high <- dfp.tall
 
-# plot
-new.plot.experiment.high <- ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_pseudobulk id :", sample.id.iter.high))
-
 #-----------------------------------
 #
 # experiment: low neuron proportion
@@ -89,5 +86,10 @@ dfp.tall$s.sample.id <- sample.id.iter
 dfp.tall$matched.id <- dfp.tall$s.sample.id==dfp.tall$sample.id
 dfp.tall.low <- dfp.tall
 
+
+
+
 # save
+
 save.image(file = file.path("env", "03_shuffle", "00_fig3ab_script.RData"))
+

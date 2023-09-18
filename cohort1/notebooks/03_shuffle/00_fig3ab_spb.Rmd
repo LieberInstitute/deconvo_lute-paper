@@ -15,14 +15,7 @@ This notebook shows a pseudobulk shuffle experiment in which $S_{pseudobulk}$ is
 ```{r setup, include=FALSE}
 setwd("..")
 setwd("..")
-env.name <- "00_figab_s-pseudobulk.RData"
-env.path <- file.path("notebooks", "13_shuffle", env.name)
-if(file.exists(env.path)){
-  knitr::opts_chunk$set(echo = F, eval = F, include = F)
-  load(file = env.path)
-} else{
-  knitr::opts_chunk$set(echo = T)
-}
+env.name <- "00_fig3ab_script.RData"
 
 knitr::opts_chunk$set(echo = TRUE)
 libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle")
@@ -73,27 +66,14 @@ return.dimensions <- "tall"
 
 The $S_{pseudobulk}$ sample has high neuron proportion.
 
-```{r, include = FALSE}
-sample.id.iter <- "Br3942_mid"
-s.vector <- dfs.rn[dfs.rn$sample.id==sample.id.iter,]
-s.vector <- c("glial" = as.numeric(s.vector[1]), "neuron" = as.numeric(s.vector[2]))
-dfp.tall <- get_ypb_experiment_series(sce.k2, 
-                                      sample.id.variable = sample.id.variable,
-                                      celltype.variable = celltype.variable, 
-                                      assay.name = assay.name,
-                                      s.vector = s.vector,
-                                      algorithm.name = algorithm.name, 
-                                      return.dimensions = return.dimensions)
-dfp.tall$s.sample.id <- sample.id.iter
-dfp.tall$matched.id <- dfp.tall$s.sample.id==dfp.tall$sample.id
-dfp.tall.high <- dfp.tall
-```
+Plot
 
 ```{r, include=TRUE}
-sample.id.iter <- "Br3942_mid"
-ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
+sample.id.iter.high <- "Br3942_mid"
+new.plot.experiment.high <- ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_pseudobulk id :", sample.id.iter))
+  ggtitle(paste0("S_pseudobulk id :", sample.id.iter.high))
+new.plot.experiment.high
 ```
 
 Save formatted plot.
@@ -115,27 +95,10 @@ dev.off()
 
 The $S_{pseudobulk}$ sample has low neuron proportion.
 
-```{r, include = FALSE}
-sample.id.iter <- "Br2743_ant"
-s.vector <- dfs.rn[dfs.rn$sample.id==sample.id.iter,]
-s.vector <- c("glial" = as.numeric(s.vector[1]), "neuron" = as.numeric(s.vector[2]))
-dfp.tall <- get_ypb_experiment_series(sce.k2, 
-                                      sample.id.variable = sample.id.variable,
-                                      celltype.variable = celltype.variable, 
-                                      assay.name = assay.name,
-                                      s.vector = s.vector,
-                                      algorithm.name = algorithm.name, 
-                                      return.dimensions = return.dimensions)
-dfp.tall$s.sample.id <- sample.id.iter
-dfp.tall$matched.id <- dfp.tall$s.sample.id==dfp.tall$sample.id
-dfp.tall.low <- dfp.tall
-```
-
 ```{r, include=TRUE}
-sample.id.iter <- "Br2743_ant"
 ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_pseudobulk id: ", sample.id.iter))
+  ggtitle(paste0("S_pseudobulk id: ", sample.id.iter.low))
 ```
 
 Save formatted plot.
