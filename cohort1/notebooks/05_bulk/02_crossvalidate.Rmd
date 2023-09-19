@@ -1,0 +1,54 @@
+---
+title: "02_crossvalidate"
+author: "Sean Maden"
+date: "2023-09-19"
+output: html_document
+---
+```{r}
+knitr::opts_chunk$set(fig.width=10, fig.height=10)
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
+```
+```{r setup, include=FALSE}
+setwd("..")
+setwd("..")
+load("./env/05_bulk/02_crossvalidate_script.RData")
+```
+
+# Plot
+
+```{r}
+new.plot.jitterbox <- ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~crossvalidation) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot.jitterbox
+```
+
+```{r}
+new.plot.jitter.cond <- ggplot(df.k2, aes(x = bulk.sample.condition, y = abs.error.neuron, color = sample.id)) + 
+  geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "black") + theme_bw() +
+  facet_wrap(~crossvalidation) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+new.plot.jitter.cond
+```
+
+
+```{r}
+new.plot.jitter.cond <- ggplot(df.k2, aes(x = bulk.sample.condition, y = abs.error.neuron, color = sample.id)) + 
+  geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "black") + theme_bw() +
+  facet_wrap(~experiment.type*crossvalidation) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot.jitter.cond
+```
+
+Save
+
+```{r}
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
