@@ -31,6 +31,7 @@ new.plot.scatter <- ggplot(df.k2.filt, aes(x = true.neuron, y = neuron)) +
 
 new.plot.scatter
 ```
+
 ```{r}
 setwd("..")
 setwd("..")
@@ -68,8 +69,9 @@ df.k2 <- df.k2[df.k2$experiment.type=="within.reference",]
 # Figure S3B
 
 ```{r}
-df.k2$preparation_type <- gsub(".*_", "", df.k2$bulk.sample.condition)
-new.plot.jitter.prep <- ggplot(df.k2, aes(x = preparation_type, y = abs.error.neuron)) + 
+df.k2$preparation.type <- gsub(".*_", "", df.k2$bulk.sample.condition)
+df.k2 <- na.omit(df.k2)
+new.plot.jitter.prep <- ggplot(df.k2, aes(x = preparation.type, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw() +
   facet_wrap(~crossvalidation) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 new.plot.jitter.prep
