@@ -41,7 +41,7 @@ Save plot
 setwd("..")
 setwd("..")
 new.plot.path <- "./figures/04_experiment/fig4b_deciles.jpg"
-jpeg(new.plot.path, width = 5.5, height = 4, units = "in", res = 400)
+jpeg(new.plot.path, width = 6.5, height = 5, units = "in", res = 400)
 list.plots.dfp1$heatmaps$heatmap6
 dev.off()
 ```
