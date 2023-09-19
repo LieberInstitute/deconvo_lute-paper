@@ -5,7 +5,7 @@
 # Run pseudobulk s-optimization experiments.
 #
 
-libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr")
+libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "MultiAssayExperiment")
 sapply(libv, library, character.only = T)
 
 # sets variables
@@ -48,10 +48,10 @@ sce <- mae[["snrnaseq.k2.all"]]
 #------------
 sample.id.vector <- unique(sce[["Sample"]])
 y.unadj.counts <- do.call(cbind, lapply(sample.id.vector, function(sample.id){
-  ypb_from_sce(sce, "counts", "k2", S = c("glial" = 3, "neuron" = 10))
+  ypb_from_sce(sce[,sce[["Sample"]]==sample.id], 
+               "counts", "k2", S = c("glial" = 3, "neuron" = 10))
 }))
 colnames(y.unadj.counts) <- sample.id.vector
-
 y.unadj <- SummarizedExperiment(assays = list(counts = as.matrix(y.unadj.counts)))
 colData(y.unadj) <- DataFrame(data.frame(sample.id = sample.id.vector))
 y.unadj <- as(y.unadj, "RangedSummarizedExperiment")
@@ -83,6 +83,8 @@ assay.name <- "counts"
 celltype.variable <- "k2"
 sample.id.variable <- "Sample"
 sample.id.vector <- y.unadj$sample.id
+
+#sample.id.vector <- "Br6423_ant"
 df.res.samples <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
   y.filt <- y.unadj[,y.unadj$sample.id==sample.id]
   sce.filt <- sce[,sce$Sample==sample.id]
@@ -151,4 +153,3 @@ list.plots.dfp1 <- deconvo_plots_list(df.res, "sample.id")
 
 # save env
 save.image(file = "./env/04_experiment/01_run_script.RData")
-
