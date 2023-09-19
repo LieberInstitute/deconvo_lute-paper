@@ -40,6 +40,12 @@ filter.mae <- colData(mae)$sample.id %in% sample.id.validate
 mae <- mae[,filter.mae,]
 unique(colData(mae)[,1][complete.cases(mae)])
 
+#--------------
+# prep s-vector
+#--------------
+list.s.pred <- list(s.set1 = c("glial" = 1, "neuron" = 1),
+                    s.set4 = c("glial" = 3, "neuron" = 10))
+
 #-------------
 # run a/b test
 #-------------
@@ -50,7 +56,7 @@ base.path <- file.path("scripts/05_bulk/abtest/")
 # prep dependencies
 source(file.path(base.path, "00_helper-functions.R"))
 # prep data
-source(file.path(base.path, "01-02_prep-s-vector.R"))
+# source(file.path(base.path, "01-02_prep-s-vector.R"))
 # run experiments
 source(file.path(base.path, "02-01-02_rse-counts_logcounts-lutearg_shared-reference-experiments.R"))
 source(file.path(base.path, "02-02-02_rse-counts_lognorm-yz_within-reference-experiments.R"))
