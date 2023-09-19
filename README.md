@@ -6,11 +6,14 @@ Contains analysis for the deconvolution methods paper
 
 The path to this repository on JHPCE is:
 
-This repo contains analysis code, outputs, figures, etc. for the deconvolution methods paper. The subdirs contained here include:
+This repo contains analysis scripts, outputs, figures, etc. for the deconvolution methods paper. The subdirs contained here include:
 
-* `code` : Main location where scripts and code to generate content live.
-* `figures_and_tables`: Main location of figures and tables, with same layout as `code` subdir
-* `outputs`: Objects (i.e. not figures or tables) which are produced by scripts from `code`. Has same layout as `code` subdir.
+* `scripts` : Main location where scripts and scripts to generate content live.
+
+* `figures_and_tables`: Main location of figures and tables, with same layout as `scripts` subdir
+
+* `outputs`: Objects (i.e. not figures or tables) which are produced by scripts from `scripts`. Has same layout as `scripts` subdir.
+
 * `source`: Scripts, vignettes, etc. which are central to the planned deconvolution resource. This will have its own internal structure and be developed in parallel to analyses for the paper.
 
 ## Data files
@@ -18,7 +21,9 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 `SingleCellExperiment` objects containing single nucleus RNA-seq data.
 
 * `data/sce`  
+
 ** `data/sce/SCE_DLPFC...` snRNAseq Dorsolateral prefrontal cortex data from Tran et al 2021. Downloaded from ![link](https://github.com/LieberInstitute/10xPilot_snRNAseq-human)
+
 ** `data/sce/sce...` snRNAseq Dorsolateral prefrontal cortex data, new to this study.
 
 ## Manuscript figures
@@ -26,42 +31,40 @@ This repo contains analysis code, outputs, figures, etc. for the deconvolution m
 [Figure 1](./figures/lute_diagram.jpg) : Diagram of `lute` deconvolution framework.
 
 * Figure 2
-[Figure 2A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in neuron from k2 labels tests, using DLPFC Cohort1.
-[Figure 2B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in neuron from k2 labels tests, using DLPFC Cohort2.
-[Figure 2C](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, using DLPFC Cohort1.
-[Figure 2D](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, DLPFC Cohort2.
-[Figure 2E](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, using DLPFC Cohort1.
-[Figure 2F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, DLPFC Cohort2.
+[Figure 2A](./notebooks/02_pseudobulk/) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in neuron from k2 labels tests, using DLPFC Cohort1.
+[Figure 2B](./notebooks/02_pseudobulk/) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in neuron from k2 labels tests, using DLPFC Cohort2.
+[Figure 2C](./notebooks/02_pseudobulk/) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, using DLPFC Cohort1.
+[Figure 2D](./notebooks/02_pseudobulk/) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k3 label tests, DLPFC Cohort2.
+[Figure 2E](./notebooks/02_pseudobulk/) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, using DLPFC Cohort1.
+[Figure 2F](./notebooks/02_pseudobulk/) : Scatterplot of true versus predicted proportions from pseudobulk experiment, showing results in Excit, Inhib, and glial from k4 label tests, DLPFC Cohort2.
 
 * Figure 3
-[Figure 3A-B](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3ab_spb_shuffle-pseudobulk_cohort1.rmd) Shuffle $S_{pseudobulk}$
-[Figure 3C-D](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3cd_sdeconvo_shuffle-pseudobulk_cohort1.rmd) Shuffle $S_{deconvolution}$
-[Figure 3E-F](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3ef_zpb_shuffle-pseudobulk_cohort1.rmd) Shuffle $Z_{pseudobulk}$
-[Figure 3G-H](./notebooks/13_pseudobulk_shuffle-experiment_dlpfc-cohort1/00_fig3ef_zdeconvo_shuffle-pseudobulk_cohort1.rmd) Shuffle $Z_{deconvolution}$
+[Figure 3A](./figures/03_shuffle/) Shuffle $S_{pseudobulk}$
+[Figure 3B-C](./notebooks/03_shuffle/) Shuffle $S_{pseudobulk}$
+[Figure 3D-E](./notebooks/03_shuffle/) Shuffle $S_{deconvolution}$
+[Figure 3F-G](./notebooks/03_shuffle/) Shuffle $Z_{pseudobulk}$
 
 * Figure 4
-[Figure 4A](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K2 labels
-[Figure 4B](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K3 labels
-[Figure 4C](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_mae-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 RNAscope and snRNAseq data, K4 labels
+[Figure 4A](./scripts/04_experiment) 
+[Figure 4B](./scripts/04_experiment) 
+[Figure 4C](./scripts/04_experiment)
 
 * Supplemental Figure S1
-[Figure S1A](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 1.
-[Figure S1B](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
-[Figure S1C](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 2.
-[Figure S1D](./code/02_pseudobulk-predictions/01_only-k2_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1 k2 tests.
-[Figure S1E](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k3 tests.
-[Figure S1F](./code/02_pseudobulk-predictions/01_only-k3_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k3 tests.
-[Figure S1E](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_dlpfc-cohort1.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k4 tests.
-[Figure S1F](./code/02_pseudobulk-predictions/01_only-k4_lute-pseudobulk-experiment_mrb-dlpfc-cohort2.R) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 2, k4 tests.
+[Figure S1A](./scripts/02_pseudobulk/) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 1.
+[Figure S1B](./scripts/02_pseudobulk/) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1.
+[Figure S1C](./scripts/02_pseudobulk/) : Paneled scatterplots of adjusted and unadjusted results of true versus predicted proportions from pseudobulk experiment, DLPFC cohort 2.
+[Figure S1D](./scripts/02_pseudobulk/) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1 k2 tests.
+[Figure S1E](./scripts/02_pseudobulk/) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k3 tests.
+[Figure S1F](./scripts/02_pseudobulk/) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k3 tests.
+[Figure S1E](./scripts/02_pseudobulk/) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 1, k4 tests.
+[Figure S1F](./scripts/02_pseudobulk/) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 2, k4 tests.
 
 * Supplemental Figure 2
-[Supplemental Figure 2A](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Paneled scatterplots of scaled and unscaled results from pseudobulk simulations with random offsets.
-[Supplemental Figure 2B](./code/04_random-errors-simulations/01_shows-random-errors-z-performance.R) : Jittered points and boxplots of absolute errors from pseudobulk simulations with random offsets.B
+[Supplemental Figure 2A](./scripts/06_bulk/) : 
+[Supplemental Figure 2B](./scripts/06_bulk/) : 
+[Supplemental Figure 2C](./scripts/06_bulk/) : 
 
 * Supplemental Figure 3
-[Supplemental Figure 3A](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_snrnaseq-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 snRNAseq and RNAscope data, using RNAscope cell type labels.
-[Supplemental Figure 3B](./code/05_cell-count-versus-cell-size/01_cell-sizes-versus-snrnaseq-counts_snrnaseq-analysis_dlpfc-cohort1.R) : Cell size versus sample quality in DLPFC Cohort 1 snRNAseq data, using snRNAseq clustering cell type labels.
-
 
 
 ## File locations
