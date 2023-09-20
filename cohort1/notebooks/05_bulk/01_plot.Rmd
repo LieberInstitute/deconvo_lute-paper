@@ -13,6 +13,7 @@ knitr::opts_chunk$set(fig.width=10, fig.height=10)
 libv <- c("ggplot2")
 sapply(libv, library, character.only = T)
 ```
+
 ```{r}
 setwd("..")
 setwd("..")
@@ -104,10 +105,16 @@ dev.off()
 Absolute errors, organized by sample ID.
 
 ```{r}
+# format plot data
+df.k2 <- na.omit(df.k2)
+levels <- unique(df.k2$bulk.sample.condition)
+levels <- levels[order(gsub(".*_", "", levels))]
+df.k2$bulk.sample.condition <- factor(df.k2$bulk.sample.condition, levels = levels)
+
+# plot
 new.plot.jitter.cond <- ggplot(df.k2, aes(x = bulk.sample.condition, y = abs.error.neuron, color = sample.id)) + 
   geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "black") + theme_bw() +
   facet_wrap(~experiment.type) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 new.plot.jitter.cond
 ```
 
