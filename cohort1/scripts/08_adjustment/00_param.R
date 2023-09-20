@@ -24,6 +24,7 @@ prop_adj_results <- function(mae, bisque.sce){
   bulk.eset[["sample.id"]] <- bulk.eset[["batch.id2"]]
   # prep bisque sce
   sn.eset <- sce_to_eset(bisque.sce)
+  exprs(sn.eset) <- exprs(sn.eset) + 1e-3
   sn.eset[["sample.id"]] <- sn.eset[["Sample"]]
   s.vector.scale <- c("glial" = 3, "neuron" = 10)
   s.vector.noscale <- c("glial" = 1, "neuron" = 1)
