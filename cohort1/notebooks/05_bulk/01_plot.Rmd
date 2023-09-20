@@ -59,7 +59,7 @@ Proportions scatterplots.
 new.plot.scatter <- ggplot(df.k2, 
                            aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + 
   theme_bw() + geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~experiment.type*assay.name.lutearg)
+  facet_wrap(~experiment.type*assay.name.lutearg*s.set.label)
 
 new.plot.scatter
 ```
