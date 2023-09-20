@@ -6,7 +6,9 @@
 #
 
 source("./scripts/08_adjustment/00_musicParam-class.R")
+source("./scripts/06_estimate/00_param.R")
 source("./scripts/08_adjustment/00_param.R")
+
 
 libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "BisqueRNA", "MuSiC", 
           "dplyr", "MultiAssayExperiment", "GGally")

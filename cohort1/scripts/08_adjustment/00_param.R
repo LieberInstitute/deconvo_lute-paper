@@ -26,9 +26,18 @@ prop_adj_results <- function(mae, bisque.sce){
   sn.eset <- sce_to_eset(bisque.sce)
   exprs(sn.eset) <- exprs(sn.eset) + 1e-3
   sn.eset[["sample.id"]] <- sn.eset[["Sample"]]
-  s.vector.scale <- c("glial" = 3, "neuron" = 10)
+  #s.vector.scale <- c("glial" = 3, "neuron" = 10)
+  dfs <- dfs.series(seq(1, 20, 1))
+  # get s vectors
+  df.sopt <- get_sopt_results(mae, dfs, label = "train")
+  df.sopt.res <- df.sopt$df.res
+  filter.sopt <- df.sopt.res$error.neuron == min(df.sopt.res$error.neuron)
+  df.sopt.res <- df.sopt.res[filter.sopt,]
+  df.sopt.res <- df.sopt.res[1,]
+  s.vector.scale <- c("glial" = df.sopt.res$s.glial, "neuron" = df.sopt.res$s.neuron)
   s.vector.noscale <- c("glial" = 1, "neuron" = 1)
-  sn.eset.rescale <- sn_eset_rescale(sn.eset, 0.1, 100) # bisque rescale
+  # bisque rescale
+  sn.eset.rescale <- sn_eset_rescale(sn.eset, 0.1, 100) 
   # experiment -- nnls
   nnls.scale <- lute(z = z, y = y, 
                      s = s.vector.scale, 
@@ -77,12 +86,60 @@ experiment_all_samples <- function(sample.id.vector, mae){
     mae.iter <- mae[,colData(mae)$sample.id==sample.id,]
     lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce)
   }
-  
-  #lr <- lapply(sample.id.vector, function(sample.id){
-  #  message("working on sample: ", sample.id)
-  #  mae.iter <- mae[,colData(mae)$sample.id==sample.id,]
-  #  prop_adj_results(mae.iter, bisque.sce)
-  #})
   names(lr) <- sample.id.vector
   return(lr)
+}
+
+get_sopt_results <- function(mae, dfs, label = "train"){
+  # set params (SEE PROJECT NOTES)
+  assay.name <- "counts"
+  celltype.variable <- "k2"
+  sample.id.variable <- "Sample"
+  y.group.name <- 'batch.id2'
+  bulk.name <- "bulk.rnaseq"
+  sn.name <- "snrnaseq.k2.all"
+  # sample id vector
+  sample.id.vector <- unique(
+    intersect(
+      mae[[bulk.name]][[y.group.name]], 
+      mae[[sn.name]][[sample.id.variable]]))
+  # get list.df.true
+  sce <- mae[["snrnaseq.k2.all"]]
+  list.df.true <- get_df_true_list(sce, "Sample", "k2")
+  # iterate on training samples
+  list.res <- lapply(sample.id.vector, function(sample.id){
+    filter.mae <- colData(mae)$sample.id==sample.id
+    mae.iter <- mae[,filter.mae,]
+    message("Num. tests: ", nrow(dfs))
+    # seq
+    y.iter <- mae.iter[[bulk.name]]
+    sce.iter <- mae.iter[[sn.name]]
+    # results
+    multigroup_bias_matched(sample.id, list.df.true, y.iter, 
+                            y.group.name = y.group.name,
+                            dfs, sce.iter, assay.name = assay.name)
+  })
+  df.res <- do.call(rbind, lapply(list.res, function(item){item}))
+  df.res$crossvalidation <- label
+  # prepare and plot results
+  df.res <- dfres_postprocess(df.res)
+  # list.plots.dfres <- get_dfres_plots(df.res)
+  # return(list(df.res = df.res, list.plots = list.plots.dfres))
+  return(list(df.res = df.res))
+}
+
+get_df_true_list <- function(sce, sample.id.variable = "Sample", celltype.variable = "k2"){
+  sample.id.vector <- unique(sce[[sample.id.variable]])
+  unique.cell.types <- unique(sce[[celltype.variable]])
+  unique.cell.types <- unique.cell.types[order(unique.cell.types)]
+  list.df.true <- lapply(sample.id.vector, function(sample.id){
+    filter.sce <- sce[[sample.id.variable]]==sample.id
+    prop.true <- prop.table(table(sce[,filter.sce][[celltype.variable]]))
+    prop.true <- as.data.frame(t(as.matrix(prop.true)))
+    colnames(prop.true) <- unique.cell.types
+    rownames(prop.true) <- "true_proportion"
+    prop.true
+  })
+  names(list.df.true) <- sample.id.vector
+  return(list.df.true)
 }
