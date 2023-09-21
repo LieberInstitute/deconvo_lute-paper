@@ -98,6 +98,8 @@ prop_adj_results <- function(mae, bisque.sce,
   return(list(df.res = df.res, gg.pairs.plot = gg.pairs.plot, s.vector.scale = s.vector.scale))
 }
 
+#
+# get experiments across samples group ids
 experiment_all_samples <- function(sample.id.vector, mae, 
                                    bulk.mae.name = "bulk.rnaseq", 
                                    bulk.sample.id.variable = "batch.id2",
@@ -108,13 +110,15 @@ experiment_all_samples <- function(sample.id.vector, mae,
     message("working on sample: ", sample.id)
     mae.iter <- mae[,colData(mae)$sample.id==sample.id,]
     lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce, dfs.steps,
-                                        bulk.mae.name = "bulk.rnaseq", 
-                                        bulk.sample.id.variable = "batch.id2")
+                                        bulk.mae.name = bulk.mae.name, 
+                                        bulk.sample.id.variable = bulk.sample.id.variable)
   }
   names(lr) <- sample.id.vector
   return(lr)
 }
 
+#
+# get s optimization results table
 get_sopt_results <- function(mae, dfs, label = "train",
                              assay.name = "logcounts",
                              celltype.variable = "k2",

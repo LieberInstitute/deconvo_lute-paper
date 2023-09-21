@@ -15,7 +15,7 @@ libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "BisqueRNA", "MuSiC
 sapply(libv, library, character.only = T)
 
 # params
-num.dfs.steps <- 2
+num.dfs.steps <- 40
 
 #-----
 # load
@@ -23,8 +23,8 @@ num.dfs.steps <- 2
 new.mae.filename <- "mae_allsamples.rda"
 mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 mae <- get(load(mae.final.filepath))
-sample.id.keep <- c("Br8325_mid", "Br3942_mid")
-mae <- mae[,colData(mae)$sample.id %in% sample.id.keep,]
+#sample.id.keep <- c("Br8325_mid", "Br3942_mid")
+#mae <- mae[,colData(mae)$sample.id %in% sample.id.keep,]
 
 #-----------
 # experiment
