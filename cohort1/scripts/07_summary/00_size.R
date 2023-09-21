@@ -2,7 +2,7 @@
 # get cell type proportions
 
 se_cell_size <- function(se, celltype.variable, sample.id.variable, 
-                         label = "", method = "summary_median,cell_median"){
+                         label = "", method = "cell_median"){
   library(dplyr)
   sample.id.vector <- unique(se[[sample.id.variable]])
   df.size <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
@@ -10,7 +10,7 @@ se_cell_size <- function(se, celltype.variable, sample.id.variable,
     se.counts <- assays(se.filter)[["counts"]]
     celltype.vector <- unique(se.filter[[celltype.variable]])
     df.iter <- do.call(cbind, lapply(celltype.vector, function(cell.type){
-      median(colMedians(se.counts[,se.filter[[celltype.variable]]==cell.type]))
+      median(colSums(se.counts[,se.filter[[celltype.variable]]==cell.type]))
     }))
     df.iter <- as.data.frame(df.iter)
     colnames(df.iter) <- celltype.vector

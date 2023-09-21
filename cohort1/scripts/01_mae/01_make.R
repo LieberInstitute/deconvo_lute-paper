@@ -19,7 +19,7 @@
 # dependencies
 #-------------
 
-libv <- c("here", "nlme", "ggplot2", "gridExtra", "dplyr", "ggforce", "MultiAssayExperiment", "SingleCellExperiment")
+libv <- c("here", "nlme", "lute", "ggplot2", "gridExtra", "dplyr", "ggforce", "MultiAssayExperiment", "SingleCellExperiment")
 sapply(libv, library, character.only = TRUE)
 
 #--------------------
@@ -157,6 +157,28 @@ marker.id.vector <- unique(c(rownames(sce1), rownames(sce2), rownames(sce3)))
 rse.filter <- rse.filter[rownames(rse.filter) %in% marker.id.vector,]
 rse.rpkm <- rse.rpkm[rownames(rse.rpkm) %in% marker.id.vector,]
 
+#-----------
+# pseudobulk
+#-----------
+# make pseudobulk from sce
+sce <- sce1.all
+sample.id.vector <- unique(sce[["Sample"]])
+ypb <- do.call(cbind, lapply(sample.id.vector, function(sample.id){
+  scef <- sce[,sce[["Sample"]]==sample.id]
+  ypb_from_sce(scef, "counts", "k2")
+}))
+ypb <- as.matrix(ypb)
+colnames(ypb) <- sample.id.vector
+bulk.pb <- SummarizedExperiment(assays = SimpleList(list(counts = ypb)))
+colnames(bulk.pb) <- sample.id.vector
+cd <- DataFrame(data.frame(sample.id = colnames(ypb),
+                           batch.id2 = colnames(ypb)))
+rownames(cd) <- colnames(ypb)
+colData(bulk.pb) <- cd
+colnames(bulk.pb)
+bulk.pb.k2 <- as(bulk.pb, "RangedSummarizedExperiment")
+
+
 #-----------------------------------
 # rnascope: make sce with image data
 #-----------------------------------
@@ -246,7 +268,9 @@ unique.sample.id.vector <- unique(
     
     rse.filter[[sample.id.bulk]], # bulk and rpkm have same sample ids ...
     
-    df.rnascope.kdata["sample_id",]
+    df.rnascope.kdata["sample_id",],
+    
+    bulk.pb.k2[["sample.id"]]
     
     )
 )
@@ -284,6 +308,11 @@ image.map <- data.frame(colname = colnames(sce.img),
 dfrn.map <- data.frame(colname = colnames(df.rnascope.kdata), 
                        primary = gsub(";.*", "", colnames(df.rnascope.kdata)))
 
+# pb 
+
+bulk.pb.k2.map <- data.frame(colname = colnames(bulk.pb.k2),
+                             primary = bulk.pb.k2[["sample.id"]])
+
 # make mappings list, then map df
 
 listmap <- list(
@@ -297,7 +326,9 @@ listmap <- list(
                 
   bulk.rpkm.rnaseq = bulk.rpkm.map, # bulk, rpkm
                
-  cell.sizes = dfrn.map
+  cell.sizes = dfrn.map, # rnascope cell sizes
+  
+  bulk.pb.k2 = bulk.pb.k2.map # pseudobulk k2
   
   )
 
@@ -318,7 +349,9 @@ object.list <- list(
   
   bulk.rpkm.rnaseq = rse.rpkm,
   
-  cell.sizes = df.rnascope.kdata %>% as.matrix()
+  cell.sizes = df.rnascope.kdata %>% as.matrix(),
+  
+  bulk.pb.k2 = bulk.pb.k2
   
   )
 

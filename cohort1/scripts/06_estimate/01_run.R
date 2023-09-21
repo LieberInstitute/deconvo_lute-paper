@@ -61,11 +61,29 @@ dfp <- do.call(rbind, lapply(list.cv, function(cv.result){
 dfp <- as.data.frame(dfp)
 colnames(dfp) <- c("min.error.neuron.validate", "num.steps.train")
 
+#-----
+# save
+#-----
+# files
+
+list.cv.validate <- lapply(list.cv, function(item){
+  list(results.validate = item$validate.result, num.steps.train = item$num.steps.train)
+})
+save(list.cv.validate, file = "./outputs/06_estimate/results_cv_validate.rda")
+
+save(list.cv, file = "./outputs/06_estimate/results_cv.rda")
+save(dfp, file = "./outputs/06_estimate/results_dfp.rda")
+
+# env
+rm(mae.final)
+rm(mae.validate)
+rm(mae.train)
+save.image("./outputs/06_estimate/01_run_script.RData")
+
+#-------------
 # plot results
+#-------------
 ggplot(dfp, aes(x = num.steps.train, y = min.error.neuron.validate)) + geom_point()
-
-
-
 
 # plot
 dfp <- data.frame(min.neuron.error.val = c(min(cv10$validate.result$df.res$error.neuron),

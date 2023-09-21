@@ -12,11 +12,14 @@ sn_eset_rescale <- function(sn.eset, s.glial = 3, s.neuron = 10){
   sn.eset
 }
 
-prop_adj_results <- function(mae, bisque.sce, dfs.steps = 20){
+prop_adj_results <- function(mae, bisque.sce, 
+                             bulk.mae.name = "bulk.rnaseq", 
+                             bulk.sample.id.variable = "batch.id2",
+                             dfs.steps = 20){
   # prep
   sample.id <- unique(colData(mae)$sample.id)
   sce <- mae[["snrnaseq.k2.all"]]
-  y.set <- mae[["bulk.rnaseq"]]
+  y.set <- mae[[bulk.mae.name]]
   # get logcounts scaled expression
   y.set <- scuttle::logNormCounts(y.set)
   sce <- scuttle::logNormCounts(sce)
@@ -30,7 +33,7 @@ prop_adj_results <- function(mae, bisque.sce, dfs.steps = 20){
   sn.eset <- sce_to_eset(bisque.sce)
   exprs(sn.eset) <- exprs(sn.eset) + 1e-3
   sn.eset[["sample.id"]] <- sn.eset[["Sample"]]
-  bulk.eset[["sample.id"]] <- bulk.eset[["batch.id2"]]
+  bulk.eset[["sample.id"]] <- bulk.eset[[bulk.sample.id.variable]]
   # prep z
   z <- lute::get_z_from_sce(sce, "counts", "k2")
   dfs <- dfs.series(seq(1, 20, (20-1)/dfs.steps))
@@ -38,7 +41,7 @@ prop_adj_results <- function(mae, bisque.sce, dfs.steps = 20){
   df.s.opt.res <- do.call(rbind, lapply(seq(ncol(y))[1:2], function(index){
     message("working on bulk sample index ", index, " of ", ncol(y))
     mae.iter <- mae
-    mae.iter[["bulk.rnaseq"]] <- mae.iter[["bulk.rnaseq"]][,index]
+    mae.iter[[bulk.mae.name]] <- mae.iter[[bulk.mae.name]][,index]
     df.sopt <- get_sopt_results(mae.iter, dfs, label = "train")
     df.sopt.res <- df.sopt$df.res
     filter.sopt <- df.sopt.res$error.neuron == min(df.sopt.res$error.neuron)
@@ -95,13 +98,18 @@ prop_adj_results <- function(mae, bisque.sce, dfs.steps = 20){
   return(list(df.res = df.res, gg.pairs.plot = gg.pairs.plot, s.vector.scale = s.vector.scale))
 }
 
-experiment_all_samples <- function(sample.id.vector, mae, dfs.steps = 20){
+experiment_all_samples <- function(sample.id.vector, mae, 
+                                   bulk.mae.name = "bulk.rnaseq", 
+                                   bulk.sample.id.variable = "batch.id2",
+                                   dfs.steps = 20){
   bisque.sce <- mae[["snrnaseq.k2.all"]]
   lr <- list()
   for(sample.id in sample.id.vector){
     message("working on sample: ", sample.id)
     mae.iter <- mae[,colData(mae)$sample.id==sample.id,]
-    lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce, dfs.steps)
+    lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce, dfs.steps,
+                                        bulk.mae.name = "bulk.rnaseq", 
+                                        bulk.sample.id.variable = "batch.id2")
   }
   names(lr) <- sample.id.vector
   return(lr)

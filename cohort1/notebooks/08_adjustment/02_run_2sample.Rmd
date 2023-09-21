@@ -1,0 +1,60 @@
+---
+title: "02_run_2sample"
+author: "Sean Maden"
+date: "2023-09-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Deconvolution results from bias-adjustment.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2", "GGally")
+sapply(libv, library, character.only = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/08_adjustment/02_run_2sample_script.RData")
+dfp.wide <- list.dfp$dfp.wide
+dfp.tall <- list.dfp$dfp.tall
+```
+
+# Plots
+
+```{r}
+#------------
+# plot neuron
+#------------
+df.res.neuron <- df.res[,grepl("neuron", colnames(df.res))]
+df.res.neuron$sample.id <- df.res$sample.id
+
+#df.res.neuron <- df.res.neuron[,c(seq(2,ncol(df.res.neuron),1),1)]
+ggpairs(df.res.neuron, columns = rev(colnames(df.res.neuron)),
+                          xlim = c(0, 1), ylim = c(0, 1))
+
+# plot dfp.wide
+ggplot(list.dfp[["dfp.wide"]], aes(x = noscale, y = scale, color = sample.id)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~algorithm) +
+  xlab("No scale") + ylab("Scaled") + xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# plot dfp.tall
+ggplot(list.dfp[["dfp.tall"]], aes(x = true, y = data, color = sample.id)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~scale*algorithm) +
+  xlab("True") + ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Save
+
+```{r}
+# save
+#jpeg("./figures/08_adjustment/figs_pairs_neuron_2samples.jpg", 
+#     width = 10, height = 10, units = "in", res = 400)
+#ggpairs.neuron
+#dev.off()
+```
