@@ -39,8 +39,6 @@ ggcorrplot(cor(df.sample[,c("sn.neuron", "rn.neuron")]))
 
 # Plots
 
-
-
 ```{r}
 ggpairs(dfp.wide[,c("sn.neuron", "rn.neuron")])
 ```

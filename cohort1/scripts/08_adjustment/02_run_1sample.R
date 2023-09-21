@@ -14,6 +14,9 @@ libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "BisqueRNA", "MuSiC
           "dplyr", "MultiAssayExperiment", "GGally")
 sapply(libv, library, character.only = T)
 
+# params
+num.dfs.steps <- 40
+
 #-----
 # load
 #-----
@@ -27,8 +30,10 @@ mae <- mae[,colData(mae)$sample.id %in% sample.id.keep,]
 # experiment
 #-----------
 sample.id.vector <- colData(mae)$sample.id
-list.experiment.results <- experiment_all_samples(sample.id.vector, mae, dfs.steps = 50)
-df.res <- as.data.frame(do.call(rbind, lapply(list.experiment.results, function(item){item$df.res})))
+list.experiment.results <- experiment_all_samples(
+  sample.id.vector, mae, dfs.steps = num.dfs.steps)
+df.res <- as.data.frame(
+  do.call(rbind, lapply(list.experiment.results, function(item){item$df.res})))
 df.res$sample.id <- gsub("_.*", "", rownames(df.res))
 list.dfp <- get_dfp_list(df.res)
 

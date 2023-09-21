@@ -47,13 +47,14 @@ prop_adj_results <- function(mae, bisque.sce, dfs.steps = 20){
     c("glial" = df.sopt.res$s.glial, "neuron" = df.sopt.res$s.neuron)
   }))
   s.vector.scale <- colMedians(df.s.opt.res)
+  names(s.vector.scale) <- colnames(df.s.opt.res)
   message("sopt result:\n")
   print(s.vector.scale)
   s.vector.noscale <- c("glial" = 1, "neuron" = 1)
   # bisque rescale
   sn.eset.rescale <- sn_eset_rescale(sn.eset, 
-                                     s.vector.scale[["glial"]], 
-                                     s.vector.scale[["neuron"]]) 
+                                     s.vector.scale["glial"], 
+                                     s.vector.scale["neuron"]) 
   # experiment -- nnls
   nnls.scale <- lute(z = z, y = y,
                      s = s.vector.scale, 
