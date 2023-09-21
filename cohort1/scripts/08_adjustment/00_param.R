@@ -12,7 +12,7 @@ sn_eset_rescale <- function(sn.eset, s.glial = 3, s.neuron = 10){
   sn.eset
 }
 
-prop_adj_results <- function(mae, bisque.sce, dfs.steps = 50){
+prop_adj_results <- function(mae, bisque.sce, dfs.steps = 20){
   # prep
   sample.id <- unique(colData(mae)$sample.id)
   sce <- mae[["snrnaseq.k2.all"]]
@@ -49,10 +49,11 @@ prop_adj_results <- function(mae, bisque.sce, dfs.steps = 50){
   s.vector.scale <- colMedians(df.s.opt.res)
   message("sopt result:\n")
   print(s.vector.scale)
-  #s.vector.scale <- c("glial" = df.sopt.res$s.glial, "neuron" = df.sopt.res$s.neuron)
   s.vector.noscale <- c("glial" = 1, "neuron" = 1)
   # bisque rescale
-  sn.eset.rescale <- sn_eset_rescale(sn.eset, 0.1, 100) 
+  sn.eset.rescale <- sn_eset_rescale(sn.eset, 
+                                     s.vector.scale[["glial"]], 
+                                     s.vector.scale[["neuron"]]) 
   # experiment -- nnls
   nnls.scale <- lute(z = z, y = y,
                      s = s.vector.scale, 
@@ -93,13 +94,13 @@ prop_adj_results <- function(mae, bisque.sce, dfs.steps = 50){
   return(list(df.res = df.res, gg.pairs.plot = gg.pairs.plot, s.vector.scale = s.vector.scale))
 }
 
-experiment_all_samples <- function(sample.id.vector, mae){
+experiment_all_samples <- function(sample.id.vector, mae, dfs.steps = 20){
   bisque.sce <- mae[["snrnaseq.k2.all"]]
   lr <- list()
   for(sample.id in sample.id.vector){
     message("working on sample: ", sample.id)
     mae.iter <- mae[,colData(mae)$sample.id==sample.id,]
-    lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce)
+    lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce, dfs.steps)
   }
   names(lr) <- sample.id.vector
   return(lr)
@@ -137,4 +138,54 @@ get_sopt_results <- function(mae, dfs, label = "train",
   # prepare and plot results
   df.res <- dfres_postprocess(df.res)
   return(list(df.res = df.res))
+}
+
+# get wide and tall plot data frames
+get_dfp_list <- function(df.res){
+  # plot dfp.wide
+  dfp.wide <- rbind(data.frame(scale = df.res$neuron.music.scale,
+                               noscale = df.res$neuron.music.noscale,
+                               algorithm = rep("music", nrow(df.res)),
+                               sample.id = df.res$sample.id),
+                    data.frame(scale = df.res$neuron.nnls.scale,
+                               noscale = df.res$neuron.nnls.noscale,
+                               algorithm = rep("nnls", nrow(df.res)),
+                               sample.id = df.res$sample.id),
+                    data.frame(scale = df.res$neuron.bisque.scale,
+                               noscale = df.res$neuron.bisque.noscale,
+                               algorithm = rep("bisque", nrow(df.res)),
+                               sample.id = df.res$sample.id)
+  )
+  # plot dfp.tall
+  dfp.tall <- rbind(data.frame(data = df.res$neuron.music.scale,
+                               scale = rep("scale", nrow(df.res)),
+                               true = df.res$neuron.true,
+                               sample.id = df.res$sample.id,
+                               algorithm = rep("music", nrow(df.res))),
+                    data.frame(data = df.res$neuron.nnls.scale,
+                               scale = rep("scale", nrow(df.res)),
+                               true = df.res$neuron.true,
+                               sample.id = df.res$sample.id,
+                               algorithm = rep("nnls", nrow(df.res))),
+                    data.frame(data = df.res$neuron.bisque.scale,
+                               scale = rep("scale", nrow(df.res)),
+                               true = df.res$neuron.true,
+                               sample.id = df.res$sample.id,
+                               algorithm = rep("bisque", nrow(df.res))),
+                    data.frame(data = df.res$neuron.music.noscale,
+                               scale = rep("noscale", nrow(df.res)),
+                               true = df.res$neuron.true,
+                               sample.id = df.res$sample.id,
+                               algorithm = rep("music", nrow(df.res))),
+                    data.frame(data = df.res$neuron.nnls.noscale,
+                               scale = rep("noscale", nrow(df.res)),
+                               true = df.res$neuron.true,
+                               sample.id = df.res$sample.id,
+                               algorithm = rep("nnls", nrow(df.res))),
+                    data.frame(data = df.res$neuron.bisque.noscale,
+                               scale = rep("noscale", nrow(df.res)),
+                               true = df.res$neuron.true,
+                               sample.id = df.res$sample.id,
+                               algorithm = rep("bisque", nrow(df.res))))
+  return(list(dfp.wide = dfp.wide, dfp.tall = dfp.tall))
 }
