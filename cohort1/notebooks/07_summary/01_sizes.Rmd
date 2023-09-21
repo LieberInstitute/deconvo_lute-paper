@@ -1,0 +1,58 @@
+---
+title: "Cell type proportion summaries"
+author: "Sean Maden"
+date: "2023-09-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Cell type proportions from snRNAseq and RNAscope.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2", "GGally", "ggcorrplot")
+sapply(libv, library, character.only = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/07_summary/01_sizes_script.RData")
+dfp.wide <- list.dfp$dfp.wide
+dfp.tall <- list.dfp$dfp.tall
+```
+# Correlations
+
+```{r}
+df.cor <- dfp.wide[,c("sn.neuron", "rn.neuron", "br.region", "subject.id")]
+
+df.region <- 
+  aggregate(df.cor, by = list(br.region=df.cor$br.region), FUN = median)
+
+df.sample <- 
+  aggregate(df.cor, by = list(subject.id=df.cor$subject.id), FUN = median)
+
+ggcorrplot(cor(df.region[,c("sn.neuron", "rn.neuron")]))
+ggcorrplot(cor(df.sample[,c("sn.neuron", "rn.neuron")]))
+```
+
+# Plots
+
+
+
+```{r}
+ggpairs(dfp.wide[,c("sn.neuron", "rn.neuron")])
+```
+
+```{r}
+ggplot(dfp.tall, aes(x = subject.id, y = neuron)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~size.type.label) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+ggplot(dfp.tall, aes(x = br.region, y = neuron)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~size.type.label) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```

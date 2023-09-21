@@ -1,7 +1,7 @@
 #!/usr/bin/env R
 
 #
-# Get cell type proportions
+# Get cell type sizes
 #
 
 libv <- c("dplyr", "ggplot2")
