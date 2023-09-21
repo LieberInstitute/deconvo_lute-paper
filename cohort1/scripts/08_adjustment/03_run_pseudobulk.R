@@ -15,7 +15,7 @@ libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "BisqueRNA", "MuSiC
 sapply(libv, library, character.only = T)
 
 # params
-num.dfs.steps <- 40
+num.dfs.steps <- 2
 
 #-----
 # load

@@ -1,14 +1,13 @@
 
 # helper functions
 sn_eset_rescale <- function(sn.eset, s.glial = 3, s.neuron = 10){
-  mexprs <- exprs(sn.eset)
-  summary(mexprs[,1])
+  mexprs <- m1 <- exprs(sn.eset)
   which.glial <- sn.eset[["k2"]]=="glial"
   mexprs[,which.glial] <- mexprs[,which.glial] * s.glial
   which.neuron <- sn.eset[["k2"]]=="neuron"
   mexprs[,which.neuron] <- mexprs[,which.neuron] * s.neuron
-  exprs(sn.eset) <- mexprs
-  summary(exprs(sn.eset)[,1])
+  exprs(sn.eset) <- m2 <- mexprs
+  if(identical(m1, m2)){stop("rescale failure.")}
   sn.eset
 }
 
@@ -24,7 +23,7 @@ prop_adj_results <- function(mae, bisque.sce,
   y.set <- scuttle::logNormCounts(y.set)
   sce <- scuttle::logNormCounts(sce)
   bisque.sce <- scuttle::logNormCounts(bisque.sce)
-  y <- assays(y.set)[["logcounts"]]
+  y <- assays(y.set)[["logcounts"]][,,drop=F]
   assays(sce)[["counts"]] <- assays(sce)[["logcounts"]]
   assays(bisque.sce)[["logcounts"]] <- assays(bisque.sce)[["logcounts"]]
   bulk.eset <- se_to_eset(y.set, "logcounts")
@@ -35,10 +34,12 @@ prop_adj_results <- function(mae, bisque.sce,
   sn.eset[["sample.id"]] <- sn.eset[["Sample"]]
   bulk.eset[["sample.id"]] <- bulk.eset[[bulk.sample.id.variable]]
   # prep z
+  message("prep z")
   z <- lute::get_z_from_sce(sce, "counts", "k2")
   dfs <- dfs.series(seq(1, 20, (20-1)/dfs.steps))
   # get s vectors
-  df.s.opt.res <- do.call(rbind, lapply(seq(ncol(y))[1:2], function(index){
+  message("get s vectors")
+  df.s.opt.res <- do.call(rbind, lapply(seq(ncol(y)), function(index){
     message("working on bulk sample index ", index, " of ", ncol(y))
     mae.iter <- mae
     mae.iter[[bulk.mae.name]] <- mae.iter[[bulk.mae.name]][,index]
@@ -55,10 +56,12 @@ prop_adj_results <- function(mae, bisque.sce,
   print(s.vector.scale)
   s.vector.noscale <- c("glial" = 1, "neuron" = 1)
   # bisque rescale
+  message("bisque rescale")
   sn.eset.rescale <- sn_eset_rescale(sn.eset, 
                                      s.vector.scale["glial"], 
                                      s.vector.scale["neuron"]) 
   # experiment -- nnls
+  message("experiment -- nnls")
   nnls.scale <- lute(z = z, y = y,
                      s = s.vector.scale, 
                      typemarker.algorithm = NULL)$deconvolution.results@predictions.table
@@ -68,11 +71,13 @@ prop_adj_results <- function(mae, bisque.sce,
   colnames(nnls.scale) <- paste0(colnames(nnls.scale), ".nnls.scale")
   colnames(nnls.noscale) <- paste0(colnames(nnls.noscale), ".nnls.noscale")
   # experiment -- music
+  message("experiment -- music")
   music.prop.scale <- deconvolution(musicParam(y, z, s = s.vector.scale))@predictions.table
   music.prop.noscale <- deconvolution(musicParam(y, z, s = s.vector.noscale))@predictions.table
   colnames(music.prop.scale) <- paste0(colnames(music.prop.scale), ".music.scale")
   colnames(music.prop.noscale) <- paste0(colnames(music.prop.noscale), ".music.noscale")
   # experiment -- bisque
+  message("experiment -- bisque")
   # bisque no scale
   bisque.prop.noscale <- BisqueRNA::ReferenceBasedDecomposition(
     bulk.eset, sn.eset, markers=NULL, use.overlap=FALSE,

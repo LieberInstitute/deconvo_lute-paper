@@ -61,6 +61,53 @@ dfp <- do.call(rbind, lapply(list.cv, function(cv.result){
 dfp <- as.data.frame(dfp)
 colnames(dfp) <- c("min.error.neuron.validate", "num.steps.train")
 
+#---------------
+# save plot data
+#---------------
+# get plot data
+dfp.wide <- do.call(rbind, lapply(list.cv, function(cv.result){
+  c(cv.result$num.steps.train,
+    min(cv.result$validate.result$df.res$error.neuron), 
+    median(cv.result$validate.result$df.res$error.neuron), 
+    mean(cv.result$validate.result$df.res$error.neuron), 
+    min(cv.result$train.result$df.res$error.neuron), 
+    median(cv.result$train.result$df.res$error.neuron), 
+    mean(cv.result$train.result$df.res$error.neuron))
+}))
+dfp.wide <- as.data.frame(dfp.wide)
+colnames(dfp.wide) <- c("num.steps.train", 
+                        "min.validate", "median.validate", "mean.validate",
+                        "min.train", "median.train", "mean.train")
+
+# get dfp.wide
+dfp.tall <- do.call(rbind, lapply(list.cv, function(cv.result){
+  df.iter.val <- c(
+    cv.result$num.steps.train,
+    min(cv.result$validate.result$df.res$error.neuron), 
+    max(cv.result$validate.result$df.res$error.neuron), 
+    sd(cv.result$validate.result$df.res$error.neuron), 
+    median(cv.result$validate.result$df.res$error.neuron), 
+    mean(cv.result$validate.result$df.res$error.neuron)
+  )
+  df.iter.train <- c(
+    cv.result$num.steps.train,
+    min(cv.result$train.result$df.res$error.neuron), 
+    max(cv.result$train.result$df.res$error.neuron), 
+    sd(cv.result$train.result$df.res$error.neuron), 
+    median(cv.result$train.result$df.res$error.neuron), 
+    mean(cv.result$train.result$df.res$error.neuron)
+  )
+  df.iter <- as.data.frame(rbind(df.iter.train, df.iter.val))
+  colnames(df.iter) <- c("dfs.num.steps", "min", "max", "sd", "median", "mean")
+  df.iter$crossvalidation <- c("train", "validate")
+  return(df.iter)
+}))
+dfp.tall <- as.data.frame(dfp.tall)
+colnames(dfp.tall) <- c("dfs.num.steps", "min", "max", "sd", "median", "mean", "crossvalidation")
+list.dfp = list(dfp.wide = dfp.wide, dfp.tall = dfp.tall)
+# save
+save(list.dfp, file = "./outputs/06_estimate/list_results_train_plot.rda")
+
 #-----
 # save
 #-----
