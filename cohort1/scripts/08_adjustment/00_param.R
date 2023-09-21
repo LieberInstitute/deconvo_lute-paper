@@ -12,7 +12,7 @@ sn_eset_rescale <- function(sn.eset, s.glial = 3, s.neuron = 10){
   sn.eset
 }
 
-prop_adj_results <- function(mae, bisque.sce){
+prop_adj_results <- function(mae, bisque.sce, dfs.steps = 50){
   # prep
   sample.id <- unique(colData(mae)$sample.id)
   sce <- mae[["snrnaseq.k2.all"]]
@@ -33,9 +33,9 @@ prop_adj_results <- function(mae, bisque.sce){
   bulk.eset[["sample.id"]] <- bulk.eset[["batch.id2"]]
   # prep z
   z <- lute::get_z_from_sce(sce, "counts", "k2")
-  dfs <- dfs.series(seq(1, 20, 1))
+  dfs <- dfs.series(seq(1, 20, (20-1)/dfs.steps))
   # get s vectors
-  df.s.opt.res <- unlist(lapply(seq(ncol(y)), function(index){
+  df.s.opt.res <- do.call(rbind, lapply(seq(ncol(y))[1:2], function(index){
     message("working on bulk sample index ", index, " of ", ncol(y))
     mae.iter <- mae
     mae.iter[["bulk.rnaseq"]] <- mae.iter[["bulk.rnaseq"]][,index]
@@ -46,7 +46,7 @@ prop_adj_results <- function(mae, bisque.sce){
     df.sopt.res <- df.sopt.res[1,]
     c("glial" = df.sopt.res$s.glial, "neuron" = df.sopt.res$s.neuron)
   }))
-  s.vector.scale <- colMeans(df.s.opt.res)
+  s.vector.scale <- colMedians(df.s.opt.res)
   message("sopt result:\n")
   print(s.vector.scale)
   #s.vector.scale <- c("glial" = df.sopt.res$s.glial, "neuron" = df.sopt.res$s.neuron)
@@ -137,18 +137,4 @@ get_sopt_results <- function(mae, dfs, label = "train",
   # prepare and plot results
   df.res <- dfres_postprocess(df.res)
   return(list(df.res = df.res))
-}
-
-get_df_true_list <- function(sce, sample.id.variable = "Sample", 
-                             celltype.variable = "k2"){
-  sample.id.vector <- unique(sce[[sample.id.variable]])
-  list.df.true <- lapply(sample.id.vector, function(sample.id){
-    filter.sce <- sce[[sample.id.variable]]==sample.id
-    prop.true <- prop.table(table(sce[,filter.sce][[celltype.variable]]))
-    prop.true <- as.data.frame(t(as.matrix(prop.true)))
-    rownames(prop.true) <- "true_proportion"
-    prop.true
-  })
-  names(list.df.true) <- sample.id.vector
-  return(list.df.true)
 }

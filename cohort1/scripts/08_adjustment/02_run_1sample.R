@@ -6,7 +6,8 @@
 #
 
 source("./scripts/08_adjustment/00_musicParam-class.R")
-source("./scripts/06_estimate/00_param.R")
+source("./scripts/08_adjustment/00_sopt.R")
+source("./scripts/08_adjustment/00_sopt_utilities.R")
 source("./scripts/08_adjustment/00_param.R")
 
 
@@ -20,11 +21,8 @@ sapply(libv, library, character.only = T)
 new.mae.filename <- "mae_allsamples.rda"
 mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 mae <- get(load(mae.final.filepath))
-sample.id.keep <- c("Br8325_mid", "Br2720_mid")
+sample.id.keep <- c("Br8325_mid", "Br3942_mid")
 mae <- mae[,colData(mae)$sample.id %in% sample.id.keep,]
-
-bulk.sample.remove <- c("2107UNHS-0293_Br2720_Mid_Nuc", "2107UNHS-0293_Br2720_Mid_Cyto")
-mae[["bulk.rnaseq"]] <- mae[["bulk.rnaseq"]][,!colnames(mae[["bulk.rnaseq"]]) %in% bulk.sample.remove]
 
 #-----------
 # experiment
@@ -68,6 +66,45 @@ ggplot(df.res.neuron, aes(x = neuron.music.noscale, y = neuron.music.scale, colo
 ggplot(df.res.neuron, aes(x = neuron.bisque.noscale, y = neuron.bisque.scale, color = sample.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + theme_bw() +
   xlim(0, 1) + ylim(0, 1)
+
+# plot dfp.tall
+dfp.tall <- rbind(data.frame(data = df.res.neuron$neuron.music.scale,
+                             scale = rep("scale", nrow(df.res.neuron)),
+                             true = df.res.neuron$neuron.true,
+                             sample.id = df.res.neuron$sample.id,
+                             algorithm = rep("music", nrow(df.res.neuron))),
+                  data.frame(data = df.res.neuron$neuron.nnls.scale,
+                             scale = rep("scale", nrow(df.res.neuron)),
+                             true = df.res.neuron$neuron.true,
+                             sample.id = df.res.neuron$sample.id,
+                             algorithm = rep("nnls", nrow(df.res.neuron))),
+                  data.frame(data = df.res.neuron$neuron.bisque.scale,
+                             scale = rep("scale", nrow(df.res.neuron)),
+                             true = df.res.neuron$neuron.true,
+                             sample.id = df.res.neuron$sample.id,
+                             algorithm = rep("bisque", nrow(df.res.neuron))),
+                  data.frame(data = df.res.neuron$neuron.music.noscale,
+                             scale = rep("noscale", nrow(df.res.neuron)),
+                             true = df.res.neuron$neuron.true,
+                             sample.id = df.res.neuron$sample.id,
+                             algorithm = rep("music", nrow(df.res.neuron))),
+                  data.frame(data = df.res.neuron$neuron.nnls.noscale,
+                             scale = rep("noscale", nrow(df.res.neuron)),
+                             true = df.res.neuron$neuron.true,
+                             sample.id = df.res.neuron$sample.id,
+                             algorithm = rep("nnls", nrow(df.res.neuron))),
+                  data.frame(data = df.res.neuron$neuron.bisque.noscale,
+                             scale = rep("noscale", nrow(df.res.neuron)),
+                             true = df.res.neuron$neuron.true,
+                             sample.id = df.res.neuron$sample.id,
+                             algorithm = rep("bisque", nrow(df.res.neuron))))
+
+
+ggplot(dfp.tall, aes(x = true, y = data, color = sample.id)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~scale*algorithm) +
+  xlab("True") + ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 
 #-----
