@@ -10,7 +10,6 @@ source("./scripts/08_adjustment/00_sopt.R")
 source("./scripts/08_adjustment/00_sopt_utilities.R")
 source("./scripts/08_adjustment/00_param.R")
 
-
 libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "BisqueRNA", "MuSiC", 
           "dplyr", "MultiAssayExperiment", "GGally")
 sapply(libv, library, character.only = T)
@@ -28,7 +27,7 @@ mae <- mae[,colData(mae)$sample.id %in% sample.id.keep,]
 # experiment
 #-----------
 sample.id.vector <- colData(mae)$sample.id
-list.experiment.results <- experiment_all_samples(sample.id.vector, mae, dfs.steps = 20)
+list.experiment.results <- experiment_all_samples(sample.id.vector, mae, dfs.steps = 50)
 df.res <- as.data.frame(do.call(rbind, lapply(list.experiment.results, function(item){item$df.res})))
 df.res$sample.id <- gsub("_.*", "", rownames(df.res))
 list.dfp <- get_dfp_list(df.res)
@@ -36,7 +35,6 @@ list.dfp <- get_dfp_list(df.res)
 # save image
 rm(mae)
 save.image(file = "./env/08_adjustment/01_run_script.RData")
-
 
 #------------
 # plot neuron

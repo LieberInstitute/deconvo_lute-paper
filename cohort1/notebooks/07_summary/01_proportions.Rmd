@@ -1,0 +1,67 @@
+---
+title: "Cell type proportion summaries"
+author: "Sean Maden"
+date: "2023-09-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Cell type proportions from snRNAseq and RNAscope.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2")
+sapply(libv, library, character.only = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/07_summary/01_proportions_script.RData")
+dfp.wide <- list.dfp$dfp.wide
+dfp.tall <- list.dfp$dfp.tall
+```
+
+# Plots
+
+```{r}
+#------
+# plots
+#------
+# wide plots
+ggplot(dfp.wide, aes(x = sn.neuron, y = rn.neuron)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0)
+
+ggplot(dfp.wide, aes(x = sn.neuron, y = rn.neuron)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~sn.sample.id)
+
+ggplot(dfp.wide, aes(x = sn.neuron, y = rn.neuron)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~br.region)
+
+ggplot(dfp.wide, aes(x = sn.neuron, y = rn.neuron)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~subject.id)
+
+# tall plots
+ggplot(dfp.tall, aes(x = prop.type.label, y = neuron)) + 
+  geom_violin(draw_quantiles = 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp.tall, aes(x = prop.type.label, y = neuron)) + 
+  geom_violin(draw_quantiles = 0.5) + facet_wrap(~br.region) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp.tall, aes(x = prop.type.label, y = neuron)) + 
+  geom_violin(draw_quantiles = 0.5) + facet_wrap(~subject.id) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp.tall, aes(x = prop.type.label, y = neuron)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~subject.id) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dfp.tall, aes(x = prop.type.label, y = neuron)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~br.region) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+###
+```
