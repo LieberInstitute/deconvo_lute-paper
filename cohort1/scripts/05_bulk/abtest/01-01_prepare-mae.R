@@ -23,3 +23,6 @@ sce.iter <- logNormCounts(sce.iter)
 df.rn <- mae[["cell.sizes"]]
 df.rn <- as.data.frame(t(df.rn))
 df.rn <- df.rn[df.rn$k.label=="k2",]
+
+# get list.df.true
+list.df.true <- metadata(sce.iter)[["list.df.true.k2"]]

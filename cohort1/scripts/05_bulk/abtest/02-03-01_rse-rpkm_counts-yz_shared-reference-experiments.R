@@ -34,8 +34,8 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
     prop.pred.iter$assay.name.lutearg <- assay.name
     # get true proportions
     df.rn.iter <- df.rn[df.rn$sample_id==sample.id,]
-    prop.pred.iter$true.glial <- df.rn.iter[df.rn.iter$cell_type=="glial",]$true_proportion
-    prop.pred.iter$true.neuron <- df.rn.iter[df.rn.iter$cell_type=="neuron",]$true_proportion
+    #prop.pred.iter$true.glial <- df.rn.iter[df.rn.iter$cell_type=="glial",]$true_proportion
+    #prop.pred.iter$true.neuron <- df.rn.iter[df.rn.iter$cell_type=="neuron",]$true_proportion
     prop.pred.iter
   }))
 }))

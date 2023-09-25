@@ -2,15 +2,15 @@
 # format results
 #---------------
 list.counts <- list(
-  df.s.k2.shared.counts.counts[,c(1:6,8:11)],
-  df.s.k2.shared.rpkm.counts[,c(1:6,8:11)],
+  df.s.k2.shared.counts.counts[,c(1:6,8:9)],
+  df.s.k2.shared.rpkm.counts[,c(1:6,8:9)],
   df.s.k2.within.counts.counts,
   df.s.k2.within.rpkm.counts
 )
 
 list.logcounts <- list(
-  df.s.k2.shared.counts.logcounts[,c(1:6,8:11)],
-  df.s.k2.shared.rpkm.logcounts[,c(1:6,8:11)],
+  df.s.k2.shared.counts.logcounts[,c(1:6,8:9)],
+  df.s.k2.shared.rpkm.logcounts[,c(1:6,8:9)],
   df.s.k2.within.counts.lognorm,
   df.s.k2.within.rpkm.lognorm
 )
@@ -32,6 +32,16 @@ list.logcounts <- lapply(list.logcounts, function(df){
 
 # bind final df
 df.k2 <- rbind(do.call(rbind, list.counts), do.call(rbind, list.logcounts))
+
+# append true values
+sample.id.vector <- unique(df.k2$sample.id)
+df.k2$true.neuron <- df.k2$true.glial <- "NA"
+for(sample.id in sample.id.vector){
+  df.k2[df.k2$sample.id==sample.id,]$true.neuron <-
+    as.numeric(list.df.true[[sample.id]][["neuron"]])
+  df.k2[df.k2$sample.id==sample.id,]$true.glial <-
+    as.numeric(list.df.true[[sample.id]][["glial"]])
+}
 
 # append abs.error
 df.k2$abs.error.neuron <- abs(as.numeric(df.k2$neuron)-as.numeric(df.k2$true.neuron))

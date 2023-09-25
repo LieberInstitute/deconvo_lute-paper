@@ -42,5 +42,5 @@ rn <- mae[["cell.sizes"]]
 #-----
 
 mae.out.path <- "./outputs/01_mae/mae_analysis.rda"
-mae <- get(load(mae.out.path))
+mae <- save(mae, file = mae.out.path)
 
