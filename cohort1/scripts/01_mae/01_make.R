@@ -33,7 +33,8 @@ load("./outputs/00_preprocess/rse-gene-filter.rda")
 load("./outputs/00_preprocess/rse-rpkmCounts_Human_DLPFC_Deconvolution_n113.rda")
 # load rnascope image data
 load("./outputs/00_preprocess/halo-outputs_updated.Rdata")
-
+# load snrnaseq filtered nucleus proportions
+sn.proportions <- read.csv("./data/snRNA_cell_type_proportions.csv")
 
 #------------------
 # common sample ids
@@ -41,6 +42,7 @@ load("./outputs/00_preprocess/halo-outputs_updated.Rdata")
 sample.id.snrnaseq <- "Sample"
 sample.id.halo <- "Sample"
 sample.id.bulk <- "batch.id2"
+sample.id.sn.proportions <- "Sample"
 
 #-----------------
 # helper functions
@@ -161,22 +163,29 @@ rse.rpkm <- rse.rpkm[rownames(rse.rpkm) %in% marker.id.vector,]
 # pseudobulk
 #-----------
 # make pseudobulk from sce
-sce <- sce1.all
-sample.id.vector <- unique(sce[["Sample"]])
-ypb <- do.call(cbind, lapply(sample.id.vector, function(sample.id){
-  scef <- sce[,sce[["Sample"]]==sample.id]
-  ypb_from_sce(scef, "counts", "k2")
-}))
-ypb <- as.matrix(ypb)
-colnames(ypb) <- sample.id.vector
-bulk.pb <- SummarizedExperiment(assays = SimpleList(list(counts = ypb)))
-colnames(bulk.pb) <- sample.id.vector
-cd <- DataFrame(data.frame(sample.id = colnames(ypb),
-                           batch.id2 = colnames(ypb)))
-rownames(cd) <- colnames(ypb)
-colData(bulk.pb) <- cd
-colnames(bulk.pb)
-bulk.pb.k2 <- as(bulk.pb, "RangedSummarizedExperiment")
+# for k2, k3, k4
+list.sce.k234 <- list(k2 = sce1.all, k3 = sce2.all, k4 = sce3.all)
+list.pb.k234 <- lapply(seq(3), function(index){
+  sce <- list.sce.k234[[index]]
+  sample.id.vector <- unique(sce[["Sample"]])
+  variable.name <- paste0("k", index+1)
+  # get pseudobulk
+  ypb <- do.call(cbind, lapply(sample.id.vector, function(sample.id){
+    scef <- sce[,sce[["Sample"]]==sample.id]
+    ypb_from_sce(scef, "counts", variable.name)
+  }))
+  ypb <- as.matrix(ypb)
+  colnames(ypb) <- sample.id.vector
+  bulk.pb <- SummarizedExperiment(assays = SimpleList(list(counts = ypb)))
+  colnames(bulk.pb) <- sample.id.vector
+  cd <- DataFrame(data.frame(sample.id = colnames(ypb), batch.id2 = colnames(ypb)))
+  rownames(cd) <- colnames(ypb)
+  colData(bulk.pb) <- cd
+  colnames(bulk.pb)
+  as(bulk.pb, "RangedSummarizedExperiment")
+})
+names(list.pb.k234) <- names(list.sce.k234)
+
 
 
 #-----------------------------------
@@ -308,10 +317,19 @@ image.map <- data.frame(colname = colnames(sce.img),
 dfrn.map <- data.frame(colname = colnames(df.rnascope.kdata), 
                        primary = gsub(";.*", "", colnames(df.rnascope.kdata)))
 
-# pb 
+# pseudobulk
 
-bulk.pb.k2.map <- data.frame(colname = colnames(bulk.pb.k2),
-                             primary = bulk.pb.k2[["sample.id"]])
+bulk.pb.k2.map <- data.frame(colname = colnames(list.pb.k234[["k2"]]),
+                             primary = list.pb.k234[["k2"]][["sample.id"]])
+bulk.pb.k3.map <- data.frame(colname = colnames(list.pb.k234[["k3"]]),
+                             primary = list.pb.k234[["k3"]][["sample.id"]])
+bulk.pb.k4.map <- data.frame(colname = colnames(list.pb.k234[["k4"]]),
+                             primary = list.pb.k234[["k4"]][["sample.id"]])
+
+# sn proportions
+
+sn.proportions.map <- data.frame(colname = rownames(sn.proportions),
+                                 primary = sn.proportions[,sample.id.sn.proportions])
 
 # make mappings list, then map df
 
@@ -328,7 +346,13 @@ listmap <- list(
                
   cell.sizes = dfrn.map, # rnascope cell sizes
   
-  bulk.pb.k2 = bulk.pb.k2.map # pseudobulk k2
+  bulk.pb.k2 = bulk.pb.k2.map, # pseudobulk k2
+  
+  bulk.pb.k3 = bulk.pb.k3.map, # pseudobulk k3
+  
+  bulk.pb.k4 = bulk.pb.k4.map, # pseudobulk k4
+  
+  sn.proportions = sn.proportions.map # sn rnaseq proportions
   
   )
 
@@ -351,7 +375,13 @@ object.list <- list(
   
   cell.sizes = df.rnascope.kdata %>% as.matrix(),
   
-  bulk.pb.k2 = bulk.pb.k2
+  bulk.pb.k2 = list.pb.k234[["k2"]],
+  
+  bulk.pb.k3 = list.pb.k234[["k3"]],
+  
+  bulk.pb.k4 = list.pb.k234[["k4"]],
+  
+  sn.proportions = sn.proportions
   
   )
 
