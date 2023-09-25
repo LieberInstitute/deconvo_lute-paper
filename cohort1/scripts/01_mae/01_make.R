@@ -33,8 +33,6 @@ load("./outputs/00_preprocess/rse-gene-filter.rda")
 load("./outputs/00_preprocess/rse-rpkmCounts_Human_DLPFC_Deconvolution_n113.rda")
 # load rnascope image data
 load("./outputs/00_preprocess/halo-outputs_updated.Rdata")
-# load snrnaseq filtered nucleus proportions
-sn.proportions <- read.csv("./data/snRNA_cell_type_proportions.csv")
 
 #------------------
 # common sample ids
@@ -186,8 +184,6 @@ list.pb.k234 <- lapply(seq(3), function(index){
 })
 names(list.pb.k234) <- names(list.sce.k234)
 
-
-
 #-----------------------------------
 # rnascope: make sce with image data
 #-----------------------------------
@@ -279,13 +275,16 @@ unique.sample.id.vector <- unique(
     
     df.rnascope.kdata["sample_id",],
     
-    bulk.pb.k2[["sample.id"]]
+    list.sce.k234[["k2"]][["sample.id"]]
     
     )
 )
 coldata <- DataFrame(
   data.frame(
     sample.id = unique.sample.id.vector))
+
+
+
 
 #------------------------
 # mae: make data mappings/maplist
@@ -326,11 +325,6 @@ bulk.pb.k3.map <- data.frame(colname = colnames(list.pb.k234[["k3"]]),
 bulk.pb.k4.map <- data.frame(colname = colnames(list.pb.k234[["k4"]]),
                              primary = list.pb.k234[["k4"]][["sample.id"]])
 
-# sn proportions
-
-sn.proportions.map <- data.frame(colname = rownames(sn.proportions),
-                                 primary = sn.proportions[,sample.id.sn.proportions])
-
 # make mappings list, then map df
 
 listmap <- list(
@@ -350,9 +344,7 @@ listmap <- list(
   
   bulk.pb.k3 = bulk.pb.k3.map, # pseudobulk k3
   
-  bulk.pb.k4 = bulk.pb.k4.map, # pseudobulk k4
-  
-  sn.proportions = sn.proportions.map # sn rnaseq proportions
+  bulk.pb.k4 = bulk.pb.k4.map # pseudobulk k4
   
   )
 
@@ -379,9 +371,7 @@ object.list <- list(
   
   bulk.pb.k3 = list.pb.k234[["k3"]],
   
-  bulk.pb.k4 = list.pb.k234[["k4"]],
-  
-  sn.proportions = sn.proportions
+  bulk.pb.k4 = list.pb.k234[["k4"]]
   
   )
 
