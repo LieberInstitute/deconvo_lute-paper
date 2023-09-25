@@ -1,11 +1,10 @@
 #!/usr/bin/env R
 
 #
-# Preprocess MultiAssayExperiment
+# Preprocess MultiAssayExperiment using filters.
 #
 
 min.neuron.proportion <- 0.2
-max.nucleus.area <- 78
 
 #-----
 # load
@@ -43,5 +42,5 @@ rn <- mae[["cell.sizes"]]
 #-----
 
 mae.out.path <- "./outputs/01_mae/mae_analysis.rda"
-mae <- get(load(mae.path))
+mae <- get(load(mae.out.path))
 

@@ -12,7 +12,7 @@ sapply(libv, library, character.only = TRUE)
 #---------
 # load mae
 #---------
-new.mae.filename <- "mae_allsamples.rda"
+new.mae.filename <- "mae_analysis.rda"
 mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 mae <- get(load(mae.final.filepath))
 

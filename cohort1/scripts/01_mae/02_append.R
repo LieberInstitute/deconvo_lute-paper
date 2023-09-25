@@ -1,6 +1,7 @@
+#!/usr/bin/env R
 
 #
-# Append data to snRNAseq SingleCellExperiment objects
+# Append data to snRNAseq SingleCellExperiment object metadata.
 #
 
 
@@ -113,5 +114,5 @@ for(index in seq(3)){
 #-----
 # save
 #-----
-mae.new.path <- "./outputs/01_mae/mae_allsamples_append.rda"
-save(mae, file = mae.new.path)
+mae.out.path <- "./outputs/01_mae/mae_allsamples_append.rda"
+save(mae, file = mae.out.path)
