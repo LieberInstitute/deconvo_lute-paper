@@ -8,12 +8,17 @@ sample.id.vector <- unique(colData(mae)[,1][complete.cases(mae)])
 sample.id <- sample.id.vector[1]
 df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.index){
   # format cell sizes
+  #s.set.name <- names(list.s.pred)[s.index]
+  #s.vector.pred <- list.s.pred[[s.index]]
+  #s.vector.pred <- order_svector(s.vector.pred)
   s.set.name <- names(list.s.pred)[s.index]
-  s.vector.pred <- list.s.pred[[s.index]]
-  s.vector.pred <- order_svector(s.vector.pred)
+  
   # iterate on samples, returning predictions matrix
   do.call(rbind, lapply(sample.id.vector, function(sample.id){
     message(sample.id)
+    # get s for iteration
+    s.vector.pred <- list.s.pred[[s.set.name]][[sample.id]]
+    
     # filter bulk
     filter.y.sample <- colData(rse.rpkm)[,"batch.id2"]==sample.id
     filter.y.marker <- rownames(rse.rpkm) %in% rownames(sce.iter)

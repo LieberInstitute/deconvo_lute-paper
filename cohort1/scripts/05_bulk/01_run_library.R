@@ -40,19 +40,20 @@ dim(mae[["bulk.rnaseq"]])
 #---------------------
 # prep cell sizes data
 #---------------------
+sample.id.vector <- unique(mae[[1]]$Sample)
 # get sample s data from rnascope
-rnascope.sizes <- metadata(sce.iter)[["cell.sizes"]]
-list.sizes <- lapply(unique(rnascope.sizes$sample.id), function(sample.id){
-  sizes.iter <- rnascope.sizes[rnascope.sizes$sample.id==sample.id,1]
-  names(sizes.iter) <- rnascope.sizes[rnascope.sizes$sample.id==sample.id,2]
+library.sizes <- metadata(mae[[1]])[["cell.sizes"]]
+list.sizes <- lapply(sample.id.vector, function(sample.id){
+  sizes.iter <- library.sizes[library.sizes$sample.id==sample.id,1]
+  names(sizes.iter) <- library.sizes[library.sizes$sample.id==sample.id,2]
   sizes.iter <- sizes.iter[order(names(sizes.iter))]
   return(sizes.iter)
 })
-list.null <- lapply(unique(rnascope.sizes$sample.id), function(sample.id){
+list.null <- lapply(sample.id.vector, function(sample.id){
   c("glial" = 1, "neuron" = 1)
 })
-names(list.sizes) <- names(list.null) <- unique(rnascope.sizes$sample.id)
-list.s.pred <- list(rnascope = list.sizes, null = list.null)
+names(list.sizes) <- names(list.null) <- sample.id.vector
+list.s.pred <- list(s.library = list.sizes, s.null = list.null)
 
 #-------------
 # run a/b test
@@ -75,4 +76,4 @@ source(file.path(base.path, "02-04-02_rse-rpkm_lognorm-yz_within-reference-exper
 source(file.path(base.path, "03_prep-experiment-results.R"))
 
 # save environment
-save.image(file = "./env/05_bulk/01_run_script.RData")
+save.image(file = "./env/05_bulk/01_run_library_script.RData")

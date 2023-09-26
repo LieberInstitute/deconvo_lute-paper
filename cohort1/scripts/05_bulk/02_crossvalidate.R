@@ -17,7 +17,7 @@ sample.id.validate <- get(load("./outputs/00_preprocess/list_snrnaseq_sampleid.r
 validation.sample.id <- unique(gsub("_.*", "", sample.id.validate))
 
 # load mae, subset validation
-mae.path <- file.path("outputs", "01_mae", "mae_allsamples.rda")
+mae.path <- file.path("outputs", "01_mae", "mae_analysis_append.rda")
 mae <- get(load(mae.path))
 
 # get bulk expression

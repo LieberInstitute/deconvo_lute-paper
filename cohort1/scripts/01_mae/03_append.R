@@ -11,6 +11,7 @@ sapply(libv, library, character.only = TRUE)
 # load
 #-----
 mae.path <- "./outputs/01_mae/mae_analysis.rda"
+mae <- get(load(mae.path))
 
 # load snrnaseq filtered nucleus proportions
 sn.path <- "./data/snRNA_cell_type_proportions.csv"
@@ -91,10 +92,11 @@ for(index in seq(3)){
   sce <- mae[[paste0("snrnaseq.",k.variable,".all")]]
   sample.id.vector <- unique(sce[["Sample"]])
   df.sizes.all <- do.call(rbind, lapply(sample.id.vector, function(sample.id){
-    cell.types <- unique(sce[[k.variable]])
+    scef <- sce[,sce[["Sample"]]==sample.id]
+    cell.types <- unique(scef[[k.variable]])
     df.sizes <- do.call(rbind, lapply(cell.types, function(cell.type){
       counts <- assays(
-        sce[,sce[[celltype.variable]]==cell.type])[["counts"]]
+        scef[,scef[[k.variable]]==cell.type])[["counts"]]
       mean(colSums(counts))
     }))
     df.sizes <- as.data.frame(df.sizes)
@@ -106,7 +108,8 @@ for(index in seq(3)){
   }))
   df.sizes.all <- as.data.frame(df.sizes.all)
   df.sizes.all$ktype <- k.variable
-  metadata(mae[[paste0("snrnaseq.",k.variable,".all")]])[["cell.sizes"]] <- df.sizes.all
+  assay.name <- paste0("snrnaseq.",k.variable,".all")
+  metadata(mae[[assay.name]])[["cell.sizes"]] <- df.sizes.all
 }
 
 #-----
