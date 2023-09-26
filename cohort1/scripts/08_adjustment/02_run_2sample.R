@@ -5,7 +5,6 @@
 # Performs bias-adjusted deconvolution.
 #
 
-source("./scripts/08_adjustment/00_musicParam-class.R")
 source("./scripts/08_adjustment/00_sopt.R")
 source("./scripts/08_adjustment/00_sopt_utilities.R")
 source("./scripts/08_adjustment/00_param.R")
@@ -14,13 +13,15 @@ libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "BisqueRNA", "MuSiC
           "dplyr", "MultiAssayExperiment", "GGally")
 sapply(libv, library, character.only = T)
 
+source("./scripts/08_adjustment/00_musicParam-class.R")
+
 # params
 num.dfs.steps <- 40
 
 #-----
 # load
 #-----
-new.mae.filename <- "mae_allsamples.rda"
+new.mae.filename <- "mae_analysis_append.rda"
 mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 mae <- get(load(mae.final.filepath))
 sample.id.keep <- c("Br8325_mid", "Br3942_mid")

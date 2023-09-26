@@ -5,7 +5,7 @@
 # Performs bias-adjusted deconvolution.
 #
 
-source("./scripts/08_adjustment/00_musicParam-class.R")
+
 source("./scripts/06_estimate/00_param.R")
 source("./scripts/08_adjustment/00_param.R")
 
@@ -14,10 +14,12 @@ libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "BisqueRNA", "MuSiC
           "dplyr", "MultiAssayExperiment", "GGally")
 sapply(libv, library, character.only = T)
 
+source("./scripts/08_adjustment/00_musicParam-class.R")
+
 #-----
 # load
 #-----
-new.mae.filename <- "mae_allsamples.rda"
+new.mae.filename <- "mae_analysis_append.rda"
 mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 mae <- get(load(mae.final.filepath))
 sample.id.vector <- unlist(get(load("./outputs/00_preprocess/list_snrnaseq_sampleid.rda")))
@@ -33,7 +35,8 @@ nrow(colData(mae))
 #-----------
 sample.id.vector <- colData(mae)$sample.id
 list.experiment.results <- experiment_all_samples(sample.id.vector, mae)
-df.res <- as.data.frame(do.call(rbind, lapply(list.experiment.results, function(item){item$df.res})))
+df.res <- as.data.frame(
+  do.call(rbind, lapply(list.experiment.results, function(item){item$df.res})))
 
 #------------
 # plot neuron

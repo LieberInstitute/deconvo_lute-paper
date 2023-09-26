@@ -1,0 +1,41 @@
+---
+title: "01_run"
+author: "Sean Maden"
+date: "2023-09-20"
+output: html_document
+---
+
+Cell size scale factor estimates from crossvalidation.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2")
+sapply(libv, library, character.only = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./outputs/06_estimate/list_results_train_plot_limited.rda")
+```
+
+# Plot 
+
+```{r}
+dfp.tall <- list.dfp$dfp.tall
+dfp.tall <- dfp.tall[dfp.tall$crossvalidation=="train",]
+###
+new.plot <- ggplot(dfp.tall, aes(x = dfs.num.steps, y = median)) +
+  geom_point() + geom_line() + ylab("Median train error neuron") +
+  xlab("Search step count")
+###
+new.plot
+```
+
+Save new plot
+
+```{r}
+new.jpg.path <- "./figures/06_estimate/figs_cv_limited.jpeg"
+jpeg(new.jpg.path, width = 5, height = 4, units = "in", res = 400)
+new.plot; dev.off()
+```

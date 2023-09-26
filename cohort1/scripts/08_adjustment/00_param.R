@@ -137,7 +137,8 @@ get_sopt_results <- function(mae, dfs, label = "train",
       mae[[sn.name]][[sample.id.variable]]))
   # get list.df.true
   sce <- mae[[sn.name]]
-  list.df.true <- get_df_true_list(sce, sample.id.variable, celltype.variable)
+  # list.df.true <- get_df_true_list(sce, sample.id.variable, celltype.variable)
+  list.df.true <- metadata(sce)[["list.df.true.k2"]]
   # iterate on training samples
   list.res <- lapply(sample.id.vector, function(sample.id){
     filter.mae <- colData(mae)$sample.id==sample.id
