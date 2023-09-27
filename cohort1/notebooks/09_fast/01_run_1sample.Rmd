@@ -6,7 +6,10 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library(gridExtra)
 knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
 load("./env/09_fast/01_run_bulk_1sample_script.RData")
 ```
 
@@ -16,9 +19,43 @@ load("./env/09_fast/01_run_bulk_1sample_script.RData")
 list.res.plots$min.error.neuron
 list.res.plots$s.optimal.neuron
 list.res.plots$s.optimal.glial
+
+
 ```
 
 Save new plots.
 
 ```{r}
+dfp <- list.res.plots$dfp
+dfp.tall <- rbind(
+  data.frame(value = dfp$time.elapsed, variable = rep("time.elapsed", nrow(dfp))),
+  data.frame(value = dfp$min.error.neuron, variable = rep("min.error.neuron", nrow(dfp))),
+  data.frame(value = dfp$s.opt.neuron, variable = rep("s.opt.neuron", nrow(dfp))),
+  data.frame(value = dfp$s.opt.glial, variable = rep("s.opt.glial", nrow(dfp)))
+)
+dfp.tall <- as.data.frame(dfp.tall)
+dfp.tall$run.iteration <- rep(seq(4), nrow(dfp*4))
+
+ggplot(dfp.tall, aes(x = run.iteration, y = value)) + 
+  geom_point() + geom_line() + facet_wrap(~variable, ncol = 1)
+
+```
+
+```{r}
+new.plot1 <- list.res.plots$min.error.neuron + 
+  theme(axis.text.x = element_blank(), axis.title.x = element_blank()) +
+  ylab("Min. error\n(neuron)")
+new.plot2 <- list.res.plots$time.elapsed + 
+  theme(axis.text.x = element_blank(), axis.title.x = element_blank()) +
+  ylab("Time elapsed\n(seconds)")
+new.plot3 <- list.res.plots$s.optimal.neuron + 
+  theme(axis.text.x = element_blank(), axis.title.x = element_blank()) +
+  ylab("S optimal\n(neuron)")
+new.plot4 <- list.res.plots$s.optimal.glial +
+  ylab("S optimal\n(glial)")
+jpeg("./figures/09_fast/figs_1sample_sopt_iterations.jpg", 
+     width = 3, height = 5, units = "in", res = 400)
+grid.arrange(new.plot1, new.plot2, new.plot3, new.plot4, ncol = 1)
+dev.off()
+
 ```

@@ -41,12 +41,15 @@ parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL,
                              function(i){
                                s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
                                suppressMessages(
-                                 dfi <-lute(sce, y = yunadj, celltype.variable = celltype.variable, s = s.vector,
+                                 dfi <-lute(sce, y = yunadj, 
+                                            celltype.variable = celltype.variable, 
+                                            s = s.vector, assay.name = assay.name,
                                             typemarker.algorithm = NULL)$deconvolution.results@predictions.table
                                )
                                dfi$sample.label <- colnames(yunadj)
                                dfi$s.glial <- s.vector["glial"]
                                dfi$s.neuron <- s.vector["neuron"]
+                               dfi$lute.assay.name <- assay.name
                                return(dfi)
                              }))
   colnames(df.res)[1:2] <- paste0(colnames(df.res)[1:2], ".pred.nnls")
@@ -340,6 +343,10 @@ run_sopt_series <- function(dfs.param, sample.id.vector, df.true.list, y.unadj,
                             sce, y.group.name = "batch.id2",
                             celltype.variable = "k2", 
                             assay.name = "logcounts"){
+  if(assay.name=="logcounts"){
+    sce <- scuttle::logNormCounts(sce)
+    y.unadj <- scuttle::logNormCounts(y.unadj)
+  }
   list.res <- list()
   s.opt.iter <- NA
   for(iter in seq(nrow(dfs.param))){

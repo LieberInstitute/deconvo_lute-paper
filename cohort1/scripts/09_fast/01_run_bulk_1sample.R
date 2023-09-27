@@ -2,18 +2,11 @@
 
 # Author: Sean Maden
 #
-# Run sucessive iterations of S optimization. Use the real bulk data.
+# Run successive iterations of S optimization. Use the real bulk data.
 #
 
 libv <- c("MultiAssayExperiment", "ggplot2", "gridExtra")
 sapply(libv, library, character.only = T)
-#!/usr/bin/env R
-
-# Author: Sean Maden
-#
-# Explore dfs search iteratively in a single sample.
-#
-
 
 source("./source/00_dataset_summaries.R")
 source("./source/00_deconvo_plots.R")
