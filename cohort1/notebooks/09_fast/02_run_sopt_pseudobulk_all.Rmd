@@ -1,0 +1,55 @@
+---
+title: "Real bulk results"
+author: "Sean Maden"
+date: "2023-09-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Deconvolution on real bulk samples.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2", "GGally")
+sapply(libv, library, character.only = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/09_fast/02_run_adjustment_pseudobulk_all_script.RData")
+```
+
+# Plots
+
+```{r}
+ggpairs(dfp.wide, 
+        columns = rev(colnames(dfp.wide)),
+        xlim = c(0, 1), ylim = c(0, 1))
+```
+
+```{r}
+# plot dfp.tall
+ggplot(dfp.tall, aes(x = true, y = value, color = sample.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~scale*algorithm) + xlab("True") + 
+  ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Save
+
+```{r}
+# save
+#jpeg("./figures/08_adjustment/figs_pairs_neuron_2samples.jpg", 
+#     width = 10, height = 10, units = "in", res = 400)
+#ggpairs.neuron
+#dev.off()
+```
+
+
+
+```{r}
+ggpairs(dfp.wide)
+```

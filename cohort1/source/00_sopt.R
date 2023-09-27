@@ -34,7 +34,7 @@ parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL,
   registerDoParallel(cl)
   # get full run
   if(is(yunadj, "RangedSummarizedExperiment")){
-    yunadj <- assays(yunadj)[[1]] %>% as.matrix()
+    yunadj <- assays(yunadj)[[assay.name]] %>% as.matrix()
   }
   df.res <- do.call(rbind, 
                     mclapply(seq(nrow(dfs)), 
@@ -44,7 +44,8 @@ parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL,
                                  dfi <-lute(sce, y = yunadj, 
                                             celltype.variable = celltype.variable, 
                                             s = s.vector, assay.name = assay.name,
-                                            typemarker.algorithm = NULL)$deconvolution.results@predictions.table
+                                            typemarker.algorithm = NULL
+                                            )$deconvolution.results@predictions.table
                                )
                                dfi$sample.label <- colnames(yunadj)
                                dfi$s.glial <- s.vector["glial"]

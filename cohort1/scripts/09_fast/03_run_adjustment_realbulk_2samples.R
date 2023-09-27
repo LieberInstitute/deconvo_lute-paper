@@ -18,12 +18,13 @@ source("./scripts/08_adjustment/00_param.R")
 # load
 #-----
 mae <- get(load("./outputs/01_mae/mae_analysis_append.rda"))
-#sample.id.vector <- colData(mae)$sample.id
-sample.id.vector <- c("Br8667_ant", "Br8667_mid")
-mae <- mae[,colData(mae)$sample.id %in% sample.id.vector,]
+sample.id.vector <- colData(mae)$sample.id
+#sample.id.vector <- c("Br8667_ant", "Br8667_mid")
+#mae <- mae[,colData(mae)$sample.id %in% sample.id.vector,]
 df.true.list <- metadata(mae[[1]])[["list.df.true.k2"]]
-bulk.assay.name <- "bulk.pb.k2"
-y.unadj <- mae[[bulk.assay.name]]
+y.unadj <- mae[["bulk.rnaseq"]]
+y.unadj <- y.unadj[,y.unadj$expt_condition=="Nuc_RiboZeroGold"]
+mae[["bulk.rnaseq"]] <- y.unadj
 dim(y.unadj)
 sce <- mae[[1]]
 
@@ -34,7 +35,7 @@ sce <- mae[[1]]
 dfs.param <- data.frame(
   s.min = c(1, NA, NA),
   s.max = c(80, NA, NA),
-  s.step = c(4, 1e-2, 1e-3),
+  s.step = c(5, 5e-2, 5e-3),
   s.diff = c(NA, 1, 1e-1)
 )
 list.res.all <- lapply(sample.id.vector, function(sample.id){
@@ -119,4 +120,4 @@ save(df.res1, file = "./outputs/09_fast/df_result_sopt_biasadj.rda")
 
 # save image
 rm(mae)
-save.image(file = "./env/09_fast/02_run_adjustment_pseudobulk_2samples_script.RData")
+save.image(file = "./env/09_fast/03_run_adjustment_realbulk_2samples_script.RData")

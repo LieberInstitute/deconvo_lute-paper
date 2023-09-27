@@ -1,0 +1,62 @@
+---
+title: "Real bulk results"
+author: "Sean Maden"
+date: "2023-09-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Deconvolution on real bulk samples.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2", "GGally")
+sapply(libv, library, character.only = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/09_fast/03_run_adjustment_realbulk_2samples_script.RData")
+```
+
+# Plots
+
+```{r}
+ggpairs(dfp.wide, 
+        columns = rev(colnames(dfp.wide)),
+        xlim = c(0, 1), ylim = c(0, 1))
+```
+
+```{r}
+new.plot.tall <- ggplot(dfp.tall, aes(x = true, y = value, color = sample.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~scale*algorithm) + xlab("True") + 
+  ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+new.plot.tall
+```
+
+# Save
+
+```{r}
+jpeg("./figures/09_fast/figs5_ggpairs_realbulk.jpg", 
+     width = 10, height = 10, units = "in", res = 400)
+
+ggpairs(dfp.wide, 
+        columns = rev(colnames(dfp.wide)),
+        xlim = c(0, 1), ylim = c(0, 1))
+
+dev.off()
+```
+
+
+```{r}
+jpeg("./figures/09_fast/fig5a_scale_sopt_realbulk.jpg", 
+     width = 6, height = 4, units = "in", res = 400)
+
+new.plot.tall
+
+dev.off()
+```
