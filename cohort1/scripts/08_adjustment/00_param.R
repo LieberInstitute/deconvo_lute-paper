@@ -11,14 +11,14 @@ sn_eset_rescale <- function(sn.eset, s.glial = 3, s.neuron = 10){
   sn.eset
 }
 
-prop_adj_results <- function(mae, bisque.sce, 
+prop_adj_results <- function(mae, bisque.sce, bisque.bulk,
                              bulk.mae.name = "bulk.rnaseq", 
                              bulk.sample.id.variable = "batch.id2",
                              dfs.steps = 20){
   # prep
   sample.id <- unique(colData(mae)$sample.id)
   sce <- mae[["snrnaseq.k2.all"]]
-  y.set <- mae[[bulk.mae.name]]
+  y.set <- bisque.bulk # mae[[bulk.mae.name]]
   # get logcounts scaled expression
   y.set <- scuttle::logNormCounts(y.set)
   sce <- scuttle::logNormCounts(sce)
@@ -39,8 +39,9 @@ prop_adj_results <- function(mae, bisque.sce,
   dfs <- dfs.series(seq(1, 20, (20-1)/dfs.steps))
   # get s vectors
   message("get s vectors")
-  df.s.opt.res <- do.call(rbind, lapply(seq(ncol(y)), function(index){
-    message("working on bulk sample index ", index, " of ", ncol(y))
+  y.sopt <- y[,grepl(sample.id, colnames(y)),drop = F]
+  df.s.opt.res <- do.call(rbind, lapply(seq(ncol(y.sopt)), function(index){
+    message("working on bulk sample index ", index, " of ", ncol(y.sopt))
     mae.iter <- mae
     mae.iter[[bulk.mae.name]] <- mae.iter[[bulk.mae.name]][,index]
     df.sopt <- get_sopt_results(mae.iter, dfs, label = "train")
@@ -87,8 +88,9 @@ prop_adj_results <- function(mae, bisque.sce,
                                                                 markers=NULL, use.overlap=FALSE,
                                                                 subject.names = "sample.id",
                                                                 cell.types = "k2")$bulk.props
-  bisque.prop.noscale <- as.data.frame(t(bisque.prop.noscale))
-  bisque.prop.rescale <- as.data.frame(t(bisque.prop.rescale))
+  sample.id <- colData(mae)$sample.id
+  bisque.prop.noscale <- as.data.frame(t(bisque.prop.noscale[,sample.id]))
+  bisque.prop.rescale <- as.data.frame(t(bisque.prop.rescale[,sample.id]))
   colnames(bisque.prop.rescale) <- paste0(colnames(bisque.prop.rescale), ".bisque.scale")
   colnames(bisque.prop.noscale) <- paste0(colnames(bisque.prop.noscale), ".bisque.noscale")
   # bind results
@@ -99,8 +101,8 @@ prop_adj_results <- function(mae, bisque.sce,
   df.res$neuron.true <- prop.table(table(sce[["k2"]]))[["neuron"]]
   df.res$sample.id <- sample.id
   # get plot
-  gg.pairs.plot <- ggpairs(df.res[,grepl("neuron", colnames(df.res))])
-  return(list(df.res = df.res, gg.pairs.plot = gg.pairs.plot, s.vector.scale = s.vector.scale))
+  #gg.pairs.plot <- ggpairs(df.res[,grepl("neuron", colnames(df.res))])
+  return(list(df.res = df.res, s.vector.scale = s.vector.scale))
 }
 
 #
@@ -110,12 +112,13 @@ experiment_all_samples <- function(sample.id.vector, mae,
                                    bulk.sample.id.variable = "batch.id2",
                                    dfs.steps = 20){
   bisque.sce <- mae[["snrnaseq.k2.all"]]
+  bisque.bulk <- mae[[bulk.mae.name]]
   lr <- list()
   for(sample.id in sample.id.vector){
     message("working on sample: ", sample.id)
     mae.iter <- mae[,colData(mae)$sample.id==sample.id,]
-    lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce, dfs.steps,
-                                        bulk.mae.name = bulk.mae.name, 
+    lr[[sample.id]] <- prop_adj_results(mae.iter, bisque.sce, bisque.bulk, 
+                                        dfs.steps, bulk.mae.name = bulk.mae.name, 
                                         bulk.sample.id.variable = bulk.sample.id.variable)
   }
   names(lr) <- sample.id.vector
