@@ -1,0 +1,24 @@
+---
+title: "01_run_bulk_1sample"
+author: "Sean Maden"
+date: "2023-09-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+load("./env/09_fast/01_run_bulk_1sample_script.RData")
+```
+
+# Plot
+
+```{r}
+list.res.plots$min.error.neuron
+list.res.plots$s.optimal.neuron
+list.res.plots$s.optimal.glial
+```
+
+Save new plots.
+
+```{r}
+```
