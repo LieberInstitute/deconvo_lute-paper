@@ -229,7 +229,7 @@ get_dfres_plots <- function(df.res, facet.variable = NULL){
   return(list.plots.dfp)
 }
 
-get_sopt_results <- function(mae, dfs, label = "train"){
+get_sopt_results <- function(mae, dfs, label = "train", plot = TRUE){
   # set params (SEE PROJECT NOTES)
   assay.name <- "counts"
   celltype.variable <- "k2"
@@ -260,21 +260,26 @@ get_sopt_results <- function(mae, dfs, label = "train"){
   df.res$crossvalidation <- label
   # prepare and plot results
   df.res <- dfres_postprocess(df.res)
-  list.plots.dfres <- get_dfres_plots(df.res)
-  return(list(df.res = df.res, list.plots = list.plots.dfres))
+  # return
+  lr <- list(df.res = df.res)
+  if(plot){lr[[list.plots]] <- get_dfres_plots(df.res)}
+  return(lr)
 }
 
 get_crossvalidation_results <- function(mae.train, mae.validate, 
                                         num.steps.train = 10,
                                         num.steps.validate = 50,
                                         s.min.train = 1,
-                                        s.max.train = 40){
+                                        s.max.train = 40,
+                                        plot = FALSE){
   # train
   s.increment.train <- (s.max.train-s.min.train)/num.steps.train
   dfs <- dfs.series(
     seq(s.min.train, s.max.train, s.increment.train))
   message("beginning training")
-  list.dfres.train <- get_sopt_results(mae.train, dfs, "train")
+  list.dfres.train <- get_sopt_results(
+    mae.train, dfs, "train", plot = plot)
+  
   # get dfs from train min.error coordinates
   df.res.train <- list.dfres.train$df.res
   min.error.neuron <- min(df.res.train$error.neuron)
@@ -288,9 +293,12 @@ get_crossvalidation_results <- function(mae.train, mae.validate,
   s.validate.increment <- (s.validate.max-s.validate.min)/num.steps.validate
   s.validate.seq <- seq(s.validate.min, s.validate.max, s.validate.increment)
   dfs.validate <- dfs.series(s.validate.seq)
+  
   # validate
   message("beginning validation")
-  list.dfres.validate <- get_sopt_results(mae.validate, dfs.validate, "validate")
+  list.dfres.validate <- get_sopt_results(
+    mae.validate, dfs.validate, "validate", plot = plot)
+  
   return(list(train.result = list.dfres.train, 
               validate.result = list.dfres.validate,
               num.steps.train = num.steps.train))
