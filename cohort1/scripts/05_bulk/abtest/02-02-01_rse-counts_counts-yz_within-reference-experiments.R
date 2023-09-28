@@ -7,9 +7,6 @@ sample.id.vector <- unique(colData(mae)[,1][complete.cases(mae)])
 sample.id <- sample.id.vector[1]
 df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.index){
   # format cell sizes
-  #s.set.name <- names(list.s.pred)[s.index]
-  #s.vector.pred <- list.s.pred[[s.index]]
-  #s.vector.pred <- order_svector(s.vector.pred)
   s.set.name <- names(list.s.pred)[s.index]
   
   # iterate on samples, returning predictions matrix
@@ -37,10 +34,6 @@ df.s.k2.within <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
       names(s.vector.pred),"=",s.vector.pred,collapse=",")
     prop.pred.iter$sample.id <- sample.id
     prop.pred.iter$k.type <- celltype.variable
-    # get true proportions
-    df.rn.iter <- df.rn[df.rn$sample_id==sample.id,]
-    #prop.pred.iter$true.glial <- df.rn.iter[df.rn.iter$cell_type=="glial",]$true_proportion
-    #prop.pred.iter$true.neuron <- df.rn.iter[df.rn.iter$cell_type=="neuron",]$true_proportion
     prop.pred.iter
   }))
 }))

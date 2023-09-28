@@ -2,6 +2,10 @@
 
 Contains analysis for the deconvolution methods paper
 
+## Directory structure
+
+
+
 ## Details about this repository
 
 The path to this repository on JHPCE is:
@@ -60,14 +64,26 @@ This repo contains analysis scripts, outputs, figures, etc. for the deconvolutio
 [Figure S1F](./scripts/02_pseudobulk/) : Jittered points overlaying cyan quantile boxplots of absolute errors for adjusted and unadjusted results, DLPFC cohort 2, k4 tests.
 
 * Supplemental Figure 2
-[Supplemental Figure 2A](./scripts/06_bulk/) : 
-[Supplemental Figure 2B](./scripts/06_bulk/) : 
-[Supplemental Figure 2C](./scripts/06_bulk/) : 
+[Supplemental Figure 2A](./notebooks/06_estimate/01_run/Rmd) : 
+[Supplemental Figure 2B](./notebooks/09_fast/01_run_1sample.Rmd) : 
 
 * Supplemental Figure 3
+[Supplemental Figure 3A](./notebooks/05_bulk/01_plot_manual_save.Rmd) : 
+[Supplemental Figure 3B](./notebooks/05_bulk/01_plot_manual_save.Rmd) : 
+
+* Supplemental Figure 4
+[Supplemental Figure 4A](./notebooks/05_bulk/01_plot_manual_save.Rmd) :
+[Supplemental Figure 4B](./notebooks/05_bulk/01_plot_manual_save.Rmd) :
+[Supplemental Figure 4C](./notebooks/05_bulk/02_crossvalidate_save.Rmd) :
+[Supplemental Figure 4D](./notebooks/05_bulk/02_crossvalidate_save.Rmd) :
+[Supplemental Figure 4E](./notebooks/05_bulk/02_crossvalidate_save.Rmd) :
+
+* Supplemental Figure 5
+[Supplemental Figure 5](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd) :
 
 
 ## File locations
+
 This is an integrative, multi-assay project including individual-matched data generated from human dorsolateral prefrontal cortex (DLPFC) using the RNAscope, 10X Chromium, and Illumina HiSeq platforms. 
 
 The main directory path on JHPCE is located at:

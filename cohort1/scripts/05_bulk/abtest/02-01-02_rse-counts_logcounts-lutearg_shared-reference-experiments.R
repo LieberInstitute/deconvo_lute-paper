@@ -8,9 +8,6 @@ sample.id.vector <- unique(colData(mae)[,1][complete.cases(mae)])
 sample.id <- sample.id.vector[1]
 df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.index){
   # format cell sizes
-  #s.set.name <- names(list.s.pred)[s.index]
-  #s.vector.pred <- list.s.pred[[s.index]]
-  #s.vector.pred <- order_svector(s.vector.pred)
   s.set.name <- names(list.s.pred)[s.index]
   
   # iterate on samples, returning predictions matrix
@@ -25,6 +22,7 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
     rse.iter <- rse.counts[filter.y.marker, filter.y.sample]
     rse.iter <- logNormCounts(rse.iter)
     y.iter <- assays(rse.iter)[[assay.name]]
+    
     # get predictions
     prop.pred.iter <- lute(sce = sce.iter, y = y.iter, assay.name = assay.name, 
                            celltype.variable = celltype.variable, s = s.vector.pred, 
@@ -37,10 +35,7 @@ df.s.k2.shared <- do.call(rbind, lapply(seq(length(list.s.pred)), function(s.ind
     prop.pred.iter$sample.id <- sample.id
     prop.pred.iter$k.type <- celltype.variable
     prop.pred.iter$assay.name.lutearg <- assay.name
-    # get true proportions
-    df.rn.iter <- df.rn[df.rn$sample_id==sample.id,]
-    #prop.pred.iter$true.glial <- df.rn.iter[df.rn.iter$cell_type=="glial",]$true_proportion[1]
-    #prop.pred.iter$true.neuron <- df.rn.iter[df.rn.iter$cell_type=="neuron",]$true_proportion[1]
+    
     prop.pred.iter
   }))
 }))

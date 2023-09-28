@@ -45,7 +45,7 @@ s.manual <- c("glial" = 3, "neuron" = 10)
 s.null <- c("glial" = 1, "neuron" = 1)
 list.s.null <- lapply(sample.id.vector, function(id){s.null})
 list.s.manual <- lapply(sample.id.vector, function(id){s.manual})
-names(list.s.null) <- names(list.s.null) <- sample.id.vector
+names(list.s.null) <- names(list.s.manual) <- sample.id.vector
 list.s.pred <- list(s.null = list.s.null, s.manual = list.s.manual)
 
 #-------------

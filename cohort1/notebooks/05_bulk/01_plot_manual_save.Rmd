@@ -1,0 +1,147 @@
+---
+title: "Plot results of bulk A/B tests with and without cell size scaling"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+This is to perform A/B tests on the bulk datasets using counts, RPKM-counts, logcounts.
+
+```{r}
+knitr::opts_chunk$set(fig.width=10, fig.height=10, echo = F)
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
+```
+
+```{r}
+# load env data
+setwd("..")
+setwd("..")
+load("./env/05_bulk/01_run_manual_script.RData")
+```
+
+```{r}
+# format plot data
+dfp <- df.k2
+# format variable states
+dfp$experiment.type <- paste0("z_type : ", dfp$experiment.type)
+dfp$assay.name.lutearg <- paste0("rescale_type : ", dfp$assay.name.lutearg)
+dfp$s.set.label <- paste0("s_set : ", dfp$s.set.label)
+dfp$bulk.sample.id <- gsub("c1", "c", dfp$bulk.sample.id)
+dfp$bulk.sample.id <- gsub("k1", "k", dfp$bulk.sample.id)
+dfp$bulk.sample.id <- gsub("o1", "o", dfp$bulk.sample.id)
+# experiment conditions
+dfp$bulk.sample.condition <- cd[dfp$bulk.sample.id,]$expt_condition
+table(dfp$bulk.sample.condition)
+# filter na
+dfp <- na.omit(dfp)
+```
+
+# Experiment summaries
+
+Overall experiment design table with conditions tested.
+
+```{r}
+expt <- data.frame(z.reference.type = c("shared", "within", "shared", "within"),
+                   y.expression.scale = c("counts", "counts", "RPKM", "RPKM"))
+expt <- do.call(rbind, lapply(seq(length(list.s.pred)), function(ii){
+  expt.iter <- expt
+  expt.iter
+}))
+expt$cell.label.type <- "k2"
+
+# table visualization
+knitr::kable(expt)
+```
+
+Experiment condition table data dictionary
+
+```{r}
+data.dict <- list(z.reference.type = "Type of cell type reference for deconvolution",
+                  y.expression.scale = "Scale of the bulk sample data passed to lute",
+                  s.pred.set.name = "Label of the S factor set",
+                  s.pred.set.values = "S factor set values.",
+                  cell.label.type = "Cell type identifier")
+data.dict <- do.call(rbind, lapply(seq(length(data.dict)), function(ii){c(names(data.dict)[ii], data.dict[[ii]])}))
+knitr::kable(data.dict)
+```
+
+# Supplemental Figure 3A: Experiment condition summaries
+
+Proportions scatterplots.
+
+```{r}
+# new plot
+new.plot.scatter <- 
+  ggplot(dfp, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + 
+  theme_bw() + geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~experiment.type*assay.name.lutearg*s.set.label)
+new.plot.scatter
+```
+
+Save plot
+
+```{r}
+setwd("..")
+setwd("..")
+
+new.plot.path <- "./figures/05_bulk/figs3a_scatter.jpg"
+jpeg(new.plot.path, width = 7, height = 6, res = 400, units = "in")
+new.plot.scatter
+dev.off()
+```
+
+# Supplemental Figure 4B: Jittered boxplots
+
+Absolute errors, organized by S cell size scale factor set ID.
+
+```{r}
+dfp.new <- dfp
+dfp.new$experiment.type <- gsub("z_type : ", "", dfp.new$experiment.type)
+
+new.plot.jitterbox <- ggplot(dfp.new, aes(x = experiment.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~assay.name.lutearg) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  xlab("z_type") + ylab("Error (neuron)")
+new.plot.jitterbox
+```
+
+Save plot
+
+```{r}
+setwd("..")
+setwd("..")
+
+new.plot.path <- "./figures/05_bulk/figs4b_jitterbox1.jpg"
+jpeg(new.plot.path, width = 3.5, height = 3, res = 400, units = "in")
+new.plot.jitterbox
+dev.off()
+```
+
+# Supplemental Figure 4A: Errors by sample id and condition
+
+Absolute errors, organized by sample ID.
+
+```{r}
+new.plot.jitter.cond <- ggplot(dfp, aes(x = bulk.sample.condition, 
+                                          y = abs.error.neuron, color = sample.id)) + 
+  geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "black") + theme_bw() +
+  facet_wrap(~experiment.type) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Error (neuron)") + xlab("Preparation condition")
+new.plot.jitter.cond
+```
+
+Save plot
+
+```{r}
+setwd("..")
+setwd("..")
+
+new.plot.path <- "./figures/05_bulk/figs4a_jitterbox2_condition.jpg"
+jpeg(new.plot.path, width = 6, height = 3.5, res = 400, units = "in")
+new.plot.jitter.cond
+dev.off()
+```
+

@@ -1,0 +1,145 @@
+---
+title: "02_crossvalidate"
+author: "Sean Maden"
+date: "2023-09-19"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+knitr::opts_chunk$set(fig.width=10, fig.height=10, echo = F)
+libv <- c("ggplot2")
+sapply(libv, library, character.only = T)
+```
+
+```{r setup, include=FALSE}
+setwd("..")
+setwd("..")
+load("./env/05_bulk/02_crossvalidate_script.RData")
+```
+ 
+```{r}
+
+dfp <- df.k2
+# format plot data
+dfp <- dfp[dfp$crossvalidation=="validation",]
+dfp[dfp$s.set.label=="s.null",]$s.set.label <- "unscaled"
+dfp[dfp$s.set.label=="s.manual",]$s.set.label <- "scaled"
+dfp$experiment.type <- paste0("z_type : ", dfp$experiment.type)
+
+dfp$bulk.sample.id <- gsub("c1", "c", dfp$bulk.sample.id)
+dfp$bulk.sample.id <- gsub("k1", "k", dfp$bulk.sample.id)
+dfp$bulk.sample.id <- gsub("o1", "o", dfp$bulk.sample.id)
+# experiment conditions
+dfp$bulk.sample.condition <- cd[dfp$bulk.sample.id,]$expt_condition
+table(dfp$bulk.sample.condition)
+
+dfp <- na.omit(dfp)
+
+```
+ 
+# Supplemental Figure 3B : Scatterplot of true and predicted proportions across experiments
+
+```{r}
+
+new.plot.scatter <- ggplot(dfp, aes(x = true.neuron, y = neuron)) + 
+  theme_bw() + geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label*experiment.type) + xlab("True") + ylab("Predicted")
+
+new.plot.scatter
+
+```
+
+```{r}
+setwd("..")
+setwd("..")
+
+new.plot.path <- "./figures/05_bulk/figs2b_validate.jpg"
+jpeg(new.plot.path, width = 4.2, height = 3.8, units = "in", res = 400)
+new.plot.scatter
+dev.off()
+```
+
+# Supplemental Figure 3E : Neuron errors across conditions by cross validation set, experiment
+
+```{r}
+
+new.plot.jitterbox <- ggplot(df.k2, aes(x = experiment.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.5) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~crossvalidation) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  xlab("z_type") + ylab("Error (neuron)")
+
+new.plot.jitterbox
+
+```
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.path <- "./figures/05_bulk/figs3e_experimenttype.jpg"
+
+jpeg(new.plot.path, width = 4, height = 3, units = "in", res = 400)
+new.plot.jitterbox
+dev.off()
+
+```
+
+# Supplemental Figure 3C and 3D
+
+```{r}
+
+# Filter results to within-reference condition only
+dfp <- df.k2[df.k2$experiment.type=="shared.reference",]
+dfp$preparation.type <- gsub(".*_", "", dfp$bulk.sample.condition)
+dfp <- na.omit(dfp)
+
+```
+
+```{r}
+
+new.plot.jitter.prep <- ggplot(dfp, aes(x = preparation.type, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw() +
+  facet_wrap(~crossvalidation) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Error (neuron)")
+new.plot.jitter.prep
+
+```
+
+```{r}
+setwd("..")
+setwd("..")
+
+new.plot.path <- "./figures/05_bulk/figs3c_library_condition.jpg"
+jpeg(new.plot.path, width = 4, height = 3, units = "in", res = 400)
+new.plot.jitter.prep
+dev.off()
+```
+
+```{r}
+
+dfp$cell_compartment <- gsub("_.*", "", dfp$bulk.sample.condition)
+
+new.plot.jitter.compart <- ggplot(dfp, aes(x = cell_compartment, y = abs.error.neuron)) + 
+  geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw() +
+  facet_wrap(~crossvalidation) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot.jitter.compart
+
+```
+
+```{r}
+setwd("..")
+setwd("..")
+
+new.plot.path <- "./figures/05_bulk/figs3d_cell_compartment.jpg"
+jpeg(new.plot.path, width = 4, height = 3, units = "in", res = 400)
+new.plot.jitter.compart
+dev.off()
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
