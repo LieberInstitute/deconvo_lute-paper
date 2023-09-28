@@ -330,7 +330,7 @@ bias_res_iter <- function(sample.id.vector, df.true.list,
   t2 <- Sys.time()
   time.elapsed <- t2 - t1
   df.res <- dfres_postprocess(df.res)
-  filter.error <- df.res$error.neuron==min(df.res$error.neuron)
+  filter.error <- which(df.res$error.neuron==min(df.res$error.neuron))[1]
   s.opt.iter <- c(df.res[filter.error,]$s.glial,
                   df.res[filter.error,]$s.neuron)
   names(s.opt.iter) <- c("glial", "neuron")

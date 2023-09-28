@@ -18,7 +18,29 @@ sapply(libv, library, character.only = TRUE)
 ```{r}
 setwd("..")
 setwd("..")
-load("./env/09_fast/03_run_adjustment_realbulk_2samples_script.RData")
+load("./env/09_fast/03_run_adjustment_realbulk_all_script.RData")
+list.df.true <- metadata(sce)[["list.df.true.k2"]]
+```
+
+```{r}
+list.df.true <- metadata(sce)[["list.df.true.k2"]]
+
+for(sample.id in unique(dfp.tall$sample.id)){
+  message(sample.id)
+  message(identical(dfp.tall[dfp.tall$sample.id==sample.id,]$true[1],
+            as.numeric(list.df.true[[sample.id]]["neuron"])))
+}
+```
+  
+```{r}
+for(sample.id in unique(dfp.tall$sample.id)){
+  filter.dfp.tall <- dfp.tall$sample.id==sample.id
+  filter.dfp.wide <- rownames(dfp.wide)==sample.id
+  true.neuron.value <- as.numeric(df.true.list[[sample.id]]["neuron"])
+  dfp.tall[filter.dfp.tall,]$true <- true.neuron.value
+  dfp.wide[filter.dfp.wide,]$neuron.true <- true.neuron.value
+}
+dfp.tall$error <- abs(dfp.tall$true-dfp.tall$value)
 ```
 
 # Plots
@@ -33,9 +55,19 @@ ggpairs(dfp.wide,
 new.plot.tall <- ggplot(dfp.tall, aes(x = true, y = value, color = sample.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + 
   facet_wrap(~scale*algorithm) + xlab("True") + 
-  ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
+  ylab("Predicted") + xlim(0.1,0.9) + ylim(0.1,0.9) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 new.plot.tall
+```
+
+```{r}
+new.plot.tall.jitterbox <- ggplot(dfp.tall, 
+                                  aes(x = scale, y = error)) + 
+  geom_jitter(alpha = 0.5, width = 0.5, height = 0) + geom_boxplot(alpha = 0, color = "cyan") +
+  facet_wrap(~algorithm) + xlab("Scale") + 
+  ylab("Error (neuron)") + ylim(0, 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+new.plot.tall.jitterbox
 ```
 
 # Save
@@ -53,10 +85,20 @@ dev.off()
 
 
 ```{r}
-jpeg("./figures/09_fast/fig5a_scale_sopt_realbulk.jpg", 
+jpeg("./figures/09_fast/fig5a_scatterplot_scale_sopt_realbulk.jpg", 
      width = 6, height = 4, units = "in", res = 400)
 
 new.plot.tall
 
 dev.off()
+```
+
+```{r}
+jpeg("./figures/09_fast/fig5b_jitterbox_scale_sopt_realbulk.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+
+new.plot.tall.jitterbox
+
+dev.off()
+
 ```
