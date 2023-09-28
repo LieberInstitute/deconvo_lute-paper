@@ -29,7 +29,8 @@ list.df.true <- metadata(sce.all)[["list.df.true.k2"]]
 #-------------------------------
 # subset validation and training
 #-------------------------------
-samples.index <- 1:2
+samples.index.train <- 1:5
+samples.index.validate <- 1:2
 list.sample.cv <- get(load("./outputs/00_preprocess/list_snrnaseq_sampleid.rda"))
 train.sample.id <- list.sample.cv[["train"]]
 validate.sample.id <- list.sample.cv[["validation"]]
@@ -38,23 +39,20 @@ cd.mae <- colData(mae)
 filter.mae.train <- cd.mae$sample.id %in% train.sample.id
 filter.mae.validate <- cd.mae$sample.id %in% validate.sample.id
 
-mae.train <- mae[,which(filter.mae.train)[samples.index],]
-mae.validate <- mae[,which(filter.mae.validate)[samples.index],]
+mae.train <- mae[,which(filter.mae.train)[samples.index.train],]
+mae.validate <- mae[,which(filter.mae.validate)[samples.index.validate],]
 rm(mae)
 
 #-----------
 # experiment
 #-----------
 # parameters for experiment
-num.steps.validate <- 10
-seq.steps.train <- seq(5, 90, 20)
+seq.steps.train <- seq(5, 100, 10)
 
 # run experiment
 list.cv <- lapply(seq.steps.train, function(train.steps){
   list.res <- get_crossvalidation_results(
-    mae.train, mae.validate, 
-    num.steps.train = train.steps,
-    num.steps.validate = num.steps.validate)
+    mae.train, mae.validate, num.steps.train = train.steps)
   list.res
 })
 names(list.cv) <- paste0("steps:", seq.steps.train)
@@ -146,7 +144,6 @@ save(list.cv, file = "./outputs/06_estimate/results_cv_limited.rda")
 save(dfp, file = "./outputs/06_estimate/results_dfp_limited.rda")
 
 # env
-rm(mae.final)
 rm(mae.validate)
 rm(mae.train)
-save.image("./outputs/06_estimate/02_run_limited_script.RData")
+save.image("./outputs/06_estimate/02_run_limited_resolution_script.RData")

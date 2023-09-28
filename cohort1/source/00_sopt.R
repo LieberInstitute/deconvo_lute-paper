@@ -268,7 +268,8 @@ get_sopt_results <- function(mae, dfs, label = "train", plot = TRUE){
 
 get_crossvalidation_results <- function(mae.train, mae.validate, 
                                         num.steps.train = 10,
-                                        num.steps.validate = 50,
+                                        s.step.validation = 1e-2,
+                                        s.diff.validation = 1,
                                         s.min.train = 1,
                                         s.max.train = 40,
                                         plot = FALSE){
@@ -290,9 +291,14 @@ get_crossvalidation_results <- function(mae.train, mae.validate,
   s.vector.validate <- c(s.train.neuron, s.train.glial)
   s.validate.min <- min(s.vector.validate)
   s.validate.max <- max(s.vector.validate)
-  s.validate.increment <- (s.validate.max-s.validate.min)/num.steps.validate
-  s.validate.seq <- seq(s.validate.min, s.validate.max, s.validate.increment)
-  dfs.validate <- dfs.series(s.validate.seq)
+  names(s.vector.validate) <- c("glial", "neuron")
+  
+  # s.vector.validate <- c("glial" = 2, "neuron" = 10)
+  param.iter <- c("s.min" = min(s.vector.validate), 
+                  "s.max" = max(s.vector.validate), 
+                  "s.step" = s.step.validation, 
+                  "s.diff" = s.diff.validation)
+  dfs.validate <- dfs_iter(param.iter, s.vector.validate)
   
   # validate
   message("beginning validation")
@@ -352,6 +358,12 @@ run_sopt_series <- function(dfs.param, sample.id.vector, df.true.list, y.unadj,
                             sce, y.group.name = "batch.id2",
                             celltype.variable = "k2", 
                             assay.name = "logcounts"){
+  #
+  #
+  #
+  #
+  #
+  
   if(assay.name=="logcounts"){
     sce <- scuttle::logNormCounts(sce)
     y.unadj <- scuttle::logNormCounts(y.unadj)
