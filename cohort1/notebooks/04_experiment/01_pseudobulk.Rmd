@@ -6,10 +6,12 @@ output:
   html_document: default
 ---
 
+Results of pseudobulk $S$ optimization experiments.
+
 ```{r setup, include=FALSE}
 libv <- c("ggplot2", "dplyr")
 sapply(libv, library, character.only = T)
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r}
@@ -20,9 +22,15 @@ list.files()
 load("./env/04_experiment/01_run_script.RData")
 ```
 
-# Heatmaps
+# Figure 4A: Heatmaps of neuron error.
 
-Save plot
+View plot.
+
+```{r}
+list.plots.dfp1$heatmaps$heatmap1
+```
+
+Save plot.
 
 ```{r}
 setwd("..")
@@ -33,9 +41,15 @@ list.plots.dfp1$heatmaps$heatmap1
 dev.off()
 ```
 
-# Decile heatmaps
+# Figure 4B: Neuron error deciles and min/max values plots.
 
-Save plot
+View plot. 
+
+```{r}
+list.plots.dfp1$heatmaps$heatmap6
+```
+
+Save plot.
 
 ```{r}
 setwd("..")
@@ -46,9 +60,15 @@ list.plots.dfp1$heatmaps$heatmap6
 dev.off()
 ```
 
-# Error by s.fraction
+# Figure 4C: Neuron error by log of S fraction
 
-Save plot
+View plot.
+
+```{r}
+list.plots.dfp1$deconvocanos$cano2
+```
+
+Save plot.
 
 ```{r}
 setwd("..")
@@ -57,4 +77,10 @@ new.plot.path <- "./figures/04_experiment/fig4c_errorfraction.jpg"
 jpeg(new.plot.path, width = 5.5, height = 4, units = "in", res = 400)
 list.plots.dfp1$deconvocanos$cano2
 dev.off()
+```
+
+# Session info
+
+```{r}
+sessionInfo()
 ```

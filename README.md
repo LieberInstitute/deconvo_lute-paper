@@ -1,16 +1,16 @@
 # deconvo_method-paper
 
-Supplementary materials to prepare data and run analyses for the paper "".
+Supplementary materials to prepare data and run analyses for the paper "Cell size-normalized bulk transcriptomics deconvolution in human cortex".
 
-## Paper citation
+## Citation
 
-## Repository structure
+Sean K. Maden, Louise A. Huuki-Myers, Sang Ho Kwon, Leonardo Collado-Torres, 
+Kristen R. Maynard, Stephanie C. Hicks. "Cell size-normalized bulk transcriptomics 
+deconvolution in human cortex". [link]()
 
-Describes the contents of this repo.
+## Folders
 
-### Folder tree
-
-File tree structure returned from `tree deconvo_method-paper -d`:
+The file tree structure of this repo, returned from `tree deconvo_method-paper -d`, is:
 
 ```
 deconvo_method-paper
@@ -82,7 +82,7 @@ deconvo_method-paper
 └── sosina_et_al_2021
 ```
 
-### Folder guide
+The folder contents are described as follows:
 
 * `cohort1` : Supplementary materials for analyses of Cohort1.
 
@@ -103,16 +103,6 @@ deconvo_method-paper
 * `cohort1/scripts` : Scripts (`.Rmd`) performing data preparation and analyses.
 
 * `cohort1/source` : Scripts (`.R`) shared across analysis sections.
-
-This repo contains analysis scripts, outputs, figures, etc. for the deconvolution methods paper. The subdirs contained here include:
-
-* `scripts` : Main location where scripts and scripts to generate content live.
-
-* `figures_and_tables`: Main location of figures and tables, with same layout as `scripts` subdir
-
-* `outputs`: Objects (i.e. not figures or tables) which are produced by scripts from `scripts`. Has same layout as `scripts` subdir.
-
-* `source`: Scripts, vignettes, etc. which are central to the planned deconvolution resource. This will have its own internal structure and be developed in parallel to analyses for the paper.
 
 ## Figure links
 
@@ -155,6 +145,13 @@ Contains the links to files saving figures for the manuscript.
 [Figure 4B](./scripts/04_experiment) 
 
 [Figure 4C](./scripts/04_experiment)
+
+**Figure 5**
+
+[Figure 5A](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
+
+[Figure 5B](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
+
 
 ### Supplementary Figures
 
@@ -204,16 +201,15 @@ Contains the links to files saving figures for the manuscript.
 
 [Supplemental Figure 5](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
 
+## Datasets
 
-## JHPCE
+### JHPCE
 
 The main directory path on JHPCE is located at `/dcs04/lieber/lcolladotor/deconvolution_LIBD4030/deconvo_lute-paper`.
 
 Further details about sample processing and QC are available at `/dcs04/lieber/lcolladotor/deconvolution_LIBD4030/Human_DLPFC_Deconvolution`.
 
-## Datasets
-
-### snRNA-seq
+### snRNA-seq data
 
 The snRNA-seq datasets for this project currently include 9 donors and 10 samples. For the deconvolution method paper, we access these data as a `SingleCellExperiment` object. The latest (final?) version is a file called `sce_DLPFC.Rdata` located at the subdirectory:
 
@@ -221,7 +217,7 @@ The snRNA-seq datasets for this project currently include 9 donors and 10 sample
 
 Cell type labels for `snRNA-seq` datasets are determined from the variable `cellType_broad_hc`. This can be accessed from the `sce` object in various ways such as `colData(sce)$cellType_broad_hc` or `sce[["cellType_broad_hc"]]`. Note that the deconvolution methods paper focuses on just 6 cell types of interest, and these are identified from among the cell type labels in the `cellType_broad_hc` variable.
 
-### Real bulk RNA-seq samples
+### Real bulk RNA-seq data
 
 The bulk RNA-seq datasets include 6 samples groups comprised of mRNA isolated from either nucleus, cytoplasm, or bulk, and prepped with either polyA selection or rRNA depletion strategies. Data come from 19 samples, meaning 113 total data points. 
 
@@ -229,7 +225,7 @@ These bulk RNA-seq data are currently being QC'd, but they will be accessible as
 
 `Human_DLPFC_Deconvolution/processed-data/01_SPEAQeasy/`
 
-### RNAscope outputs
+### RNAscope data
 
 Image data is generated for RNAscope slides by analysis with HALO and outputting the analysis results as `.csv` tables. These tables are read from the file tree located at the subdirectory:
 
