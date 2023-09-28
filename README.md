@@ -120,56 +120,89 @@ Contains the links to files saving figures for the manuscript.
 
 ### Main figures
 
+**Figure 1**
+
 [Figure 1](./figures/lute_diagram.jpg)
 
-* Figure 2
+**Figure 2**
+
 [Figure 2A](./notebooks/02_pseudobulk/)
+
 [Figure 2B](./notebooks/02_pseudobulk/)
+
 [Figure 2C](./notebooks/02_pseudobulk/)
+
 [Figure 2D](./notebooks/02_pseudobulk/)
+
 [Figure 2E](./notebooks/02_pseudobulk/)
+
 [Figure 2F](./notebooks/02_pseudobulk/)
 
-* Figure 3
+**Figure 3**
+
 [Figure 3A](./figures/03_shuffle/)
+
 [Figure 3B-C](./notebooks/03_shuffle/)
+
 [Figure 3D-E](./notebooks/03_shuffle/)
+
 [Figure 3F-G](./notebooks/03_shuffle/)
 
-* Figure 4
+**Figure 4**
+
 [Figure 4A](./scripts/04_experiment) 
+
 [Figure 4B](./scripts/04_experiment) 
+
 [Figure 4C](./scripts/04_experiment)
 
 ### Supplementary Figures
 
-* Supplemental Figure S1
+**Supplemental Figure 1**
+
 [Figure S1A](./scripts/02_pseudobulk/)
+
 [Figure S1B](./scripts/02_pseudobulk/)
+
 [Figure S1C](./scripts/02_pseudobulk/)
+
 [Figure S1D](./scripts/02_pseudobulk/)
+
 [Figure S1E](./scripts/02_pseudobulk/)
-[Figure S1F](./scripts/02_pseudobulk/)
-[Figure S1E](./scripts/02_pseudobulk/)
+
 [Figure S1F](./scripts/02_pseudobulk/)
 
-* Supplemental Figure 2
+[Figure S1E](./scripts/02_pseudobulk/)
+
+[Figure S1F](./scripts/02_pseudobulk/)
+
+**Supplemental Figure 2**
+
 [Supplemental Figure 2A](./notebooks/06_estimate/01_run/Rmd)
+
 [Supplemental Figure 2B](./notebooks/09_fast/01_run_1sample.Rmd)
 
-* Supplemental Figure 3
+**Supplemental Figure 3**
+
 [Supplemental Figure 3A](./notebooks/05_bulk/01_plot_manual_save.Rmd)
+
 [Supplemental Figure 3B](./notebooks/05_bulk/01_plot_manual_save.Rmd) 
 
-* Supplemental Figure 4
+**Supplemental Figure 4**
+
 [Supplemental Figure 4A](./notebooks/05_bulk/01_plot_manual_save.Rmd)
+
 [Supplemental Figure 4B](./notebooks/05_bulk/01_plot_manual_save.Rmd)
+
 [Supplemental Figure 4C](./notebooks/05_bulk/02_crossvalidate_save.Rmd)
+
 [Supplemental Figure 4D](./notebooks/05_bulk/02_crossvalidate_save.Rmd)
+
 [Supplemental Figure 4E](./notebooks/05_bulk/02_crossvalidate_save.Rmd)
 
-* Supplemental Figure 5
-[Supplemental Figure 5](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd) :
+**Supplemental Figure 5**
+
+[Supplemental Figure 5](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
 
 
 ## JHPCE
@@ -224,3 +257,8 @@ Details about deconvolution terminology and formulations are available in the [`
 ## Funding sources
 
 * 1R01MH123183-01 ([grantome_link](https://grantome.com/grant/NIH/R01-MH123183-01))
+
+## See also
+
+* [lute](https://github.com/metamaden/lute/tree/main) : Framework for bulk transcriptomics deconvolution using cell size scale factor normalization.
+
