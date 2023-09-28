@@ -1,31 +1,25 @@
 ---
-title: "01_run_bulk_1sample"
+title: "S optimization on a single real bulk RNA-seq sample using convergent search"
 author: "Sean Maden"
 date: "2023-09-27"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
+Demonstrates convergent search strategy for a single real bulk RNA-seq sample.
+
 ```{r setup, include=FALSE}
-library(gridExtra)
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+libv <- c("ggplot2", "gridExtra")
+sapply(libv, library, character.only = T)
 setwd("..")
 setwd("..")
-load("./env/09_fast/01_run_bulk_1sample_script.RData")
+load("./env/06_estimate/01_run_bulk_1sample_convergent_script.RData")
 ```
 
-# Plot
-
 ```{r}
-list.res.plots$min.error.neuron
-list.res.plots$s.optimal.neuron
-list.res.plots$s.optimal.glial
-
-
-```
-
-Save new plots.
-
-```{r}
+# format plot data
 dfp <- list.res.plots$dfp
 dfp.tall <- rbind(
   data.frame(value = dfp$time.elapsed, variable = rep("time.elapsed", nrow(dfp))),
@@ -38,8 +32,11 @@ dfp.tall$run.iteration <- rep(seq(4), nrow(dfp*4))
 
 ggplot(dfp.tall, aes(x = run.iteration, y = value)) + 
   geom_point() + geom_line() + facet_wrap(~variable, ncol = 1)
-
 ```
+
+# Supplemental Figure 2B
+
+View plot.
 
 ```{r}
 new.plot1 <- list.res.plots$min.error.neuron + 
@@ -53,9 +50,23 @@ new.plot3 <- list.res.plots$s.optimal.neuron +
   ylab("S optimal\n(neuron)")
 new.plot4 <- list.res.plots$s.optimal.glial +
   ylab("S optimal\n(glial)")
-jpeg("./figures/09_fast/figs_1sample_sopt_iterations.jpg", 
+
+grid.arrange(new.plot1, new.plot2, new.plot3, new.plot4, ncol = 1)
+```
+
+Save plot.
+
+```{r}
+setwd("..")
+setwd("..")
+jpeg("./figures/06_estimate/figs_1sample_sopt_iterations.jpg", 
      width = 3, height = 5, units = "in", res = 400)
 grid.arrange(new.plot1, new.plot2, new.plot3, new.plot4, ncol = 1)
 dev.off()
+```
 
+# Session info
+
+```{r}
+sessionInfo()
 ```

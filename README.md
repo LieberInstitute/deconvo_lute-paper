@@ -45,17 +45,15 @@ deconvo_method-paper
 │   │   ├── 04_experiment
 │   │   ├── 05_bulk
 │   │   ├── 06_estimate
-│   │   ├── 07_summary
-│   │   ├── 08_adjustment
-│   │   └── 09_fast
+│   │   ├── 07_adjustment
+│   │   └── 08_sizes
 │   ├── figures
 │   │   ├── 02_pseudobulk
 │   │   ├── 03_shuffle
 │   │   ├── 04_experiment
 │   │   ├── 05_bulk
 │   │   ├── 06_estimate
-│   │   ├── 08_adjustment
-│   │   └── 09_fast
+│   │   └── 08_adjustment
 │   ├── notebooks
 │   │   ├── 00_preprocess
 │   │   ├── 01_mae
@@ -64,9 +62,8 @@ deconvo_method-paper
 │   │   ├── 04_experiment
 │   │   ├── 05_bulk
 │   │   ├── 06_estimate
-│   │   ├── 07_summary
-│   │   ├── 08_adjustment
-│   │   ├── 09_fast
+│   │   ├── 07_adjustment
+│   │   ├── 08_sizes
 │   │   └── bioc2023
 │   ├── outputs
 │   │   ├── 00_preprocess
@@ -76,9 +73,8 @@ deconvo_method-paper
 │   │   ├── 04_experiment
 │   │   ├── 05_bulk
 │   │   ├── 06_estimate
-│   │   ├── 07_summary
-│   │   ├── 08_adjustment
-│   │   └── 09_fast
+│   │   ├── 07_adjustment
+│   │   └── 08_sizes
 │   ├── scripts
 │   │   ├── 00_preprocess
 │   │   ├── 01_mae
@@ -89,9 +85,8 @@ deconvo_method-paper
 │   │   ├── 05_bulk
 │   │   │   └── abtest
 │   │   ├── 06_estimate
-│   │   ├── 07_summary
-│   │   ├── 08_adjustment
-│   │   └── 09_fast
+│   │   ├── 07_adjustment
+│   │   └── 08_sizes
 │   └── source
 ├── cohort2
 │   ├── env
@@ -180,27 +175,27 @@ Contains the links to files saving figures for the manuscript.
 
 **Supplemental Figure 1**
 
-[Supplemental Figure 1A](./scripts/02_pseudobulk/)
+[Supplemental Figure 1A](./notebooks/02_pseudobulk/01_k2.Rmd)
 
-[Supplemental Figure 1B](./scripts/02_pseudobulk/)
+[Supplemental Figure 1B](./notebooks/02_pseudobulk/01_k2.Rmd)
 
 [Supplemental Figure 1C](./scripts/02_pseudobulk/)
 
 [Supplemental Figure 1D](./scripts/02_pseudobulk/)
 
-[Supplemental Figure 1E](./scripts/02_pseudobulk/)
+[Supplemental Figure 1E](./notebooks/02_pseudobulk/02_k3.Rmd)
 
-[Supplemental Figure 1F](./scripts/02_pseudobulk/)
+[Supplemental Figure 1F](./notebooks/02_pseudobulk/)
 
-[Supplemental Figure 1E](./scripts/02_pseudobulk/)
+[Supplemental Figure 1E](./notebooks/02_pseudobulk/03_k4.Rmd)
 
-[Supplemental Figure 1F](./scripts/02_pseudobulk/)
+[Supplemental Figure 1F](./notebooks/02_pseudobulk/)
 
 **Supplemental Figure 2**
 
-[Supplemental Figure 2A](./notebooks/06_estimate/01_run/Rmd)
+[Supplemental Figure 2A](./notebooks/06_estimate/01_run_limited_resolution.Rmd)
 
-[Supplemental Figure 2B](./notebooks/09_fast/01_run_1sample.Rmd)
+[Supplemental Figure 2B](./notebooks/06_estimate/01_run_1sample_convergent.Rmd)
 
 **Supplemental Figure 3**
 
@@ -222,7 +217,7 @@ Contains the links to files saving figures for the manuscript.
 
 **Supplemental Figure 5**
 
-[Supplemental Figure 5](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
+[Supplemental Figure 5](./notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd)
 
 ## Datasets
 

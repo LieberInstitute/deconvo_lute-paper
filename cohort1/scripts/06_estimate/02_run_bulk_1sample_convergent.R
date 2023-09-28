@@ -11,7 +11,6 @@ sapply(libv, library, character.only = T)
 source("./source/00_dataset_summaries.R")
 source("./source/00_deconvo_plots.R")
 source("./source/00_sopt.R")
-# source("./source/00_sopt.R")
 
 # load
 mae <- get(load("./outputs/01_mae/mae_analysis_append.rda"))
@@ -19,10 +18,10 @@ mae <- mae[,colData(mae)$sample.id=="Br8492_mid",]
 
 # new run
 dfs.param <- data.frame(
-  s.min = c(1, NA, NA, NA),
-  s.max = c(80, NA, NA, NA),
-  s.step = c(2, 1e-2, 1e-3, 1e-4),
-  s.diff = c(NA, 1e-1, 1e-2, 1e-3)
+  s.min = c(1, NA, NA, NA, NA),
+  s.max = c(80, NA, NA, NA, NA),
+  s.step = c(1, 1e-1, 1e-2, 1e-3, 1e-4),
+  s.diff = c(NA, 2, 2e-1, 2e-2, 2e-3)
 )
 sample.id.vector <- "Br8492_mid"
 df.true.list <- metadata(mae[[1]])[["list.df.true.k2"]]
@@ -37,4 +36,4 @@ identical(list.res$iter1$df.res,
 
 list.res.plots <- plot_sopt_series(list.res)
 
-save.image(file = "./env/09_fast/01_run_bulk_1sample_script.RData")
+save.image(file = "./env/06_estimate/01_run_bulk_1sample_convergent_script.RData")
