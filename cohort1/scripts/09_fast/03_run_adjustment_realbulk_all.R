@@ -74,12 +74,21 @@ df.sopt <- do.call(rbind, lapply(list.dfsopt, function(item){item}))
 df.sopt <- as.data.frame(df.sopt)
 colnames(df.sopt) <- c("sample.id", "s.glial", "s.neuron", "min.error.neuron")
 df.sopt
+# format variables
+df.sopt$min.error.neuron <- as.numeric(df.sopt$min.error.neuron)
+df.sopt$s.fract.glial.neuron <- as.numeric(df.sopt$s.glial)/as.numeric(df.sopt$s.neuron)
 
 # exclude failed runs
+# filter on sopt success, max allowed neuron error & min allowed glial ratio
 max.allowed.error <- 0.1
-df.sopt$min.error.neuron <- as.numeric(df.sopt$min.error.neuron)
+min.allowed.glial.sfract <- 0.3
+max.allowed.glial.sfract <- 3
+# define filter
 filter.sopt <- df.sopt$min.error.neuron > 0.1
-df.sopt[filter.sopt,]$sample.id # "Br6423_ant"  "Br6522_post"
+filter.sopt <- filter.sopt | df.sopt$s.fract.glial.neuron <= min.allowed.glial.sfract
+filter.sopt <- filter.sopt | df.sopt$s.fract.glial.neuron >= max.allowed.glial.sfract
+table(filter.sopt)
+df.sopt[filter.sopt,]$sample.id # "Br6423_post" "Br6423_ant"  "Br6432_ant"  "Br6522_post"
 df.sopt <- df.sopt[!filter.sopt,]
 # update sample.id.vector
 sample.id.vector <- df.sopt$sample.id
@@ -123,7 +132,7 @@ ggplot(df.sopt, aes(x = min.error.neuron, y = sanity.check.error)) +
 # > Error in solve.default(t(D.weight) %*% D.weight) : 
 # > Lapack routine dgesv: system is exactly singular: U[1,1] = 0
 # 
-filter.bisque.samples <- c("Br8667_ant")
+filter.bisque.samples <- c("Br8667_ant", "Br6522_post")
 sample.id.vector <- sample.id.vector[!sample.id.vector %in% filter.bisque.samples]
 
 list.dfsopt <- list.dfsopt[names(list.dfsopt) %in% sample.id.vector]
