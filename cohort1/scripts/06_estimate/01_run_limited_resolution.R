@@ -21,10 +21,18 @@ source("./source/00_deconvo_plots.R")
 new.mae.filename <- "mae_analysis_append.rda"
 mae.final.filepath <- file.path("outputs", "01_mae", new.mae.filename)
 mae <- get(load(mae.final.filepath))
-# true proportions from sce data
+
+# get sn data
 sn.assay.name <- "snrnaseq.k2.all"
 sce.all <- mae[[sn.assay.name]]
+
+# get true proportions
 list.df.true <- metadata(sce.all)[["list.df.true.k2"]]
+
+# filter bulk 
+condition.name <- "Nuc_RiboZeroGold"
+y.set <- mae[["bulk.rnaseq"]]
+mae[["bulk.rnaseq"]] <- y.set[,y.set$expt_condition==condition.name]
 
 #-------------------------------
 # subset validation and training
@@ -35,10 +43,12 @@ list.sample.cv <- get(load("./outputs/00_preprocess/list_snrnaseq_sampleid.rda")
 train.sample.id <- list.sample.cv[["train"]]
 validate.sample.id <- list.sample.cv[["validation"]]
 
+# filter cv ids
 cd.mae <- colData(mae)
 filter.mae.train <- cd.mae$sample.id %in% train.sample.id
 filter.mae.validate <- cd.mae$sample.id %in% validate.sample.id
 
+# get separate mae cv data
 mae.train <- mae[,which(filter.mae.train)[samples.index.train],]
 mae.validate <- mae[,which(filter.mae.validate)[samples.index.validate],]
 rm(mae)
@@ -47,7 +57,7 @@ rm(mae)
 # experiment
 #-----------
 # parameters for experiment
-seq.steps.train <- seq(5, 100, 10)
+seq.steps.train <- seq(5, 150, 25)
 
 # run experiment
 list.cv <- lapply(seq.steps.train, function(train.steps){

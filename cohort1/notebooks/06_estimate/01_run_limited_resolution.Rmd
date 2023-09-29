@@ -24,7 +24,7 @@ load("./outputs/06_estimate/02_run_limited_resolution_script.RData")
 ```{r}
 # format plot data
 # dfp <- list.dfp$dfp.tall
-dfp <- dfp[dfp$crossvalidation=="train",]
+# dfp <- dfp[dfp$crossvalidation=="train",]
 # dfp$median <- format(dfp$median, scientific = TRUE, digits = 6)
 ```
 
@@ -34,22 +34,28 @@ View plot.
 
 ```{r}
 
-new.plot <- ggplot(dfp, aes(x = steps, y = median.train)) +
+new.plot1 <- ggplot(dfp, aes(x = steps, y = median.train)) +
   geom_point() + geom_line() + ylab("Median error (neuron)") +
   xlab("Step count")
 
-new.plot2 <- ggplot(dfp, aes(x = min.train, y = min.val, color = steps)) +
+new.plot2 <- ggplot(dfp, aes(x = steps, y = min.train)) +
+  geom_point() + geom_line() + ylab("Min. error (neuron)") +
+  xlab("Step count")
+
+new.plot3 <- ggplot(dfp, aes(x = min.train, y = min.val, color = steps)) +
   geom_point() + geom_abline(slope = 1, intercept = 0)
 
-new.plot3 <- ggplot(dfp, aes(x = sd.train, y = sd.val, color = steps)) +
+new.plot4 <- ggplot(dfp, aes(x = sd.train, y = sd.val, color = steps)) +
   geom_point() + geom_abline(slope = 1, intercept = 0) +
   xlim(0, 0.3) + ylim(0, 0.3)
+
+new.plot1
 
 new.plot2
 
 new.plot3
 
-new.plot
+new.plot4
 
 ```
 
