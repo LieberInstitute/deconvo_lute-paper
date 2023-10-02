@@ -1,0 +1,18 @@
+---
+title: "01_run"
+author: "Sean Maden"
+date: "2023-10-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+source("./env/09_quality/01_run_script.envs")
+```
+
+## R Markdown
+
+```{r}
+```
