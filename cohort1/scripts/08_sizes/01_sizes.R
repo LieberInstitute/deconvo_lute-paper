@@ -30,11 +30,15 @@ df.sopt <- do.call(rbind, lapply(unique(sopt$sample.id), function(sample.id){
   c(sample.id, mean(sf$s.glial), mean(sf$s.neuron))
 }))
 
+# get pr
+dfp.tall$ratio.glial.neuron <- dfp.tall$glial/dfp.tall$neuron
+dfp.tall$ratio.neuron.glial <- dfp.tall$neuron/dfp.tall$glial
+
+#------
+# save 
+#------
+
 # save env
 rm(mae)
 save.image(file.path("./env/",folder.name,"/01_sizes_script.RData"))
-
-#---------------------------------------------
-# compare size estimates within sample sources
-#---------------------------------------------
 

@@ -54,3 +54,9 @@ ggplot(dfp.tall, aes(x = br.region, y = neuron)) +
   geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~size.type.label) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+```{r}
+ggplot(dfp.tall, aes(x = br.region, y = neuron)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~size.type.label) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
