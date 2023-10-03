@@ -7,7 +7,8 @@
 libv <- c("dplyr", "ggplot2")
 sapply(libv, library, character.only = TRUE)
 
-source("./scripts/07_summary/00_size.R")
+folder.name <- "08_sizes"
+source(file.path("./scripts/",folder.name,"/00_size.R"))
 
 # load
 mae <- get(load("./outputs/01_mae/mae_allsamples.rda"))
@@ -31,7 +32,7 @@ df.sopt <- do.call(rbind, lapply(unique(sopt$sample.id), function(sample.id){
 
 # save env
 rm(mae)
-save.image("./env/07_summary/01_sizes_script.RData")
+save.image(file.path("./env/",folder.name,"/01_sizes_script.RData"))
 
 #---------------------------------------------
 # compare size estimates within sample sources
