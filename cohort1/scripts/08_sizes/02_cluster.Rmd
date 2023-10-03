@@ -1,5 +1,5 @@
 ---
-title: "00_size-vs-quality"
+title: "02_cluster"
 author: "Sean Maden"
 date: "2023-10-03"
 output: html_document
@@ -7,18 +7,19 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2", "GGally", "ggcorrplot")
+sapply(libv, library, character.only = TRUE)
 ```
 
 ```{r}
 setwd("..")
 setwd("..")
-load("./env/08_sizes/01_sizes_script.RData")
+load("./env/08_sizes/02_cluster_script.RData")
 dfp.wide <- list.dfp$dfp.wide
 dfp.tall <- list.dfp$dfp.tall
-load("./")
 ```
 
-# Plot
+# Plots
 
 View
 
@@ -33,13 +34,13 @@ Save
 setwd("..")
 setwd("..")
 list.files()
-new.plot.path <- "./figures/09_quality/supplemental_figure_quality_by_sizes.jpg"
+new.plot.path <- "./figures/08_sizes/supplemental_figure_cluster.jpg"
 jpeg(new.plot.path, width = 5, height = 3, res = 400, units = "in")
 new.plot1
 dev.off()
 ```
 
-# Session info
+# Session
 
 ```{r}
 sessionInfo()

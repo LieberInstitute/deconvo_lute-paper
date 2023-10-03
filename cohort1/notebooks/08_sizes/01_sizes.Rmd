@@ -18,10 +18,9 @@ sapply(libv, library, character.only = TRUE)
 ```{r}
 setwd("..")
 setwd("..")
-load("./env/08_sizes/01_sizes_script.RData")
+load("./env/08_sizes/01_run_script.RData")
 dfp.wide <- list.dfp$dfp.wide
 dfp.tall <- list.dfp$dfp.tall
-annotations <- load("data/09_quality/rnascope_quality_annotations.csv")
 ```
 # Correlations
 
