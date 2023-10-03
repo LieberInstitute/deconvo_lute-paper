@@ -1,0 +1,40 @@
+---
+title: "00_size-vs-quality"
+author: "Sean Maden"
+date: "2023-10-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/08_sizes/01_sizes_script.RData")
+dfp.wide <- list.dfp$dfp.wide
+dfp.tall <- list.dfp$dfp.tall
+
+load("./")
+```
+
+# Plot
+
+view
+
+```{r}
+```
+
+save
+
+```{r}
+setwd("..")
+setwd("..")
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
