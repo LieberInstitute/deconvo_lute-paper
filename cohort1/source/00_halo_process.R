@@ -9,12 +9,28 @@
 #
 #
 
+conf_by_combo <- function(halo.processed.table){
+  
+  
+  combo.label.vector <- unique(halo.table[,combo.label.varname])
+  
+  # get conf by combo
+  df.conf.bycombo <- as.data.frame(
+    table(
+      halo.table$Confidence, halo.table$Combo, halo.table$Sample))
+  df.conf.bycombod <- dft[!dft[,4]==0, seq(3)]
+  colnames(df.conf.bycombod) <- c("confidence", "combo", "sample.id")
+  
+  return(df.conf.bycombod)
+}
 
 
-get_halo_df_conf <- function(halo.table, data.type = "halo_all",
+
+conf_from_halodataobject <- function(halo.table, data.type = "halo_all",
                              sample.id.colname = "Sample",
-                             combo.label.varname = "Combo"){
-  # get_halo_df_conf
+                             combo.label.varname = "Combo",
+                             combo.label.vector = c("Circle", "Star")){
+  # conf_from_halodataobject
   #
   # Author: Sean Maden
   # 
@@ -31,18 +47,12 @@ get_halo_df_conf <- function(halo.table, data.type = "halo_all",
   
   sample.id.vector <- as.character(unique(as.matrix(halo.table[,sample.id.colname])))
   
-  combo.label.vector <- c("Circle", "Star")
-  combo.label.varname <- "Combo"
+  
   
   if(data.type == "halo_all"){
     
     
-    # get conf by combo
-    df.conf.bycombo <- as.data.frame(
-      table(
-        halo.table$Confidence, halo.table$Combo, halo.table$Sample))
-    df.conf.bycombod <- dft[!dft[,4]==0, seq(3)]
-    colnames(df.conf.bycombod) <- c("confidence", "combo", "sample.id")
+    df.conf <- conf_by_combo(halo.processed.table)
     
     
   } else{
