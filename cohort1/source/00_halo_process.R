@@ -10,6 +10,15 @@
 #
 
 conf_by_combo <- function(halo.processed.table){
+  # conf_by_combo
+  #
+  # get confidence by slide combination.
+  #
+  #
+  #
+  #
+  #
+  #
   
   
   combo.label.vector <- unique(halo.table[,combo.label.varname])
@@ -22,6 +31,8 @@ conf_by_combo <- function(halo.processed.table){
   colnames(df.conf.bycombod) <- c("confidence", "combo", "sample.id")
   
   return(df.conf.bycombod)
+  
+  
 }
 
 
