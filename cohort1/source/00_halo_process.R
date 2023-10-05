@@ -132,57 +132,79 @@ conf_frequencies <- function(df.conf,
   
   df.conf.all <- df.conf
   sample.id.vector <- unique(df.conf.slide$sample.id)
+  unique.combo.vector <- unique(df.conf$combo)
   colnames.iter <- c("sample.id", "is.high", "is.low", "is.middle",
                      "is.high.and.middle", "is.high.and.low", "is.low.and.middle")
   
   list.combo.return <- lapply(
-    unique(df.conf$combo), 
+    unique.combo.vector, 
     function(combo){
-      df.conf <- df.conf[df.conf$combo==combo,]
+      
+      df.conf <- df.conf.all[df.conf.all$combo==combo,]
+      sample.id.vector.iter <- sample.id.vector # all samples
+      
       is.high <- df.conf$confidence==high.label
       is.low <- df.conf$confidence==low.label
       is.middle <- df.conf$confidence==middle.label
       is.high.and.middle <- is.high & is.middle
       is.high.and.low <- is.high & is.low
       is.low.and.middle <- is.low & is.middle
-      list.return <- lapply(sample.id.vector, 
+      
+      item.na <- rep("NA", 7) # make null set, define NA terms
+      
+      list.combo.return <- lapply(sample.id.vector.iter, 
                             function(sample.id){
-        dff.conf <- df.conf[df.conf$sample.id==sample.id,]
-        is.high <- dff.conf$confidence==high.label
-        is.low <- dff.conf$confidence==low.label
-        is.middle <- dff.conf$confidence==middle.label
-        is.high.and.middle <- is.high & is.middle
-        is.high.and.low <- is.high & is.low
-        is.low.and.middle <- is.low & is.middle
-        return(
-          c(as.character(sample.id),
-             is.high,
-             is.low,
-             is.middle,
-             is.high.and.middle,
-             is.high.and.low,
-             is.low.and.middle)
-          )
+                              
+        message(sample.id)
+        item.na.iter <- item.na
+        item.na.iter[1] <- as.character(sample.id)
+        
+        if(sample.id %in% sample.id.vector.iter){
+          df.conf.iter <- df.conf[df.conf$sample.id==sample.id,]
+          
+          is.high <- df.conf.iter$confidence==high.label
+          is.low <- df.conf.iter$confidence==low.label
+          is.middle <- df.conf.iter$confidence==middle.label
+          
+          is.high.and.middle <- is.high & is.middle
+          is.high.and.low <- is.high & is.low
+          is.low.and.middle <- is.low & is.middle
+          
+          item.na.iter[2] <- is.high
+          item.na.iter[3] <- is.low
+          item.na.iter[4] <- is.middle
+          item.na.iter[5] <- is.high.and.middle
+          item.na.iter[6] <- is.high.and.low
+          item.na.iter[7] <- is.low.and.middle
+        }
+        
+        return(item.na.iter)
+        
       })
+      
       df.return <- 
         as.data.frame(
-        do.call(rbind, 
-                lapply(
-                  list.return, 
-                  function(item){item})))
+          do.call(rbind, 
+                  lapply(
+                    list.combo.return, 
+                    function(item){item})))
+      
       colnames(df.return) <- colnames.iter
       df.return$combo <- combo
+      
       return(df.return)
-    }
-    )
+    })
   
   # get wide df
-  df.wide <- as.data.frame(do.call(cbind, 
-                                   lapply(list.combo.return, function(item){
-                                     combo <- unique(item$combo)
-                                     colnames(item) <- paste0(colnames(item), ".", combo)
-                                     item
-                                    })))
+  matrix.wide <- do.call(cbind, 
+                         lapply(list.combo.return, function(item){
+                           message(item)
+                           combo <- unique(item$combo)
+                           colnames(item) <- 
+                             paste0(colnames(item), ".", combo)
+                           item
+                          }))
+  df.wide <- as.data.frame(matrix.wide)
   
   df.wide$is.high.consensus <- 
     as.logical(df.wide$is.high.Circle) & as.logical(df.wide$is.high.Star)
