@@ -19,6 +19,7 @@ source("./source/00_halo_process.R")
 
 
 load("./data/09_quality/halo_all.Rdata")
+
 load("./env/03_shuffle/00_fig3ab_script.RData")
 
 
@@ -27,17 +28,12 @@ load("./env/03_shuffle/00_fig3ab_script.RData")
 #----------
 # 
 
-# df.conf <- get_halo_df_conf()
+df.conf <- conf_from_halodataobject(halo_all)[[1]]
 
-# 
-as.data.frame(table(halo_all$Confidence, halo_all$SAMPLE_ID))
-df.conf <- as.data.frame(table(halo_all$Confidence, halo_all$Sample))
-dfp.tall$confidence <- NA
-for(sample.id in df.qual[,2]){
-  qual.iter <- df.conf[df.conf[,2]==sample.id,1]
-  print(qual.iter)
-  dfp.tall[dfp.tall$sample.id==sample.id,]$confidence <- 
-    as.character(unique(df.conf[df.conf[,2]==sample.id, 1]))
+df.conf.freq <- conf_frequencies(df.conf)
+
+map_halo_conf_df <- function(df, df.conf, sample.id.variable = "sample.id"){
+  
 }
 
 
