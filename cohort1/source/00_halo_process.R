@@ -37,10 +37,16 @@ conf_by_combo <- function(halo.processed.table){
 
 
 
-conf_from_halodataobject <- function(halo.table, data.type = "halo_all",
-                             sample.id.colname = "Sample",
-                             combo.label.varname = "Combo",
-                             combo.label.vector = c("Circle", "Star")){
+conf_from_halodataobject <- function(
+    halo.table, data.type = "halo_all",
+                             
+    sample.id.colname = "Sample",
+                             
+    combo.label.varname = "Combo",
+                             
+    combo.label.vector = c("Circle", "Star")
+    
+    ){
   # conf_from_halodataobject
   #
   # Author: Sean Maden
@@ -70,7 +76,23 @@ conf_from_halodataobject <- function(halo.table, data.type = "halo_all",
     stop("error, unidentified data type.")
   }
   
+  
+  
+  
+  lr <- list(df.conf.bycombo = df.conf.bycombod)
+  
+  df.returns <- df.conf
+  
+  return(df.returns)
+}
+
+
+conf_frequencies <- function(){
   # get combo quality frequency
+  #
+  #
+  #
+  # 
   # status = "both low" # consensus low/below quality thresh
   # status = "both high" # consensus high/exceeds quality thresh
   # status = "both OK" # consensus ok/meets quality thresh
@@ -81,11 +103,16 @@ conf_from_halodataobject <- function(halo.table, data.type = "halo_all",
   # note:
   # we may retain the at or above quality samples
   # in other words, removes low/high, removes oklow, removes both low
+  #
+  #
+  #
+  #
+  #
   
   
-  lr <- list(df.conf.bycombo = df.conf.bycombod)
   
-  df.returns <- df.conf
   
-  return(df.returns)
+  frequencies.table <- frequencies.table
+  return(frequencies.table)
 }
+
