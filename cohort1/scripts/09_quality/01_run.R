@@ -90,6 +90,30 @@ list.dfp.tall.append.quality <- lapply(list.dfp.tall, function(item){
 
 names(list.dfp.tall.append.quality) <- names(list.dfp.tall)
 
+#-----------------
+# prep plot data
+#------------------
+
+dfp.tall.high <- list.dfp.tall.append.quality$dfp.tall.high
+dfp.tall.low <- list.dfp.tall.append.quality$dfp.tall.low
+dfp.tall <- list.dfp.tall.append.quality$dfp.tall
+
+post_dfp_nafilt <- function(dfp.pre, varname){
+  filter.na.cond <- !is.na(dfp.pre[,varname])
+  filter.na.cond <- !dfp.pre[,varname]=="NA"
+  dfp.post <- dfp.pre[filter.na.cond,]
+  # try({dfp.post[,varname] <- droplevels(dfp.post[,varname])})
+  dfp.post[,varname] <- as.character(dfp.post[,varname])
+  return(dfp.post)
+}
+
+
+# filter
+## table(is.na(dfp.tall.high$is.high.consensus))
+## table(dfp.tall.high$is.high.consensus=="NA")
+dfp.tall.high <- post_dfp_nafilt(dfp.tall.high, "is.high.consensus")
+
+
 #---------
 # save
 #---------

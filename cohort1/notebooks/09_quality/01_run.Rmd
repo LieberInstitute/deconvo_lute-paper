@@ -17,23 +17,38 @@ setwd("..")
 load("./env/09_quality/01_run_script.RData")
 
 
-dfp.tall.high <- list.dfp.tall.append.quality$dfp.tall.high
-dfp.tall.low <- list.dfp.tall.append.quality$dfp.tall.low
-dfp.tall <- list.dfp.tall.append.quality$dfp.tall
 ```
 
 # High neuron proportion
 
 ```{r, include=TRUE}
+
+
 sample.id.iter.high <- "Br3942_mid"
 
+# DYNAMIC TITLE
+varname <- "is.high.consensus"
+dynamic.title <- paste0(
+  
+  "S_pseudobulk id :", sample.id.iter.high, "; ",
+  "varname_facet: ", varname
+  
+)
+
+# new plot object
 new.plot.experiment.high <- 
   ggplot(dfp.tall.high, 
-         aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_pseudobulk id :", sample.id.iter.high)) +
-  facet_wrap(~is.high.consensus)
+         aes(x = neuron.true, 
+             y = neuron.pred, 
+             color = sample.id, 
+             size = matched.id)) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~type) +
+  ggtitle(dynamic.title) +
+  facet_wrap(~is.high.consensus*type, ncol=2)
 
+# evaluate the object, getting plot as side effect
 new.plot.experiment.high
 ```
 
