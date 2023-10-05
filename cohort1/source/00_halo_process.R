@@ -141,7 +141,7 @@ conf_frequencies <- function(df.conf,
     function(combo){
       
       df.conf <- df.conf.all[df.conf.all$combo==combo,]
-      sample.id.vector.iter <- sample.id.vector # all samples
+      sample.id.vector.iter <- df.conf$sample.id # all samples
       
       is.high <- df.conf$confidence==high.label
       is.low <- df.conf$confidence==low.label
@@ -152,13 +152,14 @@ conf_frequencies <- function(df.conf,
       
       item.na <- rep("NA", 7) # make null set, define NA terms
       
-      list.combo.return <- lapply(sample.id.vector.iter, 
+      list.combo.return <- lapply(sample.id.vector, 
                             function(sample.id){
                               
         message(sample.id)
         item.na.iter <- item.na
         item.na.iter[1] <- as.character(sample.id)
         
+        # if slide available for sample, parse options, otherwise pass NA
         if(sample.id %in% sample.id.vector.iter){
           df.conf.iter <- df.conf[df.conf$sample.id==sample.id,]
           
@@ -196,8 +197,8 @@ conf_frequencies <- function(df.conf,
     })
   
   # get wide df
-  matrix.wide <- do.call(cbind, 
-                         lapply(list.combo.return, function(item){
+  matrix.wide <- do.call(
+    cbind, lapply(list.combo.return, function(item){
                            message(item)
                            combo <- unique(item$combo)
                            colnames(item) <- 
