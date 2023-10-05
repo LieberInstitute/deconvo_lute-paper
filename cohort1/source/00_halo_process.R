@@ -103,6 +103,9 @@ conf_frequencies <- function(df.conf,
   #
   # df.conf : Confidence table with standard colnames (confidence, combo, sample.id).
   # 
+  #
+  #
+  #
   # status = "both low" # consensus low/below quality thresh
   # status = "both high" # consensus high/exceeds quality thresh
   # status = "both OK" # consensus ok/meets quality thresh
@@ -199,7 +202,7 @@ conf_frequencies <- function(df.conf,
   # get wide df
   matrix.wide <- do.call(
     cbind, lapply(list.combo.return, function(item){
-                           message(item)
+                           # message(item)
                            combo <- unique(item$combo)
                            colnames(item) <- 
                              paste0(colnames(item), ".", combo)
@@ -207,6 +210,7 @@ conf_frequencies <- function(df.conf,
                           }))
   df.wide <- as.data.frame(matrix.wide)
   
+  # get consensus/harmonized annotations ACROSS slides
   df.wide$is.high.consensus <- 
     as.logical(df.wide$is.high.Circle) & as.logical(df.wide$is.high.Star)
   df.wide$is.low.consensus <- 
@@ -226,11 +230,16 @@ conf_frequencies <- function(df.conf,
     as.logical(df.wide$is.high.Circle) & as.logical(df.wide$is.low.Star) |
     as.logical(df.wide$is.low.Circle) & as.logical(df.wide$is.high.Star)
   
-  df.combo.wide <- df.wide
+  # has slides condition
+  condition.has.all.slides <- 
+    df.wide$is.high.Circle=="NA" | df.wide$is.high.Star=="NA"
+  df.wide$has.all.slides <- !condition.has.all.slides
   
-  lr <- list(list.combo.return = list.combo.return,
-             df.combo.wide = df.combo.wide)
-  
+  # return
+  lr <- list(
+    list.combo.return = list.combo.return,
+    df.combo.wide = df.wide
+  )
   return(lr)
   
   
