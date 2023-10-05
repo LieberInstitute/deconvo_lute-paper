@@ -134,8 +134,8 @@ conf_frequencies <- function(df.conf,
   #
   
   df.conf.all <- df.conf
-  sample.id.vector <- unique(df.conf.slide$sample.id)
-  unique.combo.vector <- unique(df.conf$combo)
+  sample.id.vector <- unique(df.conf.all$sample.id)
+  unique.combo.vector <- unique(df.conf.all$combo)
   colnames.iter <- c("sample.id", "is.high", "is.low", "is.middle",
                      "is.high.and.middle", "is.high.and.low", "is.low.and.middle")
   
