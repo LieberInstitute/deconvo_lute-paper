@@ -98,6 +98,9 @@ conf_frequencies <- function(df.conf,
                              high.label = "High",
                              low.label = "Low",
                              middle.label = "OK"){
+  # conf_frequencies
+  #
+  #
   # get combo quality frequency
   #
   #

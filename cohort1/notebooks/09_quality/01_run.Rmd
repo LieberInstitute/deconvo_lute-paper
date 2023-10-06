@@ -19,11 +19,14 @@ load("./env/09_quality/01_run_script.RData")
 
 ```
 
+# Low neuron proportion
+
+```{r}
+```
+
 # High neuron proportion
 
 ```{r, include=TRUE}
-
-
 sample.id.iter.high <- "Br3942_mid"
 
 # DYNAMIC TITLE
@@ -37,7 +40,7 @@ dynamic.title <- paste0(
 
 # new plot object
 new.plot.experiment.high <- 
-  ggplot(dfp.tall.high, 
+  ggplot(na.omit(dfp.tall.high), 
          aes(x = neuron.true, 
              y = neuron.pred, 
              color = sample.id, 
@@ -50,29 +53,6 @@ new.plot.experiment.high <-
 
 # evaluate the object, getting plot as side effect
 new.plot.experiment.high
-```
-
-Save formatted plot.
-
-```{r}
-new.plot.filename <- "fig3a.jpg"
-new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
-###
-new.plot.high.save <- ggplot(dfp.tall.high, 
-                            aes(x = neuron.true, y = neuron.pred, 
-                                shape = matched.id)) + 
-  geom_point(size = 5, alpha = 0.5, colour = point.color) + 
-  geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("S pseudobulk id: ", sample.id.iter.high)) + 
-  xlim(0.2, 1) + ylim(0.2, 1)
-###
-new.plot.high.save
-```
-
-Save
-
-```{r}
 ```
 
 # Session info

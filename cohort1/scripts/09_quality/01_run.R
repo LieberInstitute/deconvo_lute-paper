@@ -118,6 +118,10 @@ dfp.tall.high <- post_dfp_nafilt(dfp.tall.high, "is.high.consensus")
 # save
 #---------
 
+# save rnascope
+# write.csv(df.conf, file = "./outputs/09_quality/df_conf.csv", row.names = F)
+write.csv(df.conf.wide, file = "./outputs/09_quality/rnascope_quality.csv")
+
 # save image
 save.image("./env/09_quality/01_run_script.RData")
 
