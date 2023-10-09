@@ -23,38 +23,279 @@ dfp.wide <- list.dfp$dfp.wide
 dfp.tall <- list.dfp$dfp.tall
 ```
 
-# Correlations
+# Rank difference
 
 ```{r}
-df.cor <- dfp.wide[,c("sn.neuron", "rn.neuron", "br.region", "subject.id")]
 
-df.region <- 
-  aggregate(df.cor, by = list(br.region=df.cor$br.region), FUN = median)
+dfp.wide <- dfp.wide[order(dfp.wide$sn.neuron),]
+dfp.wide$rank.snrnaseq <- seq(nrow(dfp.wide))
 
-df.sample <- 
-  aggregate(df.cor, by = list(subject.id=df.cor$subject.id), FUN = median)
+dfp.wide <- dfp.wide[order(dfp.wide$rn.neuron),]
+dfp.wide$rank.rnascope <- seq(nrow(dfp.wide))
 
-ggcorrplot(cor(df.region[,c("sn.neuron", "rn.neuron")]))
-ggcorrplot(cor(df.sample[,c("sn.neuron", "rn.neuron")]))
+dfp.wide$rank.difference.snranseq.rnascope <- dfp.wide$rank.snrnaseq-dfp.wide$rank.rnascope
+dfp.wide$abs.rank.difference.snranseq.rnascope <- abs(dfp.wide$rank.difference.snranseq.rnascope)
+
+summary(dfp.wide$abs.rank.difference.snranseq.rnascope)
+
+sd(dfp.wide$abs.rank.difference.snranseq.rnascope)
+
 ```
 
-# Plots
+# Additional processing
+
+Drop columns, get size ratios.
 
 ```{r}
-ggpairs(dfp.wide[,c("sn.neuron", "rn.neuron")])
+
+
+
+columns.keep <- c(1:2, 5:6, 9:13)
+
+dfp.wide <- dfp.wide[,columns.keep]
+
+dfp.wide$sn.ratio.glial.neuron <- dfp.wide$sn.glial/dfp.wide$sn.neuron
+dfp.wide$rn.ratio.glial.neuron <- dfp.wide$rn.glial/dfp.wide$rn.neuron
+
+dfp.tall$ratio.glial.neuron <- dfp.tall$glial/dfp.tall$neuron
+
+
+
 ```
 
+# Write table
+
+Save supplemental table.
+
 ```{r}
-ggplot(dfp.tall, aes(x = subject.id, y = neuron)) + 
-  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~size.type.label) +
+
+dfp.wide$sn.ratio.glial.neuron <- dfp.wide$sn.glial/dfp.wide$sn.neuron
+dfp.wide$rn.ratio.glial.neuron <- dfp.wide$rn.glial/dfp.wide$rn.neuron
+
+setwd("..")
+setwd("..")
+write.csv(
+  dfp.wide, file = "./outputs/08_sizes/tables_cell_sizes.csv", row.names = FALSE
+  )
+
+```
+
+# Plots -- by subject
+
+Cell sizes from snRNAseq
+
+```{r}
+
+filter.plot <- dfp.tall$size.type.label=="snrnaseq"
+dfp <- dfp.tall[filter.plot,]
+
+new.plot1 <- ggplot(dfp, aes(x = subject.id, y = neuron)) + 
+  geom_jitter() + 
+  geom_boxplot(alpha = 0, color = "cyan") + 
+  facet_wrap(~size.type.label) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot2 <- ggplot(dfp, aes(x = subject.id, y = glial)) + 
+  geom_jitter() + 
+  geom_boxplot(alpha = 0, color = "cyan") + 
+  facet_wrap(~size.type.label) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot3 <- ggplot(dfp, aes(x = neuron, y = glial)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0) + 
+  ggtitle("snRNAseq")
+
+new.plot1
+
+new.plot2
+
+new.plot3
+
+```
+
+Cell sizes from RNAscope
+
+```{r}
+
+filter.plot <- dfp.tall$size.type.label=="rnascope"
+dfp <- dfp.tall[filter.plot,]
+
+new.plot1 <- ggplot(dfp, aes(x = subject.id, y = neuron)) + 
+  geom_point(size = 2, alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + 
+  facet_wrap(~size.type.label) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot2 <- ggplot(dfp, aes(x = subject.id, y = glial)) + 
+  geom_point(size = 2, alpha = 0.5) + 
+  geom_boxplot(alpha = 0, color = "cyan") + 
+  facet_wrap(~size.type.label) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+new.plot3 <- ggplot(dfp, aes(x = neuron, y = glial)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0) +
+  ggtitle("RNAscope")
+
+new.plot1
+
+new.plot2
+
+new.plot3
+
+```
+
+Proportions scatter plot, snRNAseq and RNAscope
+
+```{r}
+
+dfp <- dfp.wide
+
+new.plot1 <- ggplot(dfp, 
+                    aes(x = sn.ratio.glial.neuron, y = rn.ratio.glial.neuron)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0)
+
+new.plot1
+
+```
+
+
+
+# Cell ratios, by brain region
+
+```{r}
+
+dfp <- dfp.tall
+dfp$ratio.glial.neuron <- dfp$glial/dfp$neuron
+
+new.plot1 <- ggplot(dfp, 
+                    aes(x = size.type.label, y = ratio.glial.neuron)) + 
+  geom_jitter() + 
+  geom_boxplot(alpha = 0, color = "cyan") +
+  geom_hline(yintercept = 1)
+
+new.plot1
+
+```
+
+
+
+
+```{r}
+
+new.plot2 <- ggplot(dfp, 
+                    aes(x = size.type.label, 
+                        y = ratio.glial.neuron,
+                        color = subject.id)) + 
+  geom_point() + 
+  geom_line(data = dfp, aes(x, xend, y, yend)) +
+  geom_hline(yintercept = 1)
+
+new.plot2
+
+```
+
+
+
+
+
+
+```{r}
+
+dfp <- dfp.wide
+
+new.plot1 <- ggplot(dfp, 
+                    aes(x = sn.ratio.glial.neuron, y = rn.ratio.glial.neuron,
+                        color = br.region)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlab("snRNAseq") + ylab("RNAscope") + ggtitle("Ratio (glial/neuron)")
+
+new.plot1
+
 ```
 
 ```{r}
-ggplot(dfp.tall, aes(x = br.region, y = neuron)) + 
-  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + facet_wrap(~size.type.label) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+dfp <- dfp.wide
+
+new.plot1 <- ggplot(dfp, 
+                    aes(x = sn.ratio.glial.neuron, y = rn.ratio.glial.neuron,
+                        color = subject.id)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlab("snRNAseq") + ylab("RNAscope") + ggtitle("Ratio (glial/neuron)")
+
+new.plot1
+
 ```
+
+```{r}
+
+dfp <- dfp.wide
+
+new.plot1 <- ggplot(dfp, 
+                    aes(x = sn.ratio.glial.neuron, y = rn.ratio.glial.neuron,
+                        color = br.region)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlab("snRNAseq") + ylab("RNAscope") + ggtitle("Ratio (glial/neuron)") +
+  facet_wrap(~subject.id)
+
+new.plot1
+
+```
+
+```{r}
+
+dfp <- dfp.wide
+
+new.plot1 <- ggplot(dfp, 
+                    aes(x = sn.ratio.glial.neuron, y = rn.ratio.glial.neuron,
+                        color = subject.id)) + 
+  geom_point() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~br.region)
+
+new.plot1
+
+```
+
+
+
+
+
+# Pairs plots
+
+```{r}
+
+dfp <- dfp.wide
+
+columns.plot <- c(1,2,3,4,8,9)
+
+dfp <- dfp[,columns.plot]
+
+new.plot1 <- ggpairs(dfp)
+
+new.plot1
+
+```
+
+
+
+
+
+# Centered measures
 
 ```{r}
 ratio.yintercept.ref = 1
@@ -74,6 +315,10 @@ new.plot1 <- ggplot(dfp.tall, aes(x = br.region, y = ratio.neuron.glial)) +
   geom_hline(yintercept = ratio.yintercept.ref)
 new.plot1
 ```
+
+
+
+
 
 # Save
 
