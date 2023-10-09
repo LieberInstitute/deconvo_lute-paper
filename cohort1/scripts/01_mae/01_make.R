@@ -32,7 +32,7 @@ load("./outputs/00_preprocess/list-sce-validate_k-2-3-4-markers_cohort1.rda")
 load("./outputs/00_preprocess/rse-gene-filter.rda")
 load("./outputs/00_preprocess/rse-rpkmCounts_Human_DLPFC_Deconvolution_n113.rda")
 # load rnascope image data
-load("./outputs/00_preprocess/halo-outputs_updated.Rdata")
+load("./data/01_mae/halo_all.Rdata")
 
 #------------------
 # common sample ids
@@ -187,7 +187,7 @@ names(list.pb.k234) <- names(list.sce.k234)
 #-----------------------------------
 # rnascope: make sce with image data
 #-----------------------------------
-img <- halo.output.table
+img <- as.data.frame(as.matrix(halo_all))
 new.img.colnames <- paste0("cell", seq(nrow(img)))
 img.data.colnames <- c("Nucleus_Area", "AKT3_Copies", "Cell_Area", 
                        "DAPI_Nucleus_Intensity", "DAPI_Cytoplasm_Intensity")
@@ -200,11 +200,25 @@ img.list <- lapply(img.data.colnames, function(colname){
 })
 names(img.list) <- img.data.colnames
 sce.img <- SingleCellExperiment(assays = img.list)
+
 img.coldata <- DataFrame(img[,img.coldata.colnames])
 rownames(img.coldata) <- new.img.colnames
 colData(sce.img) <- img.coldata
-rm(halo.output.table)
+rm(halo_all)
 gc()
+
+#------------------------------------
+# preprocess rnascope samples
+#------------------------------------
+
+# filter on nucleus area
+max.nucleus.area <- 78
+dim(sce.img)
+filter.sce <- assays(sce.img)[["Nucleus_Area"]] < max.nucleus.area
+sce.img <- sce.img[,filter.sce]
+dim(sce.img)
+
+# filter on low confidence
 
 #--------------------------------------------------
 # df.rn: get additional rnascope data.frame objects

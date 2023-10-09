@@ -1,0 +1,17 @@
+---
+title: "01_all_samples"
+author: "Sean Maden"
+date: "2023-10-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "reshape2")
+sapply(libv, library, character.only = TRUE)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/01_mae/")
+
+```

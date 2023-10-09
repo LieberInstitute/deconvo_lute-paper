@@ -4,8 +4,6 @@
 # Preprocess MultiAssayExperiment
 #
 
-min.neuron.proportion <- 0.2
-max.nucleus.area <- 78
 filter.rnascope.confidence <- "Low"
 
 #-----
@@ -15,20 +13,6 @@ filter.rnascope.confidence <- "Low"
 mae.in.path <- "./outputs/01_mae/mae_allsamples.rda"
 mae <- get(load(mae.in.path))
 cd <- colData(mae)
-
-#--------------------------
-# 1. filter on nucleus area
-#--------------------------
-
-assay.name <- "cell.sizes"
-
-rnascope <- mae[[assay.name]]
-
-
-dim(sce.img)
-filter.sce <- assays(sce.img)[["Nucleus_Area"]] < max.nucleus.area
-sce.img <- sce.img[,filter.sce]
-dim(sce.img)
 
 #-------------------------------------
 # 2. filter on confidence annotations
