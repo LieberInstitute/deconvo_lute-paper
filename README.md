@@ -264,6 +264,11 @@ The molecular markers for the `Circle` and `Star` RNAscope experiments are as fo
 6 Oligo    OLIG2   Star		Ab			OLIG2
 ```
 
+The processed data with confidence annotations were read from the JHCPCE directory at:
+
+`Human_DLPFC_Deconvolution/processed-data/03_HALO/halo_all.Rdata`
+
+
 ## Terminology
 
 Details about deconvolution terminology and formulations are available in the [`lute` User's Guide](https://github.com/metamaden/lute/blob/main/vignettes/lute_users_guide.Rmd).

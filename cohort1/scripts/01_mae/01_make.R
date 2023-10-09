@@ -206,13 +206,6 @@ colData(sce.img) <- img.coldata
 rm(halo.output.table)
 gc()
 
-# filter on nucleus area
-max.nucleus.area <- 78
-dim(sce.img)
-filter.sce <- assays(sce.img)[["Nucleus_Area"]] < max.nucleus.area
-sce.img <- sce.img[,filter.sce]
-dim(sce.img)
-
 #--------------------------------------------------
 # df.rn: get additional rnascope data.frame objects
 #--------------------------------------------------

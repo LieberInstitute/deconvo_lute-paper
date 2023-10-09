@@ -48,8 +48,6 @@ Drop columns, get size ratios.
 
 ```{r}
 
-
-
 columns.keep <- c(1:2, 5:6, 9:13)
 
 dfp.wide <- dfp.wide[,columns.keep]
@@ -58,8 +56,6 @@ dfp.wide$sn.ratio.glial.neuron <- dfp.wide$sn.glial/dfp.wide$sn.neuron
 dfp.wide$rn.ratio.glial.neuron <- dfp.wide$rn.glial/dfp.wide$rn.neuron
 
 dfp.tall$ratio.glial.neuron <- dfp.tall$glial/dfp.tall$neuron
-
-
 
 ```
 
