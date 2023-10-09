@@ -46,6 +46,8 @@ list.dfp.tall.append.quality <- lapply(list.dfp.tall, function(item){
   dfp.tall.iter <- item
   
   dfp.tall.iter$has.all.slides <- 
+    dfp.tall.iter$has.circle.combo <- 
+    dfp.tall.iter$has.star.combo <- 
     dfp.tall.iter$is.high.and.low <- 
     dfp.tall.iter$is.high.and.middle <-
     dfp.tall.iter$is.low.and.middle <-

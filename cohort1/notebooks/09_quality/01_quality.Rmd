@@ -2,11 +2,14 @@
 title: "01_run"
 author: "Sean Maden"
 date: "2023-10-02"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-
+libv <- c("ggplot2", "reshape2")
+sapply(libv, library, character.only = TRUE)
 
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
@@ -88,6 +91,8 @@ df.newplot <- dfp.tall
 df.melt <- melt(df.newplot, id.vars = "sample.id")
 
 variables <- c("has.all.slides",
+               "has.circle.combo",
+               "has.star.combo",
                "is.low.consensus",
                "is.middle.consensus",
                "is.high.consensus",

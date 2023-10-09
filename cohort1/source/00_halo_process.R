@@ -238,6 +238,16 @@ conf_frequencies <- function(df.conf,
     df.wide$is.high.Circle=="NA" | df.wide$is.high.Star=="NA"
   df.wide$has.all.slides <- !condition.has.all.slides
   
+  # has combos condition: circle
+  condition.has.circle <- 
+    df.wide$is.high.Circle=="NA" | df.wide$is.high.Star=="NA"
+  df.wide$has.circle.combo <- !condition.has.circle
+  
+  # has combos condition
+  condition.has.star <- 
+    df.wide$is.high.Star=="NA" | df.wide$is.high.Star=="NA"
+  df.wide$has.star.combo <- !condition.has.star
+  
   # return
   lr <- list(
     list.combo.return = list.combo.return,
