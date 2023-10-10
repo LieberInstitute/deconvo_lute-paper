@@ -1,0 +1,47 @@
+---
+title: "02_cluster"
+author: "Sean Maden"
+date: "2023-10-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+libv <- c("dplyr", "ggplot2", "GGally", "ggcorrplot")
+sapply(libv, library, character.only = TRUE)
+```
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/08_sizes/02_cluster_script.RData")
+dfp.wide <- list.dfp$dfp.wide
+dfp.tall <- list.dfp$dfp.tall
+```
+
+# Plots
+
+View
+
+```{r}
+new.plot1 <- ggplot()
+new.plot1
+```
+
+Save
+
+```{r}
+setwd("..")
+setwd("..")
+list.files()
+new.plot.path <- "./figures/08_sizes/supplemental_figure_cluster.jpg"
+jpeg(new.plot.path, width = 5, height = 3, res = 400, units = "in")
+new.plot1
+dev.off()
+```
+
+# Session
+
+```{r}
+sessionInfo()
+```

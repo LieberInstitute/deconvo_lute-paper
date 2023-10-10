@@ -18,7 +18,7 @@ sapply(libv, library, character.only = TRUE)
 ```{r}
 setwd("..")
 setwd("..")
-load("./env/08_sizes/01_run_script.RData")
+load("./env/08_sizes/01_sizes_script.RData")
 dfp.wide <- list.dfp$dfp.wide
 dfp.tall <- list.dfp$dfp.tall
 ```
