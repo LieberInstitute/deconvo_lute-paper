@@ -52,9 +52,16 @@ for(sample.id in cd.id$sample.id){
 
 for(c in c(4:7)){cd.id[,c] <- as.numeric(as.character(cd.id[,c]))}
 
-cd.id$remove.low <- cd.id$confidence.circle=="Low" | cd.id$confidence.star=="Low"
+filter.na <- is.na(cd.id$confidence.star) & is.na(cd.id$confidence.circle)
+table(filter.na)
+cd.id <- cd.id[!filter.na,]
 
-#cd.id.tall <- rbind(data.frame())
-#cd.id.tall <- as.data.frame(cd.id.tall)
+cd.id$remove.low <- FALSE
+condition.remove <- cd.id$confidence.circle=="Low" & cd.id$confidence.star=="Low"
+condition.remove <- condition.remove | (cd.id$confidence.circle=="Low" & is.na(cd.id$confidence.star))
+condition.remove <- condition.remove | (is.na(cd.id$confidence.circle) & cd.id$confidence.star=="Low")
+cd.id[condition.remove,]$remove.low <- TRUE
+
+cd.id$brain.region <- gsub(".*_", "", cd.id$sample.id)
 
 save(cd.id, file = "./outputs/01_mae/sample_qc_df.rda")

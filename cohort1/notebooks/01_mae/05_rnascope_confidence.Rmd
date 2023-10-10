@@ -1,0 +1,133 @@
+---
+title: "05_rnascope_confidence"
+author: "Sean Maden"
+date: "2023-10-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./outputs/01_mae/sample_qc_df.rda")
+```
+
+Shows snRNAseq neuron and glial proportions versus RNAscope confidence annotation filter.
+The annotation filter criteria was either Circle or Star combo having a "Low" confidence status (i.e. label status TRUE) versus otherwise (i.e. label status FALSE).
+
+# Summary
+
+Sample ids removed
+
+```{r}
+cd.id[cd.id$remove.low==TRUE,]$sample.id
+```
+
+Sample ids included
+
+```{r}
+cd.id[cd.id$remove.low==FALSE,]$sample.id
+```
+
+Neuron proportion among samples removed
+
+```{r}
+summary(cd.id[cd.id$remove.low==TRUE,]$proportion.sn.neuron)
+```
+
+Neuron proportion among samples included
+
+```{r}
+summary(cd.id[cd.id$remove.low==FALSE,]$proportion.sn.neuron)
+```
+
+# Plot proportion neuron
+
+```{r}
+newplot <- ggplot(cd.id, 
+                  aes(x = sample.id, y = proportion.sn.neuron)) + 
+  geom_boxplot() + geom_jitter() +
+  facet_wrap(~remove.low) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+newplot
+```
+
+```{r}
+newplot <- ggplot(cd.id, 
+                  aes(x = brain.region, y = proportion.sn.neuron)) + 
+  geom_boxplot() + geom_jitter() +
+  facet_wrap(~remove.low) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+newplot
+```
+
+# Scatterplots of glial and neuron proportions
+
+Unlabeled
+
+```{r}
+newplot <- ggplot(cd.id, 
+                  aes(x = proportion.sn.neuron, y = proportion.sn.glial)) + 
+  geom_point(size = 2, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~remove.low)
+
+newplot
+```
+
+## Label on sample id
+
+```{r}
+newplot <- ggplot(cd.id, 
+                  aes(x = proportion.sn.neuron, y = proportion.sn.glial,
+                      color = sample.id)) + 
+  geom_point(size = 2, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~remove.low)
+
+newplot
+```
+
+```{r}
+newplot <- ggplot(cd.id, 
+                  aes(x = proportion.sn.neuron, y = proportion.sn.glial,
+                      color = sample.id)) + 
+  geom_point(size = 2, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~remove.low) +
+  geom_label(aes(label = sample.id))
+
+newplot
+```
+
+## Label on region
+
+```{r}
+newplot <- ggplot(cd.id, 
+                  aes(x = proportion.sn.neuron, y = proportion.sn.glial,
+                      color = brain.region)) + 
+  geom_point(size = 2, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~remove.low)
+
+newplot
+```
+
+```{r}
+newplot <- ggplot(cd.id, 
+                  aes(x = proportion.sn.neuron, y = proportion.sn.glial,
+                      color = brain.region)) + 
+  geom_point(size = 2, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~remove.low) +
+  geom_label(aes(label = brain.region))
+
+newplot
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
