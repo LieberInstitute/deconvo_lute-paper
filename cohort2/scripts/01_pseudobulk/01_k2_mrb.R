@@ -2,7 +2,7 @@
 
 # Author: Sean Maden
 #
-# Test independent pseudobulk from DLPFC cohort1 snRNAseq data.
+# Test independent pseudobulk from DLPFC cohort2 snRNAseq data.
 #
 
 source("./cohort2/scripts/01_pseudobulk/00_parameters-pseudobulk.R")
