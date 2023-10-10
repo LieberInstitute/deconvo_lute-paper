@@ -20,11 +20,11 @@ load("./outputs/01_mae/sample_qc_df.rda")
 
 ```{r}
 filter.low <- cd.id$confidence.circle=="Low" & cd.id$confidence.star=="Low"
-mean(na.omit(as.numeric(cd.id[filter.low,]$size.sn.neuron)))
+summary(cd.id[filter.low,]$size.sn.neuron)
 ```
 
 ```{r}
-mean(na.omit(as.numeric(cd.id[!filter.low,]$size.sn.neuron)))
+summary(cd.id[!filter.low,]$size.sn.neuron)
 ```
 
 
@@ -35,7 +35,7 @@ mean(na.omit(as.numeric(cd.id[!filter.low,]$size.sn.neuron)))
 
 
 ggplot(cd.id, aes(x = size.sn.neuron, y = size.sn.glial)) + 
-  geom_point() + facet_wrap(~confidence.star)
+  geom_point() + facet_wrap(~remove.low)
 
 
 

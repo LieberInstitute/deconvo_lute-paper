@@ -15,7 +15,7 @@ load("./outputs/01_mae/mae_allsamples_append.rda")
 combo.id.variable <- "SAMPLE_ID"
 confidence.variable <- "Confidence"
 
-cd.id <- colData(mae)
+cd.id <- as.data.frame(colData(mae))
 cd.id$confidence.circle <- cd.id$confidence.star <- "NA"
 
 sce.img <- mae[["sce.img"]]
@@ -47,6 +47,14 @@ for(sample.id in cd.id$sample.id){
     cd.id[cd.id$sample.id==sample.id,]$proportion.sn.glial <- cell.proportions[[sample.id]][["glial"]]
     cd.id[cd.id$sample.id==sample.id,]$proportion.sn.neuron <- cell.proportions[[sample.id]][["neuron"]]
   }
+  
 }
+
+for(c in c(4:7)){cd.id[,c] <- as.numeric(as.character(cd.id[,c]))}
+
+cd.id$remove.low <- cd.id$confidence.circle=="Low" | cd.id$confidence.star=="Low"
+
+#cd.id.tall <- rbind(data.frame())
+#cd.id.tall <- as.data.frame(cd.id.tall)
 
 save(cd.id, file = "./outputs/01_mae/sample_qc_df.rda")
