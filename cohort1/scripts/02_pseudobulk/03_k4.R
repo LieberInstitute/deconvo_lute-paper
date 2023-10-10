@@ -1,7 +1,12 @@
 #!/usr/bin/env R
 
+# Author: Sean Maden
 #
 # Test independent pseudobulk from DLPFC cohort1 snRNAseq data.
+#
+#
+#
+#
 #
 
 source("scripts/02_pseudobulk/00_param.R")
@@ -79,5 +84,5 @@ ggplot(dfp.ae, aes(x = celltype, y = abs.error)) + geom_jitter(alpha = 0.5) +
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + facet_wrap(~type)
 
 # save environment
-
 save.image("./env/02_pseudobulk/03_k4.RData")
+

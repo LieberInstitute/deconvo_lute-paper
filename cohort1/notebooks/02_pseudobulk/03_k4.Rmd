@@ -1,5 +1,5 @@
 ---
-title: "03_k4"
+title: "Pseudobulk k4 with and without cell size rescaling"
 author: "Sean Maden"
 date: "2023-09-17"
 output: html_document
@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
 list.files()
-load("./env/02_pseudobulk/02_k3.RData")
+load("./env/02_pseudobulk/03_k4.RData")
 ```
 
 # Figure 2E 

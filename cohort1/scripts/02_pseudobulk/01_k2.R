@@ -1,7 +1,13 @@
 #!/usr/bin/env R
 
+# Author: Sean Maden
 #
 # Test independent pseudobulk from DLPFC cohort1 snRNAseq data.
+#
+#
+#
+#
+#
 #
 
 source(file.path("scripts", "02_pseudobulk", "00_param.R"))
