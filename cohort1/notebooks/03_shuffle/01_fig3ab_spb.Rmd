@@ -106,10 +106,22 @@ dev.off()
 # Write table
 
 ```{r}
+# get write table
+dfp.tall.write <- dfp.tall
+colnames(dfp.tall.write)[9] <- "index.sample.id"
+dfp.tall.write$shuffle.term <- "S_pseudobulk"
+colnames.write <- c("glial.true", "neuron.true", 
+                    "glial.pred", "neuron.pred", 
+                    "type", "sample.id", 
+                    "glial.abs.error", "neuron.abs.error",
+                    "index.sample.id", "shuffle.term")
+dfp.tall.write <- dfp.tall.write[,colnames.write]
+```
+
+```{r}
 setwd("..")
 setwd("..")
-dfp.tall$shuffle.term <- "S_pseudobulk"
-write.csv(dfp.tall, row.names = F, file = "./outputs/03_shuffle/table_s3_spb.csv")
+write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_spb.csv")
 ```
 
 # Session info

@@ -96,12 +96,33 @@ dev.off()
 
 # Write table
 
+
+```{r}
+# get write table
+dfp.tall.write <- dfp.tall
+colnames(dfp.tall.write)[5] <- "sample.id"
+colnames(dfp.tall.write)[7] <- "index.sample.id"
+
+dfp.tall.write$neuron.abs.error <- abs(dfp.tall.write$neuron.pred-dfp.tall.write$neuron.true)
+dfp.tall.write$glial.abs.error <- abs(dfp.tall.write$glial.pred-dfp.tall.write$glial.true)
+dfp.tall.write$shuffle.term <- "S_deconvolution"
+
+colnames.write <- c("glial.true", "neuron.true", 
+                    "glial.pred", "neuron.pred", 
+                    "type", "sample.id", 
+                    "glial.abs.error", "neuron.abs.error",
+                    "index.sample.id", "shuffle.term")
+
+dfp.tall.write <- dfp.tall.write[,colnames.write]
+```
+
 ```{r}
 setwd("..")
 setwd("..")
-dfp.tall$shuffle.term <- "S_deconvolution"
-write.csv(dfp.tall, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
+write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
 ```
+
+
 
 # Session info
 
