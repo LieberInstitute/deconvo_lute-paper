@@ -12,13 +12,7 @@ sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
-load("./outputs/01_mae/mae_allsamples_append.rda")
-
-```
-
-```{r}
-
-filter.low <- colData(mae[["sce.img"]])$Confidence=="Low"
+load("./outputs/01_mae/sample_qc_df.rda")
 
 ```
 
