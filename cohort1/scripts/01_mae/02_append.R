@@ -1,8 +1,9 @@
+#!/usr/bin/env R
 
+# Author: Sean Maden
 #
 # Append data to snRNAseq SingleCellExperiment objects
 #
-
 
 libv <- c("dplyr", "ggplot2")
 sapply(libv, library, character.only = TRUE)
@@ -10,7 +11,7 @@ sapply(libv, library, character.only = TRUE)
 #-----
 # load
 #-----
-mae.path <- "./outputs/01_mae/mae_analysis.rda"
+mae.path <- "./outputs/01_mae/mae_allsamples.rda"
 mae <- get(load(mae.path))
 
 # load snrnaseq filtered nucleus proportions
@@ -115,5 +116,5 @@ for(index in seq(3)){
 #-----
 # save
 #-----
-mae.new.path <- "./outputs/01_mae/mae_analysis_append.rda"
+mae.new.path <- "./outputs/01_mae/mae_allsamples_append.rda"
 save(mae, file = mae.new.path)

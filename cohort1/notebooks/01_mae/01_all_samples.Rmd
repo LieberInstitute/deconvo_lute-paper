@@ -12,6 +12,57 @@ sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
-load("./env/01_mae/")
+load("./outputs/01_mae/mae_allsamples_append.rda")
 
+```
+
+```{r}
+
+filter.low <- colData(mae[["sce.img"]])$Confidence=="Low"
+
+```
+
+# Gets proportions with confidences
+
+Gets proportions with confidences
+
+```{r}
+cd.id <- colData(mae)
+sce.img <- mae[["sce.img"]]
+
+cd.rnascope <- colData(sce.img)
+cd$confidence.circle <- cd$confidence.star <- "NA"
+combo.id.variable <- "SAMPLE_ID"
+confidence.variable <- "Confidence"
+sce.img$combo <- gsub(".*_", "", sce.img$SAMPLE_ID) 
+
+for(sample.id in cd$sample.id){
+  cd.id[cd.id]$confidence <- colData(sce.img)[sce.img$combo=="STAR",confidence.variable][1]
+  
+}
+
+
+```
+
+# Low compared to not-low confidence RNAscope samples
+
+```{r}
+
+
+facet_wrap(~slide)
+```
+
+# Low/OK compared to OK/High
+
+```{r}
+```
+
+#
+
+```{r}
+```
+
+# Session info
+
+```{r}
 ```

@@ -192,7 +192,7 @@ new.img.colnames <- paste0("cell", seq(nrow(img)))
 img.data.colnames <- c("Nucleus_Area", "AKT3_Copies", "Cell_Area", 
                        "DAPI_Nucleus_Intensity", "DAPI_Cytoplasm_Intensity")
 img.coldata.colnames <- c("SAMPLE_ID", sample.id.halo, "cell_type", "Slide", 
-                          "XMin", "XMax", "YMin", "YMax")
+                          "XMin", "XMax", "YMin", "YMax", "Confidence")
 img.list <- lapply(img.data.colnames, function(colname){
   new.data <- img[,colname] %>% as.matrix() %>% t()
   colnames(new.data) <- new.img.colnames
@@ -207,18 +207,16 @@ colData(sce.img) <- img.coldata
 rm(halo_all)
 gc()
 
-#------------------------------------
-# preprocess rnascope samples
-#------------------------------------
+#--------------------
+# preprocess rnascope
+#--------------------
 
 # filter on nucleus area
 max.nucleus.area <- 78
 dim(sce.img)
 filter.sce <- assays(sce.img)[["Nucleus_Area"]] < max.nucleus.area
 sce.img <- sce.img[,filter.sce]
-dim(sce.img)
-
-# filter on low confidence
+# dim(sce.img)
 
 #--------------------------------------------------
 # df.rn: get additional rnascope data.frame objects
@@ -324,7 +322,7 @@ bulk.rpkm.map <- data.frame(colname = colnames(rse.rpkm),
 
 # rnascope data
 
-image.map <- data.frame(colname = colnames(sce.img), 
+sce.img.map <- data.frame(colname = colnames(sce.img), 
                         primary = sce.img[[sample.id.halo]])
 
 dfrn.map <- data.frame(colname = colnames(df.rnascope.kdata), 
@@ -354,6 +352,8 @@ listmap <- list(
                
   cell.sizes = dfrn.map, # rnascope cell sizes
   
+  sce.img = sce.img.map, # rnascope sce image data
+  
   bulk.pb.k2 = bulk.pb.k2.map, # pseudobulk k2
   
   bulk.pb.k3 = bulk.pb.k3.map, # pseudobulk k3
@@ -380,6 +380,8 @@ object.list <- list(
   bulk.rpkm.rnaseq = rse.rpkm,
   
   cell.sizes = df.rnascope.kdata %>% as.matrix(),
+  
+  sce.img = sce.img,
   
   bulk.pb.k2 = list.pb.k234[["k2"]],
   
