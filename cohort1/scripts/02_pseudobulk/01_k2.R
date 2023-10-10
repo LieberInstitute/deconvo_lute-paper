@@ -20,6 +20,9 @@ dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample",
                                       s.vector = c("glial" = 3, "neuron" = 10),
                                       algorithm.name = "nnls", return.dimensions = "wide")
 
+dfp.ct <- dfp_tall_by_celltype(dfp.wide) # dfp.wide, tall by cell type
+
+
 # make new plots
 # plot proportions panel -- no scale
 ggplot(dfp.tall[dfp.tall$type=="noscale",], 
@@ -41,5 +44,5 @@ ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + geom_jitter(alpha = 0.5)
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + ggtitle("Neuron")
 
 # save environment
-
 save.image("./env/02_pseudobulk/01_k2.RData")
+

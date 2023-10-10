@@ -16,11 +16,13 @@ load("./env/02_pseudobulk/01_k2.RData")
 # Figure 2A 
 
 ```{r}
-new.plot <- ggplot(dfp.ct, aes(x = true.noscale, y = pred.noscale)) + geom_point() + 
+new.plot <- ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
-  xlab("True proportion") + ylab("Predicted proportion") +
-  xlim(0, 1) + ylim(0, 1) + facet_wrap(~celltype)
+  xlab("True") + ylab("Predicted") +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 new.plot
 ```
 
@@ -29,7 +31,7 @@ setwd("..")
 setwd("..")
 new.plot.name <- "fig2a.jpg"
 jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
-     width = 6, height = 3, units = "in", res = 400)
+     width = 4, height = 2.5, units = "in", res = 400)
 new.plot
 dev.off()
 ```
@@ -38,8 +40,9 @@ dev.off()
 
 ```{r}
 new.plot <- ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + 
-  geom_jitter(alpha = 0.5) + 
-  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + ggtitle("Neuron")
+  geom_jitter(alpha = 0.5, size = 3) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
+  ylab("Error (neuron)")
 ```
 
 ```{r}
@@ -47,7 +50,7 @@ setwd("..")
 setwd("..")
 new.plot.name <- "figs1a.jpg"
 jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
-     width = 4, height = 2.5, units = "in", res = 400)
+     width = 3, height = 3, units = "in", res = 400)
 new.plot
 dev.off()
 ```
