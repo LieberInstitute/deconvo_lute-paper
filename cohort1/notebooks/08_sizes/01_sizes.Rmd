@@ -27,8 +27,32 @@ dfp.tall <- list.dfp$dfp.tall
 
 ## Summary statistics
 
+snRNAseq neuron summary
+
 ```{r}
-summary(dfp.tall[]$neuron)
+summary(dfp.wide$sn.neuron)
+sd(dfp.wide$sn.neuron)
+```
+
+snRNAseq glial summary
+
+```{r}
+summary(dfp.wide$sn.glial)
+sd(dfp.wide$sn.glial)
+```
+
+RNAscope neuron summary
+
+```{r}
+summary(dfp.wide$rn.neuron)
+sd(dfp.wide$rn.neuron)
+```
+
+RNAscope glial summary
+
+```{r}
+summary(dfp.wide$rn.glial)
+sd(dfp.wide$rn.glial)
 ```
 
 ## Rank difference
