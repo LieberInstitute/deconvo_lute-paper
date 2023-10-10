@@ -38,6 +38,11 @@ dfs.rn <- dfs.rn[dfs.rn$k.label==celltype.variable,]
 dfs.rn <- data.frame(s.glial = dfs.rn[dfs.rn$cell_type=="glial",]$cell_size,
                      s.neuron = dfs.rn[dfs.rn$cell_type=="neuron",]$cell_size,
                      sample.id.column = dfs.rn[dfs.rn$cell_type=="neuron",]$sample_id)
+
+dim(dfs.rn)
+dfs.rn <- na.omit(dfs.rn)
+dim(dfs.rn)
+
 colnames(dfs.rn)[3] <- sample.id.variable.rn
 for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 
@@ -45,6 +50,9 @@ for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 sample.id.train.path <- file.path("outputs", "00_preprocess", "list_snrnaseq_sampleid.rda")
 sample.id.train <- get(load(sample.id.train.path))[["train"]]
 sce <- sce[,sce[[sample.id.variable]] %in% sample.id.train]
+
+# subset on rnascope samples
+sce <- sce[,sce$Sample %in% dfs.rn$sample.id]
 
 #-----------------------------------
 #

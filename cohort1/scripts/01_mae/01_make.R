@@ -252,7 +252,7 @@ df.rnascope.kdata <- do.call(rbind, lapply(c("k2", "k3", "k4"), function(cell.ty
     # counts
     df.count <- table(rnf[[cell.type.variable]], rnf$Sample)
     # sizes
-    df.size <- aggregate(data.frame(area = assays(rnf)[["Nucleus_Area"]][1,]), 
+    df.size <- aggregate(data.frame(area = as.numeric(assays(rnf)[["Nucleus_Area"]][1,])), 
                          by = list(cell_type = rnf[[cell.type.variable]]), FUN = "median")
     # combine and format output
     df.iter <- cbind(df.prop, cbind(df.size, df.count))

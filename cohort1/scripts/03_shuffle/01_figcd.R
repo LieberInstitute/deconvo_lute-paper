@@ -47,6 +47,11 @@ sample.id.train.path <- file.path("outputs", "00_preprocess", "list_snrnaseq_sam
 sample.id.train <- get(load(sample.id.train.path))[["train"]]
 sce <- sce[,sce[[sample.id.variable]] %in% sample.id.train]
 
+# subset on rnascope samples
+sce <- sce[,sce$Sample %in% dfs.rn$sample.id]
+
+length(intersect(sce$Sample, mae[["cell.sizes"]]))
+
 #-----------------------------------
 #
 # experiment: high neuron proportion
