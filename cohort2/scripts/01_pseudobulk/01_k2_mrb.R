@@ -1,15 +1,20 @@
 #!/usr/bin/env R
 
+# Author: Sean Maden
 #
 # Test independent pseudobulk from DLPFC cohort1 snRNAseq data.
 #
 
-source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudobulk.R")
+source("./cohort2/scripts/01_pseudobulk/00_parameters-pseudobulk.R")
 sapply(libv, library, character.only = T)
-list.sce.markers <- get(load(sce.markers.list.path))
 
-list.sce.markers <- get(load(sce.markers.list.path)) # load marker data
-sce.mrb <- get(load(sce.mrb.path)) # load sce data
+# load marker data
+markers.path <- "./cohort1/outputs/00_preprocess/list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
+list.sce.markers <- get(load(markers.path))
+
+# load sce data
+sce.path <- "./cohort2/data/sce-mrb_dlpfc.rda"
+sce.mrb <- get(load(sce.path)) # load sce data
 sce.k2 <- sce.mrb[rownames(sce.mrb) %in% rownames(list.sce.markers[["k2"]]),]
 
 # get experiment results tables
@@ -42,3 +47,9 @@ ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() +
 # jitterbox -- jittered points and boxplots of absolute errors
 ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + ggtitle("Neuron")
+
+
+
+
+# save env
+save.image("./cohort2/env/01_pseudobulk/01_k2_mrb_script.RData")

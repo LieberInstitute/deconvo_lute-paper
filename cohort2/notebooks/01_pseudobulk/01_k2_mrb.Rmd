@@ -1,0 +1,75 @@
+---
+title: "01_k2_mrb"
+author: "Sean Maden"
+date: "2023-10-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+list.files()
+load("./env/01_pseudobulk/01_k2_mrb_script.RData")
+```
+
+# Figure 2, scatterplots
+
+Show
+
+```{r}
+# plot proportions multipanel -- scale vs with scale
+new.plot <- ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True") + ylab("Predicted") +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Save
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.name <- "fig2_mrb_k2.jpg"
+jpeg(file.path("./figures/01_pseudobulk/", new.plot.name), 
+     width = 4, height = 2.5, units = "in", res = 400)
+new.plot
+dev.off()
+```
+
+# Figure S1, boxplots
+
+Show
+
+```{r}
+new.plot <- ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + 
+  geom_jitter(alpha = 0.5, size = 3) + 
+  geom_boxplot(color = "cyan", alpha = 0) + 
+  theme_bw() + 
+  ylab("Error (neuron)")
+```
+
+Save
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.name <- "figs1_mrb_k2.jpg"
+jpeg(file.path("./figures/01_pseudobulk/", new.plot.name), 
+     width = 3, height = 2, units = "in", res = 400)
+new.plot
+dev.off()
+```
+```
+
+
+# Session info
+
+```{r}
+sessionInfo()
+```
