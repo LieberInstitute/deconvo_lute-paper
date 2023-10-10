@@ -23,7 +23,15 @@ dfp.wide <- list.dfp$dfp.wide
 dfp.tall <- list.dfp$dfp.tall
 ```
 
-# Rank difference
+# Summaries
+
+## Summary statistics
+
+```{r}
+summary(dfp.tall[]$neuron)
+```
+
+## Rank difference
 
 ```{r}
 
@@ -314,10 +322,6 @@ new.plot1
 
 ```
 
-
-
-
-
 # Pairs plots
 
 ```{r}
@@ -333,10 +337,6 @@ new.plot1 <- ggpairs(dfp)
 new.plot1
 
 ```
-
-
-
-
 
 # Centered measures
 
@@ -357,22 +357,6 @@ new.plot1 <- ggplot(dfp.tall, aes(x = br.region, y = ratio.neuron.glial)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_hline(yintercept = ratio.yintercept.ref)
 new.plot1
-```
-
-
-
-
-
-# Save
-
-```{r}
-setwd("..")
-setwd("..")
-list.files()
-new.plot.path <- "./figures/08_sizes/supplemental_figure_boxplots_ratio_neuron_glial.jpg"
-jpeg(new.plot.path, width = 5, height = 3, res = 400, units = "in")
-new.plot1
-dev.off()
 ```
 
 # Session info

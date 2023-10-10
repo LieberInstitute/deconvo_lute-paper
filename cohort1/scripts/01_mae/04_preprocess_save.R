@@ -10,7 +10,7 @@ filter.rnascope.confidence <- "Low"
 # load
 #-----
 mae.in.path <- "./outputs/01_mae/mae_allsamples_append.rda"
-mae <- get(load(mae.in.path))
+mae <- mae.all <- get(load(mae.in.path))
 dim(colData(mae))
 
 # rnascope confidence annotations
@@ -42,6 +42,5 @@ mae[["cell.sizes"]] <- cell.sizes
 #-----
 
 dim(colData(mae))
-
 mae.out.path <- "./outputs/01_mae/mae_analysis_append.rda"
-mae <- get(load(mae.out.path))
+save(mae, file = mae.out.path)
