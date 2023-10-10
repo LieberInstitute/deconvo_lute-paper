@@ -49,10 +49,12 @@ for(c in seq(2)){dfs.rn[,c] <- as.numeric(dfs.rn[,c])}
 # filter training samples
 sample.id.train.path <- file.path("outputs", "00_preprocess", "list_snrnaseq_sampleid.rda")
 sample.id.train <- get(load(sample.id.train.path))[["train"]]
-sce <- sce[,sce[[sample.id.variable]] %in% sample.id.train]
+sample.id.train <- sample.id.train[sample.id.train %in% dfs.rn$sample.id]
+length(sample.id.train)
 
 # subset on rnascope samples
-sce <- sce[,sce$Sample %in% dfs.rn$sample.id]
+sce <- sce[,sce[[sample.id.variable]] %in% sample.id.train]
+sce.k2 <- sce.k2[,sce.k2$Sample %in% sample.id.train]
 
 #-----------------------------------
 #
