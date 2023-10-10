@@ -97,17 +97,30 @@ new.plot2 <- ggplot(dfp, aes(x = subject.id, y = glial)) +
   facet_wrap(~size.type.label) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+new.plot1
+
+new.plot2
+```
+
+snRNAseq glial by neuron scatterplot
+
+```{r}
+
 new.plot3 <- ggplot(dfp, aes(x = neuron, y = glial)) + 
   geom_point(size = 4, alpha = 0.5) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_abline(slope = 1, intercept = 0) + 
   ggtitle("snRNAseq")
 
-new.plot1
-
-new.plot2
-
 new.plot3
+
+# save
+setwd("..")
+setwd("..")
+jpeg("./figures/08_sizes/figures_snrnaseq_size_scatterplot.jpg", 
+     width = 3, height = 3, units = "in", res = 400)
+new.plot3
+dev.off()
 
 ```
 
@@ -130,17 +143,28 @@ new.plot2 <- ggplot(dfp, aes(x = subject.id, y = glial)) +
   facet_wrap(~size.type.label) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+new.plot1
+
+new.plot2
+```
+
+```{r}
+
 new.plot3 <- ggplot(dfp, aes(x = neuron, y = glial)) + 
   geom_point(size = 4, alpha = 0.5) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_abline(slope = 1, intercept = 0) +
   ggtitle("RNAscope")
 
-new.plot1
-
-new.plot2
-
 new.plot3
+
+# save
+setwd("..")
+setwd("..")
+jpeg("./figures/08_sizes/figures_rnascope_size_scatterplot.jpg", 
+     width = 3, height = 3, units = "in", res = 400)
+new.plot3
+dev.off()
 
 ```
 
@@ -154,9 +178,46 @@ new.plot1 <- ggplot(dfp,
                     aes(x = sn.ratio.glial.neuron, y = rn.ratio.glial.neuron)) + 
   geom_point(size = 4, alpha = 0.5) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_abline(slope = 1, intercept = 0)
+  geom_abline(slope = 1, intercept = 0) +
+  xlab("snRNAseq") +
+  ylab("RNAscope")
 
 new.plot1
+
+# save
+setwd("..")
+setwd("..")
+jpeg("./figures/08_sizes/figures_size_ratios_rnascope_snrnaseq_scatterplot.jpg", 
+     width = 3, height = 3, units = "in", res = 400)
+new.plot1
+dev.off()
+
+```
+
+Proportions scatter plot, by region, snRNAseq and RNAscope
+
+```{r}
+
+dfp <- dfp.wide
+
+new.plot1 <- ggplot(dfp, 
+                    aes(x = sn.ratio.glial.neuron, y = rn.ratio.glial.neuron)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_abline(slope = 1, intercept = 0) +
+  xlab("snRNAseq") +
+  ylab("RNAscope") +
+  facet_wrap(~br.region)
+
+new.plot1
+
+# save
+setwd("..")
+setwd("..")
+jpeg("./figures/08_sizes/figures_size_ratios_rnascope_snrnaseq_scatterplot.jpg", 
+     width = 4.5, height = 2.8, units = "in", res = 400)
+new.plot1
+dev.off()
 
 ```
 
@@ -178,28 +239,6 @@ new.plot1 <- ggplot(dfp,
 new.plot1
 
 ```
-
-
-
-
-```{r}
-
-new.plot2 <- ggplot(dfp, 
-                    aes(x = size.type.label, 
-                        y = ratio.glial.neuron,
-                        color = subject.id)) + 
-  geom_point() + 
-  geom_line(data = dfp, aes(x, xend, y, yend)) +
-  geom_hline(yintercept = 1)
-
-new.plot2
-
-```
-
-
-
-
-
 
 ```{r}
 
@@ -247,6 +286,14 @@ new.plot1 <- ggplot(dfp,
   facet_wrap(~subject.id)
 
 new.plot1
+
+# save
+setwd("..")
+setwd("..")
+jpeg("./figures/08_sizes/figures_size_ratios_rnascope_snrnaseq_bysourceid_scatterplot.jpg", 
+     width = 6, height = 5, units = "in", res = 400)
+new.plot1
+dev.off()
 
 ```
 
