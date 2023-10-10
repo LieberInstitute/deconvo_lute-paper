@@ -8,19 +8,18 @@ source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudo
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k3
+sce.mrb <- get(load(sce.mrb.path)) # load sce data
 s.vector <- c("Excit" = 10, "glial" = 3, "Inhib" = 10)
 
 # get experiment results tables
-dfp.tall <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
+dfp.tall <- get_ypb_experiment_series(sce.mrb, sample.id.variable = "donor", 
                                       celltype.variable = "k3", assay.name = "logcounts",
                                       s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "tall")
-
-dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
+dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "donor", 
                                       celltype.variable = "k3", assay.name = "logcounts",
                                       s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "wide")
-
 dfp.ct <- dfp_tall_by_celltype(dfp.wide) # dfp.wide, tall by cell type
 
 # make new plots
@@ -41,4 +40,5 @@ dfp.ae2$type <- "noscale"
 dfp.ae <- rbind(dfp.ae1, dfp.ae2)
 ggplot(dfp.ae, aes(x = celltype, y = abs.error)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + facet_wrap(~type)
+
 

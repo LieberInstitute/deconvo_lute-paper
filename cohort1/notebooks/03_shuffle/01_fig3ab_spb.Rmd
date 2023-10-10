@@ -103,6 +103,15 @@ new.plot.low.save
 dev.off()
 ```
 
+# Write table
+
+```{r}
+setwd("..")
+setwd("..")
+dfp.tall$shuffle.term <- "S_pseudobulk"
+write.csv(dfp.tall, row.names = F, file = "./outputs/03_shuffle/table_s3_spb.csv")
+```
+
 # Session info
 
 ```{r, include = FALSE}

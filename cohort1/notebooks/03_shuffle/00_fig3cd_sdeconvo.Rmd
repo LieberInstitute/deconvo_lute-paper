@@ -94,6 +94,15 @@ new.plot.high
 dev.off()
 ```
 
+# Write table
+
+```{r}
+setwd("..")
+setwd("..")
+dfp.tall$shuffle.term <- "S_deconvolution"
+write.csv(dfp.tall, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
+```
+
 # Session info
 
 ```{r, include = FALSE}

@@ -216,7 +216,7 @@ max.nucleus.area <- 78
 dim(sce.img)
 filter.sce <- assays(sce.img)[["Nucleus_Area"]] < max.nucleus.area
 sce.img <- sce.img[,filter.sce]
-# dim(sce.img)
+dim(sce.img)
 
 #--------------------------------------------------
 # df.rn: get additional rnascope data.frame objects

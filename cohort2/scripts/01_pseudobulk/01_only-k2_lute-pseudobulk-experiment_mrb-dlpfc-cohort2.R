@@ -7,20 +7,21 @@
 source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudobulk.R")
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
-sce.k2 <- list.sce.markers$k2
+
+list.sce.markers <- get(load(sce.markers.list.path)) # load marker data
+sce.mrb <- get(load(sce.mrb.path)) # load sce data
+sce.k2 <- sce.mrb[rownames(sce.mrb) %in% rownames(list.sce.markers[["k2"]]),]
 
 # get experiment results tables
-dfp.tall <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample", 
-                                 celltype.variable = "k2", assay.name = "logcounts",
-                                 s.vector = c("glial" = 3, "neuron" = 10),
-                                 algorithm.name = "nnls", return.dimensions = "tall",
-                                 deconvolution.algorithm = "bisque")
-
-dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample", 
+dfp.tall <- get_ypb_experiment_series(sce.k2, sample.id.variable = "donor", 
                                       celltype.variable = "k2", assay.name = "logcounts",
                                       s.vector = c("glial" = 3, "neuron" = 10),
-                                      algorithm.name = "nnls", return.dimensions = "wide",
-                                      deconvolution.algorithm = "bisque")
+                                      algorithm.name = "nnls", return.dimensions = "tall")
+
+dfp.wide <- get_ypb_experiment_series(sce.k2, sample.id.variable = "donor", 
+                                      celltype.variable = "k2", assay.name = "logcounts",
+                                      s.vector = c("glial" = 3, "neuron" = 10),
+                                      algorithm.name = "nnls", return.dimensions = "wide")
 
 # make new plots
 # plot proportions panel -- no scale

@@ -4,7 +4,7 @@
 # Test independent pseudobulk from DLPFC cohort1 snRNAseq data.
 #
 
-source("deconvo_method-paper/code/02_pseudobulk-predictions/00_parameters-pseudobulk.R")
+source("scripts/02_pseudobulk/00_param.R")
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
 sce <- list.sce.markers$k4
@@ -77,3 +77,7 @@ dfp.ae2$type <- "noscale"
 dfp.ae <- rbind(dfp.ae1, dfp.ae2)
 ggplot(dfp.ae, aes(x = celltype, y = abs.error)) + geom_jitter(alpha = 0.5) + 
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + facet_wrap(~type)
+
+# save environment
+
+save.image("./env/02_pseudobulk/03_k4.RData")
