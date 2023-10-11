@@ -18,8 +18,10 @@ sce <- list.sce.markers$k4
 s.vector <- c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3)
 
 # get experiment results tables
-unique.sample.id.vector <- unique(sce[["Sample"]])
-sample.id.filter1 <- sce[["Sample"]] %in% unique.sample.id.vector[1:2]
+unique.sample.id.vector <- unique(
+  sce[["Sample"]])
+sample.id.filter1 <- 
+  sce[["Sample"]] %in% unique.sample.id.vector[1:2]
 #sample.id.filter2 <- sce[["Sample"]] %in% unique.sample.id.vector[3:4]
 #sample.id.filter3 <- sce[["Sample"]] %in% unique.sample.id.vector[3]
 #sample.id.filter4 <- sce[["Sample"]] %in% unique.sample.id.vector[4]
