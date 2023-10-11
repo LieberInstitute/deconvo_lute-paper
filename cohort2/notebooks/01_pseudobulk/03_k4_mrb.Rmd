@@ -1,5 +1,5 @@
 ---
-title: "01_k2_mrb"
+title: "Pseudobulk k4 with and without cell size rescaling, cohort2"
 author: "Sean Maden"
 date: "2023-10-10"
 output: html_document

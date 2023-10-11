@@ -1,11 +1,15 @@
 ---
-title: "Pseudobulk k3 with and without cell size rescaling"
+title: "Pseudobulk k3 with and without cell size rescaling, cohort1"
 author: "Sean Maden"
 date: "2023-09-17"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
@@ -14,6 +18,8 @@ load("./env/02_pseudobulk/02_k3.RData")
 ```
 
 # Figure 2C 
+
+Show
 
 ```{r}
 # plot proportions multipanel -- scale vs with scale
@@ -26,17 +32,19 @@ new.plot <- ggplot(dfp.ct, aes(x = true.noscale, y = pred.noscale)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+Save
+
 ```{r}
 setwd("..")
 setwd("..")
-new.plot.name <- "fig2c.jpg"
+new.plot.name <- "fig2c_cohort1.jpg"
 jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
      width = 6, height = 3, units = "in", res = 400)
 new.plot
 dev.off()
 ```
 
-# Figure S1C
+# Figure S1E
 
 ```{r}
 # jitterbox -- jittered points and boxplots of absolute errors
@@ -57,10 +65,16 @@ new.plot <- ggplot(dfp.ae, aes(x = celltype, y = abs.error)) +
 ```{r}
 setwd("..")
 setwd("..")
-new.plot.name <- "figs1c.jpg"
+new.plot.name <- "figs1e_cohort1.jpg"
 jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
      width = 4, height = 2.5, units = "in", res = 400)
 new.plot
 dev.off()
+```
+
+# Session info
+
+```{r}
+sessionInfo()
 ```
 

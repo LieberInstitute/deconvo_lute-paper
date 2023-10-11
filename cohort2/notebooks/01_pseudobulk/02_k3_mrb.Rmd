@@ -1,5 +1,5 @@
 ---
-title: "01_k2_mrb"
+title: "Pseudobulk k3 with and without cell size rescaling, cohort2"
 author: "Sean Maden"
 date: "2023-10-10"
 output: html_document
@@ -15,7 +15,7 @@ list.files()
 load("./env/01_pseudobulk/01_k3_mrb_script.RData")
 ```
 
-# Figure 2, scatterplots
+# Figure 2D, scatterplots
 
 Show
 
@@ -35,14 +35,14 @@ Save
 ```{r}
 setwd("..")
 setwd("..")
-new.plot.name <- "fig2_mrb_k3.jpg"
+new.plot.name <- "fig2d_cohort2.jpg"
 jpeg(file.path("./figures/01_pseudobulk/", new.plot.name), 
      width = 5.5, height = 2.5, units = "in", res = 400)
 new.plot
 dev.off()
 ```
 
-# Figure S1, boxplots
+# Figure S1F, boxplots
 
 Show
 
@@ -69,7 +69,7 @@ Save
 ```{r}
 setwd("..")
 setwd("..")
-new.plot.name <- "figs1_mrb_k3.jpg"
+new.plot.name <- "figs1f_cohort2.jpg"
 jpeg(file.path("./figures/01_pseudobulk/", new.plot.name), 
      width = 4.5, height = 2.5, units = "in", res = 400)
 new.plot

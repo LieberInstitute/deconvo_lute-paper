@@ -1,11 +1,15 @@
 ---
-title: "Pseudobulk k2 with and without cell size rescaling"
+title: "Pseudobulk k2 with and without cell size rescaling, cohort1"
 author: "Sean Maden"
 date: "2023-09-17"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
@@ -13,7 +17,36 @@ list.files()
 load("./env/02_pseudobulk/01_k2.RData")
 ```
 
-# Figure 2A 
+# Figure 2A
+
+View
+
+```{r}
+# plot proportions panel -- no scale
+new.plot <- ggplot(dfp.tall[dfp.tall$type=="noscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True") + ylab("Predicted") +
+  xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Save
+
+```{r}
+setwd("..")
+setwd("..")
+new.plot.name <- "fig2a_cohort1.jpg"
+jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
+     width = 3, height = 3, units = "in", res = 400)
+new.plot
+dev.off()
+```
+
+# Figure S1B
 
 ```{r}
 new.plot <- ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + 
@@ -29,7 +62,7 @@ new.plot
 ```{r}
 setwd("..")
 setwd("..")
-new.plot.name <- "fig2a.jpg"
+new.plot.name <- "figs1b_cohort1.jpg"
 jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
      width = 4, height = 2.5, units = "in", res = 400)
 new.plot
@@ -48,10 +81,15 @@ new.plot <- ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) +
 ```{r}
 setwd("..")
 setwd("..")
-new.plot.name <- "figs1a.jpg"
+new.plot.name <- "figs1a_cohort1.jpg"
 jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
      width = 3, height = 3, units = "in", res = 400)
 new.plot
 dev.off()
 ```
 
+# Session info
+
+```{r}
+sessionInfo()
+```
