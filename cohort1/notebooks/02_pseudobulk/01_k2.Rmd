@@ -17,6 +17,19 @@ list.files()
 load("./env/02_pseudobulk/01_k2.RData")
 ```
 
+
+# Summarize
+
+Neuron
+
+```{r}
+summary(dfp.ct[dfp.ct$celltype=="neuron",]$abs.error.noscale)
+sd(dfp.ct[dfp.ct$celltype=="neuron",]$abs.error.noscale)
+
+summary(dfp.ct[dfp.ct$celltype=="neuron",]$abs.error.withscale)
+sd(dfp.ct[dfp.ct$celltype=="neuron",]$abs.error.withscale)
+```
+
 # Figure 2A
 
 View

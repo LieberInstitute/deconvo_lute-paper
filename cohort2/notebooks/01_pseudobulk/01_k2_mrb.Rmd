@@ -15,6 +15,19 @@ list.files()
 load("./env/01_pseudobulk/01_k2_mrb_script.RData")
 ```
 
+
+# Summarize
+
+Neuron
+
+```{r}
+summary(dfp.tall[dfp.tall$type=="noscale",]$neuron.abs.error)
+sd(dfp.tall[dfp.tall$type=="noscale",]$neuron.abs.error)
+
+summary(dfp.tall[dfp.tall$type=="withscale",]$neuron.abs.error)
+sd(dfp.tall[dfp.tall$type=="withscale",]$neuron.abs.error)
+```
+
 # Figure 2B, scatterplots
 
 View

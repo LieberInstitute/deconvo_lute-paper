@@ -2,7 +2,9 @@
 title: "Pseudobulk k3 with and without cell size rescaling, cohort2"
 author: "Sean Maden"
 date: "2023-10-10"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -60,7 +62,7 @@ new.plot <- ggplot(dfp.ae, aes(x = celltype, y = abs.error)) +
   geom_jitter(alpha = 0.5, size = 2.5) + 
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + facet_wrap(~type) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylab("Error (neuron)")
+  ylab("Error")
 
 ```
 
