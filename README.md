@@ -130,94 +130,98 @@ Contains the links to files saving figures for the manuscript.
 
 **Figure 1**
 
-[Figure 1](./figures/lute_diagram.jpg)
+[Figure 1](./cohort1/figures/lute_diagram.jpg)
 
 **Figure 2**
 
-[Figure 2A](./notebooks/02_pseudobulk/)
+[Figure 2A](./cohort1/notebooks/02_pseudobulk/01_k2.Rmd)
 
-[Figure 2B](./notebooks/02_pseudobulk/)
+[Figure 2B](./cohort2/notebooks/02_pseudobulk/01_k2_mrb.Rmd)
 
-[Figure 2C](./notebooks/02_pseudobulk/)
+[Figure 2C](./cohort1/notebooks/02_pseudobulk/02_k3.Rmd)
 
-[Figure 2D](./notebooks/02_pseudobulk/)
+[Figure 2D](./cohort2/notebooks/02_pseudobulk/02_k3_mrb.Rmd)
 
-[Figure 2E](./notebooks/02_pseudobulk/)
+[Figure 2E](./cohort1/notebooks/02_pseudobulk/03_k4.Rmd)
 
-[Figure 2F](./notebooks/02_pseudobulk/)
+[Figure 2F](./cohort2/notebooks/02_pseudobulk/03_k4_mrb.Rmd)
 
 **Figure 3**
 
-[Figure 3A](./figures/03_shuffle/)
+[Figure 3A](./cohort1/figures/03_shuffle/figure3a_equation.jpg)
 
-[Figure 3B-C](./notebooks/03_shuffle/)
+[Figure 3B-C](./cohort1/notebooks/03_shuffle/01_fig3ab_spb.Rmd)
 
-[Figure 3D-E](./notebooks/03_shuffle/)
+[Figure 3D-E](./cohort1/notebooks/03_shuffle/00_fig3cd_sdeconvo.Rmd)
 
-[Figure 3F-G](./notebooks/03_shuffle/)
+[Figure 3F-G](./cohort1/notebooks/03_shuffle/00_fig3ef_zpseudobulk.Rmd)
 
 **Figure 4**
 
-[Figure 4A](./scripts/04_experiment) 
+[Figure 4A](./cohort1/scripts/04_experiment/01_pseudobulk.Rmd) 
 
-[Figure 4B](./scripts/04_experiment) 
+[Figure 4B](./cohort1/scripts/04_experiment/01_pseudobulk.Rmd) 
 
-[Figure 4C](./scripts/04_experiment)
+[Figure 4C](./cohort1/scripts/04_experiment/01_pseudobulk.Rmd)
 
 **Figure 5**
 
-[Figure 5A](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
+[Figure 5A](./cohort1/notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
 
-[Figure 5B](./notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
+[Figure 5B](./cohort1/notebooks/09_fast/03_run_sopt_realbulk_all.Rmd)
 
 
 ### Supplementary Figures
 
 **Supplemental Figure 1**
 
-[Supplemental Figure 1A](./notebooks/02_pseudobulk/01_k2.Rmd)
+[Supplemental Figure 1A](./cohort1/notebooks/02_pseudobulk/01_k2.Rmd)
 
-[Supplemental Figure 1B](./notebooks/02_pseudobulk/01_k2.Rmd)
+[Supplemental Figure 1B](./cohort1/notebooks/02_pseudobulk/01_k2.Rmd)
 
-[Supplemental Figure 1C](./scripts/02_pseudobulk/)
+[Supplemental Figure 1C](./cohort2/scripts/01_pseudobulk/01_k2_mrb.Rmd)
 
-[Supplemental Figure 1D](./scripts/02_pseudobulk/)
+[Supplemental Figure 1D](./cohort2/scripts/01_pseudobulk/01_k2_mrb.Rmd)
 
-[Supplemental Figure 1E](./notebooks/02_pseudobulk/02_k3.Rmd)
+[Supplemental Figure 1E](./cohort1/notebooks/02_pseudobulk/02_k3.Rmd)
 
-[Supplemental Figure 1F](./notebooks/02_pseudobulk/)
+[Supplemental Figure 1F](./cohort2/notebooks/01_pseudobulk/02_k3_mrb.Rmd)
 
-[Supplemental Figure 1E](./notebooks/02_pseudobulk/03_k4.Rmd)
+[Supplemental Figure 1E](./cohort1/notebooks/02_pseudobulk/03_k4.Rmd)
 
-[Supplemental Figure 1F](./notebooks/02_pseudobulk/)
+[Supplemental Figure 1F](./cohort2/notebooks/01_pseudobulk/03_k4_mrb.Rmd)
 
 **Supplemental Figure 2**
 
-[Supplemental Figure 2A](./notebooks/06_estimate/01_run_limited_resolution.Rmd)
+[Supplemental Figure 2A](./cohort1/figures/06_estimate/figs2_resolution.jpg)
 
-[Supplemental Figure 2B](./notebooks/06_estimate/01_run_1sample_convergent.Rmd)
+[Supplemental Figure 2B](./cohort1/notebooks/06_estimate/01_run_limited_resolution.Rmd)
+
+[Supplemental Figure 2C](./cohort1/figures/06_estimate/figs2_convergence.jpg)
+
+[Supplemental Figure 2D](./cohort1/notebooks/06_estimate/01_run_1sample_convergent.Rmd)
 
 **Supplemental Figure 3**
 
-[Supplemental Figure 3A](./notebooks/05_bulk/01_plot_manual_save.Rmd)
+[Supplemental Figure 3A](./cohort1/notebooks/05_bulk/01_plot_manual_save.Rmd)
 
-[Supplemental Figure 3B](./notebooks/05_bulk/01_plot_manual_save.Rmd) 
+[Supplemental Figure 3B](./cohort1/notebooks/05_bulk/01_plot_manual_save.Rmd) 
 
 **Supplemental Figure 4**
 
-[Supplemental Figure 4A](./notebooks/05_bulk/01_plot_manual_save.Rmd)
+[Supplemental Figure 4A](./cohort1/notebooks/05_bulk/01_plot_manual_save.Rmd)
 
-[Supplemental Figure 4B](./notebooks/05_bulk/01_plot_manual_save.Rmd)
+[Supplemental Figure 4B](./cohort1/notebooks/05_bulk/01_plot_manual_save.Rmd)
 
-[Supplemental Figure 4C](./notebooks/05_bulk/02_crossvalidate_save.Rmd)
+[Supplemental Figure 4C](./cohort1/notebooks/05_bulk/02_crossvalidate_save.Rmd)
 
-[Supplemental Figure 4D](./notebooks/05_bulk/02_crossvalidate_save.Rmd)
+[Supplemental Figure 4D](./cohort1/notebooks/05_bulk/02_crossvalidate_save.Rmd)
 
-[Supplemental Figure 4E](./notebooks/05_bulk/02_crossvalidate_save.Rmd)
+[Supplemental Figure 4E](./cohort1/notebooks/05_bulk/02_crossvalidate_save.Rmd)
 
 **Supplemental Figure 5**
 
-[Supplemental Figure 5](./notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd)
+[Supplemental Figure 5](./cohort1/notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd)
 
 ## Datasets
 
