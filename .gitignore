@@ -32,3 +32,4 @@ cohort1\data\inputs\00_preprocess\sce-mrb_dlpfc.rda
 cohort1\data\outputs\03_shuffle\01_run-experiment.RData
 
 cohort1/unit_tests/01_mae_summaries.Rmd
+cohort1/unit_tests/01_mae_summaries.R
