@@ -26,7 +26,7 @@ point.color <- "purple"
 ```{r}
 setwd("..")
 setwd("..")
-env.name <- "00_fig3ab_script.RData"
+env.name <- "01_figbc_script.RData"
 load(file.path("env", "03_shuffle", env.name))
 ```
 
@@ -43,7 +43,7 @@ new.plot.experiment.high
 Save formatted plot.
 
 ```{r}
-new.plot.filename <- "fig3a.jpg"
+new.plot.filename <- "fig3b.jpg"
 new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
 ###
 new.plot.high.save <- ggplot(dfp.tall.high, 
@@ -80,7 +80,7 @@ ggplot(dfp.tall.low,
 Save formatted plot.
 
 ```{r}
-new.plot.filename <- "fig3b.jpg"
+new.plot.filename <- "fig3c.jpg"
 new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
 ###
 new.plot.low.save <- ggplot(dfp.tall.low, 

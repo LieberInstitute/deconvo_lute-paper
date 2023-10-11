@@ -11,7 +11,7 @@
 #
 #
 
-new.env.name <- "00_fig3bc_script.RData"
+new.env.name <- "01_figbc_script.RData"
 
 source(file.path("scripts","02_pseudobulk","00_param.R"))
 source(file.path("scripts","03_shuffle","00_param.R"))

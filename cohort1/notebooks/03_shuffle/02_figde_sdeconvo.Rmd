@@ -7,133 +7,124 @@ output:
   html_document: default
 ---
 
-This notebook shows a pseudobulk shuffle experiment in which $Z_{pseudobulk}$ is shuffled.
+This notebook shows a pseudobulk shuffle experiment in which $S_{deconvolution}$ is shuffled.
 
-```{r}
+# Load
+
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 libv <- c("snow", "ggplot2", "dplyr", "parallel", 
           "doParallel", "lute", "dplyr", "scuttle")
 sapply(libv, library, character.only = T)
 ###
-point.color <- "limegreen"
+point.color <- "goldenrod1"
 ###
 setwd("..")
 setwd("..")
-env.name <- "00_fig3ef_script.RData"
+env.name <- "02_figde_script.RData"
 env.path <- file.path("env", "03_shuffle", env.name)
 load(env.path)
 ```
 
 # High neuron proportion sample
 
-The $Z_{deconvolution}$ sample has high neuron proportion.
+The $S_{deconvolution}$ sample has high neuron proportion.
 
 ```{r, include = TRUE}
-ggplot(dfp.tall.high, 
-       aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.z)) + 
+ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id.high))
+  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.high))
 ```
 
-Save formatted plot. 
+Save formatted plot.
 
 ```{r}
-new.plot.high <- ggplot(dfp.tall.high, 
-       aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
-  geom_point(size = 5, alpha = 0.5, colour = point.color) + 
+new.plot.low <- ggplot(dfp.tall.high, 
+       aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5, colour = point.color) +
   geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id.high)) + xlim(0.2, 1) + ylim(0.2, 1)
-new.plot.high
-```
-
-```{r, include = FALSE}
-
-setwd("..")
-setwd("..")
-
-new.plot.path <- file.path("figures", "03_shuffle", "fig3e.jpg")
-
-jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
-
-new.plot.high
-
-dev.off()
-
-```
-
-# Low neuron sample
-
-```{r, include = TRUE}
-ggplot(dfp.tall.low, 
-       aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.z)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id.low))
-```
-
-Save formatted plot. 
-
-```{r}
-new.plot.low <- ggplot(dfp.tall.low, 
-       aes(x = neuron.true, y = neuron.pred, shape = matched.z)) + 
-  geom_point(size = 5, alpha = 0.5, colour = point.color) + 
-  geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  ggtitle(paste0("Z pseudobulk id: ", zpb.sample.id)) + xlim(0.2, 1) + ylim(0.2, 1)
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.high)) + xlim(0.2, 1) + ylim(0.2, 1)
 new.plot.low
 ```
 
 ```{r, include = FALSE}
-
 setwd("..")
 setwd("..")
 
-new.plot.path <- file.path("figures", "03_shuffle", "fig3f.jpg")
+new.plot.path <- file.path("figures", "03_shuffle", "fig3d.jpg")
 
 jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
 
 new.plot.low
 
 dev.off()
+```
 
+# Low neuron proportion sample
+
+The $S_{deconvolution}$ sample has low neuron proportion.
+
+```{r, include = TRUE}
+ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
+  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.id.low))
+```
+
+Save formatted plot. 
+
+```{r}
+new.plot.high <- ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
+  geom_point(size = 5, alpha = 0.5, colour = point.color) + 
+  geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.id.low)) + xlim(0.2, 1) + ylim(0.2, 1)
+new.plot.high
+```
+
+```{r, include = FALSE}
+setwd("..")
+setwd("..")
+
+new.plot.filename <- "fig3e.jpg"
+new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
+
+jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
+
+new.plot.high
+
+dev.off()
 ```
 
 # Write table
 
+
 ```{r}
 # get write table
 dfp.tall.write <- dfp.tall
-colnames(dfp.tall.write)[9] <- "index.sample.id"
-colnames(dfp.tall.write)[10] <- "matched.id"
+colnames(dfp.tall.write)[5] <- "sample.id"
+colnames(dfp.tall.write)[7] <- "index.sample.id"
 
 dfp.tall.write$neuron.abs.error <- abs(dfp.tall.write$neuron.pred-dfp.tall.write$neuron.true)
 dfp.tall.write$glial.abs.error <- abs(dfp.tall.write$glial.pred-dfp.tall.write$glial.true)
-dfp.tall.write$shuffle.term <- "Z_pseudobulk"
+dfp.tall.write$shuffle.term <- "S_deconvolution"
+
 colnames.write <- c("glial.true", "neuron.true", 
                     "glial.pred", "neuron.pred", 
                     "type", "sample.id", 
                     "glial.abs.error", "neuron.abs.error",
                     "index.sample.id", "shuffle.term")
+
 dfp.tall.write <- dfp.tall.write[,colnames.write]
 ```
 
 ```{r}
 setwd("..")
 setwd("..")
-write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_zpseudobulk.csv")
+write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
 ```
 
 
 
-
-```{r}
-setwd("..")
-setwd("..")
-dfp.tall$shuffle.term <- "Z_pseudobulk"
-write.csv(dfp.tall, row.names = F, file = "./outputs/03_shuffle/table_s3_zpb.csv")
-```
-
-# Notebook end content
-
-Save environment, session info.
+# Session info
 
 ```{r, include = FALSE}
 sessionInfo()

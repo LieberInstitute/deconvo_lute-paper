@@ -4,6 +4,13 @@
 #
 # Run pseudobulk shuffle experiment varying Sdeconvolution
 #
+#
+#
+#
+#
+#
+
+new.env.name <- "02_figde_script.RData"
 
 source(file.path("scripts","02_pseudobulk","00_param.R"))
 source(file.path("scripts","03_shuffle","00_param.R"))
@@ -93,4 +100,4 @@ dfp.tall.low <- dfp.tall
 
 # save
 
-save.image(file = file.path("env", "03_shuffle", "00_fig3cd_script.RData"))
+save.image(file = file.path("env", "03_shuffle", new.env.name))
