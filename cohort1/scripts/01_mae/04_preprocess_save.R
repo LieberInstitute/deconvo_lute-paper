@@ -82,35 +82,20 @@ length(sample.vector.keep)==total.source.ids.to.keep
 #--------------------------------------
 mae.old <- mae
 
-sample.map.mae <- mae@sampleMap
-
-overlapping.samples.3.platforms <- intersect(
-  
-  intersect(
-    sample.map.mae[sample.map.mae$assay=="snrnaseq.k2.all",]$primary,
-    sample.map.mae[sample.map.mae$assay=="cell.sizes",]$primary
-  ),
-  sample.map.mae[sample.map.mae$assay=="bulk.rnaseq",]$primary
-  
-)
-
-#filter.samples.3platforms <- 
-#  sample.map.mae$primary %in% overlapping.samples.3.platforms
-#sample.map.mae.final <- sample.map.mae[filter.samples.3platforms,]
-
 sample.mae.map.filter.final <- 
-  colData(mae)$sample.id == unique(overlapping.samples.3.platforms)
+  colData(mae)$sample.id %in% sample.vector.keep
 
 mae <- mae[,sample.mae.map.filter.final,]
 
 # tests filtered mae
-mae.final.samples.count <- 11
-dim(colData(mae))
+final.samples.count.mae <- 13
+length(unique(colData(mae)$sample.id))==final.samples.count.mae
 
+# tests filtered mae
 names.test.mae1 <- c("snrnaseq.k2.all")
-for(name in names.test.mae1){
-  message(name)
-  message(length(unique(mae[[name]]$Sample))==mae.final.samples.count)
+for(name1 in names.test.mae1){
+  message(name1)
+  message(length(unique(mae[[name1]]$Sample))==final.samples.count.mae)
 }
 
 names.test.mae2 <- c("snrnaseq.k3.all", 
@@ -123,7 +108,8 @@ names.test.mae2 <- c("snrnaseq.k3.all",
 for(name2 in names.test.mae2){
   message(name2)
   message(
-    length(unique(mae[[name2]]$Sample))==mae.final.samples.count)
+    length(
+      unique(mae[[name2]]$Sample))==final.samples.count.mae)
 }
 
 names.test.mae3 <- c("cell.sizes")
