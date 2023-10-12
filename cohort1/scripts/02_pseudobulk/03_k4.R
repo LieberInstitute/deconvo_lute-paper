@@ -14,21 +14,26 @@ gc()
 source("scripts/02_pseudobulk/00_param.R")
 sapply(libv, library, character.only = T)
 list.sce.markers <- get(load(sce.markers.list.path))
-sce <- list.sce.markers$k4
+
+# load mae samples
+mae.filename <- "mae_analysis_append.rda"
+mae.path <- file.path("outputs", "01_mae", mae.filename)
+mae.analysis <- get(load(mae.path))
+sce.k4 <- mae.analysis[["snrnaseq.k4.all"]]
 s.vector <- c("Excit" = 10, "Inhib" = 10, "non_oligo_glial" = 3, "Oligo" = 3)
 
 # get experiment results tables
 unique.sample.id.vector <- unique(
-  sce[["Sample"]])
+  sce.k4[["Sample"]])
 sample.id.filter1 <- 
-  sce[["Sample"]] %in% unique.sample.id.vector[1:2]
+  sce.k4[["Sample"]] %in% unique.sample.id.vector[1:2]
 #sample.id.filter2 <- sce[["Sample"]] %in% unique.sample.id.vector[3:4]
 #sample.id.filter3 <- sce[["Sample"]] %in% unique.sample.id.vector[3]
 #sample.id.filter4 <- sce[["Sample"]] %in% unique.sample.id.vector[4]
 #sample.id.filter5 <- sce[["Sample"]] %in% unique.sample.id.vector[5]
 
 # get dfp.tall with memory management
-dfp.tall1 <- get_ypb_experiment_series(sce[,sample.id.filter1], 
+dfp.tall1 <- get_ypb_experiment_series(sce.k4[,sample.id.filter1], 
                                        sample.id.variable = "Sample", 
                                        celltype.variable = "k4", 
                                        assay.name = "logcounts",
@@ -40,7 +45,7 @@ dfp.tall1 <- get_ypb_experiment_series(sce[,sample.id.filter1],
 #gc()
 
 
-dfp.tall2 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
+dfp.tall2 <- get_ypb_experiment_series(sce.k4[,sample.id.filter2], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
@@ -51,7 +56,7 @@ dfp.tall2 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variab
 
 
 
-dfp.tall3 <- get_ypb_experiment_series(sce[,sample.id.filter3], sample.id.variable = "Sample", 
+dfp.tall3 <- get_ypb_experiment_series(sce.k4[,sample.id.filter3], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
@@ -62,12 +67,12 @@ dfp.tall3 <- get_ypb_experiment_series(sce[,sample.id.filter3], sample.id.variab
 
 
 
-dfp.tall4 <- get_ypb_experiment_series(sce[,sample.id.filter4], sample.id.variable = "Sample", 
+dfp.tall4 <- get_ypb_experiment_series(sce.k4[,sample.id.filter4], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
                                        system.sleep.sec = 10)
-dfp.tall5 <- get_ypb_experiment_series(sce[,sample.id.filter5], sample.id.variable = "Sample", 
+dfp.tall5 <- get_ypb_experiment_series(sce.k4[,sample.id.filter5], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
@@ -78,7 +83,7 @@ list.dfp.tall <- lapply(unique.sample.id.vector, function(sample.id){
   
   filter.sample.id <- sce$Sample==sample.id
   
-  dfp.tall.iter <- get_ypb_experiment_series(sce[,filter.sample.id], 
+  dfp.tall.iter <- get_ypb_experiment_series(sce.k4[,filter.sample.id], 
                                              sample.id.variable = "Sample",
                                              celltype.variable = "k4", 
                                              assay.name = "logcounts",
@@ -91,13 +96,13 @@ list.dfp.tall <- lapply(unique.sample.id.vector, function(sample.id){
   
 })
 
-unique.sample.id.vector <- unique(sce[["Sample"]])
+unique.sample.id.vector <- unique(sce.k4[["Sample"]])
 
 sample.id <- unique.sample.id.vector[1:2]
 
 filter.sample.id <- sce$Sample %in% sample.id
 
-dfp.tall1 <- get_ypb_experiment_series(sce[,filter.sample.id], sample.id.variable = "Sample", 
+dfp.tall1 <- get_ypb_experiment_series(sce.k4[,filter.sample.id], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
@@ -106,21 +111,21 @@ dfp.tall1 <- get_ypb_experiment_series(sce[,filter.sample.id], sample.id.variabl
 gc()
 
 
-dfp.tall1 <- get_ypb_experiment_series(sce[,sample.id.filter1], sample.id.variable = "Sample", 
+dfp.tall1 <- get_ypb_experiment_series(sce.k4[,sample.id.filter1], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
                                        system.sleep.sec = 5)
 gc()
 
-dfp.tall2 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
+dfp.tall2 <- get_ypb_experiment_series(sce.k4[,sample.id.filter2], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
                                        system.sleep.sec = 5)
 gc()
 
-dfp.tall3 <- get_ypb_experiment_series(sce[,sample.id.filter3], sample.id.variable = "Sample", 
+dfp.tall3 <- get_ypb_experiment_series(sce.k4[,sample.id.filter3], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "tall",
@@ -129,17 +134,17 @@ gc()
 dfp.tall <- rbind(dfp.tall1, rbind(dfp.tall2, dfp.tall3))
 
 # get dfp.wide with memory management
-dfp.wide1 <- get_ypb_experiment_series(sce[,sample.id.filter1], sample.id.variable = "Sample", 
+dfp.wide1 <- get_ypb_experiment_series(sce.k4[,sample.id.filter1], sample.id.variable = "Sample", 
                                       celltype.variable = "k4", assay.name = "logcounts",
                                       s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "wide")
 gc()
-dfp.wide2 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
+dfp.wide2 <- get_ypb_experiment_series(sce.k4[,sample.id.filter2], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "wide")
 gc()
-dfp.wide3 <- get_ypb_experiment_series(sce[,sample.id.filter2], sample.id.variable = "Sample", 
+dfp.wide3 <- get_ypb_experiment_series(sce.k4[,sample.id.filter2], sample.id.variable = "Sample", 
                                        celltype.variable = "k4", assay.name = "logcounts",
                                        s.vector = s.vector,
                                        algorithm.name = "nnls", return.dimensions = "wide")

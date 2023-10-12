@@ -12,8 +12,12 @@
 
 source(file.path("scripts", "02_pseudobulk", "00_param.R"))
 sapply(libv, library, character.only = T)
-list.sce.markers <- get(load(sce.markers.list.path))
-sce.k2 <- list.sce.markers$k2
+
+# load mae samples
+mae.filename <- "mae_analysis_append.rda"
+mae.path <- file.path("outputs", "01_mae", mae.filename)
+mae.analysis <- get(load(mae.path))
+sce.k2 <- mae.analysis[["snrnaseq.k2.all"]]
 
 # get experiment results tables
 dfp.tall <- get_ypb_experiment_series(sce.k2, sample.id.variable = "Sample", 

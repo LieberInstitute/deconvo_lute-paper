@@ -8,20 +8,23 @@
 #
 #
 
-
 source("scripts/02_pseudobulk/00_param.R")
 sapply(libv, library, character.only = T)
-list.sce.markers <- get(load(sce.markers.list.path))
-sce <- list.sce.markers$k3
+
+# load mae samples
+mae.filename <- "mae_analysis_append.rda"
+mae.path <- file.path("outputs", "01_mae", mae.filename)
+mae.analysis <- get(load(mae.path))
+sce.k3 <- mae.analysis[["snrnaseq.k3.all"]]
 s.vector <- c("Excit" = 10, "glial" = 3, "Inhib" = 10)
 
 # get experiment results tables
-dfp.tall <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
+dfp.tall <- get_ypb_experiment_series(sce.k3, sample.id.variable = "Sample", 
                                       celltype.variable = "k3", assay.name = "logcounts",
                                       s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "tall")
 
-dfp.wide <- get_ypb_experiment_series(sce, sample.id.variable = "Sample", 
+dfp.wide <- get_ypb_experiment_series(sce.k3, sample.id.variable = "Sample", 
                                       celltype.variable = "k3", assay.name = "logcounts",
                                       s.vector = s.vector,
                                       algorithm.name = "nnls", return.dimensions = "wide")
