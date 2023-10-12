@@ -207,16 +207,34 @@ colData(sce.img) <- img.coldata
 rm(halo_all)
 gc()
 
+expected.samples.count.rnascope <- 19
+length(unique(sce.img$Sample)) == expected.samples.count.rnascope
+
 #--------------------
 # preprocess rnascope
 #--------------------
+max.nucleus.area <- 78
+expected.nuclei.count <- 1362399
 
 # filter on nucleus area
-max.nucleus.area <- 78
-dim(sce.img)
 filter.sce <- assays(sce.img)[["Nucleus_Area"]] < max.nucleus.area
 sce.img <- sce.img[,filter.sce]
-dim(sce.img)
+
+# test: total rnascope nuclei
+ncol(sce.img)==expected.nuclei.count
+
+# test: samples overlapping rnascope and snrnaseq
+expected.samples.overlapping <- 11
+length(intersect(unique(sce.img$Sample), unique(sce1$Sample)))==
+  expected.samples.overlapping
+
+
+
+
+
+
+
+
 
 #--------------------------------------------------
 # df.rn: get additional rnascope data.frame objects
@@ -267,6 +285,10 @@ rownames(df.rnascope.kdata) <- paste0(df.rnascope.kdata$sample_id,";",
                                       df.rnascope.kdata$k.label)
 # make transpose
 df.rnascope.kdata <- t(df.rnascope.kdata)
+
+# test: number of samples in 1. cell.sizes and 2. sce.img
+length(unique(df.rnascope.kdata["sample_id",]))==expected.samples.count.rnascope
+identical(unique(df.rnascope.kdata["sample_id",]), unique(sce.img$Sample))
 
 # save rnascope data objects
 save(sce.img, file = "outputs/00_preprocess/sce_img.rda")

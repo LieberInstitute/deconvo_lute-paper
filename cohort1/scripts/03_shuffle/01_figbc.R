@@ -22,6 +22,13 @@ knitr::opts_chunk$set(echo = TRUE)
 libv <- c("snow", "dplyr", "parallel", "doParallel", "lute", "dplyr", "scuttle", "MultiAssayExperiment")
 sapply(libv, library, character.only = T)
 
+
+
+
+
+
+
+
 #----------
 # load data
 #----------
@@ -62,7 +69,9 @@ length(sample.id.train)
 
 # subset on rnascope samples
 sce <- sce[,sce[[sample.id.variable]] %in% sample.id.train]
-sce.k2 <- sce.k2[,sce.k2$Sample %in% sample.id.train]
+sce.k2 <- sce
+
+dim(sce)
 
 #-----------------------------------
 #
