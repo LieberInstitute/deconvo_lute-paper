@@ -11,7 +11,7 @@ Sample source IDs dataset summaries.
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
-save.image(file = './env/01_mae/05_data_summaries_script.RData')
+save.image(file = './env/02_summarize_mae/05_data_summaries_script.RData')
 ```
 
 # Inspect tables

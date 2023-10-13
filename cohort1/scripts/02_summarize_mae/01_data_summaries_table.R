@@ -19,6 +19,14 @@ list.sample.id <- get(load("./outputs/00_preprocess/list_snrnaseq_sampleid.rda")
 sample.id.train <- list.sample.id[["train"]]
 sample.id.validate <- list.sample.id[["validation"]]
 
+
+
+
+
+
+
+
+
 #----------------------------
 # PRE FILTER DATA SETS
 #----------------------------
@@ -163,8 +171,17 @@ new.table.postfilter <- new.table
 save(new.table, file = "./outputs/01_mae/table2_platforms.rda")
 write.csv(new.table, file = "./outputs/01_mae/table2_platforms.csv", row.names = FALSE)
 
+
+
+
+
+
+
+
+
+
 #---------------------
 # save the environment
 #---------------------
 
-save.image(file = './env/01_mae/05_data_summaries_script.RData')
+save.image(file = './env/02_summarize_mae/05_data_summaries_script.RData')
