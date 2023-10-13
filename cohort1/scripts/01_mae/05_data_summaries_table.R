@@ -82,7 +82,7 @@ new.table[new.table$platform %in% platform.names.iter,]$platform.name <- "RNAsco
 save(new.table, file = "./outputs/01_mae/table2_platforms_prefilter.rda")
 write.csv(new.table, file = "./outputs/01_mae/table2_platforms_prefilter.csv", row.names = FALSE)
 
-
+new.table.prefilter <- new.table
 
 
 
@@ -157,6 +157,14 @@ platform.names.iter <- c(
 new.table[new.table$platform %in% platform.names.iter,]$assay.type <- "fluorescent in situ hybridization"
 new.table[new.table$platform %in% platform.names.iter,]$platform.name <- "RNAscope"
 
+new.table.postfilter <- new.table
+
 # save
 save(new.table, file = "./outputs/01_mae/table2_platforms.rda")
 write.csv(new.table, file = "./outputs/01_mae/table2_platforms.csv", row.names = FALSE)
+
+#---------------------
+# save the environment
+#---------------------
+
+save.image(file = './env/01_mae/05_data_summaries_script.RData')
