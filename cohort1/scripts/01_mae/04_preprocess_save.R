@@ -11,6 +11,14 @@
 
 filter.rnascope.confidence <- "Low"
 
+
+
+
+
+
+
+
+
 #-----
 # load
 #-----
@@ -22,9 +30,7 @@ num.samples.mae.input <- 22
 length(unique(colData(mae)$sample.id))==num.samples.mae.input
 
 # rnascope confidence annotations
-cd.id <- get(
-  load(
-    "./outputs/01_mae/sample_qc_df.rda"))
+cd.id <- get(load("./outputs/01_mae/sample_qc_df.rda"))
 samples.to.remove <- unique(cd.id[cd.id$remove.low==TRUE,]$sample.id)
 
 # samples to keep
