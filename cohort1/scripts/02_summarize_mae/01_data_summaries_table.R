@@ -21,112 +21,21 @@ sample.id.validate <- list.sample.id[["validation"]]
 
 source("./scripts/02_summarize_mae/00_param.R")
 
-
-#----------------------------
-# PRE FILTER DATA SETS
-#----------------------------
 # load
-mae <- get(load(path.data.pre.filter))
+mae.all <- get(load(path.data.pre.filter))
+mae.filter <- get(load(path.data.post.filter))
 
-# sample source summaries
-dfmap <- mae@sampleMap
-dfmap$region <- gsub(".*_", "", dfmap$primary)
-dfmap$brnum <- gsub("_.*", "", dfmap$primary)
-variables.vector <- c("primary", "region", "brnum")
+# summaries
+list.summaries.prefilter <- summaries_df_list(mae.all, filter.type.label = "prefilter")
+list.summaries.postfilter <- summaries_df_list(mae.filter, filter.type.label = "postfilter")
 
-list.summaries.prefilter <- get_summaries_df_list(dfmap, label = "prefilter")
+# write summary tables
+write.csv(list.summaries.prefilter[["df.wide"]], 
+          file = "./outputs/02_summarize_mae/table2_platforms.csv", row.names = FALSE)
+df.filter.all <- rbind(list.summaries.postfilter[[1]],
+                       list.summaries.prefilter[[1]])
+write.csv(df.filter.all, 
+          file = "./outputs/02_summarize_mae/table_compare_filters.csv", row.names = FALSE)
 
-# save
-save(new.table, file = "./outputs/01_mae/table2_platforms_prefilter.rda")
-write.csv(new.table, file = "./outputs/01_mae/table2_platforms_prefilter.csv", row.names = FALSE)
-
-df.wide.prefilter <- df.wide
-df.tall.prefilter <- df.tall
-
-
-
-
-
-
-#----------------------------
-# POST FILTER DATA SETS
-#----------------------------
-mae.all <- mae
-# load
-mae <- mae.filter <- get(load(path.data.post.filter))
-
-
-# sample source summaries
-# PLATFORM_TYPE X SAMPLE_SOURCE_ID_COUNT
-df.samples.map.all <- mae@sampleMap %>% 
-  as.data.frame() %>%
-  distinct(assay, primary) %>%
-  group_by(assay) %>%
-  summarize(n())
-
-df.samples.map.train <- mae@sampleMap %>% 
-  as.data.frame() %>%
-  filter(primary %in% sample.id.train) %>%
-  distinct(assay, primary) %>%
-  group_by(assay) %>%
-  summarize(n())
-
-df.samples.map.validate <- mae@sampleMap %>% 
-  as.data.frame() %>%
-  filter(primary %in% sample.id.validate) %>%
-  distinct(assay, primary) %>%
-  group_by(assay) %>%
-  summarize(n())
-
-df.samples.map.all$data.type <- "all"
-df.samples.map.train$data.type <- "train"
-df.samples.map.validate$data.type <- "validate"
-
-new.table <- rbind(df.samples.map.all,
-      rbind(
-        df.samples.map.train,
-        df.samples.map.validate
-      ))
-colnames(new.table) <- c("platform", "unique_sample_source_count", "dataset_type")
-new.table <- new.table[,c(3,1,2)]
-
-new.table$platform.name <- 
-  new.table$assay.type <- "NA"
-platform.names.iter <- c(
-  "snrnaseq.k2.all", "snrnaseq.k3.all", "snrnaseq.k4.all",
-  "bulk.pb.k2", "bulk.pb.k3", "bulk.pb.k4"
-)
-new.table[new.table$platform %in% platform.names.iter,]$assay.type <- "snRNAseq"
-new.table[new.table$platform %in% platform.names.iter,]$platform.name <- "10X Chromium"
-platform.names.iter <- c(
-  "bulk.rnaseq", "bulk.rpkm.rnaseq"
-)
-new.table[new.table$platform %in% platform.names.iter,]$assay.type <- "bulk RNAseq"
-new.table[new.table$platform %in% platform.names.iter,]$platform.name <- "Illumina HiSeq"
-platform.names.iter <- c(
-  "cell.sizes", "sce.img"
-)
-new.table[new.table$platform %in% platform.names.iter,]$assay.type <- "fluorescent in situ hybridization"
-new.table[new.table$platform %in% platform.names.iter,]$platform.name <- "RNAscope"
-
-new.table.postfilter <- new.table
-
-# save
-save(new.table, file = "./outputs/01_mae/table2_platforms.rda")
-write.csv(new.table, file = "./outputs/01_mae/table2_platforms.csv", row.names = FALSE)
-
-
-
-
-
-
-
-
-
-
-#---------------------
-# save the environment
-#---------------------
-
-rm(mae)
+# save image
 save.image(file = './env/02_summarize_mae/01_data_summaries_script.RData')

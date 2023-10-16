@@ -6,7 +6,21 @@
 #
 
 
-summaries_df_list <- function(dfmap, filter.type.label){
+summaries_df_list <- function(mae, filter.type.label){
+  # summaries_df_list
+  #
+  # mae MultiAssayExperiment
+  # filter.type.label label for the filter used, if any
+  #
+  #
+  #
+  #
+  
+  dfmap <- mae@sampleMap
+  dfmap$region <- gsub(".*_", "", dfmap$primary)
+  dfmap$brnum <- gsub("_.*", "", dfmap$primary)
+  
+  variables.vector <- c("primary", "region", "brnum")
   
   # get summaries by data set type
   df.all <- do.call(cbind, 
