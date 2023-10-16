@@ -1,0 +1,74 @@
+---
+title: "TPM summaries"
+author: "Sean Maden"
+date: "2023-10-16"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "dplyr")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/01_tpm_summaries/01_read_script.RData")
+```
+
+# Summary statistics
+
+# Plots
+
+## Compare PBMC vs. immune cell
+
+Library sizes
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = library.size, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Library size")
+```
+Median expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = median.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Median expression")
+```
+
+Mean expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = mean.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Mean expression")
+```
+
+SD expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = sd.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Mean expression")
+```
+Number of zero-expression genes
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = num.zero.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  ggtitle("Number zero-expression genes")
+```
+
+Mean vs. standard deviation expression
+
+```{r}
+ggplot()
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
