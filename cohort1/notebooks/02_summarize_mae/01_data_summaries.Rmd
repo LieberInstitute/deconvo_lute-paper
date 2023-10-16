@@ -57,12 +57,60 @@ When you click the **Knit** button a document will be generated that includes bo
 summary(cars)
 ```
 
-## Including Plots
+# Sample summaries plots
 
-You can also embed plots, for example:
+## Upset plots
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+mae.upset <- mae.filter[,,c(1,4,6)]
+names(mae.upset) <- c("snRNAseq", "bulk RNAseq", "RNAscope")
+# training
+filter.train <- colData(mae.upset)$sample.id %in% sample.id.train
+mae.upset.train <- mae.upset[,filter.train,]
+# validation
+filter.validate <- colData(mae.upset)$sample.id %in% sample.id.validate
+mae.upset.validate <- mae.upset[,filter.validate,]
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+All samples
+
+```{r}
+setwd("..")
+setwd("..")
+jpeg("./figures/02_summarize_mae/figs_upset-mae-all.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+upsetSamples(mae.upset)
+dev.off()
+```
+
+Training 
+
+```{r}
+setwd("..")
+setwd("..")
+jpeg("./figures/02_summarize_mae/figs_upset-mae-train.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+upsetSamples(mae.upset.train)
+dev.off()
+```
+
+Validation 
+
+```{r}
+setwd("..")
+setwd("..")
+jpeg("./figures/02_summarize_mae/figs_upset-mae-validate.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+upsetSamples(mae.upset.validate)
+dev.off()
+```
+
+
+
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
