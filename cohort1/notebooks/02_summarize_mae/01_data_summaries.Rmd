@@ -11,7 +11,8 @@ Sample source IDs dataset summaries.
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
-save.image(file = './env/02_summarize_mae/01_data_summaries_script.RData')
+list.files()
+load('./env/02_summarize_mae/01_data_summaries_script.RData')
 ```
 
 # Inspect tables
@@ -26,6 +27,18 @@ Post-filter table
 
 ```{r}
 head(new.table.postfilter)
+```
+
+# Inspect sample IDs
+
+Pre-filter sample IDs
+
+```{r}
+```
+
+Post-filter sample IDs.
+
+```{r}
 ```
 
 # Session info

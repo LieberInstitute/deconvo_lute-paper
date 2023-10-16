@@ -25,6 +25,8 @@ mae <- get(load(mae.final.filepath))
 dim(mae[["bulk.rnaseq"]])
 cd.mae <- colData(mae)
 cd.mae$sample.id.new <- gsub("_.*", "", cd.mae$sample.id)
+length(unique(cd.mae$sample.id)) # 22
+length(unique(cd.mae$sample.id.new)) # 10
 
 validation.sample.id <- c("Br6432", "Br6522", "Br8667")
 filter.string <- paste0(validation.sample.id, collapse = "|")
@@ -33,9 +35,13 @@ table(filter.mae)
 # filter.mae
 # FALSE  TRUE 
 # 7    15 
+length(unique(cd.mae[filter.mae,]$sample.id)) # 15
+length(unique(cd.mae[filter.mae,]$sample.id.new)) # 7
 
 mae <- mae[,filter.mae,]
 dim(mae[["bulk.rnaseq"]])
+length(unique(mae[["bulk.rnaseq"]]$BrNum))
+length(unique(mae[["bulk.rnaseq"]]$batch.id2))
 
 #---------------------
 # prep cell sizes data

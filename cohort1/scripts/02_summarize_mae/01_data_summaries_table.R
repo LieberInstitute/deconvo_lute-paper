@@ -108,8 +108,9 @@ new.table.prefilter <- new.table
 #----------------------------
 # POST FILTER DATA SETS
 #----------------------------
+mae.all <- mae
 # load
-mae <- get(load(path.data.post.filter))
+mae <- mae.filter <- get(load(path.data.post.filter))
 
 
 # sample source summaries
@@ -184,4 +185,5 @@ write.csv(new.table, file = "./outputs/01_mae/table2_platforms.csv", row.names =
 # save the environment
 #---------------------
 
-save.image(file = './env/02_summarize_mae/05_data_summaries_script.RData')
+rm(mae)
+save.image(file = './env/02_summarize_mae/01_data_summaries_script.RData')
