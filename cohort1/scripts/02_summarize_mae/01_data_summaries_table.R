@@ -11,19 +11,18 @@
 
 library(dplyr)
 
+source("./scripts/02_summarize_mae/00_param.R")
+
+# load
 # dataset names
 path.data.pre.filter <- "./outputs/01_mae/mae_allsamples_append.rda"
 path.data.post.filter <- "./outputs/01_mae/mae_analysis_append.rda"
+mae.all <- get(load(path.data.pre.filter))
+mae.filter <- get(load(path.data.post.filter))
 
 list.sample.id <- get(load("./outputs/00_preprocess/list_snrnaseq_sampleid.rda"))
 sample.id.train <- list.sample.id[["train"]]
 sample.id.validate <- list.sample.id[["validation"]]
-
-source("./scripts/02_summarize_mae/00_param.R")
-
-# load
-mae.all <- get(load(path.data.pre.filter))
-mae.filter <- get(load(path.data.post.filter))
 
 # summaries
 list.summaries.prefilter <- summaries_df_list(mae.all, filter.type.label = "prefilter")

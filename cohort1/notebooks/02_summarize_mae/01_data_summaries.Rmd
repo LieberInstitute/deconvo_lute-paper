@@ -2,12 +2,16 @@
 title: "Dataset summaries, sample source IDs"
 author: "Sean Maden"
 date: "2023-10-13"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 Sample source IDs dataset summaries.
 
 ```{r setup, include=FALSE}
+libv <- c("MultiAssayExperiment")
+sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
@@ -17,16 +21,10 @@ load('./env/02_summarize_mae/01_data_summaries_script.RData')
 
 # Inspect tables
 
-Pre-filter table
+Filters comparison
 
 ```{r}
-head(new.table.prefilter)
-```
-
-Post-filter table
-
-```{r}
-head(new.table.postfilter)
+df.filter.all
 ```
 
 # Inspect sample IDs
@@ -34,27 +32,23 @@ head(new.table.postfilter)
 Pre-filter sample IDs
 
 ```{r}
+message("all")
+unique(mae.all@sampleMap$primary)
+message("snrnaseq")
+unique(mae.all[[1]][["Sample"]])
+message("rnascope")
+unique(mae.all[["sce.img"]]$Sample)
 ```
 
 Post-filter sample IDs.
 
 ```{r}
-```
-
-# Session info
-
-```{r}
-sessionInfo()
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+message("all")
+unique(mae.filter@sampleMap$primary)
+message("snrnaseq")
+unique(mae.filter[[1]][["Sample"]])
+message("rnascope")
+unique(mae.filter[["sce.img"]]$Sample)
 ```
 
 # Sample summaries plots
@@ -104,9 +98,6 @@ jpeg("./figures/02_summarize_mae/figs_upset-mae-validate.jpg",
 upsetSamples(mae.upset.validate)
 dev.off()
 ```
-
-
-
 
 # Session info
 
