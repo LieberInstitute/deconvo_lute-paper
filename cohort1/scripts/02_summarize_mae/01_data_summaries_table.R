@@ -34,31 +34,81 @@ sample.id.validate <- list.sample.id[["validation"]]
 mae <- get(load(path.data.pre.filter))
 
 # sample source summaries
+dfmap <- mae@sampleMap
+dfmap$region <- gsub(".*_", "", dfmap$primary)
+dfmap$brnum <- gsub("_.*", "", dfmap$primary)
+variables.vector <- c("primary", "region", "brnum")
+
+
+
+
+
+# get summaries by data set type
+df.all <- do.call(cbind, 
+                      lapply(variables.vector, 
+                             function(variable.iter){
+  dfmap$variable.iter <- dfmap[,variable.iter]
+  df.iter <- dfmap %>% 
+    as.data.frame() %>%
+    distinct(assay, variable.iter) %>%
+    group_by(assay) %>%
+    summarize(n()) %>%
+    as.data.frame()
+  colnames(df.iter) <- c("assay", variable.iter)
+  df.iter
+})) %>% as.data.frame()
+df.all <- df.all[,c(1,2,4,6)]
+df.train <- do.call(cbind, 
+                    lapply(variables.vector, 
+                           function(variable.iter){
+                             dfmap$variable.iter <- dfmap[,variable.iter]
+                             df.iter <- dfmap %>% 
+                               as.data.frame() %>%
+                               filter(primary %in% sample.id.train) %>%
+                               distinct(assay, variable.iter) %>%
+                               group_by(assay) %>%
+                               summarize(n()) %>%
+                               as.data.frame()
+                             colnames(df.iter) <- c("assay", variable.iter)
+                             df.iter
+                           })) %>% as.data.frame()
+df.train <- df.train[,c(1,2,4,6)]
+df.validate <- do.call(cbind, 
+                    lapply(variables.vector, 
+                           function(variable.iter){
+                             dfmap$variable.iter <- dfmap[,variable.iter]
+                             df.iter <- dfmap %>% 
+                               as.data.frame() %>%
+                               filter(primary %in% sample.id.validate) %>%
+                               distinct(assay, variable.iter) %>%
+                               group_by(assay) %>%
+                               summarize(n()) %>%
+                               as.data.frame()
+                             colnames(df.iter) <- c("assay", variable.iter)
+                             df.iter
+                           })) %>% as.data.frame()
+df.validate <- df.validate[,c(1,2,4,6)]
+
+
+# make wide data.frame
+df.all.wide <- df.all; df.train.wide <- df.train; df.validate.wide <- df.validate
+colnames(df.all.wide)[2:4] <- paste0(colnames(df.all.wide)[2:4],".all")
+colnames(df.train.wide)[2:4] <- paste0(colnames(df.train.wide)[2:4],".train")
+colnames(df.validate.wide)[2:4] <- paste0(colnames(df.validate.wide)[2:4],".validate")
+
+df.wide <- cbind(df.all.wide, 
+                 cbind(df.train.wide[,c(2:4)], df.validate.wide[,c(2:4)])) %>% 
+  as.data.frame()
+
+
+df.train$data.type <- "train"
+df.validate$data.type <- "validate"
+df.summary$data.type <- "all"
+
+
 # PLATFORM_TYPE X SAMPLE_SOURCE_ID_COUNT
-df.samples.map.all <- mae@sampleMap %>% 
-  as.data.frame() %>%
-  distinct(assay, primary) %>%
-  group_by(assay) %>%
-  summarize(n())
 
-df.samples.map.train <- mae@sampleMap %>% 
-  as.data.frame() %>%
-  filter(primary %in% sample.id.train) %>%
-  distinct(assay, primary) %>%
-  group_by(assay) %>%
-  summarize(n())
-
-df.samples.map.validate <- mae@sampleMap %>% 
-  as.data.frame() %>%
-  filter(primary %in% sample.id.validate) %>%
-  distinct(assay, primary) %>%
-  group_by(assay) %>%
-  summarize(n())
-
-df.samples.map.all$data.type <- "all"
-df.samples.map.train$data.type <- "train"
-df.samples.map.validate$data.type <- "validate"
-
+# make tall data.frame
 new.table <- rbind(df.samples.map.all,
                    rbind(
                      df.samples.map.train,
@@ -67,6 +117,8 @@ new.table <- rbind(df.samples.map.all,
 colnames(new.table) <- c("platform", "unique_sample_source_count", "dataset_type")
 new.table <- new.table[,c(3,1,2)]
 
+
+# append formatted assay name and platform name
 new.table$platform.name <- 
   new.table$assay.type <- "NA"
 platform.names.iter <- c(
@@ -85,6 +137,9 @@ platform.names.iter <- c(
 )
 new.table[new.table$platform %in% platform.names.iter,]$assay.type <- "fluorescent in situ hybridization"
 new.table[new.table$platform %in% platform.names.iter,]$platform.name <- "RNAscope"
+
+
+
 
 # save
 save(new.table, file = "./outputs/01_mae/table2_platforms_prefilter.rda")
