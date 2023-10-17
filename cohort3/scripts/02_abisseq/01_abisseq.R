@@ -17,6 +17,13 @@ zref <- read.csv("./data/zref_abisseq.csv")
 ptrue <- read.csv("./data/ptrue_abis.csv")
 load("./env/01_tpm_summaries/01_read_script.RData")
 
+#--------------
+# format inputs
+#--------------
+# zref
+rownames(zref) <- zref[,1]
+zref <- zref[,c(2:ncol(zref))]
+
 #------------
 # run deconvo
 #------------

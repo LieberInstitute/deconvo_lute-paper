@@ -4,7 +4,7 @@
 #
 # Read in TPM expression data.
 
-libv <- c("SummarizedExperiment")
+libv <- c("SummarizedExperiment", "biomaRt")
 sapply(libv, library, character.only = TRUE)
 
 #-----
@@ -12,6 +12,11 @@ sapply(libv, library, character.only = TRUE)
 #-----
 tpm.path <- "./data/GSE107011_Processed_data_TPM/GSE107011_Processed_data_TPM.txt"
 tpm <- read.table(tpm.path)
+
+#--------------------
+# format as se object
+#--------------------
+se <- SummarizedExperiment(assays = list(tpm = tpm))
 
 #------------------
 # get pheno/coldata
@@ -32,9 +37,26 @@ cd$sd.expression <- colSds(tpm)
 cd$num.na.expression <- colAnyNAs(tpm)
 cd$num.zero.expression <- unlist(apply(tpm, 2, function(ci){length(ci[ci==0])}))
 rownames(cd) <- cd[,1]
+
 # format summarized experiment
-se <- SummarizedExperiment(assays = list(tpm = tpm))
 colData(se) <- DataFrame(cd)
+
+#-----------------
+# map gene symbols
+#-----------------
+genes.format <- gsub("\\..*", "", rownames(tpm))
+mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
+rowdata <- getBM(
+  attributes = c('ensembl_gene_id', 'hgnc_symbol'),
+  filters = 'ensembl_gene_id',
+  values = genes.format, 
+  mart = mart
+)
+rowdata$ensembl_transcript_id <- rownames(tpm)
+rownames(rowdata) <- rownames(tpm)
+
+# append to se
+rowData(se) <- rowdata
 
 #-----
 # save
