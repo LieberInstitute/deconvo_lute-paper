@@ -44,19 +44,29 @@ colData(se) <- DataFrame(cd)
 #-----------------
 # map gene symbols
 #-----------------
-genes.format <- gsub("\\..*", "", rownames(tpm))
-mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
-rowdata <- getBM(
+# begin rowdata
+rd.new <- data.frame(ensembl_gene_id_version = rownames(tpm))
+rownames(rd.new) <- rd.new[,1]
+rowData(se) <- DataFrame(rd.new)
+
+# map gene ids to symbols
+mart.ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+gene.id.vector <- rownames(tpm)
+gene.id.vector <- gsub("\\..*", "", gene.id.vector)
+rd.maps <- getBM(
   attributes = c('ensembl_gene_id', 'hgnc_symbol'),
   filters = 'ensembl_gene_id',
-  values = genes.format, 
-  mart = mart
+  values = as.character(gene.id.vector), 
+  mart = mart.ensembl
 )
-rowdata$ensembl_transcript_id <- rownames(tpm)
-rownames(rowdata) <- rownames(tpm)
 
-# append to se
-rowData(se) <- rowdata
+# map symbols for rowdata
+rd.symbol <- rd.maps[,2]
+names(rd.symbol) <- rd.maps[,1]
+rd.symbol <- rd.symbol[gsub("\\..*", "", rownames(se))]
+length(rd.symbol)
+dim(se)
+rowData(se)$gene_symbol <- rd.symbol
 
 #-----
 # save
