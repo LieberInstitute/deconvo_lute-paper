@@ -6,25 +6,32 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/02_abisseq/01_abisseq_script.RData")
 ```
 
-## R Markdown
+Compare deconvolution results, with versus without scaling on cell size scale 
+factors, using the ABIS-seq reference.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Plot
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+View 
 
-```{r cars}
-summary(cars)
+```{r}
 ```
 
-## Including Plots
+Save
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Session info
+
+```{r}
+sessionInfo()
+```
+

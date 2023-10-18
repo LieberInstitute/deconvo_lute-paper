@@ -7,7 +7,7 @@
 #
 #
 
-libv <- c("lute")
+libv <- c("lute", "dplyr")
 sapply(libv, library, character.only = TRUE)
 
 #-----
@@ -71,7 +71,9 @@ result.scaled <- lute(
   typemarker.algorithm = NULL
 )
 
+#------------------
 # make df.plot.tall
+#------------------
 prop.unscaled <- result.unscaled[[1]]@predictions.table
 prop.scaled <- result.scaled[[1]]@predictions.table
 
@@ -80,8 +82,24 @@ prop.unscaled$type <- "unscaled"
 prop.scaled$sample.id <- rownames(prop.scaled)
 prop.scaled$type <- "scaled"
 
+df.plot.tall.s13 <- as.data.frame(rbind(prop.scaled, prop.unscaled))
+
+# get means on overlapping ids
+df.plot.tall.mean <- df.plot.tall.s13 %>% group_by(type) %>% summarise(across(everything(), mean))
+unique.cell.types <- df.map$p.true.id
+for(type in unique.cell.types){
+  df.plot.tall.mean[,ncol(df.plot.tall.mean)+1] <- df.proportions[df.proportions[,1]==type,2]
+  colnames(df.plot.tall.mean)[ncol(df.plot.tall.mean)] <- paste0(type, ".flow.cyto.mean.proportion")
+  df.plot.tall.mean[,ncol(df.plot.tall.mean)+1] <- df.proportions[df.proportions[,1]==type,4]
+  colnames(df.plot.tall.mean)[ncol(df.plot.tall.mean)] <- paste0(type, ".mrna.yield.mean.proportion")
+}
 
 
+#-------------------
+# make df.plot.wide
+#-------------------
+colnames(prop.unscaled) <- paste0(colnames(prop.unscaled), ".unscaled")
+colnames(prop.scaled) <- paste0(colnames(prop.scaled), ".scaled")
 
 #-----
 # save
