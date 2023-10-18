@@ -2,7 +2,9 @@
 title: "Deconvolution with ABIS-seq"
 author: "Sean Maden"
 date: "2023-10-17"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -18,6 +20,48 @@ Compare deconvolution results, with versus without scaling on cell size scale
 factors, using the ABIS-seq reference.
 
 # Summaries
+
+## Label term definitions
+
+Definitions of cell type labels for predictions.
+
+```{r}
+df.def <- data.frame(
+  cell.type = c("B.Naive",
+                "Basophils.LD",
+                "MAIT",
+                "mDCs",
+                "Monocytes.C",
+                "Monocytes.NC.I",
+                "Neutrophils.LD",
+                "NK",
+                "pDCs",
+                "Plasmablasts",
+                "T.CD4.Naive",
+                "T.CD8.Memory",
+                "T.CD8.Naive",
+                "T.gd.non.Vd2",
+                "T.gd.Vd2"),
+  description = c("Naive B-cells",
+                  "Low-density Basophils",
+                  "Mucosal-associated invariant T cells (MAIT)",
+                  "Myeloid Dendritic Cells",
+                  "Monocytes, type C",
+                  "Monocytes, types NC and I combined",
+                  "Low-density Neutrophils",
+                  "Natural Killer",
+                  "Plasmacytoid Dendritic Cells",
+                  "Plasmablasts",
+                  "CD4+ Naive T-cell",
+                  "CD8+ Memory T-cell",
+                  "CD8+ Naive T-cell",
+                  "T lymphocyte, gamma delta, non-Vdelta2",
+                  "T lymphocyte, gamma delta, Vdelta2")
+)
+knitr::kable(df.def)
+```
+
+## Summary statistics
 
 Flow cytometry proportions
 
@@ -40,24 +84,40 @@ summary(df.tall$mean.unscaled)
 
 # Plot
 
-Scatterplots of mean predicted proportions, unscaled versus scaled
+Cell size scale factors.
+
+```{r}
+ggplot(df.tall, aes(x = cell.type, y = s.cell.size)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Cell size (marker library size)")
+```
+
+```{r}
+ggplot(df.tall, aes(x = cell.type, y = s.cell.size.log)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Cell size (log10, marker library size)")
+```
+
+
+# Scatterplots of mean predicted proportions, unscaled versus scaled
 
 ```{r}
 plot1 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled)) + 
   geom_point() + geom_smooth(method = "lm", se = F) +
   geom_abline(slope = 1, intercept = 0)
+plot1
 ```
 
 ```{r}
 plot2 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, size = s.cell.size.log)) + 
   geom_point() + geom_smooth(method = "lm", se = F) +
   geom_abline(slope = 1, intercept = 0)
+plot2
 ```
 
 ```{r}
 plot3 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, color = cell.type)) + 
   geom_point() + geom_smooth(method = "lm", se = F) +
   geom_abline(slope = 1, intercept = 0)
+plot3
 ```
 
 ```{r}
@@ -65,15 +125,41 @@ plot4 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled,
                              color = cell.type, size = s.cell.size.log)) + 
   geom_point() + geom_smooth(method = "lm", se = F) +
   geom_abline(slope = 1, intercept = 0)
+plot4
 ```
 
-Multiplot scatter plots of unscaled versus scaled
+# Scatterplots of sd predicted proportions, unscaled versus scaled
 
 ```{r}
-grid.arrange(plot1, plot2, plot3, plot4, nrow = 2)
+plot1 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot1
 ```
 
-Scatterplots of mean versus sd, predicted proportions
+```{r}
+plot2 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot2
+```
+
+```{r}
+plot3 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled, color = cell.type)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot3
+```
+
+```{r}
+plot4 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled, 
+                             color = cell.type, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot4
+```
+
+# Scatterplots of mean versus sd, predicted proportions
 
 ```{r}
 ggplot(df.wide, aes(x = mean, y = sd)) + 
@@ -99,7 +185,36 @@ Boxplots and jittered points of errors
 ```{r}
 ggplot(df.wide, aes(x = type, y = error.flow.cyto, color = cell.type)) +
   geom_jitter(alpha = 0.5, size = 4) + geom_boxplot(alpha = 0, color = "cyan") +
-  theme() + xlab("Error") + ylab("Type")
+  theme() + xlab("Cell type") + ylab("Error")
+```
+
+Barplot error differences
+
+```{r}
+df.tall$error.scaled.fc <- abs(df.tall$mean.scaled-df.tall$true.prop.mean.flow.cyto)
+df.tall$error.unscaled.fc <- abs(df.tall$mean.unscaled-df.tall$true.prop.mean.flow.cyto)
+df.tall$error.scaled.unscaled <- df.tall$error.scaled.fc-df.tall$error.unscaled.fc
+
+ggplot(df.tall, aes(x = cell.type, y = error.scaled.unscaled)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Error (scaled - unscaled)")
+```
+
+Error differences versus scale factors
+
+```{r}
+ggplot(df.tall, aes(x = s.cell.size, y = error.scaled.unscaled)) + 
+  geom_point(size = 4, alpha = 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 0) + ylab("Error (scaled - unscaled)") +
+  xlab("Cell size (marker library size)")
+```
+
+```{r}
+ggplot(df.tall, aes(x = s.cell.size, y = error.scaled.unscaled, color = cell.type)) + 
+  geom_point(size = 4, alpha = 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 0) + ylab("Error (scaled - unscaled)") +
+  xlab("Cell size (marker library size)")
 ```
 
 # Save

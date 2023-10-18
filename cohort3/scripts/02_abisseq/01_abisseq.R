@@ -142,7 +142,7 @@ df.tall$true.prop.mean.flow.cyto <-
   df.tall$true.prop.sd.mrna.yield <-
   df.tall$s.cell.size <- "NA"
 for(type in df.map$p.true.id){
-  filter.tall <- rownames(df.tall) == type
+  filter.tall <- gsub("\\.", " ", rownames(df.tall)) == type
   df.tall[filter.tall,"true.prop.mean.flow.cyto"] <- 
     df.proportions[df.proportions[,1]==type,"flow.cyto.mean"]
   df.tall[filter.tall,"true.prop.sd.flow.cyto"] <- 
@@ -151,8 +151,9 @@ for(type in df.map$p.true.id){
     df.proportions[df.proportions[,1]==type,"mrna.yield.mean"]
   df.tall[filter.tall,"true.prop.sd.mrna.yield"] <- 
     df.proportions[df.proportions[,1]==type,"mrna.yield.sd"]
-  df.tall[filter.tall,"s.cell.size"] <- s.vector[type]
+  df.tall[filter.tall,"s.cell.size"] <- s.vector[gsub("\\.", " ", names(s.vector))==type]
 }
+df.tall <- df.tall[!rownames(df.tall)=="sample.id",]
 
 # format columns as numeric
 for(c in seq(ncol(df.tall))){df.tall[,c] <- as.numeric(df.tall[,c])}
