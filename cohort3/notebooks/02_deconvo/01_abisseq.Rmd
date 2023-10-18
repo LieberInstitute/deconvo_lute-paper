@@ -22,6 +22,10 @@ factors, using the ABIS-seq reference.
 View 
 
 ```{r}
+ggplot(df.tall, aes(x = )) + 
+  geom_point() + geom_abline(slope = 1, yintercept = 0)
+
+
 ```
 
 Save

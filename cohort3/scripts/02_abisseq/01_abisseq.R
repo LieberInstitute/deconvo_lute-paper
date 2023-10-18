@@ -81,25 +81,66 @@ prop.unscaled$sample.id <- rownames(prop.unscaled)
 prop.unscaled$type <- "unscaled"
 prop.scaled$sample.id <- rownames(prop.scaled)
 prop.scaled$type <- "scaled"
-
 df.plot.tall.s13 <- as.data.frame(rbind(prop.scaled, prop.unscaled))
 
+#------------------------------
+# aggregate results proportions
+#------------------------------
 # get means on overlapping ids
-df.plot.tall.mean <- df.plot.tall.s13 %>% group_by(type) %>% summarise(across(everything(), mean))
-unique.cell.types <- df.map$p.true.id
-for(type in unique.cell.types){
-  df.plot.tall.mean[,ncol(df.plot.tall.mean)+1] <- df.proportions[df.proportions[,1]==type,2]
-  colnames(df.plot.tall.mean)[ncol(df.plot.tall.mean)] <- paste0(type, ".flow.cyto.mean.proportion")
-  df.plot.tall.mean[,ncol(df.plot.tall.mean)+1] <- df.proportions[df.proportions[,1]==type,4]
-  colnames(df.plot.tall.mean)[ncol(df.plot.tall.mean)] <- paste0(type, ".mrna.yield.mean.proportion")
+df.plot.tall.mean <- df.plot.tall.s13 %>% 
+  group_by(type) %>% summarise(across(everything(), mean)) %>%
+  t() %>% as.data.frame()
+colnames(df.plot.tall.mean) <- df.plot.tall.mean[1,]
+df.plot.tall.mean <- df.plot.tall.mean[seq(2,nrow(df.plot.tall.mean)),]
+head(df.plot.tall.mean)
+
+# get sds
+df.plot.tall.sd <- df.plot.tall.s13 %>% 
+  group_by(type) %>% summarise(across(everything(), sd)) %>%
+  t() %>% as.data.frame()
+colnames(df.plot.tall.sd) <- df.plot.tall.sd[1,]
+df.plot.tall.sd <- df.plot.tall.sd[seq(2,nrow(df.plot.tall.sd)),]
+head(df.plot.tall.sd)
+
+# combine
+colnames(df.plot.tall.sd) <- paste0("sd.", colnames(df.plot.tall.sd))
+colnames(df.plot.tall.mean) <- paste0("mean.", colnames(df.plot.tall.mean))
+df.tall <- as.data.frame(cbind(df.plot.tall.mean, df.plot.tall.sd))
+# append true
+df.tall$true.prop.mean.flow.cyto <- 
+  df.tall$true.prop.sd.flow.cyto <- 
+  df.tall$true.prop.mean.mrna.yield <- 
+  df.tall$true.prop.sd.mrna.yield <- "NA"
+for(type in df.map$p.true.id){
+  filter.tall <- rownames(df.tall) == type
+  df.tall[filter.tall,"true.prop.mean.flow.cyto"] <- 
+    df.proportions[df.proportions[,1]==type,"flow.cyto.mean"]
+  df.tall[filter.tall,"true.prop.sd.flow.cyto"] <- 
+    df.proportions[df.proportions[,1]==type,"flow.cyto.sd"]
+  df.tall[filter.tall,"true.prop.mean.mrna.yield"] <- 
+    df.proportions[df.proportions[,1]==type,"mrna.yield.mean"]
+  df.tall[filter.tall,"true.prop.sd.mrna.yield"] <- 
+    df.proportions[df.proportions[,1]==type,"mrna.yield.sd"]
 }
 
+# get df.wide
+df.wide <- rbind(
+  data.frame(mean = df.tall$mean.unscaled, sd = df.tall$sd.unscaled, 
+             type = rep("unscaled", nrow(df.tall)), cell.type = rownames(df.tall),
+             true.prop.mean.flow.cyto = df.tall$true.prop.mean.flow.cyto,
+             true.prop.mean.mrna.yield = df.tall$true.prop.mean.mrna.yield,
+             true.prop.sd.flow.cyto = df.tall$true.prop.sd.flow.cyto,
+             true.prop.sd.mrna.yield = df.tall$true.prop.sd.mrna.yield),
+  data.frame(mean = df.tall$mean.scaled, sd = df.tall$sd.scaled, 
+             type = rep("scaled", nrow(df.tall)), cell.type = rownames(df.tall),
+             true.prop.mean.flow.cyto = df.tall$true.prop.mean.flow.cyto,
+             true.prop.mean.mrna.yield = df.tall$true.prop.mean.mrna.yield,
+             true.prop.sd.flow.cyto = df.tall$true.prop.sd.flow.cyto,
+             true.prop.sd.mrna.yield = df.tall$true.prop.sd.mrna.yield)
+)
+df.wide <- as.data.frame(df.wide)
 
-#-------------------
-# make df.plot.wide
-#-------------------
-colnames(prop.unscaled) <- paste0(colnames(prop.unscaled), ".unscaled")
-colnames(prop.scaled) <- paste0(colnames(prop.scaled), ".scaled")
+
 
 #-----
 # save
