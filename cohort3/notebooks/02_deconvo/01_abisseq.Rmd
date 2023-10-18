@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-libv <- c("ggplot2")
+libv <- c("ggplot2", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
@@ -40,14 +40,61 @@ summary(df.tall$mean.unscaled)
 
 # Plot
 
-View 
+Scatterplots of mean predicted proportions, unscaled versus scaled
+
+```{r}
+plot1 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+```
+
+```{r}
+plot2 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+```
+
+```{r}
+plot3 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, color = cell.type)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+```
+
+```{r}
+plot4 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, 
+                             color = cell.type, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+```
+
+Multiplot scatter plots of unscaled versus scaled
+
+```{r}
+grid.arrange(plot1, plot2, plot3, plot4, nrow = 2)
+```
+
+Scatterplots of mean versus sd, predicted proportions
+
+```{r}
+ggplot(df.wide, aes(x = mean, y = sd)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) + facet_wrap(~type)
+```
+
+```{r}
+ggplot(df.wide, aes(x = mean, y = sd)) + 
+  geom_point(aes(color = cell.type)) + 
+  geom_smooth(method = "lm", se = F) + facet_wrap(~type)
+```
+
+Scatterplot, true versus predicted proportions 
 
 ```{r}
 ggplot(df.wide, aes(x = true.prop.mean.flow.cyto.format, y = mean, color = cell.type)) + 
   geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
   theme() + facet_wrap(~type) + xlab("True") + ylab("Predicted")
 ```
-Boxplots with jittered points.
+
+Boxplots and jittered points of errors
 
 ```{r}
 ggplot(df.wide, aes(x = type, y = error.flow.cyto, color = cell.type)) +
@@ -55,7 +102,7 @@ ggplot(df.wide, aes(x = type, y = error.flow.cyto, color = cell.type)) +
   theme() + xlab("Error") + ylab("Type")
 ```
 
-Save
+# Save
 
 ```{r}
 ```

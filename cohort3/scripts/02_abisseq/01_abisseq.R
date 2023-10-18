@@ -39,18 +39,26 @@ colnames(df.proportions) <- c("cell.type",
                               "mrna.yield.mean",
                               "mrna.yield.sd")
 for(c in c(2:5)){df.proportions[,c] <- as.numeric(df.proportions[,c])}
+
 # format cell type names: "T gd non Vd2"
 df.proportions[df.proportions$cell.type=="T gd non-Vd2",]$cell.type <- "T gd non Vd2"
-# append T.CD8.Memory
-new.row <- apply(df.proportions[df.proportions$cell.type %in% c("T CD8 CM", "T CD8 EM"),c(2:5)],2,mean)
-new.row <- c("T CD8 Memory", new.row)
-df.proportions <- as.data.frame(rbind(df.proportions, new.row))
-for(c in c(2:5)){df.proportions[,c] <- as.numeric(df.proportions[,c])}
-# append Monocytes.NC.I
-new.row <- apply(df.proportions[df.proportions$cell.type %in% c("Monocytes NC", "Monocytes I"),c(2:5)],2,mean)
-new.row <- c("Monocytes NC I", new.row)
-df.proportions <- as.data.frame(rbind(df.proportions, new.row))
-for(c in c(2:5)){df.proportions[,c] <- as.numeric(df.proportions[,c])}
+
+# get collapsed cell type ids
+list.cell.type.names <- list("T CD8 Memory", "Monocytes NC I")
+list.cell.types.vectors <- list(
+  c("T CD8 CM", "T CD8 EM"), c("Monocytes NC", "Monocytes I")
+)
+for(index in seq(list.cell.type.names)){
+  new.cell.type.name <- list.cell.type.names[[index]]
+  cell.types.vector <- list.cell.types.vectors[[index]]
+  new.row <- apply(df.proportions[df.proportions$cell.type %in% cell.types.vector,c(2:5)],2,mean)
+  new.row <- c(new.cell.type.name, new.row)
+  df.proportions <- as.data.frame(rbind(df.proportions, new.row))
+  for(c in c(2:5)){df.proportions[,c] <- as.numeric(df.proportions[,c])}
+  # drop old ids
+  df.proportions <- df.proportions[!df.proportions$cell.type %in% cell.types.vector,]
+}
+
 
 #-----------------------
 # get cell scale factors
@@ -83,12 +91,6 @@ result.scaled <- lute(
 prop.unscaled <- result.unscaled[[1]]@predictions.table
 prop.scaled <- result.scaled[[1]]@predictions.table
 
-prop.unscaled$sample.id <- rownames(prop.unscaled)
-prop.unscaled$type <- "unscaled"
-prop.scaled$sample.id <- rownames(prop.scaled)
-prop.scaled$type <- "scaled"
-df.plot.tall.s13 <- as.data.frame(rbind(prop.scaled, prop.unscaled))
-
 #---------------------------------
 # get common cell type id mappings
 #---------------------------------
@@ -97,6 +99,18 @@ map.vector2 <- df.proportions$cell.type
 common.id <- intersect(map.vector1, map.vector2)
 df.map <- data.frame(p.true.id = common.id,
                      map.vector2 = common.id)
+
+# filter common ids
+filter.columns <- gsub("\\.", " ", colnames(prop.scaled)) %in% df.map[,1]
+prop.scaled <- prop.scaled[,filter.columns]
+prop.unscaled <- prop.unscaled[,filter.columns]
+
+# bind results
+prop.unscaled$sample.id <- rownames(prop.unscaled)
+prop.unscaled$type <- "unscaled"
+prop.scaled$sample.id <- rownames(prop.scaled)
+prop.scaled$type <- "scaled"
+df.plot.tall.s13 <- as.data.frame(rbind(prop.scaled, prop.unscaled))
 
 #------------------------------
 # aggregate results proportions
@@ -125,7 +139,8 @@ df.tall <- as.data.frame(cbind(df.plot.tall.mean, df.plot.tall.sd))
 df.tall$true.prop.mean.flow.cyto <- 
   df.tall$true.prop.sd.flow.cyto <- 
   df.tall$true.prop.mean.mrna.yield <- 
-  df.tall$true.prop.sd.mrna.yield <- "NA"
+  df.tall$true.prop.sd.mrna.yield <-
+  df.tall$s.cell.size <- "NA"
 for(type in df.map$p.true.id){
   filter.tall <- rownames(df.tall) == type
   df.tall[filter.tall,"true.prop.mean.flow.cyto"] <- 
@@ -136,10 +151,14 @@ for(type in df.map$p.true.id){
     df.proportions[df.proportions[,1]==type,"mrna.yield.mean"]
   df.tall[filter.tall,"true.prop.sd.mrna.yield"] <- 
     df.proportions[df.proportions[,1]==type,"mrna.yield.sd"]
+  df.tall[filter.tall,"s.cell.size"] <- s.vector[type]
 }
 
 # format columns as numeric
 for(c in seq(ncol(df.tall))){df.tall[,c] <- as.numeric(df.tall[,c])}
+df.tall$cell.type <- rownames(df.tall)
+# format cell size
+df.tall$s.cell.size.log <- log(df.tall$s.cell.size)
 
 # get df.wide
 df.wide <- rbind(
