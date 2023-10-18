@@ -38,13 +38,19 @@ colnames(df.proportions) <- c("cell.type",
                               "flow.cyto.sd",
                               "mrna.yield.mean",
                               "mrna.yield.sd")
-
-# get id mappings
-map.vector1 <- gsub("\\.", " ", colnames(prop.scaled))
-map.vector2 <- df.proportions$cell.type
-common.id <- intersect(map.vector1, map.vector2)
-df.map <- data.frame(p.true.id = common.id,
-                     map.vector2 = common.id)
+for(c in c(2:5)){df.proportions[,c] <- as.numeric(df.proportions[,c])}
+# format cell type names: "T gd non Vd2"
+df.proportions[df.proportions$cell.type=="T gd non-Vd2",]$cell.type <- "T gd non Vd2"
+# append T.CD8.Memory
+new.row <- apply(df.proportions[df.proportions$cell.type %in% c("T CD8 CM", "T CD8 EM"),c(2:5)],2,mean)
+new.row <- c("T CD8 Memory", new.row)
+df.proportions <- as.data.frame(rbind(df.proportions, new.row))
+for(c in c(2:5)){df.proportions[,c] <- as.numeric(df.proportions[,c])}
+# append Monocytes.NC.I
+new.row <- apply(df.proportions[df.proportions$cell.type %in% c("Monocytes NC", "Monocytes I"),c(2:5)],2,mean)
+new.row <- c("Monocytes NC I", new.row)
+df.proportions <- as.data.frame(rbind(df.proportions, new.row))
+for(c in c(2:5)){df.proportions[,c] <- as.numeric(df.proportions[,c])}
 
 #-----------------------
 # get cell scale factors
@@ -82,6 +88,15 @@ prop.unscaled$type <- "unscaled"
 prop.scaled$sample.id <- rownames(prop.scaled)
 prop.scaled$type <- "scaled"
 df.plot.tall.s13 <- as.data.frame(rbind(prop.scaled, prop.unscaled))
+
+#---------------------------------
+# get common cell type id mappings
+#---------------------------------
+map.vector1 <- gsub("\\.", " ", colnames(prop.scaled))
+map.vector2 <- df.proportions$cell.type
+common.id <- intersect(map.vector1, map.vector2)
+df.map <- data.frame(p.true.id = common.id,
+                     map.vector2 = common.id)
 
 #------------------------------
 # aggregate results proportions
@@ -123,6 +138,9 @@ for(type in df.map$p.true.id){
     df.proportions[df.proportions[,1]==type,"mrna.yield.sd"]
 }
 
+# format columns as numeric
+for(c in seq(ncol(df.tall))){df.tall[,c] <- as.numeric(df.tall[,c])}
+
 # get df.wide
 df.wide <- rbind(
   data.frame(mean = df.tall$mean.unscaled, sd = df.tall$sd.unscaled, 
@@ -139,6 +157,17 @@ df.wide <- rbind(
              true.prop.sd.mrna.yield = df.tall$true.prop.sd.mrna.yield)
 )
 df.wide <- as.data.frame(df.wide)
+df.wide <- df.wide[!df.wide$cell.type=="sample.id",]
+
+# format columns as numeric
+for(c in c(1,2,5,6,7,8)){df.wide[,c] <- as.numeric(df.wide[,c])}
+
+# append bias and error
+df.wide$true.prop.mean.flow.cyto.format <- 
+  df.wide$true.prop.mean.flow.cyto/sum(na.omit(df.wide$true.prop.mean.flow.cyto))
+df.wide$bias.flow.cyto <- df.wide$true.prop.mean.flow.cyto.format-
+  df.wide$mean
+df.wide$error.flow.cyto <- abs(df.wide$bias.flow.cyto)
 
 
 
