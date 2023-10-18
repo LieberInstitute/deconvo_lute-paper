@@ -33,45 +33,27 @@ se <- se[filter.rows,]
 #-----------------------
 # get cell scale factors
 #-----------------------
-
-
-# filter se marker genes
-se <- se[rownames(se) %in% rownames(zref),]
-dim(se)
-
-# cell type label mappings
-vector.sample.types <- unique(se$sample.type)
-dfmap <- data.frame(
-  term1 = vector.sample.types,
-  term2 = c("B.Naive", "CM", "B.Memory", "")
-)
-
-# mean library sizes
-s.vector <- unlist(apply(vector.sample.types, function(){
-  mean(colSums(
-  ))
-}))
+# marker library size
+s.vector <- colSums(zref)
 
 #------------
 # run deconvo
 #------------
 
-list.result1 <- lute(
+result.unscaled <- lute(
   z = as.matrix(zref), 
   y = as.matrix(assays(se)[["tpm"]]), 
   assay.name = 'tpm',
   typemarker.algorithm = NULL
 )
 
-list.result2 <- lute(
+result.scaled <- lute(
   z = as.matrix(zref), 
-  y.se = se, 
-  celltype.variable = ,
+  y = as.matrix(assays(se)[["tpm"]]),
+  s = s.vector,
   assay.name = 'tpm',
   typemarker.algorithm = NULL
 )
-
-
 
 #-----
 # save
