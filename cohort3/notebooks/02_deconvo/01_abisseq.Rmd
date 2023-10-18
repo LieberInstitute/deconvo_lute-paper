@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 libv <- c("ggplot2", "gridExtra")
 sapply(libv, library, character.only = TRUE)
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 setwd("..")
 setwd("..")
 load("./env/02_abisseq/01_abisseq_script.RData")
@@ -63,24 +63,37 @@ knitr::kable(df.def)
 
 ## Summary statistics
 
-Flow cytometry proportions
+### True cell type proportions
+
+Flow cytometry, cell type abundance summaries
 
 ```{r}
 message("original:")
 summary(df.wide$true.prop.mean.flow.cyto)
+```
+
+Flow cytometry, cell type proportions summaries
+
+```{r}
 message("format:")
 summary(df.wide$true.prop.mean.flow.cyto.format)
 ```
 
-Predicted proportions
+### Predicted cell type proportions
+
+Predicted cell type proportions without cell size scaling
 
 ```{r}
-message("scaled")
-summary(df.tall$mean.scaled)
 message("unscaled")
 summary(df.tall$mean.unscaled)
 ```
 
+Predicted cell type proportions with cell size scaling
+
+```{r}
+message("scaled")
+summary(df.tall$mean.scaled)
+```
 
 # Plot
 
@@ -172,7 +185,7 @@ ggplot(df.wide, aes(x = mean, y = sd)) +
   geom_smooth(method = "lm", se = F) + facet_wrap(~type)
 ```
 
-Scatterplot, true versus predicted proportions 
+# Scatterplot, true versus predicted proportions 
 
 ```{r}
 ggplot(df.wide, aes(x = true.prop.mean.flow.cyto.format, y = mean, color = cell.type)) + 
@@ -180,7 +193,7 @@ ggplot(df.wide, aes(x = true.prop.mean.flow.cyto.format, y = mean, color = cell.
   theme() + facet_wrap(~type) + xlab("True") + ylab("Predicted")
 ```
 
-Boxplots and jittered points of errors
+# Boxplots and jittered points of errors
 
 ```{r}
 ggplot(df.wide, aes(x = type, y = error.flow.cyto, color = cell.type)) +
@@ -188,7 +201,7 @@ ggplot(df.wide, aes(x = type, y = error.flow.cyto, color = cell.type)) +
   theme() + xlab("Cell type") + ylab("Error")
 ```
 
-Barplot error differences
+# Barplot error differences
 
 ```{r}
 df.tall$error.scaled.fc <- abs(df.tall$mean.scaled-df.tall$true.prop.mean.flow.cyto)
@@ -199,7 +212,7 @@ ggplot(df.tall, aes(x = cell.type, y = error.scaled.unscaled)) + geom_bar(stat =
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Error (scaled - unscaled)")
 ```
 
-Error differences versus scale factors
+# Error differences versus scale factors
 
 ```{r}
 ggplot(df.tall, aes(x = s.cell.size, y = error.scaled.unscaled)) + 
