@@ -70,6 +70,7 @@ Flow cytometry, cell type abundance summaries
 ```{r}
 message("original:")
 summary(df.wide$true.prop.mean.flow.cyto)
+sum(df.wide$true.prop.mean.flow.cyto)
 ```
 
 Flow cytometry, cell type proportions summaries
@@ -77,6 +78,7 @@ Flow cytometry, cell type proportions summaries
 ```{r}
 message("format:")
 summary(df.wide$true.prop.mean.flow.cyto.format)
+sum(df.wide$true.prop.mean.flow.cyto.format)
 ```
 
 ### Predicted cell type proportions
@@ -94,6 +96,76 @@ Predicted cell type proportions with cell size scaling
 message("scaled")
 summary(df.tall$mean.scaled)
 ```
+
+### Error summaries of the samples, within cell types
+
+Differences between means, scaled and unscaled
+
+```{r}
+mean.differences <- df.wide$mean-df.wide$true.prop.mean.flow.cyto
+names(mean.differences) <- paste0(df.wide$cell.type, ";", df.wide$type)
+mean.differences <- mean.differences[order(names(mean.differences))]
+root.sq.mean.diff <- sqrt(mean.differences^2)
+root.sq.mean.diff
+```
+Mean differences for largest cell type
+
+```{r}
+root.sq.mean.diff[grepl("Plasmablasts", names(root.sq.mean.diff))]
+```
+
+Mean differences for smallest cell type
+
+```{r}
+root.sq.mean.diff[grepl("Basophils.LD", names(root.sq.mean.diff))]
+```
+
+Barplot of square root of squared mean differences.
+
+```{r}
+df.plot <- data.frame(root.sq.mean.diff = root.sq.mean.diff,
+                      cell.type = gsub(";.*", "", names(root.sq.mean.diff)),
+                      scale = gsub(".*;", "", names(root.sq.mean.diff)))
+
+ggplot(df.plot, aes(x = cell.type, y = root.sq.mean.diff)) +
+  geom_bar(stat = "identity") + facet_wrap(~scale, ncol = 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Root of mean difference squared")
+```
+
+Scatterplot of root of mean difference squared
+
+```{r}
+df.plot <- data.frame(root.sq.mean.diff = root.sq.mean.diff,
+                      cell.type = gsub(";.*", "", names(root.sq.mean.diff)),
+                      scale = gsub(".*;", "", names(root.sq.mean.diff)))
+
+ggplot(df.plot, aes(x = cell.type, y = root.sq.mean.diff)) +
+  geom_bar(stat = "identity") + facet_wrap(~scale, ncol = 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Root of mean difference squared")
+```
+
+### Error summaries of mean biases across cell types
+
+```{r}
+rmse.cell.types <- function(df, var1="mean", var2="true.prop.mean.flow.cyto"){
+  mean.differences.all.types <- df[,var1]-df[,var2]
+  mean.squared.diffs.all.types <- 
+    sum(mean.differences.all.types^2)/length(mean.differences.all.types)
+  return(
+    sqrt(mean.squared.diffs.all.types)
+  )
+}
+message("Scaled RMSE across cell types:")
+rmse.cell.types(df.wide[df.wide$type=="scaled",])
+message("Unscaled RMSE across cell types:")
+rmse.cell.types(df.wide[df.wide$type=="unscaled",])
+```
+
+
+### Bias summaries for small cell type
+
 
 # Plot
 
