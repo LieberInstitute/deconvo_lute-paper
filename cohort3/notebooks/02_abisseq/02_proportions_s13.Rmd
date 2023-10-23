@@ -110,28 +110,14 @@ df.plot$cell.type <- factor(df.plot$cell.type,
                             levels = 
                               df.plot$cell.type[
                                 order(df.plot$proportion)])
-
-ggplot(df.plot, aes(y = cell.type, x = proportion)) + geom_bar(stat = "identity")
-
-```
-
-Barplot of proportions, scaled as fraction
-
-```{r}
-df.plot$proportion.rescale <- df.plot$proportion/sum(df.plot$proportion)
-
-ggplot(df.plot, aes(y = cell.type, x = proportion.rescale)) + geom_bar(stat = "identity")
-
-```
-
-Barplots with color on label intersect
-
-```{r}
 df.plot$labels.intersect <- ifelse(
   df.plot$cell.type %in% labels.intersect, "TRUE", "FALSE")
+```
 
-ggplot(df.plot, 
-       aes(y = cell.type, x = proportion.rescale, fill = labels.intersect)) + 
+Barplot of cell proportions (not rescaled, total exceeds 100)
+
+```{r}
+ggplot(df.plot, aes(y = cell.type, x = proportion, fill = labels.intersect)) + 
   geom_bar(stat = "identity")
 ```
 
@@ -141,6 +127,15 @@ ggplot(df.plot,
 df.plot <- df.plot[df.plot$labels.intersect=="TRUE",]
 df.plot
 ```
+
+Barplot of the amounts (unscaled)
+
+```{r}
+ggplot(df.plot, aes(y = cell.type, x = proportion)) + 
+  geom_bar(stat = "identity")
+```
+
+Barplot of the fractions (rescaled, fractions of total)
 
 ```{r}
 df.plot$proportion.rescale <- df.plot$proportion/sum(df.plot$proportion)
@@ -156,11 +151,25 @@ filter.fc <- colnames(fc.proportions)[seq(2,ncol(fc.proportions))] %in%
   labels.intersect
 
 df.plot.wide <- cbind(fc.proportions[,1,drop=F], fc.proportions[,filter.fc]) %>% as.data.frame()
-#df.plot.tall <- t(df.plot.wide[,seq(2,ncol(df.plot.wide))]) %>% as.data.frame()
-#colnames(df.plot.tall) <- df.plot.wide[,1]
-#df.plot.tall$cell.type <- rownames(df.plot.tall)
 df.plot.tall <- melt(df.plot.wide, id.vars = c("Sample.Name"))
 colnames(df.plot.tall) <- c("sample.id", "cell.type", "proportion")
+```
+
+Total proportions of mapped cell types
+
+```{r}
+df.total.mapped <- apply(df.plot.wide[,seq(2,ncol(df.plot.wide))], 1, function(ri){sum(ri)})
+df.total.mapped <- data.frame(sample.id = df.plot.wide$Sample.Name,
+                              total.proportion.mapped = df.total.mapped)
+
+ggplot(df.total.mapped, aes(x = sample.id, y = total.proportion.mapped)) +
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+Summary of total mapped cell types proportions
+
+```{r}
+summary(df.total.mapped$total.proportion.mapped)
 ```
 
 Cell proportions across S13 samples
@@ -169,6 +178,16 @@ Cell proportions across S13 samples
 ggplot(df.plot.tall, aes(x = cell.type, y = proportion)) + 
   geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Stacked barplots of cell proportions by sample
+
+```{r}
+ggplot(df.plot.tall, aes(x = sample.id, y = proportion, fill = cell.type)) + 
+  geom_bar(stat = "identity", position = "stack", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.text = element_text(size = 4),
+        legend.title = element_text(size = 4))
 ```
 
 # Summaries -- mRNA yield
@@ -251,6 +270,14 @@ mrna.sample
 
 ## mRNA yield across samples
 
+Original table
+
+```{r}
+knitr::kable(mrna.yield)
+```
+
+Plot Sample ID versus the column "yield_ng" (Nanograms total cell yield ?)
+
 ```{r}
 df.plot <- mrna.yield
 
@@ -277,6 +304,23 @@ df.plot$yield_ng.rank <- seq(nrow(df.plot))
 ggplot(df.plot, aes(x = pg_cell.rank, y = yield_ng.rank)) + 
   geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0)
 ```
+
+# Conclusions
+
+Flow cytometry proportions table contains "parts" (not fractions or percentages) 
+of cell signal amounts (i.e. includes <1 cell not discrete cell counts). mRNA 
+yield amounts reflect total cell amounts rather than cell type-specific amounts 
+(i.e. one value per sample). 12/13 of the S13 cohort samples have FC data, and 
+13/13 have mRNA yields.
+
+Flow cytometry data maps to ABIS-seq Zref cell type identifiers for 17 (of 61 
+available) cell types, reflecting all ABIS-seq Zref cell types. Cell types in 
+the FCS data (FC proportions table) are not mutually exclusive, but the 
+overlapping reference cell type labels are. Plasmablasts and mDCs, which had 
+high marker library size/cell size (see notebook `01_abisseq`), have very low 
+abundances from flow cytometry. 
+
+
 
 
 # Session info
