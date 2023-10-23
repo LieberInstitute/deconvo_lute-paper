@@ -7,7 +7,9 @@ output:
   html_document: default
 ---
 
-Analyses using the S13 cell proportions by sample.
+This notebook compares cell type labels and amounts between the 2 refernces 
+(flow cytometry and mRNA yield), and available cell type labels from the 
+ABIS-seq reference.
 
 ```{r setup, include=FALSE}
 libv <- c("ggplot2", "dplyr", "reshape2")
@@ -223,36 +225,16 @@ outersect.mrna <- unique.samples.mrna.format[
 outersect.mrna
 ```
 
-```{r}
-sample.index <- 1
+Variable summaries for column "yield_ng"
 
-row.data <- mrna.yield[mrna.yield$Sample_Name, seq(2,ncol(fc.proportions))]
-numeric.row.data <- as.numeric(row.data)
-names(numeric.row.data) <- names(row.data)
+```{r}
+summary(mrna.yield[,"yield_ng"])
 ```
 
-Flow cytometry proportions summary
+Variable summaries for column "pg_cell"
 
 ```{r}
-summary(numeric.row.data)
-```
-
-Most abundant cell type label
-
-```{r}
-names(numeric.row.data[numeric.row.data==max(numeric.row.data)])
-```
-
-Least abundant cell type label
-
-```{r}
-names(numeric.row.data[numeric.row.data==min(numeric.row.data)])
-```
-
-Total of proportions
-
-```{r}
-sum(numeric.row.data)
+summary(mrna.yield[,"pg_cell"])
 ```
 
 ## Evaluating one of the S13 cohort samples (id: 453W)
@@ -276,12 +258,26 @@ ggplot(df.plot, aes(x = Sample_Name, y = yield_ng)) + geom_bar(stat = "identity"
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Yield NG versus PG
+Yield NG versus PG, original values
 
 ```{r}
 ggplot(df.plot, aes(x = pg_cell, y = yield_ng)) + 
   geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0)
 ```
+
+Yield NG versus PG, ranks
+
+```{r}
+df.plot <- df.plot[order(df.plot$pg_cell),]
+df.plot$pg_cell.rank <- seq(nrow(df.plot))
+  
+df.plot <- df.plot[order(df.plot$yield_ng),]
+df.plot$yield_ng.rank <- seq(nrow(df.plot))
+
+ggplot(df.plot, aes(x = pg_cell.rank, y = yield_ng.rank)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0)
+```
+
 
 # Session info
 
