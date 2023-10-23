@@ -1,0 +1,290 @@
+---
+title: "02_cell_proportions_bysample_s13"
+author: "Sean Maden"
+date: "2023-10-23"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Analyses using the S13 cell proportions by sample.
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "dplyr", "reshape2")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/02_abisseq/02_proportions_s13_script.Rdata")
+```
+
+# Label overlap
+
+## Check cell label overlap
+
+Cell labels, flow cytometry proportions, FC proportions
+
+```{r}
+labels.fc <- colnames(fc.proportions)
+labels.fc
+```
+Cell labels, reference Zref
+
+```{r}
+labels.ref <- colnames(zref)
+labels.ref
+```
+
+Intersect, FC proportions, Zref cell type labels
+
+```{r}
+labels.intersect <- intersect(labels.fc, labels.ref)
+labels.intersect
+```
+
+```{r}
+length(labels.intersect)
+```
+
+# Summaries -- flow cytometry proportions
+
+## Sample labels
+
+Unique sample lables
+
+```{r}
+unique.samples.fc <- unique(fc.proportions$Sample.Name)
+unique.samples.fc
+```
+
+Number unique sample labels
+
+```{r}
+length(unique.samples.fc)
+```
+
+## Evaluating one of the S13 cohort samples (id: 453W)
+
+```{r}
+sample.index <- 1 # "453W"
+
+row.data <- fc.proportions[sample.index, seq(2,ncol(fc.proportions))]
+numeric.row.data <- as.numeric(row.data)
+names(numeric.row.data) <- names(row.data)
+```
+
+Flow cytometry proportions summary
+
+```{r}
+summary(numeric.row.data)
+```
+
+Most abundant cell type label
+
+```{r}
+names(numeric.row.data[numeric.row.data==max(numeric.row.data)])
+```
+
+Least abundant cell type label
+
+```{r}
+names(numeric.row.data[numeric.row.data==min(numeric.row.data)])
+```
+
+Total of proportions
+
+```{r}
+sum(numeric.row.data)
+```
+
+### Evaluating proportions from total cell profile
+
+Barplot of proportions, original scale
+
+```{r}
+df.plot <- data.frame(cell.type = names(numeric.row.data),
+                      proportion = numeric.row.data)
+df.plot$cell.type <- factor(df.plot$cell.type, 
+                            levels = 
+                              df.plot$cell.type[
+                                order(df.plot$proportion)])
+
+ggplot(df.plot, aes(y = cell.type, x = proportion)) + geom_bar(stat = "identity")
+
+```
+
+Barplot of proportions, scaled as fraction
+
+```{r}
+df.plot$proportion.rescale <- df.plot$proportion/sum(df.plot$proportion)
+
+ggplot(df.plot, aes(y = cell.type, x = proportion.rescale)) + geom_bar(stat = "identity")
+
+```
+
+Barplots with color on label intersect
+
+```{r}
+df.plot$labels.intersect <- ifelse(
+  df.plot$cell.type %in% labels.intersect, "TRUE", "FALSE")
+
+ggplot(df.plot, 
+       aes(y = cell.type, x = proportion.rescale, fill = labels.intersect)) + 
+  geom_bar(stat = "identity")
+```
+
+### Evaluating proportions from reference cell profile
+
+```{r}
+df.plot <- df.plot[df.plot$labels.intersect=="TRUE",]
+df.plot
+```
+
+```{r}
+df.plot$proportion.rescale <- df.plot$proportion/sum(df.plot$proportion)
+
+ggplot(df.plot, aes(y = cell.type, x = proportion.rescale)) + 
+  geom_bar(stat = "identity")
+```
+
+## Evaluating all S13 samples on overlapping cell types
+
+```{r}
+filter.fc <- colnames(fc.proportions)[seq(2,ncol(fc.proportions))] %in%
+  labels.intersect
+
+df.plot.wide <- cbind(fc.proportions[,1,drop=F], fc.proportions[,filter.fc]) %>% as.data.frame()
+#df.plot.tall <- t(df.plot.wide[,seq(2,ncol(df.plot.wide))]) %>% as.data.frame()
+#colnames(df.plot.tall) <- df.plot.wide[,1]
+#df.plot.tall$cell.type <- rownames(df.plot.tall)
+df.plot.tall <- melt(df.plot.wide, id.vars = c("Sample.Name"))
+colnames(df.plot.tall) <- c("sample.id", "cell.type", "proportion")
+```
+
+Cell proportions across S13 samples
+
+```{r}
+ggplot(df.plot.tall, aes(x = cell.type, y = proportion)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Summaries -- mRNA yield
+
+## Sample labels
+
+Unique sample labels
+
+```{r}
+unique.samples.mrna <- unique(mrna.yield$Sample_Name)
+unique.samples.mrna
+```
+
+Reformat labels
+
+```{r}
+unique.samples.mrna.format <- gsub("_.*", "", unique.samples.mrna)
+unique.samples.mrna.format
+```
+
+Number unique sample labels
+
+```{r}
+length(unique.samples.mrna)
+```
+
+Intersect with FC proportions
+
+```{r}
+intersect.fc.mrna <- intersect(
+  fc.proportions$Sample.Name, unique.samples.mrna.format)
+intersect.fc.mrna
+```
+
+Number intersecting sample labels
+
+```{r}
+length(intersect.fc.mrna)
+```
+
+Outersecting labels FC
+
+```{r}
+outersect.fc <- fc.proportions$Sample.Name[
+  !fc.proportions$Sample.Name %in% unique.samples.mrna.format]
+outersect.fc
+```
+
+Outersecting labels mRNA yield
+
+```{r}
+outersect.mrna <- unique.samples.mrna.format[
+  !unique.samples.mrna.format %in% fc.proportions$Sample.Name]
+outersect.mrna
+```
+
+```{r}
+sample.index <- 1
+
+row.data <- mrna.yield[mrna.yield$Sample_Name, seq(2,ncol(fc.proportions))]
+numeric.row.data <- as.numeric(row.data)
+names(numeric.row.data) <- names(row.data)
+```
+
+Flow cytometry proportions summary
+
+```{r}
+summary(numeric.row.data)
+```
+
+Most abundant cell type label
+
+```{r}
+names(numeric.row.data[numeric.row.data==max(numeric.row.data)])
+```
+
+Least abundant cell type label
+
+```{r}
+names(numeric.row.data[numeric.row.data==min(numeric.row.data)])
+```
+
+Total of proportions
+
+```{r}
+sum(numeric.row.data)
+```
+
+## Evaluating one of the S13 cohort samples (id: 453W)
+
+```{r}
+mrna.sample <- mrna.yield[mrna.yield$Sample_Name=="453W_PBMC",,drop=F]
+```
+
+Values
+
+```{r}
+mrna.sample
+```
+
+## mRNA yield across samples
+
+```{r}
+df.plot <- mrna.yield
+
+ggplot(df.plot, aes(x = Sample_Name, y = yield_ng)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Yield NG versus PG
+
+```{r}
+ggplot(df.plot, aes(x = pg_cell, y = yield_ng)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0)
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
