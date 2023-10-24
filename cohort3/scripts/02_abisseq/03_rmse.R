@@ -61,6 +61,8 @@ df3[df3$sample.id.format==sample.id.iter,
 #---------------
 # calculate RMSE
 #---------------
+num.digits.round <- 3
+
 # get bias, error, rmse, correlations
 
 df.rmse.scaled <- df.rmse.unscaled <- data.frame(cell.type = vector.available.cells)
@@ -77,14 +79,18 @@ for(cell.type in vector.available.cells){
  df3[,ncol(df3)+1] <- abs(vector.pred-vector.true)
  colnames(df3)[ncol(df3)] <- paste0(cell.type,".error.pred.true")
  # append rmse
- df.rmse.scaled[df.rmse.scaled==cell.type,]$rmse <- sqrt(
+ df.rmse.scaled[df.rmse.scaled==cell.type,]$rmse <- round(
+   sqrt(
    mean(
      df3[
-       df3$type=="scaled",paste0(cell.type,".error.pred.true")]^2))
- df.rmse.unscaled[df.rmse.unscaled==cell.type,]$rmse <- sqrt(
+       df3$type=="scaled",paste0(cell.type,".error.pred.true")]^2)),
+   num.digits.round)
+ df.rmse.unscaled[df.rmse.unscaled==cell.type,]$rmse <- round(
+   sqrt(
    mean(
      df3[
-       df3$type=="unscaled", paste0(cell.type,".error.pred.true")]^2))
+       df3$type=="unscaled", paste0(cell.type,".error.pred.true")]^2)),
+   num.digits.round)
  
  # append correlation results
  cor.test.scaled <- cor.test(vector.pred[df3$type=="scaled"],
@@ -94,13 +100,13 @@ for(cell.type in vector.available.cells){
                              vector.true[df3$type=="unscaled"],
                              method="pearson")
  df.rmse.scaled[df.rmse.scaled==cell.type,]$pearson.r <- 
-   round(cor.test.scaled$estimate,4)
+   round(cor.test.scaled$estimate, num.digits.round)
  df.rmse.scaled[df.rmse.scaled==cell.type,]$pearson.pval <- 
-   round(cor.test.scaled$p.value,4)
+   round(cor.test.scaled$p.value, num.digits.round)
  df.rmse.unscaled[df.rmse.unscaled==cell.type,]$pearson.r <- 
-   round(cor.test.unscaled$estimate,4)
+   round(cor.test.unscaled$estimate, num.digits.round)
  df.rmse.unscaled[df.rmse.unscaled==cell.type,]$pearson.pval <- 
-   round(cor.test.unscaled$p.value,4)
+   round(cor.test.unscaled$p.value, num.digits.round)
 }
 
 df.rmse.scaled$type <- "scaled"
@@ -122,7 +128,9 @@ df.rmse.wide <- data.frame(
 # append cell sizes
 df.rmse.wide$s.cell.size <- df.rmse.tall$s.cell.size <- "NA"
 for(cell.type in df.rmse.wide$cell.type){
-  cell.size.iter <- df.tall[df.tall$cell.type==cell.type,]$s.cell.size[1]
+  cell.size.iter <- format(
+    df.tall[df.tall$cell.type==cell.type,]$s.cell.size[1],
+    scientific = TRUE, digits = num.digits.round)
   df.rmse.wide[df.rmse.wide$cell.type==cell.type,]$s.cell.size <- 
     df.rmse.tall[df.rmse.tall$cell.type==cell.type,]$s.cell.size <-
     cell.size.iter

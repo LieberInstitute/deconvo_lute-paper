@@ -2,7 +2,9 @@
 title: "RMSE ABIS-seq results"
 author: "Sean Maden"
 date: "2023-10-24"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 This notebook compares the RMSE across S13 samples for each cell type, using the
