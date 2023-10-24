@@ -58,10 +58,12 @@ df3[df3$sample.id.format==sample.id.iter,
 #---------------
 # calculate RMSE
 #---------------
-# get bias, error, rmse
+# get bias, error, rmse, correlations
 
 df.rmse.scaled <- df.rmse.unscaled <- data.frame(cell.type = vector.available.cells)
-df.rmse.scaled$rmse <- df.rmse.unscaled$rmse <- "NA"
+df.rmse.scaled$rmse <- df.rmse.unscaled$rmse <-
+  df.rmse.scaled$pearson.r <- df.rmse.unscaled$pearson.r <- 
+  df.rmse.scaled$pearson.pval <- df.rmse.unscaled$pearson.pval<- "NA"
 
 for(cell.type in vector.available.cells){
   message(cell.type)
@@ -80,17 +82,38 @@ for(cell.type in vector.available.cells){
    mean(
      df3[
        df3$type=="unscaled", paste0(cell.type,".error.pred.true")]^2))
+ 
+ # append correlation results
+ cor.test.scaled <- cor.test(vector.pred[df3$type=="scaled"],
+                             vector.true[df3$type=="scaled"],
+                             method="pearson")
+ cor.test.unscaled <- cor.test(vector.pred[df3$type=="unscaled"],
+                             vector.true[df3$type=="unscaled"],
+                             method="pearson")
+ df.rmse.scaled[df.rmse.scaled==cell.type,]$pearson.r <- 
+   round(cor.test.scaled$estimate,4)
+ df.rmse.scaled[df.rmse.scaled==cell.type,]$pearson.pval <- 
+   round(cor.test.scaled$p.value,4)
+ df.rmse.unscaled[df.rmse.unscaled==cell.type,]$pearson.r <- 
+   round(cor.test.unscaled$estimate,4)
+ df.rmse.unscaled[df.rmse.unscaled==cell.type,]$pearson.pval <- 
+   round(cor.test.unscaled$p.value,4)
 }
 
 df.rmse.scaled$type <- "scaled"
 df.rmse.unscaled$type <- "unscaled"
 
 # df.rmse final tables
-df.rmse.tall <- as.data.frame(rbind(df.rmse.scaled, df.rmse.unscaled))
+df.rmse.tall <- as.data.frame(
+  rbind(df.rmse.scaled, df.rmse.unscaled))
 df.rmse.wide <- data.frame(
   cell.type = df.rmse.scaled$cell.type,
   rmse.scaled = df.rmse.scaled$rmse,
-  rmse.unscaled = df.rmse.unscaled$rmse
+  rmse.unscaled = df.rmse.unscaled$rmse,
+  pearson.r.scaled = df.rmse.scaled$pearson.r,
+  pearson.r.unscaled = df.rmse.unscaled$pearson.r,
+  pearson.pval.scaled = df.rmse.scaled$pearson.pval,
+  pearson.pval.unscaled = df.rmse.unscaled$pearson.pval
 )
 
 # append cell sizes
@@ -101,6 +124,12 @@ for(cell.type in df.rmse.wide$cell.type){
     df.rmse.tall[df.rmse.tall$cell.type==cell.type,]$s.cell.size <-
     cell.size.iter
 }
+
+# format
+for(c in c(2:4)){
+  df.rmse.wide[,c] <- as.numeric(df.rmse.wide[,c])}
+for(c in c(2,4)){
+  df.rmse.tall[,c] <- as.numeric(df.rmse.tall[,c])}
 
 #-----
 # save

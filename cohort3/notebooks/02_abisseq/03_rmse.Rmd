@@ -22,6 +22,7 @@ load("./env/02_abisseq/03_rmse_script.RData")
 ## RMSE calculations
 
 ```{r}
+knitr::kable(df.rmse.wide)
 ```
 
 ## RMSE summaries
@@ -29,7 +30,8 @@ load("./env/02_abisseq/03_rmse_script.RData")
 # Plots
 
 ```{r}
-ggplot(df.rmse.wide, aes(x = rmse.unscaled, y = rmse.scaled)) + geom_point() +
+ggplot(df.rmse.wide, aes(x = rmse.unscaled, y = rmse.scaled,
+                         color = cell.type, size = s.cell.size)) + geom_point() +
     geom_abline(slope = 1, intercept = 0)
 ```
 
