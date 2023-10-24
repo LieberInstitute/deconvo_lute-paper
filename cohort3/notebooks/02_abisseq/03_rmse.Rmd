@@ -50,7 +50,7 @@ ggplot(df.rmse.wide, aes(x = pearson.r.unscaled, y = pearson.r.scaled,
 ## RMSE difference versus Pearson R difference
 
 ```{r}
-df.rmse.wide$rmse.diff = df.rmse.wide$rmse.scaled=df.rmse.wide$rmse.unscaled
+df.rmse.wide$rmse.diff = df.rmse.wide$rmse.scaled-df.rmse.wide$rmse.unscaled
 df.rmse.wide$pearson.r.diff = df.rmse.wide$pearson.r.scaled-df.rmse.wide$pearson.r.unscaled
 
 ggplot(df.rmse.wide, aes(x = rmse.diff, y = pearson.r.diff,
