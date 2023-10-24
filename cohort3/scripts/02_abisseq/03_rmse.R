@@ -93,6 +93,15 @@ df.rmse.wide <- data.frame(
   rmse.unscaled = df.rmse.unscaled$rmse
 )
 
+# append cell sizes
+df.rmse.wide$s.cell.size <- df.rmse.tall$s.cell.size <- "NA"
+for(cell.type in df.rmse.wide$cell.type){
+  cell.size.iter <- df.tall[df.tall$cell.type==cell.type,]$s.cell.size[1]
+  df.rmse.wide[df.rmse.wide$cell.type==cell.type,]$s.cell.size <- 
+    df.rmse.tall[df.rmse.tall$cell.type==cell.type,]$s.cell.size <-
+    cell.size.iter
+}
+
 #-----
 # save
 #-----

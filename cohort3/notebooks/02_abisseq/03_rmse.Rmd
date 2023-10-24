@@ -14,14 +14,7 @@ sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
-load("./env/02_abisseq/01_abisseq_script.RData")
-load("./env/02_abisseq/02_proportions_s13_script.Rdata")
-```
-
-# Prepare
-
-```{r}
-
+load("./env/02_abisseq/03_rmse_script.RData")
 ```
 
 # Summaries
@@ -36,6 +29,8 @@ load("./env/02_abisseq/02_proportions_s13_script.Rdata")
 # Plots
 
 ```{r}
+ggplot(df.rmse.wide, aes(x = rmse.unscaled, y = rmse.scaled)) + geom_point() +
+    geom_abline(slope = 1, intercept = 0)
 ```
 
 # Conclusions
