@@ -11,7 +11,7 @@ This notebook compares the RMSE across S13 samples for each cell type, using the
 flow cytometry proportions as true cell proportions.
 
 ```{r setup, include=FALSE}
-libv <- c("ggplot2", "gridExtra")
+libv <- c("ggplot2", "gridExtra", "reshape2")
 sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
@@ -20,6 +20,16 @@ load("./env/02_abisseq/03_rmse_script.RData")
 ```
 
 # Summaries
+
+## F.C. proportions at overlapping cell types
+
+```{r}
+df.plot <- melt(df2, value = sample.id.format)
+colnames(df.plot) <- c("sample.name", "sample.id", "cell.type", "proportion")
+ggplot(df.plot, aes(x = sample.id, y = proportion, fill = cell.type)) + 
+  geom_bar(stat = "identity", position = "stack") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
 ## RMSE calculations
 
@@ -33,13 +43,31 @@ knitr::kable(df.rmse.wide)
 
 ## RMSE
 
+Scatter plot comparing scaled versus unscaled Pearson R
+
 ```{r}
 ggplot(df.rmse.wide, aes(x = rmse.unscaled, y = rmse.scaled,
                          color = cell.type, size = s.cell.size)) + 
   geom_point() + geom_abline(slope = 1, intercept = 0)
 ```
 
+Barplots of difference, scaled minus unscaled
+
+```{r}
+df.rmse.wide$rmse.diff = df.rmse.wide$rmse.scaled-df.rmse.wide$rmse.unscaled
+df.rmse.wide$rmse.diff.direction <- ifelse(df.rmse.wide$rmse.diff>0, "red", "blue")
+
+ggplot(df.rmse.wide, 
+       aes(x = cell.type, y = rmse.diff, fill = rmse.diff.direction)) + 
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none") +
+  ylab("RMSE difference (Scaled - Unscaled)")
+```
+
 ## Pearson R coefficients
+
+Scatter plot comparing scaled versus unscaled Pearson R
 
 ```{r}
 ggplot(df.rmse.wide, aes(x = pearson.r.unscaled, y = pearson.r.scaled,
@@ -47,12 +75,23 @@ ggplot(df.rmse.wide, aes(x = pearson.r.unscaled, y = pearson.r.scaled,
   geom_point() + geom_abline(slope = 1, intercept = 0)
 ```
 
+Barplots of difference, scaled minus unscaled
+
+```{r}
+df.rmse.wide$pearson.r.diff = df.rmse.wide$pearson.r.scaled-df.rmse.wide$pearson.r.unscaled
+df.rmse.wide$pearson.r.diff.direction <- ifelse(df.rmse.wide$pearson.r.diff>0, "red", "blue")
+
+ggplot(df.rmse.wide, 
+       aes(x = cell.type, y = pearson.r.diff, fill = pearson.r.diff.direction)) + 
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none") +
+  ylab("Pearson R difference (Scaled - Unscaled)")
+```
+
 ## RMSE difference versus Pearson R difference
 
 ```{r}
-df.rmse.wide$rmse.diff = df.rmse.wide$rmse.scaled-df.rmse.wide$rmse.unscaled
-df.rmse.wide$pearson.r.diff = df.rmse.wide$pearson.r.scaled-df.rmse.wide$pearson.r.unscaled
-
 ggplot(df.rmse.wide, aes(x = rmse.diff, y = pearson.r.diff,
                          color = cell.type, size = s.cell.size)) + 
   geom_point() + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) +
