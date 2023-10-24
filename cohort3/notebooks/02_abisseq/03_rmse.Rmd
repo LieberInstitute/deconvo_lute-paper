@@ -23,15 +23,34 @@ load("./env/02_abisseq/03_rmse_script.RData")
 
 ## F.C. proportions at overlapping cell types
 
+### Proportions at samples with F.C. proportions 
+
 ```{r}
 df.plot <- melt(df2, value = sample.id.format)
 colnames(df.plot) <- c("sample.name", "sample.id", "cell.type", "proportion")
 ggplot(df.plot, aes(x = sample.id, y = proportion, fill = cell.type)) + 
   geom_bar(stat = "identity", position = "stack") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("All F.C. proportions samples")
+```
+
+### Proportions at subset of S13 samples with predictions and F.C. proportions
+
+```{r}
+df.plot <- melt(df2, value = sample.id.format)
+df.plot <- df.plot[df.plot$sample.id %in% df3$sample.id.format,]
+colnames(df.plot) <- c("sample.name", "sample.id", "cell.type", "proportion")
+
+ggplot(df.plot, aes(x = sample.id, y = proportion, fill = cell.type)) + 
+  geom_bar(stat = "identity", position = "stack") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("S13 samples with predictions and F.C. proportions\n(RMSE samples)")
 ```
 
 ## RMSE calculations
+
+RMSE calculations summaries for the subset of S13 samples with predictions and 
+F.C. proportions.
 
 ```{r}
 knitr::kable(df.rmse.wide)
