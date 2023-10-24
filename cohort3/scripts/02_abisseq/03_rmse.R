@@ -5,6 +5,9 @@
 # Append FC proportions and get RMSE by sample for S13 PBMC samples.
 #
 
+libv <- c("lute", "SummarizedExperiment")
+sapply(libv, library, character.only = TRUE)
+
 #-----
 # load
 #-----
@@ -126,9 +129,9 @@ for(cell.type in df.rmse.wide$cell.type){
 }
 
 # format
-for(c in c(2:4)){
+for(c in c(2:8)){
   df.rmse.wide[,c] <- as.numeric(df.rmse.wide[,c])}
-for(c in c(2,4)){
+for(c in c(2:4,6)){
   df.rmse.tall[,c] <- as.numeric(df.rmse.tall[,c])}
 
 #-----

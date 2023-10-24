@@ -29,10 +29,20 @@ knitr::kable(df.rmse.wide)
 
 # Plots
 
+## RMSE
+
 ```{r}
 ggplot(df.rmse.wide, aes(x = rmse.unscaled, y = rmse.scaled,
-                         color = cell.type, size = s.cell.size)) + geom_point() +
-    geom_abline(slope = 1, intercept = 0)
+                         color = cell.type, size = s.cell.size)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0)
+```
+
+## Pearson R coefficients
+
+```{r}
+ggplot(df.rmse.wide, aes(x = pearson.r.unscaled, y = pearson.r.scaled,
+                         color = cell.type, size = s.cell.size)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0)
 ```
 
 # Conclusions
