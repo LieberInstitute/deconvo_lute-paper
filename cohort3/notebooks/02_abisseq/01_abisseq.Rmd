@@ -3,8 +3,8 @@ title: "Deconvolution with ABIS-seq"
 author: "Sean Maden"
 date: "2023-10-17"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}

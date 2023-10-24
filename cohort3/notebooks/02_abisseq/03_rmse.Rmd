@@ -1,0 +1,47 @@
+---
+title: "RMSE ABIS-seq results"
+author: "Sean Maden"
+date: "2023-10-24"
+output: html_document
+---
+
+This notebook compares the RMSE across S13 samples for each cell type, using the
+flow cytometry proportions as true cell proportions.
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "gridExtra")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/02_abisseq/01_abisseq_script.RData")
+load("./env/02_abisseq/02_proportions_s13_script.Rdata")
+```
+
+# Prepare
+
+```{r}
+
+```
+
+# Summaries
+
+## RMSE calculations
+
+```{r}
+```
+
+## RMSE summaries
+
+# Plots
+
+```{r}
+```
+
+# Conclusions
+
+# Session info
+
+```{r}
+sessionInfo()
+```
