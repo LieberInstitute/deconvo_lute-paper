@@ -37,7 +37,42 @@ ggplot(df.plot, aes(x = sample.id, y = proportion, fill = cell.type)) +
 knitr::kable(df.rmse.wide)
 ```
 
-## RMSE summaries
+## RMSE summaries, for samples having F.C. true proportions available
+
+Not all samples have F.C. proportions available. This section summarizes the 
+differences between sample IDs with predictions and the subset also having
+F.C. proportions.
+
+Sample IDs with F.C. proportions but not predictions (i.e. not in S13 normal 
+PBMC samples).
+
+```{r}
+unique(df2$sample.id.format[!df2$sample.id.format %in% df3$sample.id.format])
+```
+Sample IDs without F.C. proportions available (i.e. part of S13 normal PBMC 
+samples).
+
+```{r}
+unique(df1$sample.id.format[!df1$sample.id.format %in% df3$sample.id.format])
+```
+
+```{r}
+length(
+  unique(
+    df1$sample.id.format[!df1$sample.id.format %in% df3$sample.id.format]))
+```
+
+S13 sample IDs with predictions and F.C. proportions available.
+
+```{r}
+unique(df3$sample.id.format)
+```
+
+Number of S13 samples with predictions and F.C. proportions.
+
+```{r}
+length(unique(df3$sample.id.format))
+```
 
 # Plots
 
