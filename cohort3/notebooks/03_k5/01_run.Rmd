@@ -110,7 +110,30 @@ Proportions by sample, barplots, composite
 grid.arrange(bpOriginal, bpNew, nrow = 2)
 ```
 
-## 
+## Profiling cell type availability by sample (a.k.a. how many "complete" samples)
+
+Complete samples, original
+
+```{r}
+proportionsThreshold <- 0
+dfPlotOriginal$available <- ifelse(dfPlotOriginal$proportion>0,TRUE,FALSE)
+numComplete <- 
+  length(unique(dfPlotOriginal[dfPlotOriginal$available,]$sample.id))
+numTotal <- length(unique(dfPlotOriginal$sample.id))
+numComplete
+numComplete==numTotal
+```
+
+Complete samples, new
+
+```{r}
+dfPlotNew$available <- ifelse(dfPlotNew$proportion>0,TRUE,FALSE)
+numComplete <- 
+  length(unique(dfPlotNew[dfPlotNew$available,]$sample.id))
+numTotal <- length(unique(dfPlotNew$sample.id))
+numComplete
+numComplete==numTotal
+```
 
 # Plots
 
