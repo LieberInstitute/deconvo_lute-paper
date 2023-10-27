@@ -2,13 +2,17 @@
 title: "01_run"
 author: "Sean Maden"
 date: "2023-10-26"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-Analyze K5 and results.
+Evaluating lower ABIS-seq cell type label count mappings. Dataset summaries, 
+comparisons across mappings, and analysis results for lower cell type count 
+mappings of the ABIS-seq dataset.
 
 ```{r setup, include=FALSE}
-libv <- c("ggplot2")
+libv <- c("ggplot2", "ComplexHeatmap", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
@@ -20,13 +24,82 @@ load("./env/03_k5/01_run_script.Rdata")
 
 ## Marker expression heatmap
 
+Original mappings
+
 ```{r}
+Heatmap(scale(zref), show_row_names = FALSE, name = "TPM")
+```
+
+New mappings
+
+```{r}
+Heatmap(scale(zrefMapped), show_row_names = FALSE, name = "TPM")
 ```
 
 ## Table summaries, true proportions by sample
 
+Heatmap of original cell type proportions
+
+```{r}
+hmOriginal <- Heatmap(trueProportionsStart, name = "Proportions")
+hmOriginal
+```
+
+Heatmap of new cell type proportions
+
+```{r}
+hmNew <- Heatmap(trueCellTypeProportions, name = "Proportions")
+hmNew
+```
+
+Combined heatmaps
+
+```{r}
+hmOriginal + hmNew
+```
+
+Proportions by sample, barplots, original
+
 ```{r}
 
+dfPlotOriginal <- trueProportionsStart
+dfPlotOriginal$sample.id <- rownames(dfPlotOriginal)
+dfPlotOriginal <- tidyr::gather(
+  dfPlotOriginal, cellType, proportion, B.Naive:T.CD4.Memory)
+
+bpOriginal <- ggplot(
+  dfPlotOriginal, aes(x = sample.id, y = proportion, fill = cellType)) + 
+  geom_bar(stat = "identity", position = "stack", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill=guide_legend(ncol=3))
+
+bpOriginal
+
+```
+
+Proportions by sample, barplots, new
+
+```{r}
+
+dfPlotNew <- trueproportionsMapped
+dfPlotNew$sample.id <- rownames(dfPlotNew)
+dfPlotNew <- tidyr::gather(
+  dfPlotNew, cellType, proportion, B:Neutrophil)
+
+bpNew <- ggplot(
+  dfPlotNew, aes(x = sample.id, y = proportion, fill = cellType)) + 
+  geom_bar(stat = "identity", position = "stack", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill=guide_legend(ncol=2))
+
+bpNew
+
+```
+
+Proportions by sample, barplots, composite
+
+```{r}
+grid.arrange(bpOriginal, bpNew, nrow = 2)
 ```
 
 ## 

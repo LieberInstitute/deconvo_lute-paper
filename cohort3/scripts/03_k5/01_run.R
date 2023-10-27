@@ -32,25 +32,7 @@ zrefMapped <- cellLabelMappings(
   vectorCellTypeMap, vectorCellTypeStart, zref, 
   returnType = "df", summaryOperation = "mean")
 
-trueProportionsStart <- fc.proportions
-sampleNames <- fc.proportions[,1]
-trueProportionsStart <- trueProportionsStart[
-  ,colnames(trueProportionsStart) %in% colnames(zref)]
-rownames(trueProportionsStart) <- sampleNames
-trueProportionsStart <- trueProportionsStart[,c(2:ncol(trueProportionsStart))]
-trueproportionsMapped <- cellLabelMappings(
-  vectorCellTypeMap, colnames(trueProportionsStart), 
-  trueProportionsStart, returnType = "df", summaryOperation = "sum")
-# remove nas
-trueproportionsMapped <- trueproportionsMapped[
-  ,!colnames(trueproportionsMapped)=="NA"]
-# get fractions <1
-trueproportionsMapped <- t(apply(
-  trueproportionsMapped, 1, function(ri){ri/sum(ri)}))
-trueproportionsMapped <- as.data.frame(trueproportionsMapped)
-rownames(trueproportionsMapped) <- sampleNames
-
-# tests
+# tests -- mappings for reference
 #
 #
 #
@@ -66,7 +48,7 @@ geneName <- "NRG1"
 zrefMapped[geneName,mappedLabel]==rowMeans(
   zref[,which(colnames(zref) %in% mappingsTable[mappingsTable[,2]==mappedLabel,1])]
 )[geneName]
-
+#
 # test label Plasma
 mappedLabel <- "Plasma"
 # test gene FXYD6, label Plasma
@@ -82,6 +64,43 @@ zrefMapped[geneName,mappedLabel]==
                 mappingsTable[mappingsTable[,2]==mappedLabel,1])][
                   which(rownames(zref)==geneName)]
 
+# parse true proportions
+#
+#
+#
+# format from supplement
+trueProportionsStart <- fc.proportions
+rownames(trueProportionsStart) <- sampleNames <- fc.proportions[,1]
+trueProportionsStart <- trueProportionsStart[,c(2:ncol(trueProportionsStart))]
+trueProportionsStart <- trueProportionsStart[
+  ,colnames(trueProportionsStart) %in% colnames(zref)]
+# get fractions <1
+trueProportionsStart <- t(apply(
+  trueProportionsStart, 1, function(ri){ri/sum(ri)}))
+trueProportionsStart <- as.data.frame(trueProportionsStart)
+rownames(trueProportionsStart) <- sampleNames
+# map labels
+trueproportionsMapped <- cellLabelMappings(
+  vectorCellTypeMap, colnames(trueProportionsStart), 
+  trueProportionsStart, returnType = "df", summaryOperation = "sum")
+trueproportionsMapped <- trueproportionsMapped[
+  ,!colnames(trueproportionsMapped)=="NA"]
+# get fractions <1
+trueproportionsMapped <- t(apply(
+  trueproportionsMapped, 1, function(ri){ri/sum(ri)}))
+trueproportionsMapped <- as.data.frame(trueproportionsMapped)
+rownames(trueproportionsMapped) <- sampleNames
+
+# tests -- proportions
+#
+#
+# test original proportions table
+length(which(rowSums(trueProportionsStart)==1))==
+  nrow(trueProportionsStart)
+#
+# test new proportions table
+length(which(round(rowSums(trueproportionsMapped),1)==1))==
+  nrow(trueproportionsMapped)
 
 
 
@@ -101,39 +120,15 @@ referenceExpression <- referenceExpression[
 trueCellTypeProportions <- trueproportionsMapped
 
 # get experiment results
-experimentList <- newExperimentList(
-  referenceExpression=referenceExpression,
-  trueCellTypeProportions=trueCellTypeProportions,
-  bulkExpression=bulkExpression,
-  typemarkerAlgorithmName=NULL
-)
+#experimentList <- newExperimentList(
+#  referenceExpression=referenceExpression,
+#  trueCellTypeProportions=trueCellTypeProportions,
+#  bulkExpression=bulkExpression,
+#  typemarkerAlgorithmName=NULL
+#)
+#experimentResults <- evaluateExperiment(experimentList, TRUE)
 
-experimentResults <- evaluateExperiment(experimentList, TRUE)
-  
-  
-  
-  
-  singleCellExperiment=NULL,
-  referenceExpression=zrefMapped,
-  bulkExpression=tpm,
-  cellScaleFactors=cellScaleFactors,
-  experimentType=experimentType,
-  trueCellTypeProportions=
-    trueCellTypeProportions,
-  trueCellTypeProportionsSource=
-    trueCellTypeProportionsSource,
-  assayName="counts",
-  cellTypeVariable="celltype",
-  deconvolutionAlgorithmName="nnls",
-  typemarkerAlgorithmName=NULL)
-experimentResults <- evaluateExperiment(experimentList, TRUE)
-
-z = as.matrix(zref), 
-y = as.matrix(assays(se)[["tpm"]]), 
-assay.name = 'tpm',
-typemarker.algorithm = NULL
-
-#-----------
-# save image
-#-----------
-save(file="env/03_k5/01_run_script.RData")
+#-----
+# save
+#-----
+save.image(file="./env/03_k5/01_run_script.RData")
