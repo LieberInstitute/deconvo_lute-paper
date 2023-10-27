@@ -10,7 +10,7 @@
 
 cellLabelMappings <- function(
     vectorCellTypeMap, vectorCellTypeStart = NULL, dfToMap = NULL, 
-    returnType = c("list", "df"), summaryOperation = c("mean", "median")){
+    returnType = c("list", "df"), summaryOperation = c("mean", "median", "sum")){
   #
   #
   #
@@ -52,7 +52,13 @@ cellLabelMappings <- function(
       filterType <- which(
         colnames(dfToMap) %in% mappingsTable[mappingsTable[,2]==type,1])
       if(length(filterType)>1){
-        rowMeans(dfToMap[,filterType])
+        if(summaryOperation=="mean"){
+          rowMeans(dfToMap[,filterType])
+        } else if(summaryOperation=="median"){
+          rowMedians(dfToMap[,filterType])
+        } else{
+          rowSums(dfToMap[,filterType])
+        }
       } else{
         dfToMap[,filterType]
       }
