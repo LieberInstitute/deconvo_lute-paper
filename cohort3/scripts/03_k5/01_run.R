@@ -103,7 +103,26 @@ length(which(round(rowSums(trueproportionsMapped),1)==1))==
   nrow(trueproportionsMapped)
 
 
+# parse cell type sizes
+#
+#
+#
+#
+cellFactorsOriginal <- matrix(df.tall$s.cell.size,nrow=1)
+colnames(cellFactorsOriginal) <- df.tall$cell.type
+cellFactorsOriginal <- as.data.frame(cellFactorsOriginal)
+dfCellScaleFactors <- cellLabelMappings(
+  vectorCellTypeMap=vectorCellTypeMap, 
+  vectorCellTypeStart=cellFactorsOriginal$cellTypesOriginal, 
+  dfToMap=cellFactorsOriginal, returnType = "df", 
+  summaryOperation = "mean"
+)
+cellScaleFactors <- as.numeric(dfCellScaleFactors)
+names(cellScaleFactors) <- colnames(dfCellScaleFactors)
 
+# test
+#
+#
 
 
 
@@ -120,13 +139,16 @@ referenceExpression <- referenceExpression[
 trueCellTypeProportions <- trueproportionsMapped
 
 # get experiment results
-#experimentList <- newExperimentList(
-#  referenceExpression=referenceExpression,
-#  trueCellTypeProportions=trueCellTypeProportions,
-#  bulkExpression=bulkExpression,
-#  typemarkerAlgorithmName=NULL
-#)
-#experimentResults <- evaluateExperiment(experimentList, TRUE)
+experimentList <- newExperimentList(
+  referenceExpression=referenceExpression,
+  trueCellTypeProportions=trueCellTypeProportions,
+  cellScaleFactors = cellScaleFactors,
+  bulkExpression=bulkExpression,
+  typemarkerAlgorithmName=NULL
+)
+experimentResults <- evaluateExperiment(
+  experimentList, TRUE
+)
 
 #-----
 # save
