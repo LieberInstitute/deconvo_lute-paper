@@ -27,14 +27,22 @@ load("./env/03_k5/01_run_script.Rdata")
 Original mappings
 
 ```{r}
-Heatmap(scale(zref), show_row_names = FALSE, name = "TPM")
+hmRefOriginal <- Heatmap(scale(zref), show_row_names = FALSE, name = "TPM")
+hmRefOriginal
 ```
 
 New mappings
 
 ```{r}
-Heatmap(scale(zrefMapped), show_row_names = FALSE, name = "TPM")
+hmRefNew <- Heatmap(scale(zrefMapped), show_row_names = FALSE, name = "TPM")
+hmRefNew
 ```
+
+```{r}
+hmRefOriginal + hmRefNew
+```
+
+
 
 ## Table summaries, true proportions by sample
 
