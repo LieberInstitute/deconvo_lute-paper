@@ -178,7 +178,7 @@ log2TpmReference <-
 
 scaleTpmReference <- scale(tpmReference) %>% as.data.frame()
 
-scaleLog2TpmZref <- scale(log2TpmReference) %>% as.data.frame()
+scaleLog2TpmReference <- scale(log2TpmReference) %>% as.data.frame()
 
 #-----
 # save

@@ -18,19 +18,23 @@ setwd("..")
 setwd("..")
 load("./env/03_k5/01_run_script.RData")
 
+#---------------
+
 #------------------
 # helper functions
 #------------------
 
 # FROM EXPRESSION, GET SIMPLIFIED THRESHOLD PLOT
 getQuantileTablesFromReferenceExpression <- function(
-    expressionTable, quantileThresholdIndex = 4){
+    expressionTable, heatmapNumericScaleName, quantileThresholdIndex=4, 
+    quantileSeq=seq(0,1,0.25)){
   
   # boolean matrix
   booleanTable <- apply(tpmReference, 2, function(ci){
-    quantileColumn <- quantile(ci)
-    labelColumnValues <- ifelse(ci >= quantileColumn[quantileThresholdIndex],
-                                TRUE, FALSE)
+    quantileThreshold <- 
+      quantile(ci, probs=quantileSeq)[quantileThresholdIndex]
+    labelColumnValues <- ifelse(
+      ci >= quantileThreshold, TRUE, FALSE)
     return(labelColumnValues)
   })
   # numeric matrix
@@ -42,11 +46,16 @@ getQuantileTablesFromReferenceExpression <- function(
   rownames(numericTable) <- 
     rownames(booleanTable) <- rownames(expressionTable)
   
-  
+  # heatmaps
+  heatmapNumeric <- Heatmap(
+    numericTable, name = heatmapNumericScaleName)
   
   # return
   returnList <- list(
-    booleanTable = referenceQuantile, numericTable = numericTable)
+    booleanTable = booleanTable, 
+    numericTable = numericTable,
+    heatmapNumeric = heatmapNumeric
+  )
   return(returnList)
 }
 
@@ -55,6 +64,53 @@ getQuantileTablesFromReferenceExpression <- function(
 # 
 ```
 
+# Getting markers
+
+## Original expression
+
+```{r}
+Heatmap(tpmReference)
+Heatmap(scaleTpmReference)
+Heatmap(log2TpmReference)
+Heatmap(scaleLog2TpmReference)
+```
+
+## Quantile expression
+
+Shows the threshold heatmap.
+
+```{r}
+
+getQuantileTablesFromReferenceExpression(
+  tpmReference, "TPM", 10, seq(0,1,0.1))[[3]]
+
+getQuantileTablesFromReferenceExpression(
+  scaleTpmReference, "Z TPM", 10, seq(0,1,0.1))[[3]]
+
+getQuantileTablesFromReferenceExpression(
+  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1))[[3]]
+
+getQuantileTablesFromReferenceExpression(
+  scaleLog2TpmZref, "Z log2 TPM", 10, seq(0,1,0.1))[[3]]
+
+```
+
+## 
+
+```{r}
+```
+
+
+
+
+
+
+
+
+
+
+
+
 # Get the binary plot for TPM reference
 
 ## TPM reference
@@ -62,8 +118,7 @@ getQuantileTablesFromReferenceExpression <- function(
 ```{r}
 
 listQuantileTables <- 
-  getQuantileTablesFromReferenceExpression(
-    tpmReference, quantileThresholdIndex)
+  getQuantileTablesFromReferenceExpression(tpmReference)
 
 # test
 identical(
