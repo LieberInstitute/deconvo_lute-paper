@@ -5,6 +5,12 @@
 # Run K5 experiments on ABIS-seq data
 #
 #
+#
+#
+#
+#
+#
+
 
 libv <- c('tidyr')
 sapply(libv, library, character.only = TRUE)
@@ -119,6 +125,7 @@ dfCellScaleFactors <- cellLabelMappings(
 )
 cellScaleFactors <- as.numeric(dfCellScaleFactors)
 names(cellScaleFactors) <- colnames(dfCellScaleFactors)
+cellScaleFactors <- cellScaleFactors[!names(cellScaleFactors)=="NA"]
 
 # test
 #
@@ -132,23 +139,43 @@ names(cellScaleFactors) <- colnames(dfCellScaleFactors)
 #---------------
 
 bulkExpression <- as.matrix(assays(se)[["tpm"]])
-bulkExpression <- bulkExpression[rownames(bulkExpression) %in% rownames(zref),]
+bulkExpression <- bulkExpression[
+  rownames(bulkExpression) %in% rownames(zref),]
+colnames(bulkExpression) <- gsub("_.*", "", colnames(bulkExpression))
 referenceExpression <- zrefMapped
 referenceExpression <- referenceExpression[
   rownames(referenceExpression) %in% rownames(bulkExpression),]
 trueCellTypeProportions <- trueproportionsMapped
+colnames(trueCellTypeProportions) <- 
+  paste0(colnames(trueCellTypeProportions), ".true")
+trueCellTypeProportions$sample.id <- rownames(trueCellTypeProportions)
 
 # get experiment results
-experimentList <- newExperimentList(
-  referenceExpression=referenceExpression,
-  trueCellTypeProportions=trueCellTypeProportions,
-  cellScaleFactors = cellScaleFactors,
-  bulkExpression=bulkExpression,
-  typemarkerAlgorithmName=NULL
-)
-experimentResults <- evaluateExperiment(
-  experimentList, TRUE
-)
+#experimentList <- newExperimentList(
+#  referenceExpression=referenceExpression,
+#  trueCellTypeProportions=trueCellTypeProportions,
+#  cellScaleFactors=cellScaleFactors,
+#  bulkExpression=bulkExpression,
+#  trueCellTypeProportionsSource="Flow cytometry",
+#  typemarkerAlgorithmName=NULL
+#)
+#experimentResults <- evaluateExperiment(
+#  experimentList, TRUE
+#)
+
+#--------------------------
+# get the expression tables
+#--------------------------
+tpmReference <- zref
+
+log2TpmReference <- 
+  apply(
+    tpmReference, 2, 
+    function(cellName){log2(cellName+1)}) %>% as.data.frame()
+
+scaleTpmReference <- scale(tpmReference) %>% as.data.frame()
+
+scaleLog2TpmZref <- scale(log2TpmReference) %>% as.data.frame()
 
 #-----
 # save

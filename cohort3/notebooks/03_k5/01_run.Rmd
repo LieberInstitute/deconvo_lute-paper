@@ -18,23 +18,37 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
 load("./env/03_k5/01_run_script.Rdata")
+
+# heatmap scale label
+# heatmaps are TPM zscore
+heatmap.label <- "Z"
 ```
 
 # Summaries
+
+## Differences
+
+Marker expression differences
+
+```{r}
+```
+
 
 ## Marker expression heatmap
 
 Original mappings
 
 ```{r}
-hmRefOriginal <- Heatmap(scale(zref), show_row_names = FALSE, name = "TPM")
+hmRefOriginal <- Heatmap(
+  scale(zref), show_row_names = FALSE, name = heatmap.label)
 hmRefOriginal
 ```
 
 New mappings
 
 ```{r}
-hmRefNew <- Heatmap(scale(zrefMapped), show_row_names = FALSE, name = "TPM")
+hmRefNew <- Heatmap(
+  scale(zrefMapped), show_row_names = FALSE, name = heatmap.label)
 hmRefNew
 ```
 
@@ -133,6 +147,38 @@ numComplete <-
 numTotal <- length(unique(dfPlotNew$sample.id))
 numComplete
 numComplete==numTotal
+```
+
+## Cell sizes summaries
+
+Cell sizes original
+
+```{r}
+cellFactorsOriginal
+```
+
+Cell sizes new
+
+```{r}
+cellScaleFactors
+```
+
+Barplots, original cell sizes
+
+```{r}
+bpSizeOriginal <- ggplot() + geom_bar()
+```
+
+Barplots, new cell sizes
+
+```{r}
+bpSizeNew <- ggplot() + geom_bar()
+```
+
+Barplots, original cell sizes and new cell sizes
+
+```{r}
+grid.arrange(bpSizeOriginal,bpSizeNew,nrow=2)
 ```
 
 # Plots

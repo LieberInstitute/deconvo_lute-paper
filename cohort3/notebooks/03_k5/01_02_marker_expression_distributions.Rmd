@@ -1,0 +1,136 @@
+---
+title: "marker_expression_distributions"
+author: "Sean Maden"
+date: "2023-10-30"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Documenting the ABIS-seq reference marker expression distributions. Uses TPM, 
+log2(TPM+1).
+
+```{r setup, include=FALSE}
+libraryVector <- c("ggplot2", "reshape2", "dplyr")
+sapply(libraryVector, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/03_k5/01_run_script.RData")
+```
+
+# Cluster
+
+```{r}
+
+
+
+
+
+
+
+
+
+```
+
+# Summary statistics
+
+## TPM
+
+```{r}
+summary(tpmZref)
+```
+
+## Log2 TPM
+
+```{r}
+summary(log2TpmZref)
+```
+
+## Z score (from TPM)
+
+```{r}
+summary(zscoreTpm)
+```
+
+## Z score (from log2 TPM)
+
+```{r}
+summary(zscoreLog2TpmZref)
+```
+
+# Density plots
+
+```{r}
+meanDifferences <- function(dfplot){
+  cellTypes <- colnames(dfplot)
+  
+  
+  
+  markersVector <- rownames(dfplot)
+  dfMeanAllTypes <- apply(dfplot, 2, mean)
+  
+  
+  
+  lapply(markersVector, function(marker){
+    
+    mean(
+      
+    )
+    
+    dfPlotOut <- dfplot[,!colnames(dfplot)==cellType]
+    meanOut <- apply(dfPlotDifference,2,mean)
+    meanIn <- mean(dfplot[,cellType])
+    
+    
+    
+  })
+  
+  
+}
+
+densityPlot <- function(dfplot){
+  dfplot <- melt(dfplot)
+  dfplot[,2] <- as.numeric(dfplot[,2])
+  
+  # get pairwise mean differences
+  
+  plotAllMarkers <- ggplot(dfplot, aes(x = variable, y = value)) + 
+    geom_density() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  
+  
+  return(listPlots)
+}
+```
+
+## TPM
+
+```{r}
+densityPlot(zref)
+```
+
+## Log2 TPM
+
+```{r}
+densityPlot(log2TpmZref)
+```
+
+## Z score (from TPM)
+
+```{r}
+densityPlot(zscoreTpm)
+```
+
+## Z score (from log2 TPM)
+
+```{r}
+densityPlot(zscoreLog2TpmZref)
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
