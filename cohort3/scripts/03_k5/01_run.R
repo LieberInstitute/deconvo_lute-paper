@@ -44,16 +44,19 @@ zrefMapped <- cellLabelMappings(
 #
 # test label Monocyte
 mappedLabel <- "Monocyte"
+
 # test gene FXYD6, label Monocyte
 geneName <- "FXYD6"
 zrefMapped[geneName,mappedLabel]==rowMeans(
   zref[,which(colnames(zref) %in% mappingsTable[mappingsTable[,2]==mappedLabel,1])]
 )[geneName]
+
 # test gene NRG1, label Monocyte
 geneName <- "NRG1"
 zrefMapped[geneName,mappedLabel]==rowMeans(
   zref[,which(colnames(zref) %in% mappingsTable[mappingsTable[,2]==mappedLabel,1])]
 )[geneName]
+
 #
 # test label Plasma
 mappedLabel <- "Plasma"

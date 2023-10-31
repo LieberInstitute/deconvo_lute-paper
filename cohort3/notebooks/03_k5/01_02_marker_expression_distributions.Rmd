@@ -23,7 +23,7 @@ load("./env/03_k5/01_run_script.RData")
 
 ```{r}
 
-
+prcomp()
 
 
 
