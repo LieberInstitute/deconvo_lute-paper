@@ -69,10 +69,10 @@ getQuantileTablesFromReferenceExpression <- function(
 ## Original expression
 
 ```{r}
-Heatmap(tpmReference)
-Heatmap(scaleTpmReference)
-Heatmap(log2TpmReference)
-Heatmap(scaleLog2TpmReference)
+Heatmap(tpmReference, name = "TPM")
+Heatmap(scaleTpmReference, name = "Z TPM")
+Heatmap(log2TpmReference, name = "log2 TPM")
+Heatmap(scaleLog2TpmReference, name = "Z log2 TPM")
 ```
 
 ## Quantile expression
@@ -95,9 +95,12 @@ getQuantileTablesFromReferenceExpression(
 
 ```
 
-## 
+## Quantile genes by type
 
 ```{r}
+
+ggplot()
+
 ```
 
 
