@@ -17,19 +17,61 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
 load("./env/03_k5/01_run_script.RData")
+
+#------------------
+# helper functions
+#------------------
+
+# FROM EXPRESSION, GET SIMPLIFIED THRESHOLD PLOT
+
+# FROM EXPRESSION GET PCA
+
+# 
+```
+
+# Get the binary plot
+
+```{r}
+
+reference <- tpmReference
+quantileThresholdIndex <- 4
+referenceQuantile <- apply(tpmReference, 2, function(ci){
+  quantileColumn <- quantile(ci)
+  labelColumnValues <- ifelse(ci >= quantileColumn[quantileThresholdIndex],
+                              TRUE, FALSE)
+  return(labelColumnValues)
+})
+
+```
+
+Plot
+
+```{r}
+
+```
+
+Save
+
+```{r}
 ```
 
 # Cluster
 
 ```{r}
 
-prcomp()
+clusterTpmReference <- prcomp(tpmReference)
+clusterTpmLog2Reference <- prcomp(log2TpmReference)
+clusterScaleTpmReference <- prcomp(scaleTpmReference)
+clusterScaleTpmLog2Reference <- prcomp(scaleLog2TpmZref)
 
+```
 
+```{r}
 
+dfplot <- melt(clusterTpmReference$x)
+dfplot$cellType <- 
 
-
-
+ggplot(clusterTpmReference$x, aes(x = PC1, y = PC2, color = )) + geom_point()
 
 ```
 
