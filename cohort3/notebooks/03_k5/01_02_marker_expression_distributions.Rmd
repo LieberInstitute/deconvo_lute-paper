@@ -8,7 +8,7 @@ output:
 ---
 
 Documenting the ABIS-seq reference marker expression distributions. Uses TPM, 
-log2(TPM+1).
+log2(TPM+1), with and without scaling (Z score).
 
 ```{r setup, include=FALSE}
 libraryVector <- c("ggplot2", "reshape2", "dplyr")
@@ -55,30 +55,35 @@ getQuantileTablesFromReferenceExpression <- function(
 # 
 ```
 
-# Get the binary plot
+# Get the binary plot for TPM reference
+
+## TPM reference
 
 ```{r}
 
-
-
-listQuantileTables <- getQuantileTablesFromReferenceExpression(
-  tpmReference, quantileThresholdIndex)
+listQuantileTables <- 
+  getQuantileTablesFromReferenceExpression(
+    tpmReference, quantileThresholdIndex)
 
 # test
 identical(
-  ifelse(listQuantileTables$booleanTable[1,seq(10)], 1, 0),
+  ifelse(
+    listQuantileTables$booleanTable[1,seq(10)], 1, 0),
   listQuantileTables$numericTable[1,seq(10)]
 ) # TRUE
-
-
-
 
 ```
 
 Plot
 
 ```{r}
-heatmap(as.numeric(referenceQuantile))
+
+
+# plot the numeric table
+
+heatmap(
+  as.numeric(referenceQuantile))
+
 ```
 
 Save

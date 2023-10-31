@@ -1,0 +1,22 @@
+---
+title: "01_run_searches"
+output: html_notebook
+---
+
+Searching literature for markers in microarrays and RNA-seq. 
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Responses to terms
+
+```{r}
+
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
