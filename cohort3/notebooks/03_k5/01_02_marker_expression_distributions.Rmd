@@ -23,6 +23,32 @@ load("./env/03_k5/01_run_script.RData")
 #------------------
 
 # FROM EXPRESSION, GET SIMPLIFIED THRESHOLD PLOT
+getQuantileTablesFromReferenceExpression <- function(
+    expressionTable, quantileThresholdIndex = 4){
+  
+  # boolean matrix
+  booleanTable <- apply(tpmReference, 2, function(ci){
+    quantileColumn <- quantile(ci)
+    labelColumnValues <- ifelse(ci >= quantileColumn[quantileThresholdIndex],
+                                TRUE, FALSE)
+    return(labelColumnValues)
+  })
+  # numeric matrix
+  numericTable <- matrix(
+    as.numeric(booleanTable), nrow = nrow(booleanTable))
+  # format
+  colnames(numericTable) <- 
+    colnames(booleanTable) <- colnames(expressionTable)
+  rownames(numericTable) <- 
+    rownames(booleanTable) <- rownames(expressionTable)
+  
+  
+  
+  # return
+  returnList <- list(
+    booleanTable = referenceQuantile, numericTable = numericTable)
+  return(returnList)
+}
 
 # FROM EXPRESSION GET PCA
 
@@ -33,21 +59,26 @@ load("./env/03_k5/01_run_script.RData")
 
 ```{r}
 
-reference <- tpmReference
-quantileThresholdIndex <- 4
-referenceQuantile <- apply(tpmReference, 2, function(ci){
-  quantileColumn <- quantile(ci)
-  labelColumnValues <- ifelse(ci >= quantileColumn[quantileThresholdIndex],
-                              TRUE, FALSE)
-  return(labelColumnValues)
-})
+
+
+listQuantileTables <- getQuantileTablesFromReferenceExpression(
+  tpmReference, quantileThresholdIndex)
+
+# test
+identical(
+  ifelse(listQuantileTables$booleanTable[1,seq(10)], 1, 0),
+  listQuantileTables$numericTable[1,seq(10)]
+) # TRUE
+
+
+
 
 ```
 
 Plot
 
 ```{r}
-
+heatmap(as.numeric(referenceQuantile))
 ```
 
 Save
