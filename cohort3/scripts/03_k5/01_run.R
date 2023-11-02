@@ -12,8 +12,9 @@
 #
 
 
-libv <- c('tidyr')
+libv <- c("tidyr", "lute")
 sapply(libv, library, character.only = TRUE)
+source("./scripts/03_k5/00_param.R")
 
 #-----
 # load

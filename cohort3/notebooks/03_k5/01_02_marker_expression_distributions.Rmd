@@ -2,67 +2,42 @@
 title: "marker_expression_distributions"
 author: "Sean Maden"
 date: "2023-10-30"
+bibliography: bibliography.bib
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
-Documenting the ABIS-seq reference marker expression distributions. Uses TPM, 
-log2(TPM+1), with and without scaling (Z score).
-
 ```{r setup, include=FALSE}
-libraryVector <- c("ggplot2", "reshape2", "dplyr")
+libraryVector <- c("ggplot2", "reshape2", "dplyr", "ComplexHeatmap")
 sapply(libraryVector, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
 load("./env/03_k5/01_run_script.RData")
-
-#---------------
-
-#------------------
-# helper functions
-#------------------
-
-# FROM EXPRESSION, GET SIMPLIFIED THRESHOLD PLOT
-getQuantileTablesFromReferenceExpression <- function(
-    expressionTable, heatmapNumericScaleName, quantileThresholdIndex=4, 
-    quantileSeq=seq(0,1,0.25)){
-  
-  # boolean matrix
-  booleanTable <- apply(tpmReference, 2, function(ci){
-    quantileThreshold <- 
-      quantile(ci, probs=quantileSeq)[quantileThresholdIndex]
-    labelColumnValues <- ifelse(
-      ci >= quantileThreshold, TRUE, FALSE)
-    return(labelColumnValues)
-  })
-  # numeric matrix
-  numericTable <- matrix(
-    as.numeric(booleanTable), nrow = nrow(booleanTable))
-  # format
-  colnames(numericTable) <- 
-    colnames(booleanTable) <- colnames(expressionTable)
-  rownames(numericTable) <- 
-    rownames(booleanTable) <- rownames(expressionTable)
-  
-  # heatmaps
-  heatmapNumeric <- Heatmap(
-    numericTable, name = heatmapNumericScaleName)
-  
-  # return
-  returnList <- list(
-    booleanTable = booleanTable, 
-    numericTable = numericTable,
-    heatmapNumeric = heatmapNumeric
-  )
-  return(returnList)
-}
-
-# FROM EXPRESSION GET PCA
-
-# 
 ```
+
+# Purpose
+
+This notebook assesses the @monaco_rna-seq_2019 gene expression scales and 
+performs marker summaries for cell type refactoring.
+
+## Scale importance
+
+For gene expression experiments, the bulk expression scaling affects 
+deconvolution performance.
+
+The @monaco_rna-seq_2019 study published gene expression in transcripts per 
+million (TPM) scale. Analyses were performed using log2(TPM+1) scale.
+
+## Published markers
+
+Markers were published for immune and blood cell types and were studied in 
+peripheral blood mononuclear cells (PBMCs).
+
+The initial cell types included over 60 cell types profiled by flow cytometry.
+The study then identified 17 cell types with markers in either RNA-seq or 
+microarray, with 1,294 markers in the former.
 
 # Getting markers
 
@@ -82,16 +57,20 @@ Shows the threshold heatmap.
 ```{r}
 
 getQuantileTablesFromReferenceExpression(
-  tpmReference, "TPM", 10, seq(0,1,0.1))[[3]]
+  tpmReference, "TPM", 10, seq(0,1,0.1)
+)[[3]]
 
 getQuantileTablesFromReferenceExpression(
-  scaleTpmReference, "Z TPM", 10, seq(0,1,0.1))[[3]]
+  scaleTpmReference, "Z TPM", 10, seq(0,1,0.1)
+)[[3]]
 
 getQuantileTablesFromReferenceExpression(
-  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1))[[3]]
+  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
+)[[3]]
 
 getQuantileTablesFromReferenceExpression(
-  scaleLog2TpmZref, "Z log2 TPM", 10, seq(0,1,0.1))[[3]]
+  scaleLog2TpmZref, "Z log2 TPM", 10, seq(0,1,0.1)
+)[[3]]
 
 ```
 
@@ -102,17 +81,6 @@ getQuantileTablesFromReferenceExpression(
 ggplot()
 
 ```
-
-
-
-
-
-
-
-
-
-
-
 
 # Get the binary plot for TPM reference
 
@@ -270,3 +238,5 @@ densityPlot(zscoreLog2TpmZref)
 ```{r}
 sessionInfo()
 ```
+
+# Works cited
