@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-libraryVector <- c("ggplot2", "reshape2", "dplyr", "ComplexHeatmap")
+libraryVector <- c("ggplot2", "reshape2", "dplyr", "ComplexHeatmap", "UpSetR")
 sapply(libraryVector, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
@@ -38,6 +38,85 @@ peripheral blood mononuclear cells (PBMCs).
 The initial cell types included over 60 cell types profiled by flow cytometry.
 The study then identified 17 cell types with markers in either RNA-seq or 
 microarray, with 1,294 markers in the former.
+
+# Markers by cell type
+
+## Show counts
+
+```{r}
+listQuantiles <- getQuantileTablesFromReferenceExpression(
+  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
+)
+dfTall <- melt(listQuantiles$booleanTable)
+dfPlot <- dfTall %>% 
+  group_by(Var2) %>% 
+  count(value) %>% 
+  mutate(prop = prop.table(n))
+colnames(dfPlot) <- 
+  c("cellType", "isTypeMarker", "markerCount", "markerProportion")
+ggplot(dfPlot, aes(x = cellType, y = markerCount, fill = isTypeMarker)) + 
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(aes(label = markerCount), vjust=1)
+```
+
+## Annotated heatmap
+
+Show mappings table
+
+```{r}
+mappingsTable
+```
+
+Show heatmap with markers labeled
+
+```{r}
+# map plot cols to cell types
+# use 2 cell type mappings
+#
+mappingsTable$colorLabel1 <- mappingsTable$celltype1 %>%
+  as.factor() %>% as.numeric()
+mappingsTable$colorLabel2 <- mappingsTable$celltype2 %>%
+  as.factor() %>% as.numeric()
+
+# get markers vector with colors
+markerColors <- data.frame(
+  marker=rownames(scaleLog2TpmReference)
+)
+markerColors$cellType <- 
+  markerColors$markerColor1 <- 
+  markerColors$markerColor2 <- "NA"
+for(type in colnames(scaleLog2TpmReference)){
+  typeMarkerNames <- dfTall[dfTall$Var2==type & dfTall$value==TRUE,]$Var1
+  markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- type
+  markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- 
+    mappingsTable[mappingsTable$celltype1==type,]$celltype2
+  markerColors[markerColors$marker %in% typeMarkerNames,]$markerColor1 <- 
+    mappingsTable[mappingsTable$celltype1==type,]$colorLabel1
+  markerColors[markerColors$marker %in% typeMarkerNames,]$markerColor2 <- 
+    mappingsTable[mappingsTable$celltype1==type,]$colorLabel2
+}
+
+Heatmap(
+  scaleLog2TpmReference, 
+  name = "Z",
+  right_annotation = rowAnnotation(
+    cellType1 = markerColors$markerColor1,
+    cellType2 = markerColors$markerColor2
+  )
+)
+
+Heatmap(
+  scaleLog2TpmReference, 
+  name = "Z",
+  right_annotation = rowAnnotation(
+    cellType1 = markerColors$cellType2,
+    cellType2 = markerColors$cellType1
+  )
+)
+
+```
+
 
 # Getting markers
 

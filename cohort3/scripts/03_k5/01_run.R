@@ -29,7 +29,8 @@ source("./source/cell_mappings_helpers.R")
 # map k5 cell types
 #------------------
 
-vectorCellTypeMap <- c("T", "B", "Dendrocyte", "Plasma", "Monocyte", "Neutrophil", "NK")
+vectorCellTypeMap <- 
+  c("T", "B", "Dendrocyte", "Plasma", "Monocyte", "Neutrophil", "NK")
 vectorCellTypeStart <- colnames(zref)
 
 mappingsTable <- cellLabelMappings(
