@@ -44,10 +44,6 @@ microarray, with 1,294 markers in the former.
 ## Show counts
 
 ```{r}
-listQuantiles <- getQuantileTablesFromReferenceExpression(
-  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
-)
-dfTall <- melt(listQuantiles$booleanTable)
 dfPlot <- dfTall %>% 
   group_by(Var2) %>% 
   count(value) %>% 
@@ -71,48 +67,14 @@ mappingsTable
 Show heatmap with markers labeled
 
 ```{r}
-# map plot cols to cell types
-# use 2 cell type mappings
-#
-mappingsTable$colorLabel1 <- mappingsTable$celltype1 %>%
-  as.factor() %>% as.numeric()
-mappingsTable$colorLabel2 <- mappingsTable$celltype2 %>%
-  as.factor() %>% as.numeric()
-
-# get markers vector with colors
-markerColors <- data.frame(
-  marker=rownames(scaleLog2TpmReference)
-)
-markerColors$cellType <- 
-  markerColors$markerColor1 <- 
-  markerColors$markerColor2 <- "NA"
-for(type in colnames(scaleLog2TpmReference)){
-  typeMarkerNames <- dfTall[dfTall$Var2==type & dfTall$value==TRUE,]$Var1
-  markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- type
-  markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- 
-    mappingsTable[mappingsTable$celltype1==type,]$celltype2
-  markerColors[markerColors$marker %in% typeMarkerNames,]$markerColor1 <- 
-    mappingsTable[mappingsTable$celltype1==type,]$colorLabel1
-  markerColors[markerColors$marker %in% typeMarkerNames,]$markerColor2 <- 
-    mappingsTable[mappingsTable$celltype1==type,]$colorLabel2
-}
-
-Heatmap(
-  scaleLog2TpmReference, 
-  name = "Z",
-  right_annotation = rowAnnotation(
-    cellType1 = markerColors$markerColor1,
-    cellType2 = markerColors$markerColor2
-  )
-)
-
 Heatmap(
   scaleLog2TpmReference, 
   name = "Z",
   right_annotation = rowAnnotation(
     cellType1 = markerColors$cellType2,
     cellType2 = markerColors$cellType1
-  )
+  ),
+  show_row_dend = FALSE
 )
 
 ```
@@ -135,21 +97,7 @@ Shows the threshold heatmap.
 
 ```{r}
 
-getQuantileTablesFromReferenceExpression(
-  tpmReference, "TPM", 10, seq(0,1,0.1)
-)[[3]]
 
-getQuantileTablesFromReferenceExpression(
-  scaleTpmReference, "Z TPM", 10, seq(0,1,0.1)
-)[[3]]
-
-getQuantileTablesFromReferenceExpression(
-  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
-)[[3]]
-
-getQuantileTablesFromReferenceExpression(
-  scaleLog2TpmZref, "Z log2 TPM", 10, seq(0,1,0.1)
-)[[3]]
 
 ```
 
@@ -167,28 +115,13 @@ ggplot()
 
 ```{r}
 
-listQuantileTables <- 
-  getQuantileTablesFromReferenceExpression(tpmReference)
 
-# test
-identical(
-  ifelse(
-    listQuantileTables$booleanTable[1,seq(10)], 1, 0),
-  listQuantileTables$numericTable[1,seq(10)]
-) # TRUE
 
 ```
 
 Plot
 
 ```{r}
-
-
-# plot the numeric table
-
-heatmap(
-  as.numeric(referenceQuantile))
-
 ```
 
 Save
@@ -200,19 +133,14 @@ Save
 
 ```{r}
 
-clusterTpmReference <- prcomp(tpmReference)
-clusterTpmLog2Reference <- prcomp(log2TpmReference)
-clusterScaleTpmReference <- prcomp(scaleTpmReference)
-clusterScaleTpmLog2Reference <- prcomp(scaleLog2TpmZref)
+
 
 ```
 
 ```{r}
 
-dfplot <- melt(clusterTpmReference$x)
-dfplot$cellType <- 
-
-ggplot(clusterTpmReference$x, aes(x = PC1, y = PC2, color = )) + geom_point()
+#dfplot <- melt(clusterTpmReference$x)
+#ggplot(clusterTpmReference$x, aes(x = PC1, y = PC2, color = )) + geom_point()
 
 ```
 
@@ -245,47 +173,6 @@ summary(zscoreLog2TpmZref)
 # Density plots
 
 ```{r}
-meanDifferences <- function(dfplot){
-  cellTypes <- colnames(dfplot)
-  
-  
-  
-  markersVector <- rownames(dfplot)
-  dfMeanAllTypes <- apply(dfplot, 2, mean)
-  
-  
-  
-  lapply(markersVector, function(marker){
-    
-    mean(
-      
-    )
-    
-    dfPlotOut <- dfplot[,!colnames(dfplot)==cellType]
-    meanOut <- apply(dfPlotDifference,2,mean)
-    meanIn <- mean(dfplot[,cellType])
-    
-    
-    
-  })
-  
-  
-}
-
-densityPlot <- function(dfplot){
-  dfplot <- melt(dfplot)
-  dfplot[,2] <- as.numeric(dfplot[,2])
-  
-  # get pairwise mean differences
-  
-  plotAllMarkers <- ggplot(dfplot, aes(x = variable, y = value)) + 
-    geom_density() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
-  
-  
-  return(listPlots)
-}
 ```
 
 ## TPM

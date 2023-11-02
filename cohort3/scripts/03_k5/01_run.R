@@ -168,19 +168,112 @@ trueCellTypeProportions$sample.id <- rownames(trueCellTypeProportions)
 #  experimentList, TRUE
 #)
 
+
 #--------------------------
-# get the expression tables
+#
 #--------------------------
-tpmReference <- zref
 
 log2TpmReference <- 
   apply(
     tpmReference, 2, 
     function(cellName){log2(cellName+1)}) %>% as.data.frame()
 
+
+
+
+#--------------------------
+# get the expression tables
+#--------------------------
+tpmReference <- zref
+
+
+#
+# list quantile results
+#
+#
+
+
+
+getQuantileTablesFromReferenceExpression(
+  tpmReference, "TPM", 10, seq(0,1,0.1)
+)[[3]]
+
+getQuantileTablesFromReferenceExpression(
+  scaleTpmReference, "Z TPM", 10, seq(0,1,0.1)
+)[[3]]
+
+getQuantileTablesFromReferenceExpression(
+  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
+)[[3]]
+
+getQuantileTablesFromReferenceExpression(
+  scaleLog2TpmZref, "Z log2 TPM", 10, seq(0,1,0.1)
+)[[3]]
+
 scaleTpmReference <- scale(tpmReference) %>% as.data.frame()
 
 scaleLog2TpmReference <- scale(log2TpmReference) %>% as.data.frame()
+
+#
+#
+#
+listQuantileTables <- 
+  getQuantileTablesFromReferenceExpression(tpmReference)
+# test
+identical(
+  ifelse(
+    listQuantileTables$booleanTable[1,seq(10)], 1, 0),
+  listQuantileTables$numericTable[1,seq(10)]
+) # TRUE
+
+
+#-----------------------
+# get cluster results
+#-----------------------
+clusterTpmReference <- prcomp(tpmReference)
+clusterTpmLog2Reference <- prcomp(log2TpmReference)
+clusterScaleTpmReference <- prcomp(scaleTpmReference)
+clusterScaleTpmLog2Reference <- prcomp(scaleLog2TpmZref)
+
+
+#-------------------------
+# get quantiles categories
+#-------------------------
+listQuantiles <- getQuantileTablesFromReferenceExpression(
+  log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
+)
+dfTall <- melt(listQuantiles$booleanTable)
+
+
+#--------------------------
+# prepare data for heatmaps
+#--------------------------
+# map plot cols to cell types
+# use 2 cell type mappings
+#
+mappingsTable$colorLabel1 <- mappingsTable$celltype1 %>%
+  as.factor() %>% as.numeric()
+mappingsTable$colorLabel2 <- mappingsTable$celltype2 %>%
+  as.factor() %>% as.numeric()
+
+# get markers vector with colors
+markerColors <- data.frame(
+  marker=rownames(scaleLog2TpmReference)
+)
+markerColors$cellType <- 
+  markerColors$markerColor1 <- 
+  markerColors$markerColor2 <- "NA"
+for(type in colnames(scaleLog2TpmReference)){
+  typeMarkerNames <- dfTall[dfTall$Var2==type & dfTall$value==TRUE,]$Var1
+  markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- type
+  markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- 
+    mappingsTable[mappingsTable$celltype1==type,]$celltype2
+  markerColors[markerColors$marker %in% typeMarkerNames,]$markerColor1 <- 
+    mappingsTable[mappingsTable$celltype1==type,]$colorLabel1
+  markerColors[markerColors$marker %in% typeMarkerNames,]$markerColor2 <- 
+    mappingsTable[mappingsTable$celltype1==type,]$colorLabel2
+}
+
 
 #-----
 # save
