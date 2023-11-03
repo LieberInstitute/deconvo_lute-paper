@@ -176,7 +176,8 @@ trueCellTypeProportions$sample.id <- rownames(trueCellTypeProportions)
 log2TpmReference <- 
   apply(
     tpmReference, 2, 
-    function(cellName){log2(cellName+1)}) %>% as.data.frame()
+    function(cellName){
+      log2(cellName+1)}) %>% as.data.frame()
 
 
 
