@@ -39,21 +39,30 @@ The initial cell types included over 60 cell types profiled by flow cytometry.
 The study then identified 17 cell types with markers in either RNA-seq or 
 microarray, with 1,294 markers in the former.
 
-# Markers by cell type
+# Marker summaries
+
+Marker expression by cell type
+
+## Quantiles filter
+
+Quantile filter of greater than or equals to 90% was defined, or the top 130 
+markers for each cell type were taken.
 
 ## Show counts
 
+Marker abundance after quantiles filter.
+
 ```{r}
-dfPlot <- dfTall %>% 
-  group_by(Var2) %>% 
-  count(value) %>% 
-  mutate(prop = prop.table(n))
-colnames(dfPlot) <- 
-  c("cellType", "isTypeMarker", "markerCount", "markerProportion")
-ggplot(dfPlot, aes(x = cellType, y = markerCount, fill = isTypeMarker)) + 
+
+ggplot(
+  dfPlotHeatmapLog2TpmRef, 
+  aes(x = cellType, y = markerCount, fill = isTypeMarker)) + 
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(label = markerCount), vjust=1)
+
+upset()
+
 ```
 
 ## Annotated heatmap

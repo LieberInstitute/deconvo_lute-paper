@@ -186,13 +186,9 @@ log2TpmReference <-
 #--------------------------
 tpmReference <- zref
 
-
-#
 # list quantile results
 #
 #
-
-
 
 getQuantileTablesFromReferenceExpression(
   tpmReference, "TPM", 10, seq(0,1,0.1)
@@ -239,10 +235,17 @@ clusterScaleTpmLog2Reference <- prcomp(scaleLog2TpmZref)
 #-------------------------
 # get quantiles categories
 #-------------------------
-listQuantiles <- getQuantileTablesFromReferenceExpression(
+
+# quantiles for analysis scale (log2 [tpm + 1])
+#
+listQuantilesLog2TpmRef <- 
+getQuantileTablesFromReferenceExpression(
   log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
 )
-dfTall <- melt(listQuantiles$booleanTable)
+# gets tall version for plots and
+#
+dfTallLog2TpmRef <- melt(
+  listQuantilesLog2TpmRef[["booleanTable"]])
 
 
 #--------------------------
@@ -251,6 +254,10 @@ dfTall <- melt(listQuantiles$booleanTable)
 # map plot cols to cell types
 # use 2 cell type mappings
 #
+
+
+
+
 mappingsTable$colorLabel1 <- mappingsTable$celltype1 %>%
   as.factor() %>% as.numeric()
 mappingsTable$colorLabel2 <- mappingsTable$celltype2 %>%
@@ -264,7 +271,9 @@ markerColors$cellType <-
   markerColors$markerColor1 <- 
   markerColors$markerColor2 <- "NA"
 for(type in colnames(scaleLog2TpmReference)){
-  typeMarkerNames <- dfTall[dfTall$Var2==type & dfTall$value==TRUE,]$Var1
+  typeMarkerNames <- 
+    dfTallLog2TpmRef[
+      dfTallLog2TpmRef$Var2==type & dfTallLog2TpmRef$value==TRUE,]$Var1
   markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- type
   markerColors[markerColors$marker %in% typeMarkerNames,]$cellType1 <- 
     mappingsTable[mappingsTable$celltype1==type,]$celltype2
@@ -273,6 +282,21 @@ for(type in colnames(scaleLog2TpmReference)){
   markerColors[markerColors$marker %in% typeMarkerNames,]$markerColor2 <- 
     mappingsTable[mappingsTable$celltype1==type,]$colorLabel2
 }
+
+dfPlotHeatmapLog2TpmRef <- dfTallLog2TpmRef %>% 
+  group_by(Var2) %>% 
+  count(value) %>% 
+  mutate(prop = prop.table(n))
+colnames(dfPlotHeatmapLog2TpmRef) <- 
+  c("cellType", "isTypeMarker", "markerCount", "markerProportion")
+
+
+
+
+
+
+
+
 
 
 #-----
