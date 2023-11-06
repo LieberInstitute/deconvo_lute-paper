@@ -9,7 +9,8 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-libraryVector <- c("ggplot2", "reshape2", "dplyr", "ComplexHeatmap", "UpSetR")
+libraryVector <- 
+  c("ggplot2", "reshape2", "dplyr", "ComplexHeatmap", "UpSetR")
 sapply(libraryVector, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
