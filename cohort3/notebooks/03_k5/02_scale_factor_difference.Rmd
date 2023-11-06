@@ -1,0 +1,30 @@
+---
+title: "02_scale_factor_difference"
+author: "Sean Maden"
+date: "2023-11-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+```
+
+# Heatmaps
+
+Before cell scale factor transformation
+
+```{r}
+```
+
+After cell scale factor transformation
+
+```{r}
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
