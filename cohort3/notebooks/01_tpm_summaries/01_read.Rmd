@@ -1,0 +1,122 @@
+---
+title: "01_read"
+author: "Sean Maden"
+date: "2023-10-16"
+bibliograhy: bibliography.bib
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Summaries of expression tables read from GEO. Expression scale in transcripts 
+per million (TPM). Data was published in @monaco_rna-seq_2019.
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "dplyr")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/01_tpm_summaries/01_read_script.RData")
+```
+
+# Summaries
+
+# TPM
+
+Summary statistics and plots. Uses the scale for the GEO record, or TPM.
+
+Library sizes
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = library.size, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Library size")
+```
+
+Median expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = median.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Median expression")
+```
+
+Mean expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = mean.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Mean expression")
+```
+
+SD expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = sd.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Mean expression")
+```
+
+Number of zero-expression genes
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = num.zero.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  ggtitle("Number zero-expression genes")
+```
+
+# Log2(TPM+1)
+
+Summary statistics and plots. Uses the scale for the study analysis, or Log2 TPM + 1.
+
+
+Library sizes
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = library.size, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Library size")
+```
+
+Median expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = median.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Median expression")
+```
+
+Mean expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = mean.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Mean expression")
+```
+
+SD expression
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = sd.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Mean expression")
+```
+
+Number of zero-expression genes
+
+```{r}
+ggplot(cd, aes(x = tissue.type.detail, y = num.zero.expression, color = tissue.type)) + 
+  geom_jitter() + geom_boxplot(alpha = 0, color = "cyan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  ggtitle("Number zero-expression genes")
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
+# Works Cited

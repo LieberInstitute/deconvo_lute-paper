@@ -1,0 +1,219 @@
+---
+title: "02_summary_statistics"
+author: "Sean Maden"
+date: "2023-10-26"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Summary statistics for S13 expression from @monaco_rna-seq_2019.
+
+Evaluating lower ABIS-seq cell type label count mappings. Dataset summaries, 
+comparisons across mappings, and analysis results for lower cell type count 
+mappings of the ABIS-seq dataset.
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "ComplexHeatmap", "gridExtra")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/03_k5/01_run_script.Rdata")
+
+# heatmap scale label
+# heatmaps are TPM zscore
+heatmap.label <- "Z"
+```
+
+# Mappings
+
+There are two cell type label schemes (a.k.a. total K, or total cell types), 
+one, the original, which contains 17 cell types. The second, the reduced mapping, 
+contains 8 cell types.
+
+## Table of mappings
+
+The comparison of mappings looks as follows:
+
+```{r}
+knitr::kable(mappingsTable)
+```
+
+
+
+```{r}
+ggplot(
+  as.data.frame(table(mappingsTable$celltype2)), aes(x = Var1, y = Freq)) + 
+  geom_bar(stat = "identity")
+```
+
+
+# Summaries
+
+## Differences
+
+Marker expression differences
+
+```{r}
+```
+
+
+## Marker expression heatmap
+
+Original mappings
+
+```{r}
+hmRefOriginal <- Heatmap(
+  scale(zref), show_row_names = FALSE, name = heatmap.label)
+hmRefOriginal
+```
+
+New mappings
+
+```{r}
+hmRefNew <- Heatmap(
+  scale(zrefMapped), show_row_names = FALSE, name = heatmap.label)
+hmRefNew
+```
+
+```{r}
+hmRefOriginal + hmRefNew
+```
+
+
+
+## Table summaries, true proportions by sample
+
+Heatmap of original cell type proportions
+
+```{r}
+hmOriginal <- Heatmap(trueProportionsStart, name = "Proportions")
+hmOriginal
+```
+
+Heatmap of new cell type proportions
+
+```{r}
+hmNew <- Heatmap(trueCellTypeProportions, name = "Proportions")
+hmNew
+```
+
+Combined heatmaps
+
+```{r}
+hmOriginal + hmNew
+```
+
+Proportions by sample, barplots, original
+
+```{r}
+
+dfPlotOriginal <- trueProportionsStart
+dfPlotOriginal$sample.id <- rownames(dfPlotOriginal)
+dfPlotOriginal <- tidyr::gather(
+  dfPlotOriginal, cellType, proportion, B.Naive:T.CD4.Memory)
+
+bpOriginal <- ggplot(
+  dfPlotOriginal, aes(x = sample.id, y = proportion, fill = cellType)) + 
+  geom_bar(stat = "identity", position = "stack", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill=guide_legend(ncol=3))
+
+bpOriginal
+
+```
+
+Proportions by sample, barplots, new
+
+```{r}
+
+dfPlotNew <- trueproportionsMapped
+dfPlotNew$sample.id <- rownames(dfPlotNew)
+dfPlotNew <- tidyr::gather(
+  dfPlotNew, cellType, proportion, B:Neutrophil)
+
+bpNew <- ggplot(
+  dfPlotNew, aes(x = sample.id, y = proportion, fill = cellType)) + 
+  geom_bar(stat = "identity", position = "stack", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill=guide_legend(ncol=2))
+
+bpNew
+
+```
+
+Proportions by sample, barplots, composite
+
+```{r}
+grid.arrange(bpOriginal, bpNew, nrow = 2)
+```
+
+## Profiling cell type availability by sample (a.k.a. how many "complete" samples)
+
+Complete samples, original
+
+```{r}
+proportionsThreshold <- 0
+dfPlotOriginal$available <- ifelse(dfPlotOriginal$proportion>0,TRUE,FALSE)
+numComplete <- 
+  length(unique(dfPlotOriginal[dfPlotOriginal$available,]$sample.id))
+numTotal <- length(unique(dfPlotOriginal$sample.id))
+numComplete
+numComplete==numTotal
+```
+
+Complete samples, new
+
+```{r}
+dfPlotNew$available <- ifelse(dfPlotNew$proportion>0,TRUE,FALSE)
+numComplete <- 
+  length(unique(dfPlotNew[dfPlotNew$available,]$sample.id))
+numTotal <- length(unique(dfPlotNew$sample.id))
+numComplete
+numComplete==numTotal
+```
+
+## Cell sizes summaries
+
+Cell sizes original
+
+```{r}
+cellFactorsOriginal
+```
+
+Cell sizes new
+
+```{r}
+cellScaleFactors
+```
+
+Barplots, original cell sizes
+
+```{r}
+bpSizeOriginal <- ggplot() + geom_bar()
+```
+
+Barplots, new cell sizes
+
+```{r}
+bpSizeNew <- ggplot() + geom_bar()
+```
+
+Barplots, original cell sizes and new cell sizes
+
+```{r}
+grid.arrange(bpSizeOriginal,bpSizeNew,nrow=2)
+```
+
+# Plots
+
+# Save
+
+# Conclusions
+
+# Session
+
+```{r}
+sessionInfo()
+```
