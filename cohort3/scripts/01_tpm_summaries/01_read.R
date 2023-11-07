@@ -2,73 +2,81 @@
 
 # Author: Sean Maden
 #
-# Read in TPM expression data.
+# Read in TPM expression data. Data sources:
+# 
+# * "GSE107011_Processed_data_TPM.txt", GEO record.
+#
+#
+#
+#
 
 libv <- c("SummarizedExperiment", "biomaRt")
 sapply(libv, library, character.only = TRUE)
 
-#-----
-# load
-#-----
-tpm.path <- "./data/GSE107011_Processed_data_TPM/GSE107011_Processed_data_TPM.txt"
-tpm <- read.table(tpm.path)
+#----------------------------
+# read and process expression
+#----------------------------
 
-#--------------------
-# format as se object
-#--------------------
-se <- SummarizedExperiment(assays = list(tpm = tpm))
+# read geo expression into SummarizedExperiment
+geoTpmTable <- "./data/monaco_et_al_2019/geo/GSE107011_Processed_data_TPM.txt"
+tpm <- read.table(geoTpmTable)
+newSummarizedExperiment <- SummarizedExperiment(assays = list(tpm = tpm))
 
-#------------------
-# get pheno/coldata
-#------------------
-cd <- colnames(tpm)
-table(gsub(".*_", "", cd))
-cd <- data.frame(sample.id = cd, 
-                 source.id = gsub("_.*", "", cd),
-                 sample.type = gsub(".*_", "", cd))
-cd$tissue.type <- ifelse(cd$sample.type=="PBMC", "PBMC", "immune_cell")
-cd$tissue.type.detail <- ifelse(cd$sample.type=="PBMC", "PBMC", cd$sample.type)
-# append summary statistics
+# get s13 phenotype info from column labels
+phenoDataS13 <- colnames(tpm)
+table(gsub(".*_", "", phenoDataS13))
+phenoDataS13 <- data.frame(sample.id = phenoDataS13,
+                           source.id = gsub("_.*", "", phenoDataS13),
+                           sample.type = gsub(".*_", "", phenoDataS13))
+phenoDataS13$tissue.type <- 
+  ifelse(phenoDataS13$sample.type=="PBMC", "PBMC", "immune_cell")
+phenoDataS13$tissue.type.detail <- 
+  ifelse(phenoDataS13$sample.type=="PBMC", "PBMC", phenoDataS13$sample.type)
+
+# append summary statistics to pheno data
 tpm <- as.matrix(tpm)
-cd$library.size <- colSums(tpm)
-cd$mean.expression <- colMeans(tpm)
-cd$median.expression <- colMedians(tpm)
-cd$sd.expression <- colSds(tpm)
-cd$num.na.expression <- colAnyNAs(tpm)
-cd$num.zero.expression <- unlist(apply(tpm, 2, function(ci){length(ci[ci==0])}))
-rownames(cd) <- cd[,1]
+phenoDataS13$library.size <- colSums(tpm)
+phenoDataS13$mean.expression <- colMeans(tpm)
+phenoDataS13$median.expression <- colMedians(tpm)
+phenoDataS13$sd.expression <- colSds(tpm)
+phenoDataS13$num.na.expression <- colAnyNAs(tpm)
+phenoDataS13$num.zero.expression <- unlist(apply(tpm, 2, function(ci){length(ci[ci==0])}))
+rownames(phenoDataS13) <- phenoDataS13[,1]
 
-# format summarized experiment
-colData(se) <- DataFrame(cd)
+# append pheno data to colData for SummarizedExperiment
+colData(newSummarizedExperiment) <- DataFrame(phenoDataS13)
 
-#-----------------
-# map gene symbols
-#-----------------
+
+# map gene symbols using biomaRt
 # begin rowdata
-rd.new <- data.frame(ensembl_gene_id_version = rownames(tpm))
-rownames(rd.new) <- rd.new[,1]
-rowData(se) <- DataFrame(rd.new)
-
+newRowData <- data.frame(ensembl_gene_id_version = rownames(tpm))
+rownames(newRowData) <- newRowData[,1]
+rowData(newSummarizedExperiment) <- DataFrame(newRowData)
 # map gene ids to symbols
-mart.ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
-gene.id.vector <- rownames(tpm)
-gene.id.vector <- gsub("\\..*", "", gene.id.vector)
-rd.maps <- getBM(
+ensemblMart <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+geneIdVector <- rownames(tpm)
+geneIdVector <- gsub("\\..*", "", geneIdVector)
+rowDataMaps <- getBM(
   attributes = c('ensembl_gene_id', 'hgnc_symbol'),
   filters = 'ensembl_gene_id',
-  values = as.character(gene.id.vector), 
-  mart = mart.ensembl
+  values = as.character(geneIdVector), 
+  mart = ensemblMart
 )
 
 # map symbols for rowdata
-rd.symbol <- rd.maps[,2]
-names(rd.symbol) <- rd.maps[,1]
-rd.symbol <- rd.symbol[gsub("\\..*", "", rownames(se))]
-length(rd.symbol)
-dim(se)
-rowData(se)$gene_symbol <- rd.symbol
+rowDataSymbol <- rowDataMaps[,2]
+names(rowDataSymbol) <- rowDataMaps[,1]
+rowDataSymbol <- rowDataSymbol[gsub("\\..*", "", rownames(newSummarizedExperiment))]
+length(rowDataSymbol)
+dim(newSummarizedExperiment)
+rowData(newSummarizedExperiment)$gene_symbol <- rowDataSymbol
 
 #-----
 # save
 #-----
+
+# save new SummarizedExperiment
+save(newSummarizedExperiment, file = "outputs/01_tpm_summaries/se_tpm_s13.rda")
+
+# save env
 save.image("./env/01_tpm_summaries/01_read_script.RData")
