@@ -24,6 +24,29 @@ load("./env/03_k5/01_run_script.Rdata")
 heatmap.label <- "Z"
 ```
 
+# Mappings
+
+There are two cell type label schemes (a.k.a. total K, or total cell types), 
+one, the original, which contains 17 cell types. The second, the reduced mapping, 
+contains 8 cell types.
+
+## Table of mappings
+
+The comparison of mappings looks as follows:
+
+```{r}
+knitr::kable(mappingsTable)
+```
+
+
+
+```{r}
+ggplot(
+  as.data.frame(table(mappingsTable$celltype2)), aes(x = Var1, y = Freq)) + 
+  geom_bar(stat = "identity")
+```
+
+
 # Summaries
 
 ## Differences

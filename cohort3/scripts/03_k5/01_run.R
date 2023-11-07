@@ -2,7 +2,7 @@
 
 # Author: Sean Maden
 #
-# Run K5 experiments on ABIS-seq data
+# Run experiments using reduced cell type counts from ABIS-seq reference.
 #
 #
 #
@@ -25,20 +25,39 @@ load("./env/02_abisseq/02_proportions_s13_script.RData")
 source("./source/lute_experiment.R")
 source("./source/cell_mappings_helpers.R")
 
+
+
+
+
+
 #------------------
 # map k5 cell types
 #------------------
+# makes the mappings from total cell types to reduced cell types
+# starts with abis-seq reference of 
 
 vectorCellTypeMap <- 
-  c("T", "B", "Dendrocyte", "Plasma", "Monocyte", "Neutrophil", "NK")
+  c("T", "B", "Dendritic", "Plasma", "Monocyte", "Neutrophil", "NK")
 vectorCellTypeStart <- colnames(zref)
 
 mappingsTable <- cellLabelMappings(
   vectorCellTypeMap, vectorCellTypeStart, returnType = "list")[[1]]
+mappingsTable[mappingsTable$celltype1 %in% c("mDCs", "pDCs"),2] <- "Dendritic"
 
 zrefMapped <- cellLabelMappings(
   vectorCellTypeMap, vectorCellTypeStart, zref, 
   returnType = "df", summaryOperation = "mean")
+
+
+
+
+
+
+
+
+
+
+
 
 # tests -- mappings for reference
 #
@@ -185,31 +204,40 @@ log2TpmReference <-
 #--------------------------
 # get the expression tables
 #--------------------------
+
+
+
 tpmReference <- zref
 
 # list quantile results
 #
 #
 
-getQuantileTablesFromReferenceExpression(
+tpmQuantilesList <- getQuantileTablesFromReferenceExpression(
   tpmReference, "TPM", 10, seq(0,1,0.1)
-)[[3]]
+)
 
-getQuantileTablesFromReferenceExpression(
+scaleTpmQuantilesList <- getQuantileTablesFromReferenceExpression(
   scaleTpmReference, "Z TPM", 10, seq(0,1,0.1)
-)[[3]]
+)
 
-getQuantileTablesFromReferenceExpression(
+log2TpmQunatilesList <- getQuantileTablesFromReferenceExpression(
   log2TpmReference, "log2 TPM", 10, seq(0,1,0.1)
-)[[3]]
+)
 
-getQuantileTablesFromReferenceExpression(
+scaleTpmQuantilesList <- getQuantileTablesFromReferenceExpression(
   scaleLog2TpmZref, "Z log2 TPM", 10, seq(0,1,0.1)
-)[[3]]
+)
 
 scaleTpmReference <- scale(tpmReference) %>% as.data.frame()
 
 scaleLog2TpmReference <- scale(log2TpmReference) %>% as.data.frame()
+
+
+
+
+
+
 
 #
 #

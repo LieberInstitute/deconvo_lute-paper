@@ -6,9 +6,16 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+libv <- c("ggplot2", "ComplexHeatmap", "gridExtra")
+sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
+load("./env/03_k5/01_run_script.Rdata")
+
+# heatmap scale label
+# heatmaps are TPM zscore
+heatmap.label <- "Z"
 ```
 
 # Heatmaps
