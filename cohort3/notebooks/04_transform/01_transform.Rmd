@@ -14,13 +14,59 @@ load("./env/04_transform/01_transform_script.RData")
 
 # Heatmaps
 
-Untransformed
+## Untransformed
 
-```{r}
-Heatmap(zTpm)
+No annotation
+
+```{r, plot.height=10}
+Heatmap(scale(refTpmFilter),name="Z_{TPM}",row_names_gp=gpar(fontsize=5))
 ```
 
-Transformed 
+With annotation
+
+```{r}
+set.seed(0)
+# set cell type colors
+dfCellColors<-
+  data.frame(
+    cellTypeVector=cellTypeVector, 
+    cellTypeColor=colours()[sample(cellTypeCount)])
+# top annotation
+heatmapTopAnno<-HeatmapAnnotation(
+  cellType=dfCellColors[,"cellTypeVector"],
+  col=list(cellType=paste0(
+    dfCellColors[,"cellTypeVector"],"=",
+    dfCellColors[,"cellTypeColor"])),
+  gp=gpar(col="black")
+)
+# left annotation
+cellTypeMarkerVector<-unlist(
+  lapply(names(listMarkers),function(cellType){
+    rep(cellType,length(listMarkers[[cellType]]))
+}))
+cellTypeMarkerColorVector<-unlist(
+  lapply(names(listMarkers),function(cellType){
+    rep(dfCellColors[dfCellColors[,1]==cellType,2],
+        length(listMarkers[[cellType]]))
+}))
+heatmapRowAnno<-rowAnnotation(
+  cellType=cellTypeMarkerVector,
+  col=list(cellType=paste0(
+    cellTypeMarkerVector,"=",cellTypeMarkerColorVector
+  )),
+  gp=gpar(col="black")
+)
+
+
+Heatmap(scale(refTpmFilter),name="Z_{TPM}",
+        top_annotation=heatmapTopAnno,
+        row_annotation=heatmapRowAnno)
+```
+
+
+
+
+## Transformed 
 
 ```{r}
 Heatmap(zTpmTransformed)
