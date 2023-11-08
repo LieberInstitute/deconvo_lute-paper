@@ -1,0 +1,33 @@
+---
+title: "01_transform"
+author: "Sean Maden"
+date: "2023-11-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/04_transform/01_transform_script.RData")
+```
+
+# Heatmaps
+
+Untransformed
+
+```{r}
+Heatmap(zTpm)
+```
+
+Transformed 
+
+```{r}
+Heatmap(zTpmTransformed)
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
