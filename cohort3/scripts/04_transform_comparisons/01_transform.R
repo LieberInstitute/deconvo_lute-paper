@@ -1,3 +1,10 @@
+#!/usr/bin/env R
+
+# Author: Sean Maden
+#
+# Gets heatmap data before and after cell type scale factor transformations.
+#
+
 libv <- c("dplyr", "lute", "ComplexHeatmap")
 sapply(libv, library, character.only=T)
 # param
