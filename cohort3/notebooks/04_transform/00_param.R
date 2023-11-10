@@ -7,6 +7,33 @@
 #
 #
 
+markersHarmonize <- function(heatmapTall, markerTable){
+  # markersHarmonize
+  #
+  # Harmonize heatmap marker data
+  #
+  #
+  #
+  
+  markersOverlap <- intersect(rownames(heatmapTall), markerTable$markerName)
+  heatmapTall <- heatmapTall[rownames(heatmapTall) %in% markersOverlap,]
+  markerTable <- markerTable[markerTable$markerName %in% markersOverlap,]
+  
+  heatmapTall <- heatmapTall[
+    order(match(rownames(heatmapTall), markersOverlap)),]
+  markerTable <- markerTable[
+    order(match(markerTable[,"markerName"], rownames(heatmapTall))),]
+  
+  return(
+    list(
+      heatmapTall = heatmapTall,
+      markerTable = markerTable
+    )
+  )
+}
+
+
+
 annotationHeatmapList <- function(
     heatmapTall, mapTable, markerTable){
   # annotationHeatmapList

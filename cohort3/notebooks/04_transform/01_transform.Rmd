@@ -14,26 +14,24 @@ setwd("..")
 load("./env/04_transform/01_transform_script.RData")
 ```
 
-# Heatmaps
-
 ```{r}
 source("./00_param.R")
 ```
 
-## 17 cell types
+This notebook shows heatmaps of immune cell types before and after cell type 
+transformation.
+
+# Heatmaps before transformation
 
 17 cell types from ABIS-seq reference.
 
 ```{r}
-
 heatmapTall <- scale(zTpm)
 mapTable <- mapTableImmuneCells("abis17")
 markerTable <- markerTableFromList(listMarkers)
-
-
-heatmapTall <- heatmapTall[rownames(heatmapTall) %in% markerTable$markerName,]
-markerTable <- markerTable[markerTable$markerName %in% rownames(heatmapTall),]
-
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTall <- listMarkersHarmonize[["heatmapTall"]]
+markerTable <- listMarkersHarmonize[["markerTable"]]
 ```
 
 ```{r, checks, include = FALSE}
@@ -49,15 +47,22 @@ length(intersect(rownames(heatmapTall), markerTable$markerName))
 ```
 
 ```{r}
-
 annotationHeatmapList <- annotationHeatmapList(
   heatmapTall, mapTable, markerTable)
-
 ```
 
 ```{r}
 annotationHeatmapList$heatmap
 ```
+
+# Heatmaps after transformation
+
+# Heatmap grids showing before and after transformation, side by side
+
+## Contrasting heatmaps
+
+These heatmaps show the 
+
 
 
 ## Untransformed
