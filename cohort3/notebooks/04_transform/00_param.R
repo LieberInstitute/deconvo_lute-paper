@@ -18,12 +18,8 @@ markersHarmonize <- function(heatmapTall, markerTable, filterDuplicated=TRUE){
   markersOverlap <- intersect(
     unique(rownames(heatmapTall)), unique(markerTable$markerName))
   
-  
-  
   if(filterDuplicated){
-    
     markerTable <- markerTable[!duplicated(markerTable[,"markerName"]),]
-    
     duplicatedMarkers <- 
       rownames(heatmapTall)[duplicated(rownames(heatmapTall))]
     duplicatedMarkers <- 
@@ -32,6 +28,7 @@ markersHarmonize <- function(heatmapTall, markerTable, filterDuplicated=TRUE){
         markerTable$markerName[duplicated(markerTable$markerName)])
     message("Found ", length(duplicatedMarkers), " duplicated markers.")
     markersOverlap <- markersOverlap[!markersOverlap %in% duplicatedMarkers]
+    
   } else{}
   
   heatmapTall <- heatmapTall[rownames(heatmapTall) %in% markersOverlap,]

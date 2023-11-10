@@ -54,12 +54,12 @@ identical(zRefTpm, scale(refTpm, center=FALSE, scale=TRUE))
 ```
 
 ```{r}
-heatmapTall <- zRefTpm # scale(refTpm, scale = FALSE)
+heatmapTall <- scale(refTpm)
 mapTable <- mapTableImmuneCells("abis17")
 markerTable <- markerTableFromList(listMarkers)
 listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
-heatmapTall <- listMarkersHarmonize[["heatmapTall"]]
-markerTable <- listMarkersHarmonize[["markerTable"]]
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
 ```
 
 ```{r, checks-untransformed, include = FALSE}
@@ -85,7 +85,7 @@ identical(rownames(heatmapTall), markerTable$markerName)
 
 ```{r}
 newAnnotationHeatmapList <- annotationHeatmapList(
-  heatmapTall, mapTable, markerTable, "Z")
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z")
 ```
 
 ```{r}
@@ -93,7 +93,6 @@ newAnnotationHeatmapList$heatmap
 ```
 
 ## Before transformation
-
 
 Showing the Z-transformed TPM scale marker expression for 17 cell types from 
 ABIS-seq reference. This is with the cell scale factors transformation.
@@ -129,6 +128,7 @@ annotationHeatmapList <- annotationHeatmapList(
 ```{r}
 annotationHeatmapList$heatmap
 ```
+
 # Heatmaps log2( TPM + 1 )
 
 ## Before transformation
