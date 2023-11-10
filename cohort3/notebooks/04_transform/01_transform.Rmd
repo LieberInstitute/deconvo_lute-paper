@@ -6,6 +6,8 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+libv <- c("ComplexHeatmap")
+sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
@@ -14,12 +16,69 @@ load("./env/04_transform/01_transform_script.RData")
 
 # Heatmaps
 
+```{r}
+source("./00_param.R")
+```
+
+```{r}
+
+heatmapTall <- scale(zTpm)
+
+heatmapTall <- heatmapTall[,seq(2)]
+
+mapTable <- data.frame(
+  cellType=colnames(heatmapTall),
+  color=c("blue","green")
+)
+
+markerTable <- do.call(rbind, lapply
+                       (names(listMarkers), function(cellType){
+  data.frame(markerName=listMarkers[[cellType]],
+             cellType=rep(cellType, length(listMarkers[[cellType]])))
+}))
+markerTable <- as.data.frame(markerTable)
+markerTable <- markerTable[markerTable$cellType %in% mapTable$cellType,]
+
+heatmapTall <- heatmapTall[rownames(heatmapTall) %in% markerTable$markerName,]
+markerTable <- markerTable[markerTable$markerName %in% rownames(heatmapTall),]
+
+```
+
+```{r, checks}
+head(heatmapTall)
+head(markerTable)
+intersect(unique(markerTable$cellType), colnames(heatmapTall))
+length(intersect(unique(markerTable$cellType), colnames(heatmapTall)))
+mapTable
+head(rownames(heatmapTall))
+head(markerTable$markerName)
+length(intersect(rownames(heatmapTall), markerTable$markerName))
+```
+
+
+
+
+
+```{r}
+
+annotationHeatmapList <- annotationHeatmapList(heatmapTall, mapTable, markerTable)
+
+```
+
+```{r}
+annotationHeatmapList$heatmap
+```
+
+
 ## Untransformed
 
 No annotation
 
-```{r, plot.height=10}
-Heatmap(scale(refTpmFilter),name="Z_{TPM}",row_names_gp=gpar(fontsize=5))
+```{r, fig.dim=c(500,200)}
+newJpgPath <- "./heatmap_z_tpm.jpg"
+newHeatmap <- Heatmap(scale(refTpmFilter),name="Z", row_names_gp=gpar(fontsize=5))
+jpeg(newJpgPath, width=1000, height=1000, units="in", res=600); newHeatmap; dev.off()
+knitr::include_graphics(newJpgPath)
 ```
 
 With annotation
