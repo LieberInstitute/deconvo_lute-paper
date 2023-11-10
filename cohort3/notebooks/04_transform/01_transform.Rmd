@@ -53,7 +53,7 @@ identical(rownames(heatmapTall), markerTable$markerName)
 
 ```{r}
 newAnnotationHeatmapList <- annotationHeatmapList(
-  heatmapTall, mapTable, markerTable)
+  heatmapTall, mapTable, markerTable, "Z")
 ```
 
 ```{r}
@@ -91,7 +91,7 @@ identical(rownames(heatmapTall), markerTable$markerName)
 
 ```{r}
 annotationHeatmapList <- annotationHeatmapList(
-  heatmapTall, mapTable, markerTable)
+  heatmapTall, mapTable, markerTable, "Z")
 ```
 
 ```{r}
@@ -130,7 +130,7 @@ identical(rownames(heatmapTall), markerTable$markerName)
 
 ```{r}
 newAnnotationHeatmapList <- annotationHeatmapList(
-  heatmapTall, mapTable, markerTable)
+  heatmapTall, mapTable, markerTable, "Z")
 ```
 
 ```{r}
@@ -168,7 +168,7 @@ identical(rownames(heatmapTall), markerTable$markerName)
 
 ```{r}
 newAnnotationHeatmapList <- annotationHeatmapList(
-  heatmapTall, mapTable, markerTable)
+  heatmapTall, mapTable, markerTable, "Z")
 ```
 
 ```{r}

@@ -53,7 +53,7 @@ markersHarmonize <- function(heatmapTall, markerTable, filterDuplicated=TRUE){
 
 
 annotationHeatmapList <- function(
-    heatmapTall, mapTable, markerTable){
+    heatmapTall, mapTable, markerTable, heatmapTitle){
   # annotationHeatmapList
   #
   # get heatmap with cell type and marker annotations of cell types.
@@ -104,7 +104,8 @@ annotationHeatmapList <- function(
       heatmap=Heatmap(
         heatmapTall, 
         top_annotation=topAnnotation, 
-        left_annotation=leftAnnotation
+        left_annotation=leftAnnotation,
+        name=heatmapTitle
       )
     )
   )
