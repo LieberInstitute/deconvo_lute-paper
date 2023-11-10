@@ -9,6 +9,10 @@
 
 annotationHeatmapList <- function(
     heatmapTall, mapTable, markerTable){
+  # annotationHeatmapList
+  #
+  # get heatmap with cell type and marker annotations of cell types.
+  #
   
   # column labels from 1 lookup
   columnLabelVector <- sapply(colnames(heatmapTall), function(typeLabel){
@@ -57,10 +61,35 @@ annotationHeatmapList <- function(
   )
 }
 
+
+
+
 mapTableImmuneCells <- function(whichTable="abis17"){
+  # mapTableImmuneCells
+  #
+  # get celltype label and color mappings for immune cell types.
+  #
   if(whichTable=="abis17"){
     mapTable <- data.frame(
-      cellType = colnames(heatmapTall),
+      cellType = c(
+        "Monocytes.C",
+        "NK",
+        "T.CD8.Memory",
+        "T.CD4.Naive",
+        "T.CD8.Naive",
+        "B.Naive",
+        "T.CD4.Memory",
+        "MAIT",
+        "T.gd.Vd2",
+        "Neutrophils.LD",
+        "T.gd.non.Vd2",
+        "Basophils.LD",
+        "Monocytes.NC.I",
+        "B.Memory",
+        "mDCs",
+        "pDCs",
+        "Plasmablasts"
+      ),
       color=c(
         "forestgreen", # Monocytes.C
         "tan", # NK
@@ -87,3 +116,16 @@ mapTableImmuneCells <- function(whichTable="abis17"){
   return(mapTable)
 }
 
+
+
+markerTableFromList <- function(listMarkers){
+  markerTable <- do.call(rbind, lapply
+                         (names(listMarkers), function(cellType){
+                           data.frame(markerName=listMarkers[[cellType]],
+                                      cellType=rep(cellType, length(listMarkers[[cellType]])))
+                         }))
+  markerTable <- as.data.frame(markerTable)
+  markerTable <- markerTable[markerTable$cellType %in% mapTable$cellType,]
+  
+  return(markerTable)
+}

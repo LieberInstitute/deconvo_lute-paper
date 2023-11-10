@@ -20,47 +20,16 @@ load("./env/04_transform/01_transform_script.RData")
 source("./00_param.R")
 ```
 
+## 17 cell types
+
+17 cell types from ABIS-seq reference.
+
 ```{r}
 
 heatmapTall <- scale(zTpm)
+mapTable <- mapTableImmuneCells("abis17")
+markerTable <- markerTableFromList(listMarkers)
 
-#heatmapTall <- heatmapTall[,seq(2)]
-
-#mapTable <- data.frame(
-#  cellType=colnames(heatmapTall),
-#  color=c("blue","green")
-#)
-
-mapTable <- data.frame(
-  cellType = colnames(heatmapTall),
-  color=c(
-    "forestgreen", # Monocytes.C
-    "tan", # NK
-    "dodgerblue", # T.CD8.Memory
-    "gold4", # T.CD4.Naive
-    "gold4", # T.CD8.Naive
-    "brown", # B.Naive
-    "yellow", # T.CD4.Memory
-    "blue4", # MAIT
-    "purple", # T.gd.Vd2
-    "gold2", # Neutrophils.LD
-    "purple", # T.gd.non.Vd2
-    "darkorange1", # "Basophils.LD
-    "forestgreen", # Monocytes.NC.I
-    "darkgoldenrod4", # B.Memory
-    "darkgreen", # mDCs
-    "orange", # pDCs
-    "gold" # Plasmablasts
-  )
-)
-
-markerTable <- do.call(rbind, lapply
-                       (names(listMarkers), function(cellType){
-  data.frame(markerName=listMarkers[[cellType]],
-             cellType=rep(cellType, length(listMarkers[[cellType]])))
-}))
-markerTable <- as.data.frame(markerTable)
-markerTable <- markerTable[markerTable$cellType %in% mapTable$cellType,]
 
 heatmapTall <- heatmapTall[rownames(heatmapTall) %in% markerTable$markerName,]
 markerTable <- markerTable[markerTable$markerName %in% rownames(heatmapTall),]
@@ -68,6 +37,7 @@ markerTable <- markerTable[markerTable$markerName %in% rownames(heatmapTall),]
 ```
 
 ```{r, checks, include = FALSE}
+dim(heatmapTall)
 head(heatmapTall)
 head(markerTable)
 intersect(unique(markerTable$cellType), colnames(heatmapTall))
