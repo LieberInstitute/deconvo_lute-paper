@@ -2,7 +2,9 @@
 title: "01_transform"
 author: "Sean Maden"
 date: "2023-11-08"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,10 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
 load("./env/04_transform/01_transform_script.RData")
-```
-
-```{r}
-source("./00_param.R")
+source("./notebooks/04_transform/00_param.R")
 ```
 
 This notebook shows heatmaps of immune cell types before and after cell type 
@@ -24,8 +23,10 @@ the discernability of cell type transformation difference.
 
 # Heatmaps before transformation
 
+## TPM scale
+
 Showing the Z-transformed TPM scale marker expression for 17 cell types from 
-ABIS-seq reference.
+ABIS-seq reference. This is without the cell scale factors transformation.
 
 ```{r}
 heatmapTall <- scale(zTpm)
@@ -36,7 +37,45 @@ heatmapTall <- listMarkersHarmonize[["heatmapTall"]]
 markerTable <- listMarkersHarmonize[["markerTable"]]
 ```
 
-```{r, checks, include = FALSE}
+```{r, checks-untransformed, include = FALSE}
+dim(heatmapTall)
+head(heatmapTall)
+head(markerTable)
+intersect(unique(markerTable$cellType), colnames(heatmapTall))
+length(intersect(unique(markerTable$cellType), colnames(heatmapTall)))
+mapTable
+head(rownames(heatmapTall))
+head(markerTable$markerName)
+length(intersect(rownames(heatmapTall), markerTable$markerName))
+length(intersect(rownames(heatmapTall), markerTable$markerName))
+identical(rownames(heatmapTall), markerTable$markerName)
+```
+
+```{r}
+newAnnotationHeatmapList <- annotationHeatmapList(
+  heatmapTall, mapTable, markerTable)
+```
+
+```{r}
+newAnnotationHeatmapList$heatmap
+```
+
+# Heatmaps after transformation
+
+
+Showing the Z-transformed TPM scale marker expression for 17 cell types from 
+ABIS-seq reference. This is with the cell scale factors transformation.
+
+```{r}
+heatmapTall <- scale(zTpmTransformed)
+mapTable <- mapTableImmuneCells("abis17")
+markerTable <- markerTableFromList(listMarkers)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTall <- listMarkersHarmonize[["heatmapTall"]]
+markerTable <- listMarkersHarmonize[["markerTable"]]
+```
+
+```{r, checks-transformed, include = FALSE}
 dim(heatmapTall)
 head(heatmapTall)
 head(markerTable)
@@ -58,83 +97,6 @@ annotationHeatmapList <- annotationHeatmapList(
 ```{r}
 annotationHeatmapList$heatmap
 ```
-
-The expression scale is intermediate.
-
-```{r}
-```
-
-# Heatmaps after transformation
-
-# Heatmap grids showing before and after transformation, side by side
-
-## Contrasting heatmaps
-
-These heatmaps show the 
-
-
-
-## Untransformed
-
-No annotation
-
-```{r, fig.dim=c(500,200)}
-newJpgPath <- "./heatmap_z_tpm.jpg"
-newHeatmap <- Heatmap(scale(refTpmFilter),name="Z", row_names_gp=gpar(fontsize=5))
-jpeg(newJpgPath, width=1000, height=1000, units="in", res=600); newHeatmap; dev.off()
-knitr::include_graphics(newJpgPath)
-```
-
-With annotation
-
-```{r}
-set.seed(0)
-# set cell type colors
-dfCellColors<-
-  data.frame(
-    cellTypeVector=cellTypeVector, 
-    cellTypeColor=colours()[sample(cellTypeCount)])
-# top annotation
-heatmapTopAnno<-HeatmapAnnotation(
-  cellType=dfCellColors[,"cellTypeVector"],
-  col=list(cellType=paste0(
-    dfCellColors[,"cellTypeVector"],"=",
-    dfCellColors[,"cellTypeColor"])),
-  gp=gpar(col="black")
-)
-# left annotation
-cellTypeMarkerVector<-unlist(
-  lapply(names(listMarkers),function(cellType){
-    rep(cellType,length(listMarkers[[cellType]]))
-}))
-cellTypeMarkerColorVector<-unlist(
-  lapply(names(listMarkers),function(cellType){
-    rep(dfCellColors[dfCellColors[,1]==cellType,2],
-        length(listMarkers[[cellType]]))
-}))
-heatmapRowAnno<-rowAnnotation(
-  cellType=cellTypeMarkerVector,
-  col=list(cellType=paste0(
-    cellTypeMarkerVector,"=",cellTypeMarkerColorVector
-  )),
-  gp=gpar(col="black")
-)
-
-
-Heatmap(scale(refTpmFilter),name="Z_{TPM}",
-        top_annotation=heatmapTopAnno,
-        row_annotation=heatmapRowAnno)
-```
-
-
-
-
-## Transformed 
-
-```{r}
-Heatmap(zTpmTransformed)
-```
-
 # Session info
 
 ```{r}

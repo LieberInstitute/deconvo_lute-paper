@@ -90,7 +90,8 @@ annotationHeatmapList <- function(
   
   leftAnnotation<-rowAnnotation(
     markerTypeLabel=markerTable[,"cellType"],
-    col=list(markerTypeLabel=columnLabelVector)
+    col=list(markerTypeLabel=columnLabelVector),
+    show_legend=FALSE
   )
   
   return(
