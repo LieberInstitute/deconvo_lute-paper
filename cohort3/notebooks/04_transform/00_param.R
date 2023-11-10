@@ -7,7 +7,7 @@
 #
 #
 
-markersHarmonize <- function(heatmapTall, markerTable){
+markersHarmonize <- function(heatmapTall, markerTable, filterDuplicated=TRUE){
   # markersHarmonize
   #
   # Harmonize heatmap marker data
@@ -16,6 +16,18 @@ markersHarmonize <- function(heatmapTall, markerTable){
   #
   
   markersOverlap <- intersect(rownames(heatmapTall), markerTable$markerName)
+  
+  if(filterDuplicated){
+    duplicatedMarkers <- 
+      rownames(heatmapTall)[duplicated(rownames(heatmapTall))]
+    duplicatedMarkers <- 
+      unique(
+        duplicatedMarkers, 
+        markerTable$markerName[duplicated(markerTable$markerName)])
+    message("Found ", length(duplicatedMarkers), " duplicated markers.")
+    markersOverlap <- markersOverlap[!markersOverlap %in% duplicatedMarkers]
+  }
+  
   heatmapTall <- heatmapTall[rownames(heatmapTall) %in% markersOverlap,]
   markerTable <- markerTable[markerTable$markerName %in% markersOverlap,]
   
@@ -39,6 +51,9 @@ annotationHeatmapList <- function(
   # annotationHeatmapList
   #
   # get heatmap with cell type and marker annotations of cell types.
+  #
+  #
+  #
   #
   
   # column labels from 1 lookup
