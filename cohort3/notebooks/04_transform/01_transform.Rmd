@@ -24,7 +24,8 @@ the discernability of cell type transformation difference.
 
 # Heatmaps before transformation
 
-17 cell types from ABIS-seq reference.
+Showing the Z-transformed TPM scale marker expression for 17 cell types from 
+ABIS-seq reference.
 
 ```{r}
 heatmapTall <- scale(zTpm)
@@ -56,6 +57,11 @@ annotationHeatmapList <- annotationHeatmapList(
 
 ```{r}
 annotationHeatmapList$heatmap
+```
+
+The expression scale is intermediate.
+
+```{r}
 ```
 
 # Heatmaps after transformation
