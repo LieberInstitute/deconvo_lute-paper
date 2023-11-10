@@ -24,11 +24,34 @@ source("./00_param.R")
 
 heatmapTall <- scale(zTpm)
 
-heatmapTall <- heatmapTall[,seq(2)]
+#heatmapTall <- heatmapTall[,seq(2)]
+
+#mapTable <- data.frame(
+#  cellType=colnames(heatmapTall),
+#  color=c("blue","green")
+#)
 
 mapTable <- data.frame(
-  cellType=colnames(heatmapTall),
-  color=c("blue","green")
+  cellType = colnames(heatmapTall),
+  color=c(
+    "forestgreen", # Monocytes.C
+    "tan", # NK
+    "dodgerblue", # T.CD8.Memory
+    "gold4", # T.CD4.Naive
+    "gold4", # T.CD8.Naive
+    "brown", # B.Naive
+    "yellow", # T.CD4.Memory
+    "blue4", # MAIT
+    "purple", # T.gd.Vd2
+    "gold2", # Neutrophils.LD
+    "purple", # T.gd.non.Vd2
+    "darkorange1", # "Basophils.LD
+    "forestgreen", # Monocytes.NC.I
+    "darkgoldenrod4", # B.Memory
+    "darkgreen", # mDCs
+    "orange", # pDCs
+    "gold" # Plasmablasts
+  )
 )
 
 markerTable <- do.call(rbind, lapply
@@ -54,10 +77,6 @@ head(rownames(heatmapTall))
 head(markerTable$markerName)
 length(intersect(rownames(heatmapTall), markerTable$markerName))
 ```
-
-
-
-
 
 ```{r}
 
