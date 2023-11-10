@@ -32,7 +32,8 @@ annotationHeatmapList <- function(
   #)
   
   # match heatmap and marker table
-  markerTable <- markerTable[order(match(markerTable$marker, rownames(heatmapTall))),]
+  markerTable <- markerTable[
+    order(match(markerTable$marker, rownames(heatmapTall))),]
   identical(rownames(heatmapTall), markerTable$marker)
   
   leftAnnotation<-rowAnnotation(

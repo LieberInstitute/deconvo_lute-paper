@@ -44,7 +44,7 @@ markerTable <- markerTable[markerTable$markerName %in% rownames(heatmapTall),]
 
 ```
 
-```{r, checks}
+```{r, checks, include = FALSE}
 head(heatmapTall)
 head(markerTable)
 intersect(unique(markerTable$cellType), colnames(heatmapTall))
@@ -61,7 +61,8 @@ length(intersect(rownames(heatmapTall), markerTable$markerName))
 
 ```{r}
 
-annotationHeatmapList <- annotationHeatmapList(heatmapTall, mapTable, markerTable)
+annotationHeatmapList <- annotationHeatmapList(
+  heatmapTall, mapTable, markerTable)
 
 ```
 
