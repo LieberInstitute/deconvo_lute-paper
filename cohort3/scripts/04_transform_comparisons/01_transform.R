@@ -35,6 +35,7 @@ cellSizesLog2Tpm<-apply(as.matrix(refTpm),2,sum)
 refTpmLog2Transformed <- lute:::.zstransform(refTpmLog2, cellSizesLog2Tpm)
 
 # filter markers
+# TEST: does listMarkers change with TPM vs log2TPM+1?
 listMarkers <-lapply(
   colnames(refTpm), function(cellType){
     cellTypeTrue<-colnames(refTpm)==cellType
@@ -52,7 +53,10 @@ names(listMarkers)<-colnames(refTpm)
 # tables for heatmaps
 refTpmFilter<-refTpm[unlist(listMarkers),]
 refTpmTransformedFilter<-refTpmTransformed[unlist(listMarkers),]
+
 # heatmaps
 Heatmap(refTpm)
-Heatmap(refTpmTransformed)
+Heatmap(scale(refTpm))
+
+# save
 save.image(file="./env/04_transform/01_transform_script.RData")

@@ -21,6 +21,15 @@ This notebook shows heatmaps of immune cell types before and after cell type
 transformation. Part of this task is to relate the normalization conditions to 
 the discernability of cell type transformation difference.
 
+# Conditions tested
+
+```{r}
+tpm Z sum
+log2tpm+1 Z sum
+tpm_scaled Z sum
+log2tpm+1_unscaled Z sum
+```
+
 # Heatmaps TPM
 
 ## Before transformation
