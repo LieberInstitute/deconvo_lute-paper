@@ -19,7 +19,8 @@ source("./00_param.R")
 ```
 
 This notebook shows heatmaps of immune cell types before and after cell type 
-transformation.
+transformation. Part of this task is to relate the normalization conditions to 
+the discernability of cell type transformation difference.
 
 # Heatmaps before transformation
 
@@ -44,6 +45,8 @@ mapTable
 head(rownames(heatmapTall))
 head(markerTable$markerName)
 length(intersect(rownames(heatmapTall), markerTable$markerName))
+length(intersect(rownames(heatmapTall), markerTable$markerName))
+identical(rownames(heatmapTall), markerTable$markerName)
 ```
 
 ```{r}
