@@ -23,11 +23,15 @@ the discernability of cell type transformation difference.
 
 # Conditions tested
 
+Experiment condition matrix for conditions evaluated.
+
 ```{r}
-tpm Z sum
-log2tpm+1 Z sum
-tpm_scaled Z sum
-log2tpm+1_unscaled Z sum
+df <- data.frame(
+  expressionScale=c("tpm", "log2_tpm_plusone", "tpm", "log2_tpm_plusone"),
+  heatmapRescale=rep("Z", 4),
+  cellSizeScaleFactor=rep("sum",4)
+)
+knitr::kable(df, align = "c")
 ```
 
 # Heatmaps TPM
