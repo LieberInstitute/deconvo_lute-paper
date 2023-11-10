@@ -29,7 +29,7 @@ Showing the Z-transformed TPM scale marker expression for 17 cell types from
 ABIS-seq reference. This is without the cell scale factors transformation.
 
 ```{r}
-heatmapTall <- scale(zTpm)
+heatmapTall <- scale(refTpm)
 mapTable <- mapTableImmuneCells("abis17")
 markerTable <- markerTableFromList(listMarkers)
 listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
@@ -67,7 +67,7 @@ Showing the Z-transformed TPM scale marker expression for 17 cell types from
 ABIS-seq reference. This is with the cell scale factors transformation.
 
 ```{r}
-heatmapTall <- scale(zTpmTransformed)
+heatmapTall <- scale(refTpmTransformed)
 mapTable <- mapTableImmuneCells("abis17")
 markerTable <- markerTableFromList(listMarkers)
 listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
@@ -106,7 +106,7 @@ types from ABIS-seq reference. This is without the cell scale factors
 transformation.
 
 ```{r}
-heatmapTall <- scale(zLog2Tpm)
+heatmapTall <- scale(refTpmLog2)
 mapTable <- mapTableImmuneCells("abis17")
 markerTable <- markerTableFromList(listMarkers)
 listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
@@ -114,7 +114,7 @@ heatmapTall <- listMarkersHarmonize[["heatmapTall"]]
 markerTable <- listMarkersHarmonize[["markerTable"]]
 ```
 
-```{r, checks-untransformed, include = FALSE}
+```{r, checks-untransformed-tpmlog2, include = FALSE}
 dim(heatmapTall)
 head(heatmapTall)
 head(markerTable)
@@ -144,7 +144,7 @@ types from ABIS-seq reference. This is with the cell scale factors
 transformation.
 
 ```{r}
-heatmapTall <- scale(zLog2TpmTransformed)
+heatmapTall <- scale(refTpmLog2Transformed)
 mapTable <- mapTableImmuneCells("abis17")
 markerTable <- markerTableFromList(listMarkers)
 listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
@@ -152,7 +152,7 @@ heatmapTall <- listMarkersHarmonize[["heatmapTall"]]
 markerTable <- listMarkersHarmonize[["markerTable"]]
 ```
 
-```{r, checks-untransformed, include = FALSE}
+```{r, checks-untransformed-tpmlog2, include = FALSE}
 dim(heatmapTall)
 head(heatmapTall)
 head(markerTable)

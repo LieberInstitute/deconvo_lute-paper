@@ -17,11 +17,24 @@ refTpm <- refTpm[!duplicated(refTpm[,1]),]
 rownames(refTpm)<-refTpm[,1]
 refTpm <- refTpm[,seq(2,ncol(refTpm))]
 for(c in seq(ncol(refTpm))){refTpm[,c] <- as.numeric(refTpm[,c])}
+
+# TPM heatmap data
 refTpm <- as.matrix(refTpm)
 # transform
 cellSizes<-apply(as.matrix(refTpm),2,sum)
 refTpmTransformed <- lute:::.zstransform(refTpm, cellSizes)
-# filter
+
+# log2 TPM + 1 heatmap data
+refTpmLog2 <- as.data.frame(t(apply(refTpm,1,function(ci){
+  log2(ci+1)
+})))
+colnames(refTpmLog2) <- colnames(refTpm)
+rownames(refTpmLog2) <- rownames(refTpm)
+# transform
+cellSizesLog2Tpm<-apply(as.matrix(refTpm),2,sum)
+refTpmLog2Transformed <- lute:::.zstransform(refTpmLog2, cellSizesLog2Tpm)
+
+# filter markers
 listMarkers <-lapply(
   colnames(refTpm), function(cellType){
     cellTypeTrue<-colnames(refTpm)==cellType
@@ -35,6 +48,7 @@ listMarkers <-lapply(
   }
 )
 names(listMarkers)<-colnames(refTpm)
+
 # tables for heatmaps
 refTpmFilter<-refTpm[unlist(listMarkers),]
 refTpmTransformedFilter<-refTpmTransformed[unlist(listMarkers),]
