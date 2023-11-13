@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 libv <- c("ComplexHeatmap", "ggplot2", "dplyr", "reshape2")
 sapply(libv, library, character.only = TRUE)
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 setwd("..")
 setwd("..")
 load("./env/04_transform/01_transform_script.RData")
@@ -23,18 +23,24 @@ the discernability of cell type transformation difference.
 
 # Conditions tested
 
-Experiment condition matrix for conditions evaluated.
+Experiment condition matrix for conditions evaluated. Data were summarized as 
+median TPM by cell type for the ABIS-seq reference, but the scale log2(TPM+1) 
+was used for analyses in the manuscript.
 
-```{r}
+```{r, echo = FALSE}
 df <- data.frame(
-  expressionScale=c("tpm", "log2_tpm_plusone", "tpm", "log2_tpm_plusone"),
-  heatmapRescale=rep("Z", 4),
-  cellSizeScaleFactor=rep("sum",4)
+  expressionScale=c("TPM", "log2(TPM+1)", "TPM", "log2(TPM+1)"),
+  heatmapRescale=rep("Z rescaling using scale()", 4),
+  cellSizeScaleFactor=rep("Marker library size (sum expression)",4)
 )
 knitr::kable(df, align = "c")
 ```
 
 # Heatmaps TPM
+
+These heatmaps show the Z-rescaled expression either with or without cell size 
+transformations. Annotations on rows and columns show the cell type, where row
+annotations show the primary cell type for which the given gene is a marker.
 
 ## Before transformation
 
