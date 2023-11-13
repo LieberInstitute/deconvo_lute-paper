@@ -53,6 +53,8 @@ names(listMarkers)<-colnames(refTpm)
 # tables for heatmaps
 refTpmFilter<-refTpm[unlist(listMarkers),]
 refTpmTransformedFilter<-refTpmTransformed[unlist(listMarkers),]
+refTpmLog2Filter <- refTpmLog2[unlist(listMarkers),]
+refTpmLog2TransformedFilter <- refTpmLog2Transformed[unlist(listMarkers),]
 
 # heatmaps
 Heatmap(refTpm)

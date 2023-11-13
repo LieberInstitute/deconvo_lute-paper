@@ -159,60 +159,14 @@ newAnnotationHeatmapList$heatmap
 newAnnotationHeatmapListTpmTransformed <- newAnnotationHeatmapList
 ```
 
-## Side-by-side, before and after transformation
+## Side-by-side
+
+Shows heatmaps before and after transformation, side by side.
 
 ```{r}
 heatmap1 <- newAnnotationHeatmapListTpm$heatmap
 heatmap2 <- newAnnotationHeatmapListTpmTransformed$heatmap
 heatmap1 + heatmap2
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-heatmapTall <- scale(refTpmTransformed)
-mapTable <- mapTableImmuneCells("abis17")
-markerTable <- markerTableFromList(listMarkers)
-listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
-heatmapTall <- listMarkersHarmonize[["heatmapTall"]]
-markerTable <- listMarkersHarmonize[["markerTable"]]
-```
-
-```{r, checks-transformed, include = FALSE}
-dim(heatmapTall)
-head(heatmapTall)
-head(markerTable)
-intersect(unique(markerTable$cellType), colnames(heatmapTall))
-length(intersect(unique(markerTable$cellType), colnames(heatmapTall)))
-mapTable
-head(rownames(heatmapTall))
-head(markerTable$markerName)
-length(intersect(rownames(heatmapTall), markerTable$markerName))
-length(intersect(rownames(heatmapTall), markerTable$markerName))
-identical(rownames(heatmapTall), markerTable$markerName)
-```
-
-```{r}
-annotationHeatmapList <- annotationHeatmapList(
-  heatmapTall, mapTable, markerTable, "Z")
-```
-
-```{r}
-annotationHeatmapList$heatmap
 ```
 
 # Heatmaps log2( TPM + 1 )
@@ -222,6 +176,23 @@ annotationHeatmapList$heatmap
 Showing the Z-transformed log2( TPM + 1 ) scale marker expression for 17 cell 
 types from ABIS-seq reference. This is without the cell scale factors 
 transformation.
+
+```{r}
+heatmapTall <- scale(refTpmLog2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 heatmapTall <- scale(refTpmLog2)
