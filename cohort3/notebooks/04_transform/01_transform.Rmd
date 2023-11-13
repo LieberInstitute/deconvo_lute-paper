@@ -175,6 +175,16 @@ heatmap2 <- newAnnotationHeatmapListTpmTransformed$heatmap
 heatmap1 + heatmap2
 ```
 
+```{r}
+# save large heatmap image
+setwd("..")
+setwd("..")
+jpeg("./figures/04_transform/heatmap_transform_tpm_filteredmarkers.jpg", 
+     width = 10, height = 18, units = "in", res = 400)
+heatmap1 + heatmap2
+dev.off()
+```
+
 # Heatmaps log2( TPM + 1 )
 
 ## Before transformation
@@ -315,6 +325,15 @@ heatmap2 <- newAnnotationHeatmapListTpmLog2Transformed$heatmap
 heatmap1 + heatmap2
 ```
 
+```{r}
+# save large heatmap image
+setwd("..")
+setwd("..")
+jpeg("./figures/04_transform/heatmap_transform_tpmlog2plusone_filteredmarkers.jpg", 
+     width = 10, height = 18, units = "in", res = 400)
+heatmap1 + heatmap2
+dev.off()
+```
 
 # Scatter plots
 
