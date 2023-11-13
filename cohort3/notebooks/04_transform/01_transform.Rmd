@@ -348,6 +348,11 @@ Overlay all cell types, markers.
 ggplot(plotScatter, aes(x = untransformed, y = transformed)) + geom_point() + 
   geom_abline(slope = 1, intercept = 0)
 ```
+
+```{r}
+ggplot(plotScatter, aes(x = untransformed, y = transformed, color = cellType)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0)
+```
 Facet on cell types
 
 ```{r}
@@ -369,8 +374,8 @@ Scatterplots of marker log2(TPM+1) expression, comparing before and after
 rescaling.
 
 ```{r}
-plotDataUntransformed <- refTpmLog2Filter
-plotDataTransformed <- refTpmLog2TransformedFilter
+plotDataUntransformed <- as.matrix(refTpmLog2Filter)
+plotDataTransformed <- as.matrix(refTpmLog2TransformedFilter)
 ```
 
 ```{r, include = FALSE}
@@ -398,6 +403,12 @@ Overlay all cell types, markers.
 ggplot(plotScatter, aes(x = untransformed, y = transformed)) + geom_point() + 
   geom_abline(slope = 1, intercept = 0)
 ```
+
+```{r}
+ggplot(plotScatter, aes(x = untransformed, y = transformed, color = cellType)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0)
+```
+
 Facet on cell types
 
 ```{r}
