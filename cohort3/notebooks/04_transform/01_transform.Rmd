@@ -86,7 +86,7 @@ identical(rownames(heatmapTall), markerTable$markerName)
 
 ```{r}
 newAnnotationHeatmapList <- annotationHeatmapList(
-  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z")
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Untransformed")
 ```
 
 ```{r}
@@ -148,7 +148,7 @@ identical(rownames(heatmapTall), markerTable$markerName)
 
 ```{r}
 newAnnotationHeatmapList <- annotationHeatmapList(
-  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z")
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Transformed")
 ```
 
 ```{r}
