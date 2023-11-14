@@ -2,7 +2,9 @@
 title: "01-02_z_vs_unscaled"
 author: "Sean Maden"
 date: "2023-11-14"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +15,22 @@ setwd("..")
 setwd("..")
 load("./env/04_transform/01_transform_script.RData")
 source("./notebooks/04_transform/00_param.R")
+```
+
+# Overview
+
+Notebook looking at the impact of performing Z rescaling and cell size 
+transformations. The following design matrix is used.
+
+```{r, echo = FALSE}
+df <- data.frame(
+  expressionScale=c("TPM", "log2(TPM+1)", "TPM", "log2(TPM+1)"),
+  heatmapRescale=rep("Z rescaling using scale()", 4),
+  cellSizeScaleFactor=rep("Marker library size (sum expression)",4)
+)
+df2 <- df; df2$heatmapRescale <- "unscaled"
+df <- rbind(df, df2)
+knitr::kable(df, align = "c")
 ```
 
 # Heatmaps
