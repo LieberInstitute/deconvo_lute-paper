@@ -15,22 +15,20 @@ load("./env/04_transform/01_transform_script.RData")
 source("./notebooks/04_transform/00_param.R")
 ```
 
-## R Markdown
+# Overview
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This document looks at marker subsets by cell type, focusing on cell type size 
+categories (largest and smallest types). The log2(TPM+1) scale is used across 
+assessments.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# Cell sizes
 
-```{r cars}
-summary(cars)
+```{r}
+dfPlot <- data.frame(size = as.numeric(cellSizes), cellType=names(cellSizes))
 ```
 
-## Including Plots
+# Session info
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+sessinInfo()
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

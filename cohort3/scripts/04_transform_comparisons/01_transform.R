@@ -31,7 +31,7 @@ refTpmLog2 <- as.data.frame(t(apply(refTpm,1,function(ci){
 colnames(refTpmLog2) <- colnames(refTpm)
 rownames(refTpmLog2) <- rownames(refTpm)
 # transform
-cellSizesLog2Tpm<-apply(as.matrix(refTpm),2,sum)
+cellSizesLog2Tpm<-apply(as.matrix(refTpmLog2),2,sum)
 refTpmLog2Transformed <- lute:::.zstransform(refTpmLog2, cellSizesLog2Tpm)
 
 # filter markers
