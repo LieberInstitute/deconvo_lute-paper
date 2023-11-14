@@ -1,0 +1,136 @@
+---
+title: "01-02_z_vs_unscaled"
+author: "Sean Maden"
+date: "2023-11-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+libv <- c("ComplexHeatmap", "ggplot2", "dplyr", "reshape2")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+setwd("..")
+setwd("..")
+load("./env/04_transform/01_transform_script.RData")
+source("./notebooks/04_transform/00_param.R")
+```
+
+# Heatmaps
+
+## TPM
+
+```{r}
+mapTable <- mapTableImmuneCells("abis17")
+markerTable <- markerTableFromList(listMarkers)
+
+# tpm, untransformed
+heatmapData <- refTpmFilter
+# z scaled
+heatmapTall <- scale(heatmapData)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+zTpmList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Scaled, untransformed")
+# unscaled
+heatmapTall <- heatmapData
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+tpmList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "TPM", "Unscaled, untransformed")
+
+# tpm, transformed
+heatmapData <- refTpmTransformedFilter
+# z scaled
+heatmapTall <- scale(heatmapData)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+zTpmTransformedList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Scaled, transformed")
+# unscaled
+heatmapTall <- heatmapData
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+tpmTransformedList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "TPM", "Unscaled, transformed")
+```
+
+```{r}
+heatmap1_1 <- tpmList[["heatmap"]]
+heatmap1_2 <- zTpmList[["heatmap"]]
+heatmap2_1 <- tpmTransformedList[["heatmap"]]
+heatmap2_2 <- zTpmTransformedList[["heatmap"]]
+
+heatmap1_1 + heatmap1_2
+
+heatmap2_1 + heatmap2_2
+
+heatmap1_1 + heatmap2_1
+
+heatmap1_2 + heatmap2_2
+```
+
+## Log2(TPM+1)
+
+```{r}
+mapTable <- mapTableImmuneCells("abis17")
+markerTable <- markerTableFromList(listMarkers)
+
+# log2(tpm+1), untransformed
+heatmapData <- refTpmLog2Filter
+# z scaled
+heatmapTall <- scale(heatmapData)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+zTpmList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Scaled, untransformed")
+# unscaled
+heatmapTall <- heatmapData
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+tpmList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "log2(TPM+1)", "Unscaled, untransformed")
+
+# tpm, transformed
+heatmapData <- refTpmLog2TransformedFilter
+# z scaled
+heatmapTall <- scale(heatmapData)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+zTpmTransformedList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Scaled, transformed")
+# unscaled
+heatmapTall <- heatmapData
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+tpmTransformedList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "log2(TPM+1)", "Unscaled, transformed")
+```
+
+```{r}
+heatmap1_1 <- tpmList[["heatmap"]]
+heatmap1_2 <- zTpmList[["heatmap"]]
+heatmap2_1 <- tpmTransformedList[["heatmap"]]
+heatmap2_2 <- zTpmTransformedList[["heatmap"]]
+
+heatmap1_1 + heatmap1_2
+
+heatmap2_1 + heatmap2_2
+
+heatmap1_1 + heatmap2_1
+
+heatmap1_2 + heatmap2_2
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
