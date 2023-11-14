@@ -91,6 +91,9 @@ annotationHeatmapList <- function(
     show_legend=FALSE
   )
   
+  # append marker counts
+  rowTitleString <- paste0("Markers (", nrow(heatmapTall), " genes)")
+  
   return(
     list(
       heatmapTall=heatmapTall,
@@ -103,7 +106,8 @@ annotationHeatmapList <- function(
         top_annotation=topAnnotation, 
         left_annotation=leftAnnotation,
         name=heatmapTitle,
-        column_title=columnTitle
+        column_title=columnTitle,
+        row_title=rowTitleString
       )
     )
   )

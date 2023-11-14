@@ -2,7 +2,9 @@
 title: "02_marker_details"
 author: "Sean Maden"
 date: "2023-11-14"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -160,35 +162,100 @@ plot3
 
 # Heatmaps
 
-All heatmaps use Z scaled expression.
+Heatmaps subsetting on size category. All heatmaps use Z scaled expression.
 
-## By size category
+## Large cell sizes
 
-Heatmaps subsetting on size category.
+Heatmaps only showing markers from large cell size (cell types : 
+`r unique(markerTable[markerTable$sizeCategory=="high",]$cellType)``).
 
 ```{r}
-# large cell sizes
 # untransformed
 heatmapDataAll <- refTpmLog2Filter
 markerFilter <- rownames(heatmapDataAll) %in% 
   markerTable[markerTable$sizeCategory=="high",]$markerName
 heatmapData <- heatmapDataAll[markerFilter,]
+```
+```{r, fig.height=15}
 # get heatmap
 heatmapTall <- scale(heatmapData)
 listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
 heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
 markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
 highSizeMarkersHeatmapList <- annotationHeatmapList(
-  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Untransformed")s
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "High cell size markers")
 # plot
 highSizeMarkersHeatmapList$heatmap
 ```
 
+
+## Medium cell sizes
+
+Heatmaps only showing markers from medium cell size (cell types : 
+`r unique(markerTable[markerTable$sizeCategory=="medium",]$cellType)``).
+
 ```{r}
+# untransformed
+heatmapDataAll <- refTpmLog2Filter
+markerFilter <- rownames(heatmapDataAll) %in% 
+  markerTable[markerTable$sizeCategory=="medium",]$markerName
+heatmapData <- heatmapDataAll[markerFilter,]
 ```
+```{r, fig.height=15}
+# get heatmap
+heatmapTall <- scale(heatmapData)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+mediumSizeMarkersHeatmapList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Medium cell size markers")
+# plot
+mediumSizeMarkersHeatmapList$heatmap
+```
+
+
+## Low cell sizes
+
+Heatmaps only showing markers from low cell size (cell types : 
+`r unique(markerTable[markerTable$sizeCategory=="low",]$cellType)``).
+
+```{r}
+# untransformed
+heatmapDataAll <- refTpmLog2Filter
+markerFilter <- rownames(heatmapDataAll) %in% 
+  markerTable[markerTable$sizeCategory=="low",]$markerName
+heatmapData <- heatmapDataAll[markerFilter,]
+```
+```{r, fig.height=15}
+# get heatmap
+heatmapTall <- scale(heatmapData)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+lowSizeMarkersHeatmapList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Low cell size markers")
+# plot
+lowSizeMarkersHeatmapList$heatmap
+```
+
+## Composite
+
+```{r, fig.height=25}
+heatmap1 <- highSizeMarkersHeatmapList$heatmap
+heatmap2 <- mediumSizeMarkersHeatmapList$heatmap
+heatmap3 <- lowSizeMarkersHeatmapList$heatmap
+
+# heatmap1 + heatmap2 + heatmap3
+
+ht_list = heatmap1 %v% heatmap2 %v% heatmap3
+draw(ht_list)
+```
+
+
+
 
 # Session info
 
 ```{r}
-sessinInfo()
+sessionInfo()
 ```
