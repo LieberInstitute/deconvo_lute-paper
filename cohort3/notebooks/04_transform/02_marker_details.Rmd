@@ -160,11 +160,28 @@ plot3
 
 # Heatmaps
 
+All heatmaps use Z scaled expression.
+
 ## By size category
 
 Heatmaps subsetting on size category.
 
 ```{r}
+# large cell sizes
+# untransformed
+heatmapDataAll <- refTpmLog2Filter
+markerFilter <- rownames(heatmapDataAll) %in% 
+  markerTable[markerTable$sizeCategory=="high",]$markerName
+heatmapData <- heatmapDataAll[markerFilter,]
+# get heatmap
+heatmapTall <- scale(heatmapData)
+listMarkersHarmonize <- markersHarmonize(heatmapTall, markerTable)
+heatmapTallHarmonized <- listMarkersHarmonize[["heatmapTall"]]
+markerTableHarmonized <- listMarkersHarmonize[["markerTable"]]
+highSizeMarkersHeatmapList <- annotationHeatmapList(
+  heatmapTallHarmonized, mapTable, markerTableHarmonized, "Z", "Untransformed")s
+# plot
+highSizeMarkersHeatmapList$heatmap
 ```
 
 ```{r}
