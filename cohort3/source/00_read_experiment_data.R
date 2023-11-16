@@ -29,7 +29,11 @@ processP <- function(path){
   # Get proportions from file.
   #
   
-  p <- read.csv(pPath)
+  p <- read.csv(path)
+  
+  # process
+  rownames(p) <- p[,1]
+  p <- p[,seq(2,ncol(p))]
   return(p)
 }
 

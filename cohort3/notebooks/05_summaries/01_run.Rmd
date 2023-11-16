@@ -36,7 +36,7 @@ This is the bulk expression from S13 cohort. It was available from GEO GSE107011
 
 # Summaries
 
-## Cell types
+## All cell types
 
 Z ref S4
 
@@ -50,8 +50,8 @@ length(unique(cellTypes))
 Ptrue S13
 
 ```{r}
-# data <- ptrue[,1]
-cellTypes <- ptrue[,1]
+data <- ptrue
+cellTypes <- colnames(ptrue)
 cellTypes
 length(unique(cellTypes))
 ```
@@ -64,6 +64,15 @@ cellTypes <- colnames(data)
 cellTypes
 length(unique(cellTypes))
 ```
+
+## Cell types by general category
+
+```{r}
+isTcellString <- "^T .*|^T\\..*"
+isBcellString <- "^T .*|^T\\..*"
+isOtherCellString <- 
+```
+
 
 ## Expression
 
