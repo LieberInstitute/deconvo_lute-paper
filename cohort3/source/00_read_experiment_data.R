@@ -83,7 +83,7 @@ processY <- function(path, assayName = "tpm"){
   phenoDataS13$num.zero.expression <- unlist(apply(yTable, 2, function(ci){length(ci[ci==0])}))
   rownames(phenoDataS13) <- phenoDataS13[,1]
   # append pheno data to colData for SummarizedExperiment
-  colData(newSummarizedExperiment) <- DataFrame(phenoDataS13)
+  colData(ySe) <- DataFrame(phenoDataS13)
   
   
   return(returnList)

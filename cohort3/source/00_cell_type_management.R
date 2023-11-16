@@ -12,9 +12,9 @@ cellCategorySummaries <- function(cellTypeVector, typeLabelSubset=5){
   numBcell <- length(which(isBcell))
   numOther <- length(which(isOther))
   
-  fractionTcell <- numTcell/totalCell
-  fractionBcell <- numBcell/totalCell
-  fractionOther <- numOther/totalCell
+  fractionTcell <- round(numTcell/totalCell, 3)
+  fractionBcell <- round(numBcell/totalCell, 3)
+  fractionOther <- round(numOther/totalCell, 3)
   
   tCellLabels <- paste0(cellTypeVector[isTcell],collapse=";")
   bCellLabels <- paste0(cellTypeVector[isBcell],collapse=";")
