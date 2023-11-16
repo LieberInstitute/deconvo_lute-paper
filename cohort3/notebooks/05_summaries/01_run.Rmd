@@ -2,7 +2,9 @@
 title: "01_run"
 author: "Sean Maden"
 date: "2023-11-16"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -10,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
 setwd("..")
 load("./env/05_summaries/01_run_script.RData")
+source("./source/00_cell_type_management.R")
 ```
 
 ```{r}
@@ -86,7 +89,7 @@ pSummaries
 Y bulk S13
 
 ```{r}
-yCellTypes <- colnames(y)
+yCellTypes <- unique(experimentData$y.se)
 ySummaries <- cellCategorySummaries(yCellTypes)
 ySummaries
 ```
@@ -100,7 +103,7 @@ allSummaries <- rbind(
 allSummaries$data <- c(
   rep("Z", 3), rep("p", 3), rep("y", 3)
 )
-allSummaries <- allSummaries[,seq(1:3)]
+knitr::kable(allSummaries, align = "c")
 ```
 
 Aggregate Z, P
@@ -110,7 +113,7 @@ allSummaries <- rbind(zSummaries, pSummaries) |> as.data.frame()
 allSummaries$data <- c(
   rep("Z", 3), rep("p", 3)
 )
-allSummaries
+knitr::kable(allSummaries, align = "c")
 ```
 
 ## Expression

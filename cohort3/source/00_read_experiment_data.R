@@ -45,7 +45,15 @@ processY <- function(path, assayName = "tpm"){
   # load
   yTable <- read.table(path)
   
+  
+  
+  #---------
+  
+  
   # process
+  
+  
+  #---------
   assayList <- list(yTable)
   names(assayList) <- assayName
   ySe <- SummarizedExperiment(assays = assayList)
@@ -53,6 +61,31 @@ processY <- function(path, assayName = "tpm"){
     yTable=yTable,
     ySe=ySe
   )
+  
+  # get coldata
+  # get s13 phenotype info from column labels
+  phenoDataS13 <- colnames(yTable)
+  table(gsub(".*_", "", phenoDataS13))
+  phenoDataS13 <- data.frame(sample.id = phenoDataS13,
+                             source.id = gsub("_.*", "", phenoDataS13),
+                             sample.type = gsub(".*_", "", phenoDataS13))
+  phenoDataS13$tissue.type <- 
+    ifelse(phenoDataS13$sample.type=="PBMC", "PBMC", "immune_cell")
+  phenoDataS13$tissue.type.detail <- 
+    ifelse(phenoDataS13$sample.type=="PBMC", "PBMC", phenoDataS13$sample.type)
+  # append summary statistics to pheno data
+  yTable <- as.matrix(yTable)
+  phenoDataS13$library.size <- colSums(yTable)
+  phenoDataS13$mean.expression <- colMeans(yTable)
+  phenoDataS13$median.expression <- colMedians(yTable)
+  phenoDataS13$sd.expression <- colSds(yTable)
+  phenoDataS13$num.na.expression <- colAnyNAs(yTable)
+  phenoDataS13$num.zero.expression <- unlist(apply(yTable, 2, function(ci){length(ci[ci==0])}))
+  rownames(phenoDataS13) <- phenoDataS13[,1]
+  # append pheno data to colData for SummarizedExperiment
+  colData(newSummarizedExperiment) <- DataFrame(phenoDataS13)
+  
+  
   return(returnList)
 }
 
