@@ -6,34 +6,75 @@
 #
 
 
-
-getExperimentData <- function(){
-  # get Y
-  geoTpmTable <- "./data/monaco_et_al_2019/geo/GSE107011_Processed_data_TPM.txt"
-  yTable <- read.table(geoTpmTable)
-  assayName <- "tpm"
-  assayList <- list(item1=yTable)
-  names(assayList) <- assayName
-  ySe <- SummarizedExperiment(assays = assayList)
+processZ <- function(path){
+  # processZ
+  #
+  # Get reference from file.
   
-  # get Z
+  # load
   zref <- 
     read.csv(
       "./data/monaco_et_al_2019/manuscript/abisseq_rnaseq_cell_types_references_k17.csv")
+  
+  # process
+  zref <- zref[!zref[,1]=="12:00 AM",]
   rownames(zref) <- zref[,1]
-  zref <- zref[,seq(2:ncol(zref))]
+  zref <- zref[,c(2:ncol(zref))]
+  
+  return(zref)
+}
+
+processP <- function(path){
+  # processP
+  # Get proportions from file.
+  #
+  
+  p <- read.csv(pPath)
+  return(p)
+}
+
+processY <- function(path, assayName = "tpm"){
+  # processY
+  #
+  # Get bulk expression from file.
+  
+  # load
+  yTable <- read.table(path)
+  
+  # process
+  assayList <- list(yTable)
+  names(assayList) <- assayName
+  ySe <- SummarizedExperiment(assays = assayList)
+  returnList <- list(
+    yTable=yTable,
+    ySe=ySe
+  )
+  return(returnList)
+}
+
+
+getExperimentData <- function(){
+  # getExperimentData
+  #
+  # Get list of experiment data from paths.
+  
+  # get Y
+  yPath <- "./data/monaco_et_al_2019/geo/GSE107011_Processed_data_TPM.txt"
+  yList <- processY(yPath)
+  
+  # get Z
+  zPath <- "./data/monaco_et_al_2019/manuscript/abisseq_rnaseq_cell_types_references_k17.csv"
+  zref <- processZ(zPath)
   
   # get P
-  ptrue <- 
-    read.csv(
-      "./data/monaco_et_al_2019/manuscript/flow_cytometry_true_cell_type_proportions_s13.csv")
+  pPath <- "./data/monaco_et_al_2019/manuscript/flow_cytometry_true_cell_type_proportions_s13.csv"
+  ptrue <- processP(pPath)
   
   returnList <- list(
-    y.table = yTable,
-    y.se = ySe,
+    y.table = yList[["yTable"]],
+    y.se = yList[["ySe"]],
     z = zref,
     p.true = ptrue
-    
   )
   return(returnList)
 }
