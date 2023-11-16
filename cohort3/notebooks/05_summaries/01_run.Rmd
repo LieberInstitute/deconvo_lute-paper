@@ -1,0 +1,74 @@
+---
+title: "01_run"
+author: "Sean Maden"
+date: "2023-11-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/05_summaries/01_run_script.RData")
+```
+
+```{r}
+y <- experimentData$y.table
+z <- experimentData$z
+ptrue <- experimentData$p.true
+```
+
+Summaries of contents of input data types.
+
+# Data types
+
+## Z ref S4
+
+This is the ABIS-seq reference from S4 cohort. It was available in the manuscript supplement.
+
+## Ptrue S13
+
+This is the true cell type proportions from flow cytometry. It was available in the manuscript supplement.
+
+## Y S13
+
+This is the bulk expression from S13 cohort. It was available from GEO GSE107011 as the file "GSE107011_Processed_data_TPM.txt".
+
+# Summaries
+
+## Cell types
+
+Z ref S4
+
+```{r}
+data <- z
+cellTypes <- colnames(data)
+cellTypes
+length(unique(cellTypes))
+```
+
+Ptrue S13
+
+```{r}
+# data <- ptrue[,1]
+cellTypes <- ptrue[,1]
+cellTypes
+length(unique(cellTypes))
+```
+
+Y bulk S13
+
+```{r}
+data <- z
+cellTypes <- colnames(data)
+cellTypes
+length(unique(cellTypes))
+```
+
+## Expression
+
+# Session info
+
+```{r}
+sessionInfo()
+```
