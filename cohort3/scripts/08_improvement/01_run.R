@@ -23,9 +23,19 @@ source("./source/00_read_experiment_data.R")
 #--------------
 
 referenceExpression <- as.matrix(experimentData[["z"]])
-bulkExpression <- as.matrix(experimentData[["y.table"]])
 
+# get y/bulk expression -- only PBMC
+bulkExpression <- as.matrix(experimentData[["y.table"]])
+bulkExpression <- bulkExpression[,grepl("PBMC", colnames(bulkExpression))]
+dim(bulkExpression)
 bulkSummarizedExperiment <- experimentData[["y.se"]]
+bulkSummarizedExperiment <- 
+  bulkSummarizedExperiment[,grepl("PBMC", colnames(bulkSummarizedExperiment))]
+dim(bulkSummarizedExperiment)
+# format sample ids
+colnames(bulkExpression) <- gsub("_.*", "", colnames(bulkExpression))
+colnames(bulkSummarizedExperiment) <- 
+  gsub("_.*", "", colnames(bulkSummarizedExperiment))
 
 # filter genes
 # map symbols
@@ -115,13 +125,25 @@ prop.scaled$sample.id <- rownames(prop.scaled)
 prop.scaled$type <- "scaled"
 df.plot.tall.s13 <- as.data.frame(rbind(prop.scaled, prop.unscaled))
 
+# get transpose
+dfPlotTranspose <- t(df.plot.tall.s13) %>% as.data.frame()
+
 #---------------------
 # prep df.proportions
 #---------------------
 df.proportions <- experimentData[["p.true"]]
 
 # append to df.plot.tall.s13
-
+df.plot.tall.s13$true.proportions <- "NA"
+df.plot.tall.s13$sample.id.format <- gsub("_.*", "", df.plot.tall.s13$sample.id)
+for(type in colnames(df.proportions)){
+  for(sample.id in unique(df.plot.tall.s13$sample.id.format)){
+    filterTall <- 
+    df.plot.tall.s13[
+      df.plot.tall.s13[,"sample.id.format"]==sample.id, type]$true.proportions <- 
+      df.proportions[sample.id,type]
+  }
+}
 
 
 
