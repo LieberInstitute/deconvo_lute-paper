@@ -1,0 +1,93 @@
+---
+title: "01_run"
+author: "Sean Maden"
+date: "2023-10-17"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "gridExtra")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+setwd("..")
+setwd("..")
+load("./env/08_improvement/01_run_script.RData")
+```
+
+Notebook plotting bias differences before and after cell size transformation in 
+ABIS-seq immune cell populations.
+
+# Plot
+
+Axis ranges default
+
+```{r}
+cellTypesVector <- unique(dfPlotTallTall$cellType)
+plotList <- lapply(
+  cellTypesVector, function(cellType){
+    dfPlotNew <- dfPlotTallTall[dfPlotTallTall$cellType==cellType,]
+    ggplot(dfPlotNew, aes(x = trueProportion, y = proportion)) + 
+      geom_point() + geom_abline(slope=1,intercept=0) + facet_wrap(~condition) + 
+      ggtitle(cellType)
+  }
+)
+names(plotList) <- cellTypesVector
+plotList[[1]]
+plotList[[2]]
+plotList[[3]]
+plotList[[4]]
+plotList[[5]]
+plotList[[6]]
+plotList[[7]]
+plotList[[8]]
+plotList[[9]]
+plotList[[10]]
+plotList[[11]]
+plotList[[12]]
+plotList[[13]]
+plotList[[14]]
+plotList[[15]]
+plotList[[16]]
+plotList[[17]]
+```
+
+Axis ranges 0 to 1
+
+```{r}
+cellTypesVector <- unique(dfPlotTallTall$cellType)
+plotList <- lapply(
+  cellTypesVector, function(cellType){
+    dfPlotNew <- dfPlotTallTall[dfPlotTallTall$cellType==cellType,]
+    ggplot(dfPlotNew, aes(x = trueProportion, y = proportion)) + 
+      geom_point() + geom_abline(slope=1,intercept=0) + facet_wrap(~condition) + 
+      ggtitle(cellType) + xlim(0, 1) + ylim(0, 1)
+  }
+)
+names(plotList) <- cellTypesVector
+plotList[[1]]
+plotList[[2]]
+plotList[[3]]
+plotList[[4]]
+plotList[[5]]
+plotList[[6]]
+plotList[[7]]
+plotList[[8]]
+plotList[[9]]
+plotList[[10]]
+plotList[[11]]
+plotList[[12]]
+plotList[[13]]
+plotList[[14]]
+plotList[[15]]
+plotList[[16]]
+plotList[[17]]
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
