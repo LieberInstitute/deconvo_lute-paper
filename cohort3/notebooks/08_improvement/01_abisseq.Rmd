@@ -1,0 +1,315 @@
+---
+title: "Deconvolution with ABIS-seq"
+author: "Sean Maden"
+date: "2023-10-17"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2", "gridExtra")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+setwd("..")
+setwd("..")
+load("./env/02_abisseq/01_abisseq_script.RData")
+```
+
+Compare deconvolution results, with versus without scaling on cell size scale 
+factors, using the ABIS-seq reference.
+
+# Summaries
+
+## Label term definitions
+
+Definitions of cell type labels for predictions.
+
+```{r}
+df.def <- data.frame(
+  cell.type = c("B.Naive",
+                "Basophils.LD",
+                "MAIT",
+                "mDCs",
+                "Monocytes.C",
+                "Monocytes.NC.I",
+                "Neutrophils.LD",
+                "NK",
+                "pDCs",
+                "Plasmablasts",
+                "T.CD4.Naive",
+                "T.CD8.Memory",
+                "T.CD8.Naive",
+                "T.gd.non.Vd2",
+                "T.gd.Vd2"),
+  description = c("Naive B-cells",
+                  "Low-density Basophils",
+                  "Mucosal-associated invariant T cells (MAIT)",
+                  "Myeloid Dendritic Cells",
+                  "Monocytes, type C",
+                  "Monocytes, types NC and I combined",
+                  "Low-density Neutrophils",
+                  "Natural Killer",
+                  "Plasmacytoid Dendritic Cells",
+                  "Plasmablasts",
+                  "CD4+ Naive T-cell",
+                  "CD8+ Memory T-cell",
+                  "CD8+ Naive T-cell",
+                  "T lymphocyte, gamma delta, non-Vdelta2",
+                  "T lymphocyte, gamma delta, Vdelta2")
+)
+knitr::kable(df.def)
+```
+
+## Summary statistics
+
+### True cell type proportions
+
+Flow cytometry, cell type abundance summaries
+
+```{r}
+message("original:")
+summary(df.wide$true.prop.mean.flow.cyto)
+sum(df.wide$true.prop.mean.flow.cyto)
+```
+
+Flow cytometry, cell type proportions summaries
+
+```{r}
+message("format:")
+summary(df.wide$true.prop.mean.flow.cyto.format)
+sum(df.wide$true.prop.mean.flow.cyto.format)
+```
+
+### Predicted cell type proportions
+
+Predicted cell type proportions without cell size scaling
+
+```{r}
+message("unscaled")
+summary(df.tall$mean.unscaled)
+```
+
+Predicted cell type proportions with cell size scaling
+
+```{r}
+message("scaled")
+summary(df.tall$mean.scaled)
+```
+
+### Error summaries of the samples, within cell types
+
+Differences between means, scaled and unscaled
+
+```{r}
+mean.differences <- df.wide$mean-df.wide$true.prop.mean.flow.cyto
+names(mean.differences) <- paste0(df.wide$cell.type, ";", df.wide$type)
+mean.differences <- mean.differences[order(names(mean.differences))]
+root.sq.mean.diff <- sqrt(mean.differences^2)
+root.sq.mean.diff
+```
+Mean differences for largest cell type
+
+```{r}
+root.sq.mean.diff[grepl("Plasmablasts", names(root.sq.mean.diff))]
+```
+
+Mean differences for smallest cell type
+
+```{r}
+root.sq.mean.diff[grepl("Basophils.LD", names(root.sq.mean.diff))]
+```
+
+Barplot of square root of squared mean differences.
+
+```{r}
+df.plot <- data.frame(root.sq.mean.diff = root.sq.mean.diff,
+                      cell.type = gsub(";.*", "", names(root.sq.mean.diff)),
+                      scale = gsub(".*;", "", names(root.sq.mean.diff)))
+
+ggplot(df.plot, aes(x = cell.type, y = root.sq.mean.diff)) +
+  geom_bar(stat = "identity") + facet_wrap(~scale, ncol = 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Root of mean difference squared")
+```
+
+Scatterplot of root of mean difference squared
+
+```{r}
+df.plot <- data.frame(root.sq.mean.diff = root.sq.mean.diff,
+                      cell.type = gsub(";.*", "", names(root.sq.mean.diff)),
+                      scale = gsub(".*;", "", names(root.sq.mean.diff)))
+
+ggplot(df.plot, aes(x = cell.type, y = root.sq.mean.diff)) +
+  geom_bar(stat = "identity") + facet_wrap(~scale, ncol = 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Root of mean difference squared")
+```
+
+### Error summaries of mean biases across cell types
+
+```{r}
+rmse.cell.types <- function(df, var1="mean", var2="true.prop.mean.flow.cyto"){
+  mean.differences.all.types <- df[,var1]-df[,var2]
+  mean.squared.diffs.all.types <- 
+    sum(mean.differences.all.types^2)/length(mean.differences.all.types)
+  return(
+    sqrt(mean.squared.diffs.all.types)
+  )
+}
+message("Scaled RMSE across cell types:")
+rmse.cell.types(df.wide[df.wide$type=="scaled",])
+message("Unscaled RMSE across cell types:")
+rmse.cell.types(df.wide[df.wide$type=="unscaled",])
+```
+
+
+### Bias summaries for small cell type
+
+
+# Plot
+
+Cell size scale factors.
+
+```{r}
+ggplot(df.tall, aes(x = cell.type, y = s.cell.size)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Cell size (marker library size)")
+```
+
+```{r}
+ggplot(df.tall, aes(x = cell.type, y = s.cell.size.log)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Cell size (log10, marker library size)")
+```
+
+
+# Scatterplots of mean predicted proportions, unscaled versus scaled
+
+```{r}
+plot1 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot1
+```
+
+```{r}
+plot2 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot2
+```
+
+```{r}
+plot3 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, color = cell.type)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot3
+```
+
+```{r}
+plot4 <- ggplot(df.tall, aes(x = mean.unscaled, y = mean.scaled, 
+                             color = cell.type, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot4
+```
+
+# Scatterplots of sd predicted proportions, unscaled versus scaled
+
+```{r}
+plot1 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot1
+```
+
+```{r}
+plot2 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot2
+```
+
+```{r}
+plot3 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled, color = cell.type)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot3
+```
+
+```{r}
+plot4 <- ggplot(df.tall, aes(x = sd.unscaled, y = sd.scaled, 
+                             color = cell.type, size = s.cell.size.log)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) +
+  geom_abline(slope = 1, intercept = 0)
+plot4
+```
+
+# Scatterplots of mean versus sd, predicted proportions
+
+```{r}
+ggplot(df.wide, aes(x = mean, y = sd)) + 
+  geom_point() + geom_smooth(method = "lm", se = F) + facet_wrap(~type)
+```
+
+```{r}
+ggplot(df.wide, aes(x = mean, y = sd)) + 
+  geom_point(aes(color = cell.type)) + 
+  geom_smooth(method = "lm", se = F) + facet_wrap(~type)
+```
+
+# Scatterplot, true versus predicted proportions 
+
+```{r}
+ggplot(df.wide, aes(x = true.prop.mean.flow.cyto.format, y = mean, color = cell.type)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  theme() + facet_wrap(~type) + xlab("True") + ylab("Predicted")
+```
+
+# Boxplots and jittered points of errors
+
+```{r}
+ggplot(df.wide, aes(x = type, y = error.flow.cyto, color = cell.type)) +
+  geom_jitter(alpha = 0.5, size = 4) + geom_boxplot(alpha = 0, color = "cyan") +
+  theme() + xlab("Cell type") + ylab("Error")
+```
+
+# Barplot error differences
+
+```{r}
+df.tall$error.scaled.fc <- abs(df.tall$mean.scaled-df.tall$true.prop.mean.flow.cyto)
+df.tall$error.unscaled.fc <- abs(df.tall$mean.unscaled-df.tall$true.prop.mean.flow.cyto)
+df.tall$error.scaled.unscaled <- df.tall$error.scaled.fc-df.tall$error.unscaled.fc
+
+ggplot(df.tall, aes(x = cell.type, y = error.scaled.unscaled)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylab("Error (scaled - unscaled)")
+```
+
+# Error differences versus scale factors
+
+```{r}
+ggplot(df.tall, aes(x = s.cell.size, y = error.scaled.unscaled)) + 
+  geom_point(size = 4, alpha = 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 0) + ylab("Error (scaled - unscaled)") +
+  xlab("Cell size (marker library size)")
+```
+
+```{r}
+ggplot(df.tall, aes(x = s.cell.size, y = error.scaled.unscaled, color = cell.type)) + 
+  geom_point(size = 4, alpha = 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 0) + ylab("Error (scaled - unscaled)") +
+  xlab("Cell size (marker library size)")
+```
+
+# Save
+
+```{r}
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+

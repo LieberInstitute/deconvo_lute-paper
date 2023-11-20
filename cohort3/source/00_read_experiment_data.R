@@ -89,6 +89,45 @@ processY <- function(path, assayName = "tpm"){
   return(returnList)
 }
 
+yMapMarkers <- function(bulkSummarizedExperiment){
+  # yMapMarkers
+  #
+  # Get gene symbols for bulk SummarizedExperiment with ensembl gene ids.
+  #
+  #
+  
+  require(biomaRt)
+  
+  
+  # begin rowdata
+  assayData <- assays(bulkSummarizedExperiment)[[1]]
+  newRowData <- data.frame(ensembl_gene_id_version = rownames(assayData))
+  rownames(newRowData) <- newRowData[,1]
+  rowData(bulkSummarizedExperiment) <- DataFrame(newRowData)
+  
+  # map gene ids to symbols
+  ensemblMart <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+  geneIdVector <- rownames(bulkSummarizedExperiment)
+  geneIdVector <- gsub("\\..*", "", geneIdVector)
+  rowDataMaps <- getBM(
+    attributes = c('ensembl_gene_id', 'hgnc_symbol'),
+    filters = 'ensembl_gene_id',
+    values = as.character(geneIdVector), 
+    mart = ensemblMart
+  )
+  
+  # map symbols for rowdata
+  rowDataSymbol <- rowDataMaps[,2]
+  names(rowDataSymbol) <- rowDataMaps[,1]
+  rowDataSymbol <- rowDataSymbol[
+    gsub("\\..*", "", rownames(bulkSummarizedExperiment))]
+  length(rowDataSymbol)
+  dim(bulkSummarizedExperiment)
+  rowData(bulkSummarizedExperiment)$gene_symbol <- rowDataSymbol
+  
+  return(bulkSummarizedExperiment)
+}
+
 
 getExperimentData <- function(){
   # getExperimentData
