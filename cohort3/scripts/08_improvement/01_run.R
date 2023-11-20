@@ -10,11 +10,13 @@
 libv <- c("lute", "dplyr")
 sapply(libv, library, character.only = TRUE)
 
-# load 01_run_script
+# load 
+# 01_run_script
 # contains experiment data, cell size scale factors
 load("./env/06_top10markers/01_run_script.RData")
+source("./source/00_read_experiment_data.R")
 
-# load
+
 
 #--------------
 # format inputs
@@ -29,27 +31,35 @@ bulkSummarizedExperiment <- experimentData[["y.se"]]
 # map symbols
 bulkSummarizedExperimentNew <- yMapMarkers(bulkSummarizedExperiment)
 # filter duplicates
-filterDuplicatedGenes <- duplicated(rowData(bulkSummarizedExperimentNew)$gene_symbol)
-bulkSummarizedExperimentNew <- bulkSummarizedExperimentNew[!filterDuplicatedGenes]
+filterDuplicatedGenes <- duplicated(
+  rowData(bulkSummarizedExperimentNew)$gene_symbol)
+bulkSummarizedExperimentNew <- 
+  bulkSummarizedExperimentNew[!filterDuplicatedGenes]
 # filter markers overlaps
-rownames(bulkSummarizedExperimentNew) <- rowData(bulkSummarizedExperimentNew)$gene_symbol
-markersOverlaps <- rownames(bulkSummarizedExperimentNew) %in% rownames(referenceExpression)
-bulkSummarizedExperimentNew <- bulkSummarizedExperimentNew[markersOverlaps,]
+rownames(bulkSummarizedExperimentNew) <- 
+  rowData(bulkSummarizedExperimentNew)$gene_symbol
+markersOverlaps <- 
+  rownames(bulkSummarizedExperimentNew) %in% rownames(referenceExpression)
+bulkSummarizedExperimentNew <- 
+  bulkSummarizedExperimentNew[markersOverlaps,]
 
 # inspect
 dim(bulkSummarizedExperimentNew)
 length(intersect(
   rownames(bulkSummarizedExperimentNew), rownames(referenceExpression)))
 
-
 bulkExpressionNew <- as.matrix(assays(bulkSummarizedExperimentNew)[["tpm"]])
+
+
+
+
 
 #------------
 # run deconvo
 #------------
 result.unscaled <- lute(
   referenceExpression = referenceExpression, 
-  bulkExpression = bulkSummarizedExperimentNew,
+  bulkExpression = bulkExpressionNew,
   assayName = 'tpm',
   typemarkerAlgorithm = NULL
 )
@@ -61,6 +71,8 @@ result.scaled <- lute(
   assayName = 'tpm',
   typemarkerAlgorithm = NULL
 )
+
+
 
 #------------------
 # make df.plot.tall
@@ -77,9 +89,13 @@ prop.scaled <- result.scaled[["deconvolutionResults"]]@predictionsTable
 #---------------------------------
 # get common cell type id mappings
 #---------------------------------
-map.vector1 <- colnames(prop.scaled) #gsub("\\.", " ", colnames(prop.scaled))
-map.vector2 <- colnames(prop.unscaled) # df.proportions$cell.type
+
+map.vector1 <- gsub("\\.", " ", colnames(prop.scaled))
+
+map.vector2 <- gsub("\\.", " ", colnames(prop.unscaled)) # df.proportions$cell.type
+
 common.id <- intersect(map.vector1, map.vector2)
+
 df.map <- data.frame(
   p.true.id = common.id, map.vector2 = common.id)
 
@@ -98,6 +114,13 @@ prop.unscaled$type <- "unscaled"
 prop.scaled$sample.id <- rownames(prop.scaled)
 prop.scaled$type <- "scaled"
 df.plot.tall.s13 <- as.data.frame(rbind(prop.scaled, prop.unscaled))
+
+#---------------------
+# prep df.proportions
+#---------------------
+df.proportions <- experimentData[["p.true"]]
+
+# append to df.plot.tall.s13
 
 
 
@@ -126,6 +149,7 @@ head(df.plot.tall.sd)
 colnames(df.plot.tall.sd) <- paste0("sd.", colnames(df.plot.tall.sd))
 colnames(df.plot.tall.mean) <- paste0("mean.", colnames(df.plot.tall.mean))
 df.tall <- as.data.frame(cbind(df.plot.tall.mean, df.plot.tall.sd))
+
 # append true
 df.tall$true.prop.mean.flow.cyto <- 
   df.tall$true.prop.sd.flow.cyto <- 
