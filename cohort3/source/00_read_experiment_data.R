@@ -106,7 +106,8 @@ yMapMarkers <- function(bulkSummarizedExperiment){
   rowData(bulkSummarizedExperiment) <- DataFrame(newRowData)
   
   # map gene ids to symbols
-  ensemblMart <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+  ensemblMart <- useEnsembl(
+    biomart = "genes", dataset = "hsapiens_gene_ensembl")
   geneIdVector <- rownames(bulkSummarizedExperiment)
   geneIdVector <- gsub("\\..*", "", geneIdVector)
   rowDataMaps <- getBM(
