@@ -36,7 +36,7 @@ available) cell types, reflecting all ABIS-seq Zref cell types. Cell types in
 the FCS data (FC proportions table) are not mutually exclusive, but the 
 overlapping reference cell type labels are. Plasmablasts and mDCs, which had 
 high marker library size/cell size (see notebook `01_abisseq`), have very low 
-abundances from flow cytometry. 
+abundances from flow cytometry.
 
 ## Label term definitions
 
