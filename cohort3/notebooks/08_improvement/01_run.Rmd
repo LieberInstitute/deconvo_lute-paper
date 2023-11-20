@@ -21,6 +21,10 @@ ABIS-seq immune cell populations.
 
 # Background
 
+## Sample counts
+
+
+
 ## Flow cytometry data
 
 These were used as the true proportions for cell types.
@@ -80,7 +84,22 @@ knitr::kable(df.def)
 
 # Plot
 
+## Cell sizes bar plots
+
+```{r}
+dfPlot <- data.frame(cellType = names(cellSizes), size = as.numeric(cellSizes))
+dfPlot$cellType <- factor(dfPlot$cellType, levels = dfPlot$cellType[rev(order(dfPlot$size))])
+ggplot(dfPlot, aes(x = cellType, y = size)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
 ## Scatterplots
+
+Preview plot data
+
+```{r}
+knitr::kable(head(dfPlotTallTall))
+```
 
 Axis ranges default
 
@@ -95,23 +114,24 @@ plotList <- lapply(
   }
 )
 names(plotList) <- cellTypesVector
-plotList[[1]]
-plotList[[2]]
-plotList[[3]]
-plotList[[4]]
-plotList[[5]]
-plotList[[6]]
-plotList[[7]]
-plotList[[8]]
-plotList[[9]]
-plotList[[10]]
-plotList[[11]]
-plotList[[12]]
-plotList[[13]]
-plotList[[14]]
-plotList[[15]]
-plotList[[16]]
-plotList[[17]]
+#plotList[[1]]
+#plotList[[2]]
+#plotList[[3]]
+#plotList[[4]]
+#plotList[[5]]
+#plotList[[6]]
+#plotList[[7]]
+#plotList[[8]]
+#plotList[[9]]
+#plotList[[10]]
+#plotList[[11]]
+#plotList[[12]]
+#plotList[[13]]
+#plotList[[14]]
+#plotList[[15]]
+#plotList[[16]]
+#plotList[[17]]
+plotList[["Plasmablasts"]]
 ```
 
 Axis ranges 0 to 1
@@ -127,26 +147,60 @@ plotList <- lapply(
   }
 )
 names(plotList) <- cellTypesVector
-plotList[[1]]
-plotList[[2]]
-plotList[[3]]
-plotList[[4]]
-plotList[[5]]
-plotList[[6]]
-plotList[[7]]
-plotList[[8]]
-plotList[[9]]
-plotList[[10]]
-plotList[[11]]
-plotList[[12]]
-plotList[[13]]
-plotList[[14]]
-plotList[[15]]
-plotList[[16]]
-plotList[[17]]
+#plotList[[1]]
+#plotList[[2]]
+#plotList[[3]]
+#plotList[[4]]
+#plotList[[5]]
+#plotList[[6]]
+#plotList[[7]]
+#plotList[[8]]
+#plotList[[9]]
+#plotList[[10]]
+#plotList[[11]]
+#plotList[[12]]
+#plotList[[13]]
+#plotList[[14]]
+#plotList[[15]]
+#plotList[[16]]
+#plotList[[17]]
+plotList[["Plasmablasts"]]
 ```
 
-## Bar plots
+Axis ranges 0 to 0.2
+
+```{r}
+cellTypesVector <- unique(dfPlotTallTall$cellType)
+plotList <- lapply(
+  cellTypesVector, function(cellType){
+    dfPlotNew <- dfPlotTallTall[dfPlotTallTall$cellType==cellType,]
+    ggplot(dfPlotNew, aes(x = trueProportion, y = proportion)) + 
+      geom_point() + geom_abline(slope=1,intercept=0) + facet_wrap(~condition) + 
+      ggtitle(cellType) + xlim(0, 0.2) + ylim(0, 0.2)
+  }
+)
+names(plotList) <- cellTypesVector
+#plotList[[1]]
+#plotList[[2]]
+#plotList[[3]]
+#plotList[[4]]
+#plotList[[5]]
+#plotList[[6]]
+#plotList[[7]]
+#plotList[[8]]
+#plotList[[9]]
+#plotList[[10]]
+#plotList[[11]]
+#plotList[[12]]
+#plotList[[13]]
+#plotList[[14]]
+#plotList[[15]]
+#plotList[[16]]
+#plotList[[17]]
+plotList[["Plasmablasts"]]
+```
+
+## Bias bar plots
 
 Bias difference
 
