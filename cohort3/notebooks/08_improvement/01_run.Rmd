@@ -19,7 +19,68 @@ load("./env/08_improvement/01_run_script.RData")
 Notebook plotting bias differences before and after cell size transformation in 
 ABIS-seq immune cell populations.
 
+# Background
+
+## Flow cytometry data
+
+These were used as the true proportions for cell types.
+
+Flow cytometry proportions table contains "parts" (not fractions or percentages) 
+of cell signal amounts (i.e. includes <1 cell not discrete cell counts). mRNA 
+yield amounts reflect total cell amounts rather than cell type-specific amounts 
+(i.e. one value per sample). 12/13 of the S13 cohort samples have FC data, and 
+13/13 have mRNA yields.
+
+Flow cytometry data maps to ABIS-seq Zref cell type identifiers for 17 (of 61 
+available) cell types, reflecting all ABIS-seq Zref cell types. Cell types in 
+the FCS data (FC proportions table) are not mutually exclusive, but the 
+overlapping reference cell type labels are. Plasmablasts and mDCs, which had 
+high marker library size/cell size (see notebook `01_abisseq`), have very low 
+abundances from flow cytometry. 
+
+## Label term definitions
+
+Definitions of cell type labels for predictions.
+
+```{r}
+df.def <- data.frame(
+  cell.type = c("B.Naive",
+                "Basophils.LD",
+                "MAIT",
+                "mDCs",
+                "Monocytes.C",
+                "Monocytes.NC.I",
+                "Neutrophils.LD",
+                "NK",
+                "pDCs",
+                "Plasmablasts",
+                "T.CD4.Naive",
+                "T.CD8.Memory",
+                "T.CD8.Naive",
+                "T.gd.non.Vd2",
+                "T.gd.Vd2"),
+  description = c("Naive B-cells",
+                  "Low-density Basophils",
+                  "Mucosal-associated invariant T cells (MAIT)",
+                  "Myeloid Dendritic Cells",
+                  "Monocytes, type C",
+                  "Monocytes, types NC and I combined",
+                  "Low-density Neutrophils",
+                  "Natural Killer",
+                  "Plasmacytoid Dendritic Cells",
+                  "Plasmablasts",
+                  "CD4+ Naive T-cell",
+                  "CD8+ Memory T-cell",
+                  "CD8+ Naive T-cell",
+                  "T lymphocyte, gamma delta, non-Vdelta2",
+                  "T lymphocyte, gamma delta, Vdelta2")
+)
+knitr::kable(df.def)
+```
+
 # Plot
+
+## Scatterplots
 
 Axis ranges default
 
@@ -83,6 +144,14 @@ plotList[[14]]
 plotList[[15]]
 plotList[[16]]
 plotList[[17]]
+```
+
+## Bar plots
+
+Bias difference
+
+```{r}
+
 ```
 
 # Session info
