@@ -24,7 +24,7 @@ processZ <- function(path){
   return(zref)
 }
 
-processP <- function(path){
+processP <- function(path, zFilter){
   # processP
   # Get proportions from file.
   #
@@ -32,8 +32,18 @@ processP <- function(path){
   p <- read.csv(path)
   
   # process
+  # set sample labels as row names
   rownames(p) <- p[,1]
   p <- p[,seq(2,ncol(p))]
+  # subset cell types
+  p <- p[,colnames(p) %in% colnames(zFilter)]
+  # convert fractions
+  sampleIdVector <- rownames(p)
+  cellTypeVector <- colnames(p)
+  p <- apply(p, 1, function(ri){ri/sum(ri)}) |> as.data.frame()
+  colnames(p) <- cellTypeVector
+  rownames(p) <- sampleIdVector
+  
   return(p)
 }
 

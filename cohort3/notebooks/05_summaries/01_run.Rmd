@@ -23,6 +23,29 @@ ptrue <- experimentData$p.true
 
 Summaries of contents of input data types.
 
+# Background
+
+```{r}
+df <- data.frame(
+  label = c("y.table", "z", "p.true"),
+  filename = 
+    c("GSE107011_Processed_data_TPM.txt", 
+      "abisseq_rnaseq_cell_types_references_k17.csv",
+      "flow_cytometry_true_cell_type_proportions_s13.csv"),
+  deconvoLabel = 
+    c("Y", "z", "p.true"),
+  varName = 
+    c("experimentData$y.table", "experimentData$z", "experimentData$p.true"),
+  description = 
+    c("S13 RNA-seq expression TPM matrix, from GEO", 
+      "ABIS-seq RNA-seq cell type reference, from S4.", 
+      "S13 true proportions from flow cytometry"),
+  s13_samples = c(13, 0, 12)
+)
+
+knitr::kable(df)
+```
+
 # Data types
 
 ## Z ref S4
