@@ -1,0 +1,143 @@
+---
+title: "03_cell_size_summaries"
+author: "Sean Maden"
+date: "2023-11-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("lute", "ggplot2", "gridExtra", "reshape2", "ggforce")
+sapply(libv, library, character.only = TRUE)
+setwd("..")
+setwd("..")
+load("./env/08_improvement/01_run_script.RData")
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Background
+
+## Cell size calculations
+
+Cell size scale factors obtained as the library sizes (column sums) from the 
+RNA-seq reference in Monaco et al 2019 (Table S5).
+
+## Cell type label details
+
+Definitions of cell type labels for predictions.
+
+```{r}
+df.def <- data.frame(
+  cell.type = c("B.Naive",
+                "Basophils.LD",
+                "MAIT",
+                "mDCs",
+                "Monocytes.C",
+                "Monocytes.NC.I",
+                "Neutrophils.LD",
+                "NK",
+                "pDCs",
+                "Plasmablasts",
+                "T.CD4.Naive",
+                "T.CD8.Memory",
+                "T.CD8.Naive",
+                "T.gd.non.Vd2",
+                "T.gd.Vd2"),
+  description = c("Naive B-cells",
+                  "Low-density Basophils",
+                  "Mucosal-associated invariant T cells (MAIT)",
+                  "Myeloid Dendritic Cells",
+                  "Monocytes, type C",
+                  "Monocytes, types NC and I combined",
+                  "Low-density Neutrophils",
+                  "Natural Killer",
+                  "Plasmacytoid Dendritic Cells",
+                  "Plasmablasts",
+                  "CD4+ Naive T-cell",
+                  "CD8+ Memory T-cell",
+                  "CD8+ Naive T-cell",
+                  "T lymphocyte, gamma delta, non-Vdelta2",
+                  "T lymphocyte, gamma delta, Vdelta2")
+)
+knitr::kable(df.def)
+```
+
+# Analyses
+
+## Cell sizes for reference cell types
+
+Histogram and density plots of cell sizes
+
+```{r}
+dfPlotCellSize <- data.frame(cellType = names(cellSizes), size = as.numeric(cellSizes))
+dfPlotCellSize$cellType <- factor(dfPlotCellSize$cellType, levels = dfPlotCellSize$cellType[order(dfPlotCellSize$size)])
+plot1 <- ggplot(dfPlotCellSize, aes(x = size)) + geom_histogram() + xlab("Cell size") + ylab("Cell type count")
+plot2 <- ggplot(dfPlotCellSize, aes(x = size)) + geom_density() + xlab("Cell size") + ylab("Cell amount density")
+grid.arrange(plot1, plot2, nrow=2)
+```
+
+Stacked histogram of cell sizes
+
+```{r}
+plot3 <- ggplot(dfPlotCellSize, aes(x = size, fill = cellType)) + geom_histogram() + xlab("Cell size") + 
+  ylab("Cell type count") + guides(fill=guide_legend(ncol=2))
+plot3
+```
+
+Barplots of cell sizes, with color by cell size.
+
+```{r}
+ggplot(dfPlotCellSize, aes(x = cellType, y = size, fill = cellType)) + 
+  geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+  guides(fill=guide_legend(ncol=2))
+```
+
+## Cell sizes for Non-plasmablast cells
+
+Barplots of cell sizes, with color by cell size.
+
+```{r}
+dfPlotNotPlasmablast <- dfPlotCellSize[!dfPlotCellSize$cellType=="Plasmablasts",]
+dfPlotNotPlasmablast$conditionLabel <- "Non-plasmablasts"
+dfPlotNotPlasmablast$dendriticCellType <- 
+  ifelse(dfPlotNotPlasmablast$cellType %in% c("pDCs", "mDCs"), TRUE, FALSE)
+
+ggplot(dfPlotNotPlasmablast, aes(x = cellType, y = size, fill = cellType)) + 
+  geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+  guides(fill=guide_legend(ncol=2))
+```
+
+Jitter points and boxplot for Non-plasmablast cell sizes.
+
+```{r, fig.width=8}
+ggplot(
+  dfPlotNotPlasmablast, aes(x = conditionLabel, y = size)) + 
+  geom_boxplot(alpha = 0, color = "black") + 
+  geom_jitter(aes(color = cellType, shape = dendriticCellType), size = 4)
+```
+
+## Cell sizes for Plasmablasts and Non-plasmablasts
+
+```{r}
+dfPlotTwoGroups <- dfPlotCellSize
+dfPlotTwoGroups$condition <- 
+  ifelse(dfPlotTwoGroups$cellType=="Plasmablasts", "Plasmablasts", "Non-plasmablasts")
+dfPlotTwoGroups <- 
+  aggregate(size ~ condition, data = dfPlotTwoGroups, FUN = median)
+knitr::kable(dfPlotTwoGroups)
+```
+
+```{r}
+plot1 <- 
+  ggplot(dfPlotTwoGroups, aes(x = condition, y = size, fill = condition)) + 
+  geom_bar(stat = "identity") + xlab("Cell type") + ylab("Cell size") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+plot1
+```
+# Session info
+
+```{r}
+sessionInfo()
+```
