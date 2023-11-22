@@ -37,6 +37,8 @@ bulkSummarizedExperiment <-
 dim(bulkSummarizedExperiment)
 
 # format sample ids
+# check colnames on table and se data
+identical(colnames(bulkSummarizedExperiment), colnames(bulkExpression))
 # replace underscore characters
 colnames(bulkExpression) <- gsub("_.*", "", colnames(bulkExpression))
 colnames(bulkSummarizedExperiment) <- 
@@ -47,6 +49,12 @@ colnames(bulkExpression)
 # compare fc proportions ids
 fcProportionsIds <- colnames(experimentData$p.true)
 length(intersect(colnames(bulkExpression),fcProportionsIds))
+# set new sampleids as colnames
+colnames(bulkSummarizedExperiment) <- colnames(bulkExpression)
+# subset on overlapping ids
+sampleIdOverlap <- intersect(colnames(bulkSummarizedExperiment), fcProportionsIds)
+bulkSummarizedExperiment <- bulkSummarizedExperiment[,sampleIdOverlap]
+bulkExpression <- bulkExpression[,sampleIdOverlap]
 
 # filter genes
 # map symbols
