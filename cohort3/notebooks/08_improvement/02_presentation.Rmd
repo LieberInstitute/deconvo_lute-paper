@@ -8,34 +8,60 @@ output: html_document
 Main presentation notebook showing improvements after cell size transformations.
 
 ```{r setup, include=FALSE}
-libv <- c("lute")
-sapply(lib, library, character.only = TRUE)
+libv <- c("lute", "ggplot2", "gridExtra")
+sapply(libv, library, character.only = TRUE)
 setwd("..")
 setwd("..")
-
+load("./env/08_improvement/01_run_script.RData")
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 # Background
 
+Cell size scale factors obtained as column sums on Zref (ABIS-seq) cell type marker gene library sizes (column sums).
+
+True proportions (flow cytometry) available for 12 of 13 samples in S13 cohort.
+
 # Analyses
 
 ## Cell sizes
 
-Histogram of cell sizes
+Histogram and density plots of cell sizes
 
 ```{r}
+dfPlotCellSize <- data.frame(cellType = names(cellSizes), size = as.numeric(cellSizes))
+dfPlotCellSize$cellType <- factor(dfPlotCellSize$cellType, levels = dfPlotCellSize$cellType[order(dfPlotCellSize$size)])
+plot1 <- ggplot(dfPlotCellSize, aes(x = size)) + geom_histogram() + xlab("Cell size") + ylab("Cell type count")
+plot2 <- ggplot(dfPlotCellSize, aes(x = size)) + geom_density() + xlab("Cell size") + ylab("Cell amount density")
+grid.arrange(plot1, plot2, nrow=2)
 ```
 
-Barplots of cell sizes
+Stacked histogram of cell sizes
 
 ```{r}
+plot3 <- ggplot(dfPlotCellSize, aes(x = size, fill = cellType)) + geom_histogram() + xlab("Cell size") + 
+  ylab("Cell type count") + guides(fill=guide_legend(ncol=2))
+plot3
+```
+
+Barplots of cell sizes, with color by cell size.
+
+```{r}
+ggplot(dfPlotCellSize, aes(x = cellType, y = size, fill = cellType)) + 
+  geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+  guides(fill=guide_legend(ncol=2))
 ```
 
 ## Simulation
 
 Setting the conditions. We simulate scRNAseq data from Plasmablasts and 
 non-Plasmablasts, at similar proportions to the ABIS FC proportions.
+
+```{r}
+setwd("..")
+setwd("..")
+load("./env/08_improvement/02_simulation_script.RData")
+```
 
 ```{r}
 ptrue <- ptrue
