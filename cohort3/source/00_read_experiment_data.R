@@ -41,8 +41,6 @@ processP <- function(path, zFilter){
   sampleIdVector <- rownames(p)
   cellTypeVector <- colnames(p)
   p <- apply(p, 1, function(ri){ri/sum(ri)}) |> as.data.frame()
-  colnames(p) <- cellTypeVector
-  rownames(p) <- sampleIdVector
   
   return(p)
 }
@@ -155,7 +153,7 @@ getExperimentData <- function(){
   
   # get P
   pPath <- "./data/monaco_et_al_2019/manuscript/flow_cytometry_true_cell_type_proportions_s13.csv"
-  ptrue <- processP(pPath)
+  ptrue <- processP(pPath, zref)
   
   returnList <- list(
     y.table = yList[["yTable"]],

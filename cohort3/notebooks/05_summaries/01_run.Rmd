@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 setwd("..")
 setwd("..")
 load("./env/05_summaries/01_run_script.RData")
@@ -25,6 +25,10 @@ Summaries of contents of input data types.
 
 # Background
 
+## Datasets for deconvolution
+
+Details about the datasets used in NNLS and ABIS runs.
+
 ```{r}
 df <- data.frame(
   label = c("y.table", "z", "p.true"),
@@ -32,18 +36,32 @@ df <- data.frame(
     c("GSE107011_Processed_data_TPM.txt", 
       "abisseq_rnaseq_cell_types_references_k17.csv",
       "flow_cytometry_true_cell_type_proportions_s13.csv"),
-  deconvoLabel = 
-    c("Y", "z", "p.true"),
-  varName = 
-    c("experimentData$y.table", "experimentData$z", "experimentData$p.true"),
+  #deconvoLabel = 
+  #  c("Y", "z", "p.true"),
+  #varName = 
+  #  c("experimentData$y.table", "experimentData$z", "experimentData$p.true"),
   description = 
-    c("S13 RNA-seq expression TPM matrix, from GEO", 
-      "ABIS-seq RNA-seq cell type reference, from S4.", 
-      "S13 true proportions from flow cytometry"),
+    c("S13 RNA-seq TPM", 
+      "ABIS-seq reference", 
+      "S13 FC proportions"),
   s13_samples = c(13, 0, 12)
 )
 
 knitr::kable(df)
+```
+
+## Cell type labels
+
+```{r}
+rownames(ptrue)
+```
+
+## Sample ID labels
+
+Sample ID labels for S13 samples.
+
+```{r}
+colnames(ptrue)
 ```
 
 # Data types
@@ -63,85 +81,6 @@ expression from S4 cohort. It was available from GEO GSE107011 as the file
 
 This is the true cell type proportions from flow cytometry, collected for 
 12/13 of S13 cohort samples. It was available in the manuscript supplement.
-
-# Summaries
-
-## All cell types
-
-Z ref S4
-
-```{r}
-data <- z
-cellTypes <- colnames(data)
-cellTypes
-length(unique(cellTypes))
-```
-
-Ptrue S13
-
-```{r}
-data <- ptrue
-cellTypes <- colnames(ptrue)
-cellTypes
-length(unique(cellTypes))
-```
-
-Y bulk S13
-
-```{r}
-data <- z
-cellTypes <- colnames(data)
-cellTypes
-length(unique(cellTypes))
-```
-
-## Cell types by general category
-
-Z ref S4
-
-```{r}
-zCellTypes <- colnames(z)
-zSummaries <- cellCategorySummaries(zCellTypes)
-zSummaries
-```
-
-Ptrue S13
-
-```{r}
-pCellTypes <- colnames(ptrue)
-pSummaries <- cellCategorySummaries(pCellTypes)
-pSummaries
-```
-
-Y bulk S13
-
-```{r}
-yCellTypes <- unique(experimentData$y.se)
-ySummaries <- cellCategorySummaries(yCellTypes)
-ySummaries
-```
-
-Aggregate Z, P, Y
-
-```{r}
-allSummaries <- rbind(
-  zSummaries, rbind(pSummaries, ySummaries)
-) |> as.data.frame()
-allSummaries$data <- c(
-  rep("Z", 3), rep("p", 3), rep("y", 3)
-)
-knitr::kable(allSummaries, align = "c")
-```
-
-Aggregate Z, P
-
-```{r}
-allSummaries <- rbind(zSummaries, pSummaries) |> as.data.frame()
-allSummaries$data <- c(
-  rep("Z", 3), rep("p", 3)
-)
-knitr::kable(allSummaries, align = "c")
-```
 
 # Session info
 
