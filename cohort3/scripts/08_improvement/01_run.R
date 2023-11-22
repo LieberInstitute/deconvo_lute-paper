@@ -6,6 +6,9 @@
 #
 #
 #
+#
+#
+
 
 libv <- c("lute", "dplyr")
 sapply(libv, library, character.only = TRUE)
@@ -122,16 +125,13 @@ prop.scaled$type <- "scaled"
 # get tall table (SAMPLES X CELL_TYPE)
 dfPlotTall <- rbind(prop.scaled, prop.unscaled) %>% as.data.frame()
 # get wide table (CELL_TYPE X SAMPLES)
-dfPlotTranspose <- t(df.plot.tall.s13) %>% as.data.frame()
+dfPlotTranspose <- t(dfPlotTall) %>% as.data.frame()
 
 # append proportions
 dfProportions <- experimentData[["p.true"]]
 # check samples overlap
-length(intersect(rownames(dfProportions), dfPlotTall$sample.id))
-samplesKeep <- intersect(rownames(dfProportions), unique(dfPlotTall$sample.id))
-# format as fractions
-dfProportions <- apply(dfProportions,2,function(ci){ci/sum(ci)}) %>% 
-  as.data.frame()
+length(intersect(colnames(dfProportions), dfPlotTall$sample.id))
+samplesKeep <- intersect(colnames(dfProportions), unique(dfPlotTall$sample.id))
 
 # get very tall plot of sample X proportion
 dfPlotTallTall <- reshape2::melt(dfPlotTall)
@@ -140,13 +140,13 @@ colnames(dfPlotTallTall) <-
 trueProportionVarname <- "trueProportion"
 dfPlotTallTall[,ncol(dfPlotTallTall)+1] <- "NA"
 colnames(dfPlotTallTall)[ncol(dfPlotTallTall)] <- trueProportionVarname
-for(cellType in colnames(dfProportions)){
+for(cellType in rownames(dfProportions)){
   for(sample.id in unique(dfPlotTallTall$sample.id)){
     filterTallTall <- 
       dfPlotTallTall[,"sample.id"]==sample.id & 
       dfPlotTallTall[,"cellType"]==cellType
     dfPlotTallTall[filterTallTall, trueProportionVarname] <- 
-      dfProportions[sample.id, cellType]
+      dfProportions[cellType, sample.id]
   }
 }
 # filter samples

@@ -1,0 +1,61 @@
+---
+title: "02_presentation"
+author: "Sean Maden"
+date: "2023-11-22"
+output: html_document
+---
+
+Main presentation notebook showing improvements after cell size transformations.
+
+```{r setup, include=FALSE}
+libv <- c("lute")
+sapply(lib, library, character.only = TRUE)
+setwd("..")
+setwd("..")
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Background
+
+# Analyses
+
+## Cell sizes
+
+Histogram of cell sizes
+
+```{r}
+```
+
+Barplots of cell sizes
+
+```{r}
+```
+
+## Simulation
+
+Setting the conditions. We simulate scRNAseq data from Plasmablasts and 
+non-Plasmablasts, at similar proportions to the ABIS FC proportions.
+
+```{r}
+ptrue <- ptrue
+cellTypeLabel <- c(rep("Plasmablast", N1), rep("non-Plasmablast", N2))
+zref <- zref
+scrnaseq <- scrnaseq
+ypseudobulk <- ypseudobulk
+```
+
+Reporting pseudobulk results.
+
+```{r}
+```
+
+## Main experiments
+
+# Conclusions
+
+# Session info
+
+```{r}
+sessionInfo()
+```
