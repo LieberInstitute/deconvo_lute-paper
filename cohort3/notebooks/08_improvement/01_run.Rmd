@@ -23,8 +23,6 @@ ABIS-seq immune cell populations.
 
 ## Sample counts
 
-
-
 ## Flow cytometry data
 
 These were used as the true proportions for cell types.
