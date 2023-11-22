@@ -23,6 +23,9 @@ knitr::opts_chunk$set(echo = FALSE)
 Cell size scale factors obtained as the library sizes (column sums) from the 
 RNA-seq reference in Monaco et al 2019 (Table S5).
 
+Binarized cell sizes (Plasmablasts, Non-plasmablasts) for Non-plasmablasts were 
+taken as the median of cell sizes.
+
 ## Cell type label details
 
 Definitions of cell type labels for predictions.

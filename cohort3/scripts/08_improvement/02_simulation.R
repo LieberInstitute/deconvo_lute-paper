@@ -15,22 +15,33 @@ sapply(libv, library, character.only = TRUE)
 
 # load 
 # contains experiment data, cell size scale factors
-load("./env/06_top10markers/01_run_script.RData")
+load("./env/08_improvement/01_run_script.RData")
 
-# run simulation
 
+#-----------------
+
+# run simulation A
+ 
+#-----------------
+# note: cell expression randomized
+
+bulkExpression <- bulkSummarizedExperimentNew
 ptrue <- experimentData$p.true
 cellLabelLarge <- "Plasmablasts"
 cellLabelNotLarge <- "Non-plasmablast"
 totalCells <- 10000
 numberGenes <- nrow(refTpmFilter)
-expressionMean <- mean(refTpmFilter)
+globalExpressionMean <- mean(refTpmFilter)
 cellScaleFactors <- c(cellSizes[cellLabelLarge],
                       median(cellSizes[!names(cellSizes)==cellLabelLarge]))
 names(cellScaleFactors) <- c(cellLabelLarge, cellLabelNotLarge)
 
 listPseudoBulk <- lapply(seq(ncol(ptrue)), function(index){
   message(index)
+
+  sampleId <- colnames(ptrue)[index]
+  sampleExpressionMean <- assays(bulkExpression[,sampleId])[["tpm"]][,1] %>% 
+    mean()
   isLargeCell <- rownames(ptrue)==cellLabelLarge
   # cell labels from fractions
   fractLargeCell <- ptrue[isLargeCell,index]
@@ -49,7 +60,7 @@ listPseudoBulk <- lapply(seq(ncol(ptrue)), function(index){
     numberCells = totalCells,
     numberType = 2,
     fractionTypes = pFractionVector,
-    expressionMean = expressionMean
+    expressionMean = sampleExpressionMean
   )
   scePseudo[,scePseudo$celltype=="type1"]$celltype <- cellLabelLarge
   scePseudo[,scePseudo$celltype=="type2"]$celltype <- cellLabelNotLarge
@@ -82,7 +93,20 @@ listPseudoBulk <- lapply(seq(ncol(ptrue)), function(index){
   return(dfResult)
 })
 
-dfPseudobulk <- do.call(rbind, lapply(listPseudoBulk, function(item){item}))
+dfPseudobulk <- dfPseudobulkA <- 
+  do.call(rbind, lapply(listPseudoBulk, function(item){item}))
+
+# save
+
+save.image("env/08_improvement/02_simulation_script.RData")
+
+#-----------------
+
+# run simulation B
+
+#-----------------
+# notes:
+# cell expression taken from the cell type reference
 
 # save
 
