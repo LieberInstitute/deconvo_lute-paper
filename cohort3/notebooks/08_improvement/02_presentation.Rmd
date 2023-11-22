@@ -124,9 +124,36 @@ scrnaseq <- scrnaseq
 ypseudobulk <- ypseudobulk
 ```
 
-Reporting pseudobulk results.
+Heatmap of reference, transformed reference, and pseudobulk.
 
 ```{r}
+```
+
+Reporting pseudobulk results, at 3 zoom levels.
+
+```{r}
+plot1 <- ggplot(dfPseudobulk, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition) + xlim(0, 0.15) + ylim(0, 0.15) +
+  ylab("Predicted") + xlab("True")
+plot2 <- ggplot(dfPseudobulk, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition) + xlim(0, 0.5) + ylim(0, 0.5) +
+  ylab("Predicted") + xlab("True")
+plot3 <- ggplot(dfPseudobulk, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point() + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition) + xlim(0, 1) + ylim(0, 1) +
+  ylab("Predicted") + xlab("True")
+plot1
+plot2
+plot3
+
+# multiplot
+plot1 <- plot1 + xlab("") + ylab("") + ggtitle("Zoom1")
+plot2 <- plot2 + xlab("") + ylab("") + ggtitle("Zoom2")
+plot3 <- plot3 + xlab("") + ylab("") + ggtitle("Zoom3")
+grid.arrange(plot1, plot2, plot3, ncol = 1, top = "Plasmablasts", 
+             left = "Predicted", bottom = "True")
 ```
 
 ## Main experiments

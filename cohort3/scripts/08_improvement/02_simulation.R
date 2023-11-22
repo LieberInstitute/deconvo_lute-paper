@@ -10,7 +10,6 @@
 #
 #
 
-
 libv <- c("lute", "dplyr")
 sapply(libv, library, character.only = TRUE)
 
@@ -31,11 +30,12 @@ cellScaleFactors <- c(cellSizes[cellLabelLarge],
 names(cellScaleFactors) <- c(cellLabelLarge, cellLabelNotLarge)
 
 listPseudoBulk <- lapply(seq(ncol(ptrue)), function(index){
+  message(index)
   isLargeCell <- rownames(ptrue)==cellLabelLarge
   # cell labels from fractions
   fractLargeCell <- ptrue[isLargeCell,index]
-  totalLargeCells <- round(fractLargeCell*totalCells, 0)
-  totalNotLargeCells <- round((1-fractLargeCell)*totalCells, 0)
+  totalLargeCells <- round(fractLargeCell*totalCells, 0) + 2
+  totalNotLargeCells <- round(totalCells-totalLargeCells, 0)
   newCellLabels <- c(rep(cellLabelLarge, totalLargeCells),
                      rep(cellLabelNotLarge, totalNotLargeCells))
   # fraction vector
@@ -53,22 +53,37 @@ listPseudoBulk <- lapply(seq(ncol(ptrue)), function(index){
   )
   scePseudo[,scePseudo$celltype=="type1"]$celltype <- cellLabelLarge
   scePseudo[,scePseudo$celltype=="type2"]$celltype <- cellLabelNotLarge
-  yPseudo <- lute::ypb_from_sce(
-    scePseudo, cellScaleFactors = cellScaleFactors)
+  yPseudo <- 
+    lute::ypb_from_sce(
+      scePseudo, cellScaleFactors = cellScaleFactors) |> as.matrix()
+  referencePseudo <- referenceFromSingleCellExperiment(scePseudo)
   
+  unscaled <- lute(
+    referenceExpression = referencePseudo, 
+    bulkExpression = yPseudo,
+    typemarkerAlgorithm = NULL
+  )
+  scaled <- lute(
+    referenceExpression = referencePseudo, 
+    bulkExpression = yPseudo,
+    cellScaleFactors = cellScaleFactors,
+    typemarkerAlgorithm = NULL
+  )
+  
+  dfScaled <- scaled$deconvolutionResults@predictionsTable |> as.data.frame()
+  dfUnscaled <- unscaled$deconvolutionResults@predictionsTable |> as.data.frame()
+  dfScaled$condition <- "scaled"
+  dfUnscaled$condition <- "unscaled"
+  
+  dfResult <- rbind(dfScaled, dfUnscaled) |> as.data.frame()
+  dfResult$true.plasmablasts <- pFractionVector[["Plasmablasts"]]
+  dfResult$true.not.plasmablasts <- pFractionVector[["Non-plasmablast"]]
+  dfResult$sample.id <- colnames(ptrue)[index]
+  return(dfResult)
 })
 
-fractPlasmablast <- 
-numberCells <- 1000
+dfPseudobulk <- do.call(rbind, lapply(listPseudoBulk, function(item){item}))
 
-expressionMean <- mean(refTpm)
-sc <- randomSingleCellExperiment(
-  numberType = 2,
-  expressionMean = expressionMean,
-  numberCells = 1000
-)
+# save
 
-
-
-
-
+save.image("env/08_improvement/02_simulation_script.RData")
