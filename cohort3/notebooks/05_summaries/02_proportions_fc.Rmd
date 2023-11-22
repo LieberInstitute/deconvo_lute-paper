@@ -1,0 +1,79 @@
+---
+title: "02_proportions_fc"
+author: "Sean Maden"
+date: "2023-11-22"
+output: html_document
+---
+
+Compares proportions at overlapping cell types, by sample, from original file 
+and converted fractions.
+
+```{r setup, include=FALSE}
+libv <- c("ggplot2")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("./env/05_summaries/01_run_script.RData")
+# get experiment data
+ptrue <- experimentData$p.true
+# read original csv
+path <- "./data/monaco_et_al_2019/manuscript/flow_cytometry_true_cell_type_proportions_s13.csv"
+pcsv <- read.csv(path)
+rownames(pcsv) <- pcsv[,1]
+pcsv <- pcsv[,seq(2,ncol(pcsv))]
+pcsv <- t(pcsv) |> as.data.frame(pcsv)
+pcsv <- pcsv[,colnames(pcsv) %in% colnames(ptrue)] # filter overlapping
+```
+
+# Proportions summaries
+
+## Summary statistics
+
+Summaries, by sample, for original values
+
+```{r}
+summary(pcsv)
+```
+
+Summaries, by sample, for fraction formatted values
+
+```{r}
+summary(ptrue)
+```
+
+## Column sums
+
+View column sums vector.
+
+```{r}
+colSumsVector <- colSums(pcsv)
+colSumsVector
+```
+
+View histogram and barplot of column sums vector.
+
+```{r}
+dfPlot <- data.frame(
+  sample.id = names(colSumsVector), sum = as.numeric(colSumsVector))
+dfPlot$sample.id <- factor(dfPlot$sample.id, levels = dfPlot$sample.id[order(dfPlot$sum)])
+
+
+plot1 <- ggplot(dfPlot, aes(x = sum)) + geom_histogram() + 
+  ylab("Sample count") + xlab("Sum of signals")
+
+plot2 <- ggplot(dfPlot, aes(x = sample.id, y = sum)) + 
+  geom_bar(stat = "identity") + ylab("Sum of signals")
+
+plot1
+plot2
+
+```
+
+# Proportions comparisons
+
+# Session info
+
+```{r}
+sessionInfo()
+```
