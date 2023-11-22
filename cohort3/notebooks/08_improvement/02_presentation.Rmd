@@ -8,7 +8,7 @@ output: html_document
 Main presentation notebook showing improvements after cell size transformations.
 
 ```{r setup, include=FALSE}
-libv <- c("lute", "ggplot2", "gridExtra")
+libv <- c("lute", "ggplot2", "gridExtra", "reshape2", "ggforce")
 sapply(libv, library, character.only = TRUE)
 setwd("..")
 setwd("..")
@@ -50,6 +50,59 @@ Barplots of cell sizes, with color by cell size.
 ggplot(dfPlotCellSize, aes(x = cellType, y = size, fill = cellType)) + 
   geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle=45,hjust=1)) + 
   guides(fill=guide_legend(ncol=2))
+```
+
+## Proportions
+
+Flow cytometry proportions by sample.
+
+```{r}
+dfPlotType <- ptrue |> t() |> melt() |> as.data.frame()
+colnames(dfPlotType) <- c("sample.id", "cellType", "proportion.fc")
+dfPlotType$is.plasmablast <- ifelse(
+  dfPlotType$cellType=="Plasmablasts", "Plasmablasts", "Not-plasmablasts")
+
+plot1 <- ggplot(dfPlotType, aes(x = sample.id, y = proportion.fc, fill = cellType)) + 
+  geom_bar(stat = "identity", position = "stack", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill=guide_legend(ncol=2))
+
+plot2 <- ggplot(dfPlotType, aes(x = sample.id, y = proportion.fc, fill = is.plasmablast)) + 
+  geom_bar(stat = "identity", position = "stack") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill=guide_legend(ncol=2))
+
+plot1
+plot2
+```
+
+Just plasmablast proportions by sample, with zoom.
+
+```{r}
+dfPlotPlasmablasts <- dfPlotType[dfPlotType$cellType=="Plasmablasts",]
+dfPlotPlasmablasts$sample.id <- factor(dfPlotPlasmablasts$sample.id,
+                                       levels = dfPlotPlasmablasts$sample.id[
+                                         order(dfPlotPlasmablasts$proportion.fc)])
+
+plot3 <- ggplot(dfPlotPlasmablasts, 
+                aes(x = sample.id, y = proportion.fc)) + 
+  geom_bar(stat = "identity", position = "stack") + ggtitle("Plasmablasts") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+plot3
+```
+
+Just non-Plasmablast proportions by sample.
+
+```{r}
+dfPlotNotPlasmablasts <- dfPlotPlasmablasts
+dfPlotNotPlasmablasts$proportion.fc=1-dfPlotNotPlasmablasts$proportion.fc
+dfPlotNotPlasmablasts$cellType <- "Not-plasmablast"
+
+plot1 <- ggplot(dfPlotNotPlasmablasts, aes(x = proportion.fc)) + 
+  geom_histogram() + xlab("Proportion non-Plasmablast") + ylab("Sample count")
+
+plot1
 ```
 
 ## Simulation

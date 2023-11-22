@@ -35,10 +35,18 @@ bulkSummarizedExperiment <- experimentData[["y.se"]]
 bulkSummarizedExperiment <- 
   bulkSummarizedExperiment[,grepl("PBMC", colnames(bulkSummarizedExperiment))]
 dim(bulkSummarizedExperiment)
+
 # format sample ids
+# replace underscore characters
 colnames(bulkExpression) <- gsub("_.*", "", colnames(bulkExpression))
 colnames(bulkSummarizedExperiment) <- 
   gsub("_.*", "", colnames(bulkSummarizedExperiment))
+# replace x characters
+colnames(bulkExpression) <- gsub("^X", "", colnames(bulkExpression))
+colnames(bulkExpression)
+# compare fc proportions ids
+fcProportionsIds <- colnames(experimentData$p.true)
+length(intersect(colnames(bulkExpression),fcProportionsIds))
 
 # filter genes
 # map symbols
@@ -97,16 +105,12 @@ result.scaled <- lute(
 #------------------
 
 prop.unscaled <- result.unscaled[["deconvolutionResults"]]@predictionsTable
-
 prop.scaled <- result.scaled[["deconvolutionResults"]]@predictionsTable
 
 # get common cell type id mappings
 map.vector1 <- gsub("\\.", " ", colnames(prop.scaled))
-
 map.vector2 <- gsub("\\.", " ", colnames(prop.unscaled)) # df.proportions$cell.type
-
 common.id <- intersect(map.vector1, map.vector2)
-
 df.map <- data.frame(
   p.true.id = common.id, map.vector2 = common.id)
 
