@@ -8,7 +8,7 @@
 #
 #
 
-libv <- c("ggplot2", "reshape2", "gridExtra", "lute")
+libv <- c("ggplot2", "reshape2", "gridExtra", "lute", "cowplot")
 sapply(libv, library, character.only = T)
 
 #-------------------------
@@ -212,7 +212,7 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 1,
   #
   #
   
-  listPlots <- lapply(seq(length(cellScaleFactorVector)), function(index){
+  listResults <- lapply(seq(length(cellScaleFactorVector)), function(index){
     cellScaleFactorIndex <- cellScaleFactorVector[index]
     labelIndex <- labelVector[index]
     valuesList <- singleValueTestVariables(
@@ -221,11 +221,23 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 1,
       trueProportionValue = trueProportionValue)
     exampleResult <- singleValueExample(
       valuesList, paste0(labelIndex,"\ncellScaleFactor = ",cellScaleFactorIndex))
-    exampleResult$ggBarplotChange
+    
+    return(
+      list(result = exampleResult,
+           plot = exampleResult$ggBarplotChange)
+    )
   })
-  names(listPlots) <- labelVector
+  names(listResults) <- labelVector
   
-  return(listPlots)
+  # unpack plots
+  listPlots[["resultPlotsList"]] <- 
+    lapply(listResults, function(item){item[["plot"]]})
+  names(listPlots[["resultPlotsList"]]) <- labelVector
+  
+  # return
+  returnList <- list(resultsList = listResults,
+                     resultsPlotList = listPlots)
+  return(returnList)
 }
 
 cellScaleFactorsStart <- 1
@@ -253,10 +265,16 @@ grid.arrange(exampleResult$valuesList$ggBarplotStart,
              exampleResult$plot, nrow = 1)
 
 # get multiple panels
-
 listMultiPlot <- multiPanelPlots()
-
-
+barplotStart <- 
+  listMultiPlot$resultsList$Decrease$result$valuesList$ggBarplotStart
+listResultPlots <- listMultiPlot$resultsPlotList$resultPlotsList
+grid.arrange(barplotStart, 
+             listResultPlots$Decrease,
+             listResultPlots$`Slight Decrease`,
+             listResultPlots$`Slight Increase`,
+             listResultPlots$Increase,
+             listResultPlots$`NULL`, nrow = 1)
 
 
 
