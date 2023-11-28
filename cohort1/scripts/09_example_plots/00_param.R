@@ -66,6 +66,7 @@ parseExampleStartValues <- function(valuesList){
                     valuesList[["markerExpressionStart"]])
   zrefExample <- matrix(matrixValues, nrow = 2)
   colnames(zrefExample) <- c("type1", "type2")
+  zrefExample <- lute:::.zstransform(zrefExample, cellScaleFactorsStart)
   bulkExpressionExample <- matrix(
     rep(valuesList[["bulkExpressionValue"]], 2), ncol = 1)
   rownames(zrefExample) <- rownames(bulkExpressionExample) <- 
