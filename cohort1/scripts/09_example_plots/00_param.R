@@ -8,7 +8,7 @@
 #
 #
 
-libv <- c("ggplot2", "reshape2", "gridExtra", "lute", "cowplot")
+libv <- c("ggplot2", "reshape2", "gridExtra", "lute")
 sapply(libv, library, character.only = T)
 
 #-------------------------
@@ -17,10 +17,10 @@ sapply(libv, library, character.only = T)
  
 #-------------------------
 
-singleValueTestVariables <- function(cellScaleFactorsStart = 2,
+singleValueTestVariables <- function(cellScaleFactorsStart = 0.5,
                                      cellScaleFactorOffTypeValue = 1,
                                      trueProportionValue = 0.8,
-                                     markerExpressionStart = 1.5,
+                                     markerExpressionStart = 0.5,
                                      cellScaleFactorNew = 1,
                                      bulkExpressionValue = 0.8){
   # singleValueTestVariables
@@ -45,7 +45,7 @@ singleValueTestVariables <- function(cellScaleFactorsStart = 2,
   return(valuesList)
 }
 
-parseExampleStartValues <- function(valuesList){
+parseExampleStartValues <- function(valuesList, roundValue = 2){
   # parseExampleStartValues
   #
   # Get predictions for starting values, and append to valuesList
@@ -62,21 +62,27 @@ parseExampleStartValues <- function(valuesList){
     names(cellScaleFactorsNull) <- c("type1", "type2")
   
   # get expression matrices
-  matrixValues <- c(valuesList[["markerExpressionStart"]], 0, 0, 
+  matrixValues <- c(valuesList[["markerExpressionStart"]], 0.1, 0.1, 
                     valuesList[["markerExpressionStart"]])
   zrefExample <- matrix(matrixValues, nrow = 2)
   colnames(zrefExample) <- c("type1", "type2")
-  zrefExample <- lute:::.zstransform(zrefExample, cellScaleFactorsStart)
-  bulkExpressionExample <- matrix(
-    rep(valuesList[["bulkExpressionValue"]], 2), ncol = 1)
-  rownames(zrefExample) <- rownames(bulkExpressionExample) <- 
-    paste0("gene", seq(nrow(zrefExample)))
+  zrefExampleScaled <- lute:::.zstransform(zrefExample, cellScaleFactorsStart)
+  #bulkExpressionExample <- matrix(
+  #  rep(valuesList[["bulkExpressionValue"]], 2), ncol = 1)
+  bulkExpressionExample <- t(t(
+    c(valuesList[["trueProportionValue"]], 
+      1-valuesList[["trueProportionValue"]])) %*% 
+      t(zrefExampleScaled))
+  rownames(zrefExample) <- rownames(zrefExampleScaled) <- 
+    rownames(bulkExpressionExample) <- paste0("gene", seq(nrow(zrefExample)))
   
   newParamStart <- 
-    nnlsParam(bulkExpressionExample, zrefExample, cellScaleFactorsStart) |>
+    nnlsParam(bulkExpressionExample, zrefExample, 
+              cellScaleFactorsStart) |>
     deconvolution()
   newParamNull <- 
-    nnlsParam(bulkExpressionExample, zrefExample, cellScaleFactorsNull) |>
+    nnlsParam(bulkExpressionExample, zrefExample, 
+              cellScaleFactorsNull) |>
     deconvolution()
   predictedProportionsStart <- newParamStart@predictionsTable[[1]]
   predictedProportionsNull <- newParamNull@predictionsTable[[1]]
@@ -95,19 +101,22 @@ parseExampleStartValues <- function(valuesList){
     errorValue = errorStart
   )
   dfp <- melt(dfp)
-  dfp$value <- round(dfp$value, 3)
+  dfp$value <- round(dfp$value, roundValue)
   plot1 <- ggplot(dfp, aes(x = variable, y = value)) + 
     geom_bar(stat="identity", color = "black", fill = 'gray') + 
     theme_bw() + geom_hline(yintercept = 0) +
     theme(axis.text.x = element_text(angle=45,hjust=1),
           axis.title.x = element_blank()) +
     geom_text(aes(label = value), vjust = -1.5) +
-    ylab("Value") + ylim(min(dfp$value-1), max(dfp$value+1))
+    ylab("Value") + ylim(min(dfp$value-1), max(dfp$value+1)) +
+    ggtitle("Example starting values")
   
   # return
   valuesList[["deconvoResultsStart"]] <- newParamStart
   valuesList[["bulkExpressionExample"]] <- bulkExpressionExample
+  valuesList[["markerExpressionStartScaled"]] <- zrefExample[1,1]
   valuesList[["zrefExample"]] <- zrefExample
+  valuesList[["zrefExampleScaled"]] <- zrefExampleScaled
   valuesList[["predictedProportionsStart"]] <- predictedProportionsStart
   valuesList[["predictedProportionsNull"]] <- predictedProportionsNull
   valuesList[["biasStart"]] <- biasStart
@@ -130,8 +139,6 @@ singleValueExample <- function(valuesList, conditionLabel = "",
   #
   #
   
-  
-  
   changeNew <- valuesList[["cellScaleFactorNew"]]-
     valuesList[["cellScaleFactorStart"]]
   labelNew <- 
@@ -143,12 +150,16 @@ singleValueExample <- function(valuesList, conditionLabel = "",
   names(cellScaleFactorsNew) <- c("type1", "type2")
   newParamNew <- 
     nnlsParam(
-      valuesList[["bulkExpressionExample"]], valuesList[["zrefExample"]], 
+      valuesList[["bulkExpressionExample"]], 
+      valuesList[["zrefExample"]], 
       cellScaleFactorsNew) |>
     deconvolution()
   predictedProportionsNew <- newParamNew@predictionsTable[[1]]
   biasNew <- valuesList[["trueProportionValue"]]-predictedProportionsNew
   errorNew <- abs(biasNew)
+  zrefNew <- 
+    lute:::.zstransform(valuesList[["zrefExample"]], 
+                        cellScaleFactorsNew)
   
   # get changes
   cellScaleFactorChange <- valuesList[["cellScaleFactorNew"]]-
@@ -157,9 +168,7 @@ singleValueExample <- function(valuesList, conditionLabel = "",
     valuesList[["predictedProportionsStart"]]
   biasChange <- biasNew-valuesList[["biasStart"]]
   errorChange <- errorNew-valuesList[["errorStart"]]
-  markerExpressionChange <- 
-    (valuesList[["markerExpressionStart"]]/valuesList[["cellScaleFactorNew"]])-
-    valuesList[["markerExpressionStart"]]
+  markerExpressionChange <- zrefNew[1,1]-valuesList[["zrefExample"]][1,1]
   
   # get plot data
   dfpNew <- data.frame(
@@ -188,6 +197,7 @@ singleValueExample <- function(valuesList, conditionLabel = "",
   returnList <- list(
     valuesList = valuesList,
     deconvoResult = newParamNew,
+    zrefNew = zrefNew,
     plotData = dfpNew,
     ggBarplotChange = plot2
   )
@@ -196,11 +206,12 @@ singleValueExample <- function(valuesList, conditionLabel = "",
   
 }
 
-multiPanelPlots <- function(cellScaleFactorOffTypeValue = 1,
-                            cellScaleFactorsStart = 1.5,
-                            trueProportionValue = 0.2,
+multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
+                            markerExpressionStart = 0.5,
+                            cellScaleFactorsStart = 2,
+                            trueProportionValue = 0.6,
                             cellScaleFactorVector = 
-                              c(0.1, 0.5, 1.5, 2, 1),
+                              c(0.5, 1.5, 2.5, 3.5, 1),
                             labelVector = 
                               c("Decrease", "Slight Decrease", 
                                 "Slight Increase", "Increase", "NULL")){
@@ -217,6 +228,7 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 1,
     labelIndex <- labelVector[index]
     valuesList <- singleValueTestVariables(
       cellScaleFactorsStart = cellScaleFactorsStart, 
+      markerExpressionStart = markerExpressionStart,
       cellScaleFactorNew = cellScaleFactorIndex, 
       trueProportionValue = trueProportionValue)
     exampleResult <- singleValueExample(
@@ -229,17 +241,69 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 1,
   })
   names(listResults) <- labelVector
   
-  # unpack plots
-  listPlots[["resultPlotsList"]] <- 
-    lapply(listResults, function(item){item[["plot"]]})
-  names(listPlots[["resultPlotsList"]]) <- labelVector
+  # get plots formatted for grid arrange
+  listPlots <- lapply(listResults, function(item){item[["plot"]]})
+  names(listPlots) <- labelVector
+  
+  dfPlotAll <- do.call(rbind, lapply(listResults, function(item){
+    item$result$plotData
+  })) |> as.data.frame()
+  dfPlotAll$conditionLabel <- 
+    factor(dfPlotAll$conditionLabel, levels = unique(dfPlotAll$conditionLabel))
+  ggMultiPanel <- ggplot(dfPlotAll, aes(x = variable, y = value, fill = Change)) + 
+    geom_bar(stat="identity", color = "black") + theme_bw() +
+    ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
+    geom_hline(yintercept = 0) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ggtitle("Affect of scale change") +
+    scale_fill_manual(breaks = c("Increase", "Decrease"), 
+                      values=c("dodgerblue", "gold"))
   
   # return
   returnList <- list(resultsList = listResults,
-                     resultsPlotList = listPlots)
+                     resultsPlotList = listPlots,
+                     dfPlotAll = dfPlotAll,
+                     ggMulti = ggMultiPanel)
   return(returnList)
 }
 
+#--------------------------------------------------
+
+# multiple panels -- marker expression start is 0.5
+
+#--------------------------------------------------
+
+# get multiple panels
+# view facet of multi panel plots
+listMultiPlot <- multiPanelPlots()
+listMultiPlot$ggMulti
+barplotStart <- 
+  listMultiPlot$resultsList$Decrease$result$valuesList$ggBarplotStart
+grid.arrange(barplotStart, listMultiPlot$ggMulti, nrow = 1,
+             layout_matrix = matrix(c(1,2,2,2),nrow=1))
+
+# save
+jpeg("./figures/09_example_plots/multipanel_example_barplots.jpg", width = 11, 
+     height = 4, units = "in", res = 400)
+grid.arrange(barplotStart, listMultiPlot$ggMulti, nrow = 1,
+             layout_matrix = matrix(c(1,2,2,2),nrow=1))
+dev.off()
+
+# marker expression start is 1
+
+# get multiple panels
+# view facet of multi panel plots
+listMultiPlot <- multiPanelPlots(markerExpressionStart = 1)
+barplotStart <- 
+  listMultiPlot$resultsList$Decrease$result$valuesList$ggBarplotStart
+grid.arrange(barplotStart, listMultiPlot$ggMulti, nrow = 1,
+             layout_matrix = matrix(c(1,2,2,2),nrow=1))
+
+#--------------
+
+# single panels
+
+#--------------
 cellScaleFactorsStart <- 1
 cellScaleFactorNew <- 3
 trueProportionValue <- 0.2
@@ -263,32 +327,6 @@ exampleResult <- singleValueExample(
   valuesList, paste0("Decrease\ncellScaleFactor = ",cellScaleFactorNew))
 grid.arrange(exampleResult$valuesList$ggBarplotStart,
              exampleResult$plot, nrow = 1)
-
-# get multiple panels
-listMultiPlot <- multiPanelPlots()
-barplotStart <- 
-  listMultiPlot$resultsList$Decrease$result$valuesList$ggBarplotStart
-listResultPlots <- listMultiPlot$resultsPlotList$resultPlotsList
-grid.arrange(barplotStart, 
-             listResultPlots$Decrease,
-             listResultPlots$`Slight Decrease`,
-             listResultPlots$`Slight Increase`,
-             listResultPlots$Increase,
-             listResultPlots$`NULL`, nrow = 1)
-
-
-
-
-
-cellScaleFactorNew <- 0.5
-valuesList <- singleValueTestVariables(
-  cellScaleFactorsStart = cellScaleFactorsStart, 
-  cellScaleFactorNew = cellScaleFactorNew, 
-  trueProportionValue = trueProportionValue)
-exampleResult <- singleValueExample(
-  valuesList, paste0("Decrease\ncellScaleFactor = ",cellScaleFactorNew))
-
-
 
 
 #-----------------------------------
