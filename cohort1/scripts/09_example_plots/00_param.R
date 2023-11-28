@@ -12,25 +12,155 @@ libv <- c("ggplot2", "reshape2", "gridExtra", "lute")
 sapply(libv, library, character.only = T)
 
 source_test_values <- function(){
-  # set starting params (conditions for example)
-  cellScaleFactorStart <- 10
-  cellScaleFactorOffTypeValue <- 3 # this doesn't change for demonstration
-  trueProportionValue <- 0.8
-  markerExpression <- 5
+  cellScaleFactorStart = 2
+  cellScaleFactorOffTypeValue = 10
+  trueProportionValue = 0.8
+  markerExpression = 3
+  cellScaleFactorNewHigh = 3
+  cellScaleFactorNewMidHigh = 2.5
+  cellScaleFactorNewMidLow = 1.5
+  cellScaleFactorNewLow = 1
+  changeNull = 0
+  yLabelStringChanges = "Change"
+  plotTitleStringChanges = "Affect of scale change"
   
-  # set cell scale factors to change
-  cellScaleFactorNewHigh <- 0.95
-  cellScaleFactorNewMidHigh <- 0.75
-  cellScaleFactorNewMidLow <- 0.25
-  cellScaleFactorNewLow <- 0.05
   
-  # get changes for each iteration
-  changeNull <- 0
+  valuesList <- list(
+    cellScaleFactorStart = 2,
+    cellScaleFactorOffTypeValue = 10,
+    trueProportionValue = 0.8,
+    markerExpression = 3,
+    cellScaleFactorNewHigh = 3
+  )
+}
+
+singleValueTestVariables <- function(){
+  # singleValueTestVariables
+  #
+  #
+  #
   
-  yLabelStringChanges <- paste0("New - Old\n-",rep(" ",20),"+")
-  plotTitleStringChanges <- "Affect of scale change"
+  valuesList <- list(
+    cellScaleFactorsStart = 2,
+    cellScaleFactorOffTypeValue = 10,
+    trueProportionValue = 0.8,
+    markerExpression = 3,
+    cellScaleFactorNew = 3
+  )
+  
+  valuesList <- parseExampleStartValues(valuesList)
+  
+  return(valuesList)
+}
+
+parseExampleStartValues <- function(valuesList){
+  # parseExampleStartValues
+  #
+  # Get predictions for starting values, and append to valuesList
+  #
+  #
+  #
+  #
+  
+  # get scale factor sets
+  cellScaleFactorsStart <- c(valuesList[["cellScaleFactorsStart"]], 
+                             valuesList[["cellScaleFactorOffTypeValue"]])
+  cellScaleFactorsNull <- c(1, 1)
+  names(cellScaleFactorsStart) <- 
+    names(cellScaleFactorsNull) <- c("type1", "type2")
+  newParamStart <- 
+    nnlsParam(bulkExpressionExample, zrefExample, cellScaleFactorsStart) |>
+    deconvolution()
+  newParamNull <- 
+    nnlsParam(bulkExpressionExample, zrefExample, cellScaleFactorsNull) |>
+    deconvolution()
+  predictedProportionsStart <- newParamStart@predictionsTable[[1]]
+  predictedProportionsNull <- newParamNull@predictionsTable[[1]]
+  biasStart <- trueProportionValue-predictedProportionsStart
+  biasNull <- trueProportionValue-predictedProportionsNull
+  errorStart <- abs(biasStart)
+  errorNull <- abs(biasNull)
+  
+  # return
+  valuesList[["predictedProportionsStart"]] <- predictedProportionsStart
+  valuesList[["predictedProportionsNull"]] <- predictedProportionsNull
+  valuesList[["biasStart"]] <- biasStart
+  valuesList[["biasNull"]] <- biasNull
+  valuesList[["errorStart"]] <- errorStart
+  valuesList[["errorNull"]] <- errorNull
+  return(valuesList)
+}
+
+singleValueExample <- function(valuesList, conditionLabel = ""){
+  # singleValueExample
+  #
+  # Get single point values example. 
+  #
+  # @param valuesList Output from singleValueTestVariables().
+  #
+  #
+  #
+  #
+  
+  
+  
+  changeNew <- valuesList[["cellScaleFactorNew"]]-
+    valuesList[["cellScaleFactorStart"]]
+  labelNew <- 
+    paste0("cellScaleFactor = ",valuesList[["cellScaleFactorNew"]],")")
+  
+  # get simulation results
+  cellScaleFactorsNew <- c(valuesList[["cellScaleFactorNew"]], 
+                           valuesList[["cellScaleFactorOffTypeValue"]])
+  names(cellScaleFactorsNew) <- c("type1", "type2")
+  newParamNew <- 
+    nnlsParam(bulkExpressionExample, zrefExample, cellScaleFactorsNew) |>
+    deconvolution()
+  predictedProportionsNew <- newParamNew@predictionsTable[[1]]
+  biasNew <- trueProportionValue-predictedProportionsNew
+  errorNew <- abs(biasNew)
+  
+  # get changes
+  cellScaleFactorChange <- valuesList[["cellScaleFactorNew"]]-
+    valuesList[["cellScaleFactorsStart"]]
+  proportionChange <- predictedProportionsNew-
+    valuesList[["predictedProportionsStart"]]
+  biasChange <- biasNew-valuesList[["biasStart"]]
+  errorChange <- errorNew-valuesList[["errorStart"]]
+  markerExpressionChange <- 
+    (valuesList[["markerExpression"]]/valuesList[["cellScaleFactorNew"]])-
+    valuesList[["markerExpression"]]
+  
+  # get plot data
+  dfpNew <- data.frame(
+    variable = 
+      c("cellScaleFactor", "markerExpression", 
+        "predictedProportion", "bias", "error"),
+    value = 
+      c(cellScaleFactorChange, markerExpressionChange, 
+        proportionChange, biasChange, errorChange)
+  )
+  dfpNew$conditionLabel <- conditionLabel
+  dfpNew$Change <- ifelse(dfpNew$value > 0, "Increase", "Decrease")
+  dfpNew$variable <- factor(dfpNew$variable, 
+                          levels = c("cellScaleFactor", "markerExpression",
+                                     "predictedProportion", "bias", "error"))
+  
+  plot2 <- ggplot(dfpNew, aes(x = variable, y = value, fill = Change)) + 
+    geom_bar(stat="identity", color = "black") + theme_bw() +
+    ylab(yLabelStringChanges) + facet_wrap(~conditionLabel, nrow = 1) + 
+    geom_hline(yintercept = 0) +
+    #theme(axis.title.x = element_blank(),
+    #      axis.text.x = element_text(angle=45,hjust=1),
+    #      axis.ticks.y = element_blank(),
+    #      axis.text.y = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ggtitle(plotTitleStringChanges) +
+    scale_fill_manual(breaks = changeLevelsVector, 
+                      values=c("dodgerblue", "gold"))
   
 }
+
 
 point_value_example <- function(cellScaleFactorStart = 2,
                                 cellScaleFactorOffTypeValue = 10,
@@ -58,9 +188,12 @@ point_value_example <- function(cellScaleFactorStart = 2,
   changeMidHigh <- cellScaleFactorNewMidHigh-cellScaleFactorStart
   changeMidLow <- cellScaleFactorNewMidLow-cellScaleFactorStart
   changeLow <- cellScaleFactorNewLow-cellScaleFactorStart
-  labelHigh <- paste0("Increase\n(cellScaleFactor = ",cellScaleFactorNewHigh,")")
-  labelMidHigh <- paste0("Moderate Inc.\n(cellScaleFactor = ",cellScaleFactorNewMidHigh,")")
-  labelMidLow <- paste0("Moderate Dec.\n(cellScaleFactor = ",cellScaleFactorNewMidLow,")")
+  labelHigh <- 
+    paste0("Increase\n(cellScaleFactor = ",cellScaleFactorNewHigh,")")
+  labelMidHigh <- 
+    paste0("Moderate Inc.\n(cellScaleFactor = ",cellScaleFactorNewMidHigh,")")
+  labelMidLow <- 
+    paste0("Moderate Dec.\n(cellScaleFactor = ",cellScaleFactorNewMidLow,")")
   labelLow <- paste0("Decrease\n(cellScaleFactor = ",cellScaleFactorNewLow,")")
   
   changeLevelsVector <- c(labelHigh, labelMidHigh, labelMidLow, labelLow)
@@ -77,8 +210,10 @@ point_value_example <- function(cellScaleFactorStart = 2,
   cellScaleFactorsStart <- c(cellScaleFactorStart, cellScaleFactorOffTypeValue)
   cellScaleFactorsNull <- c(1, cellScaleFactorOffTypeValue)
   cellScaleFactorsHigh <- c(cellScaleFactorNewHigh, cellScaleFactorOffTypeValue)
-  cellScaleFactorsMidHigh <- c(cellScaleFactorNewMidHigh, cellScaleFactorOffTypeValue)
-  cellScaleFactorsMidLow <- c(cellScaleFactorNewMidLow, cellScaleFactorOffTypeValue)
+  cellScaleFactorsMidHigh <- 
+    c(cellScaleFactorNewMidHigh, cellScaleFactorOffTypeValue)
+  cellScaleFactorsMidLow <- 
+    c(cellScaleFactorNewMidLow, cellScaleFactorOffTypeValue)
   cellScaleFactorsLow <- c(cellScaleFactorNewLow, cellScaleFactorOffTypeValue)
   
   names(cellScaleFactorsStart) <- names(cellScaleFactorsNull) <-
