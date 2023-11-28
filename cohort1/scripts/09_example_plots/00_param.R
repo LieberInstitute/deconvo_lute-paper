@@ -11,41 +11,33 @@
 libv <- c("ggplot2", "reshape2", "gridExtra", "lute")
 sapply(libv, library, character.only = T)
 
-source_test_values <- function(){
-  cellScaleFactorStart = 2
-  cellScaleFactorOffTypeValue = 10
-  trueProportionValue = 0.8
-  markerExpression = 3
-  cellScaleFactorNewHigh = 3
-  cellScaleFactorNewMidHigh = 2.5
-  cellScaleFactorNewMidLow = 1.5
-  cellScaleFactorNewLow = 1
-  changeNull = 0
-  yLabelStringChanges = "Change"
-  plotTitleStringChanges = "Affect of scale change"
-  
-  
-  valuesList <- list(
-    cellScaleFactorStart = 2,
-    cellScaleFactorOffTypeValue = 10,
-    trueProportionValue = 0.8,
-    markerExpression = 3,
-    cellScaleFactorNewHigh = 3
-  )
-}
+#-------------------------
 
-singleValueTestVariables <- function(){
+# Single example functions
+ 
+#-------------------------
+
+singleValueTestVariables <- function(cellScaleFactorsStart = 2,
+                                     cellScaleFactorOffTypeValue = 10,
+                                     trueProportionValue = 0.8,
+                                     markerExpressionStart = 3,
+                                     cellScaleFactorNew = 10,
+                                     bulkExpressionValue = 0.8){
   # singleValueTestVariables
   #
+  # Run to get example valuesList object.
+  #
+  #
   #
   #
   
   valuesList <- list(
-    cellScaleFactorsStart = 2,
-    cellScaleFactorOffTypeValue = 10,
-    trueProportionValue = 0.8,
-    markerExpression = 3,
-    cellScaleFactorNew = 3
+    cellScaleFactorsStart = cellScaleFactorsStart,
+    cellScaleFactorOffTypeValue = cellScaleFactorOffTypeValue,
+    trueProportionValue = trueProportionValue,
+    markerExpressionStart = markerExpressionStart,
+    cellScaleFactorNew = cellScaleFactorNew,
+    bulkExpressionValue = bulkExpressionValue
   )
   
   valuesList <- parseExampleStartValues(valuesList)
@@ -68,6 +60,17 @@ parseExampleStartValues <- function(valuesList){
   cellScaleFactorsNull <- c(1, 1)
   names(cellScaleFactorsStart) <- 
     names(cellScaleFactorsNull) <- c("type1", "type2")
+  
+  # get expression matrices
+  matrixValues <- c(valuesList[["markerExpressionStart"]], 0, 0, 
+                    valuesList[["markerExpressionStart"]])
+  zrefExample <- matrix(matrixValues, nrow = 2)
+  colnames(zrefExample) <- c("type1", "type2")
+  bulkExpressionExample <- matrix(
+    rep(valuesList[["bulkExpressionValue"]], 2), ncol = 1)
+  rownames(zrefExample) <- rownames(bulkExpressionExample) <- 
+    paste0("gene", seq(nrow(zrefExample)))
+  
   newParamStart <- 
     nnlsParam(bulkExpressionExample, zrefExample, cellScaleFactorsStart) |>
     deconvolution()
@@ -76,12 +79,15 @@ parseExampleStartValues <- function(valuesList){
     deconvolution()
   predictedProportionsStart <- newParamStart@predictionsTable[[1]]
   predictedProportionsNull <- newParamNull@predictionsTable[[1]]
-  biasStart <- trueProportionValue-predictedProportionsStart
-  biasNull <- trueProportionValue-predictedProportionsNull
+  biasStart <- valuesList[["trueProportionValue"]]-predictedProportionsStart
+  biasNull <- valuesList[["trueProportionValue"]]-predictedProportionsNull
   errorStart <- abs(biasStart)
   errorNull <- abs(biasNull)
   
   # return
+  valuesList[["deconvoResultsStart"]] <- newParamStart
+  valuesList[["bulkExpressionExample"]] <- bulkExpressionExample
+  valuesList[["zrefExample"]] <- zrefExample
   valuesList[["predictedProportionsStart"]] <- predictedProportionsStart
   valuesList[["predictedProportionsNull"]] <- predictedProportionsNull
   valuesList[["biasStart"]] <- biasStart
@@ -114,7 +120,9 @@ singleValueExample <- function(valuesList, conditionLabel = ""){
                            valuesList[["cellScaleFactorOffTypeValue"]])
   names(cellScaleFactorsNew) <- c("type1", "type2")
   newParamNew <- 
-    nnlsParam(bulkExpressionExample, zrefExample, cellScaleFactorsNew) |>
+    nnlsParam(
+      valuesList[["bulkExpressionExample"]], valuesList[["zrefExample"]], 
+      cellScaleFactorsNew) |>
     deconvolution()
   predictedProportionsNew <- newParamNew@predictionsTable[[1]]
   biasNew <- trueProportionValue-predictedProportionsNew
@@ -128,8 +136,8 @@ singleValueExample <- function(valuesList, conditionLabel = ""){
   biasChange <- biasNew-valuesList[["biasStart"]]
   errorChange <- errorNew-valuesList[["errorStart"]]
   markerExpressionChange <- 
-    (valuesList[["markerExpression"]]/valuesList[["cellScaleFactorNew"]])-
-    valuesList[["markerExpression"]]
+    (valuesList[["markerExpressionStart"]]/valuesList[["cellScaleFactorNew"]])-
+    valuesList[["markerExpressionStart"]]
   
   # get plot data
   dfpNew <- data.frame(
@@ -143,24 +151,63 @@ singleValueExample <- function(valuesList, conditionLabel = ""){
   dfpNew$conditionLabel <- conditionLabel
   dfpNew$Change <- ifelse(dfpNew$value > 0, "Increase", "Decrease")
   dfpNew$variable <- factor(dfpNew$variable, 
-                          levels = c("cellScaleFactor", "markerExpression",
-                                     "predictedProportion", "bias", "error"))
+                            levels = c("cellScaleFactor", "markerExpression",
+                                       "predictedProportion", "bias", "error"))
   
   plot2 <- ggplot(dfpNew, aes(x = variable, y = value, fill = Change)) + 
     geom_bar(stat="identity", color = "black") + theme_bw() +
-    ylab(yLabelStringChanges) + facet_wrap(~conditionLabel, nrow = 1) + 
+    ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
     geom_hline(yintercept = 0) +
-    #theme(axis.title.x = element_blank(),
-    #      axis.text.x = element_text(angle=45,hjust=1),
-    #      axis.ticks.y = element_blank(),
-    #      axis.text.y = element_blank()) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
     ggtitle(plotTitleStringChanges) +
     scale_fill_manual(breaks = changeLevelsVector, 
                       values=c("dodgerblue", "gold"))
   
+  returnList <- list(
+    valuesList = valuesList,
+    deconvoResult = newParamNew,
+    plotData = dfpNew,
+    plot = plot2
+  )
+  
+  return(returnList)
+  
 }
 
+
+valuesList <- singleValueTestVariables(
+  cellScaleFactorsStart = 0, cellScaleFactorNew = 2, trueProportionValue = 0.1)
+exampleResult <- singleValueExample(valuesList)
+exampleResult$plot
+
+#-----------------------------------
+
+# Faceted/combined example functions
+
+#-----------------------------------
+
+source_test_values <- function(){
+  cellScaleFactorStart = 2
+  cellScaleFactorOffTypeValue = 10
+  trueProportionValue = 0.8
+  markerExpression = 3
+  cellScaleFactorNewHigh = 3
+  cellScaleFactorNewMidHigh = 2.5
+  cellScaleFactorNewMidLow = 1.5
+  cellScaleFactorNewLow = 1
+  changeNull = 0
+  yLabelStringChanges = "Change"
+  plotTitleStringChanges = "Affect of scale change"
+  
+  
+  valuesList <- list(
+    cellScaleFactorStart = 2,
+    cellScaleFactorOffTypeValue = 10,
+    trueProportionValue = 0.8,
+    markerExpression = 3,
+    cellScaleFactorNewHigh = 3
+  )
+}
 
 point_value_example <- function(cellScaleFactorStart = 2,
                                 cellScaleFactorOffTypeValue = 10,
@@ -352,8 +399,6 @@ point_value_example <- function(cellScaleFactorStart = 2,
   return(returnList)
 }
 
-
 listExample <- point_value_example()
 
 listExample$plots$plotBarplotChanges
-
