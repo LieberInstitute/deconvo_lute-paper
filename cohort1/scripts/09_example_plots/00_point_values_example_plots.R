@@ -36,6 +36,8 @@ labelMidHigh <- paste0("Moderate Inc.\n(cellScaleFactor = ",cellScaleFactorNewMi
 labelMidLow <- paste0("Moderate Dec.\n(cellScaleFactor = ",cellScaleFactorNewMidLow,")")
 labelLow <- paste0("Decrease\n(cellScaleFactor = ",cellScaleFactorNewLow,")")
 
+changeLevelsVector <- c(labelHigh, labelMidHigh, labelMidLow, labelLow)
+
 #-----------------------
 # get simulation results
 #-----------------------

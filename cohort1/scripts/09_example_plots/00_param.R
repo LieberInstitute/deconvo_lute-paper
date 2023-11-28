@@ -11,21 +11,48 @@
 libv <- c("ggplot2", "reshape2", "gridExtra", "lute")
 sapply(libv, library, character.only = T)
 
-point_value_example <- function(cellScaleFactorStart = 10,
-                                cellScaleFactorOffTypeValue = 3,
+source_test_values <- function(){
+  # set starting params (conditions for example)
+  cellScaleFactorStart <- 10
+  cellScaleFactorOffTypeValue <- 3 # this doesn't change for demonstration
+  trueProportionValue <- 0.8
+  markerExpression <- 5
+  
+  # set cell scale factors to change
+  cellScaleFactorNewHigh <- 0.95
+  cellScaleFactorNewMidHigh <- 0.75
+  cellScaleFactorNewMidLow <- 0.25
+  cellScaleFactorNewLow <- 0.05
+  
+  # get changes for each iteration
+  changeNull <- 0
+  
+  yLabelStringChanges <- paste0("New - Old\n-",rep(" ",20),"+")
+  plotTitleStringChanges <- "Affect of scale change"
+  
+}
+
+point_value_example <- function(cellScaleFactorStart = 2,
+                                cellScaleFactorOffTypeValue = 10,
                                 trueProportionValue = 0.8,
-                                markerExpression = 5,
-                                cellScaleFactorNewHigh = 0.95,
-                                cellScaleFactorNewMidHigh = 0.75,
-                                cellScaleFactorNewMidLow = 0.25,
-                                cellScaleFactorNewLow = 0.05,
-                                changeNull = 0){
+                                markerExpression = 3,
+                                cellScaleFactorNewHigh = 3,
+                                cellScaleFactorNewMidHigh = 2.5,
+                                cellScaleFactorNewMidLow = 1.5,
+                                cellScaleFactorNewLow = 1,
+                                changeNull = 0,
+                                yLabelStringChanges = "Change",
+                                plotTitleStringChanges = "Affect of scale change"){
   # point_value_example
   #
   # Get example from simulation using provided point values
   #
   #
   #
+  
+  #-----------------------
+  # parse simulation params
+  #-----------------------
   
   changeHigh <- cellScaleFactorNewHigh-cellScaleFactorStart
   changeMidHigh <- cellScaleFactorNewMidHigh-cellScaleFactorStart
@@ -35,6 +62,8 @@ point_value_example <- function(cellScaleFactorStart = 10,
   labelMidHigh <- paste0("Moderate Inc.\n(cellScaleFactor = ",cellScaleFactorNewMidHigh,")")
   labelMidLow <- paste0("Moderate Dec.\n(cellScaleFactor = ",cellScaleFactorNewMidLow,")")
   labelLow <- paste0("Decrease\n(cellScaleFactor = ",cellScaleFactorNewLow,")")
+  
+  changeLevelsVector <- c(labelHigh, labelMidHigh, labelMidLow, labelLow)
   
   #-----------------------
   # get simulation results
@@ -103,19 +132,20 @@ point_value_example <- function(cellScaleFactorStart = 10,
     cellScaleFactorStart = cellScaleFactorStart,
     markerExpression = markerExpression,
     trueProportion = trueProportionValue,
-    predictedProportion = predictedProportionValue,
-    biasValue = biasValue,
-    errorValue = errorValue
+    predictedProportion = predictedProportionsStart,
+    biasValue = biasStart,
+    errorValue = errorStart
   )
   dfp <- melt(dfp)
+  dfp$value <- round(dfp$value, 3)
   
   plot1 <- ggplot(dfp, aes(x = variable, y = value)) + 
     geom_bar(stat="identity", color = "black", fill = 'gray') + 
-    theme_bw() + ylim(-0.2, 0.75) + geom_hline(yintercept = 0) +
+    theme_bw() + geom_hline(yintercept = 0) +
     theme(axis.text.x = element_text(angle=45,hjust=1),
           axis.title.x = element_blank()) +
     geom_text(aes(label = value), vjust = -1.5) +
-    ylab("Value")
+    ylab("Value") + ylim(min(dfp$value-1), max(dfp$value+1))
   
   #-------------------
   # new direction plot
@@ -140,7 +170,7 @@ point_value_example <- function(cellScaleFactorStart = 10,
     biasChange <- biasValue-biasStart
     errorChange <- errorValue-errorStart
     markerExpressionChange <- 
-      (markerExpression*newScalesValue)-markerExpression
+      (markerExpression/newScalesValue)-markerExpression
     
     dfpNew <- data.frame(
       variable = 
@@ -154,19 +184,23 @@ point_value_example <- function(cellScaleFactorStart = 10,
     return(dfpNew)
   })) |> as.data.frame()
   dfp2$Change <- ifelse(dfp2$value > 0, "Increase", "Decrease")
+  dfp2$type <- factor(dfp2$type, levels = changeLevelsVector)
+  dfp2$variable <- factor(dfp2$variable, 
+                          levels = c("cellScaleFactor", "markerExpression",
+                                     "predictedProportion", "bias", "error"))
   
   plot2 <- ggplot(dfp2, aes(x = variable, y = value, fill = Change)) + 
     geom_bar(stat="identity", color = "black") + theme_bw() +
-    ylab(yLabelString) + facet_wrap(~type, nrow = 1) + 
+    ylab(yLabelStringChanges) + facet_wrap(~type, nrow = 1) + 
     geom_hline(yintercept = 0) +
-    theme(axis.title.x = element_blank(),
-          axis.text.x = element_text(angle=45,hjust=1),
-          axis.ticks.y = element_blank(),
-          axis.text.y = element_blank()) +
-    ggtitle(plotTitleString) +
+    #theme(axis.title.x = element_blank(),
+    #      axis.text.x = element_text(angle=45,hjust=1),
+    #      axis.ticks.y = element_blank(),
+    #      axis.text.y = element_blank()) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ggtitle(plotTitleStringChanges) +
     scale_fill_manual(breaks = changeLevelsVector, 
-                      values=c("dodgerblue", "gold")) +
-    ylim(-1,1)
+                      values=c("dodgerblue", "gold"))
   
   
   # return
@@ -179,12 +213,12 @@ point_value_example <- function(cellScaleFactorStart = 10,
     plotBarplotChanges = plot2
   )
   returnList <- list(data = dataList,
-                     plots = plotsList)
+                     plots = plotList)
   return(returnList)
 }
 
 
 listExample <- point_value_example()
 
-
+listExample$plots$plotBarplotChanges
 
