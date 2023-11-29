@@ -26,21 +26,21 @@ source("./scripts/09_example_plots/00_param.R")
 listMultiPlot05 <- multiPanelPlots(markerExpressionStart = 0.5)
 barplotStart05 <- 
   listMultiPlot05$resultsList$Decrease$result$valuesList$ggBarplotStart
-grid.arrange(barplotStart, listMultiPlot05$ggMulti, nrow = 1,
+grid.arrange(barplotStart05, listMultiPlot05$ggMulti, nrow = 1,
              layout_matrix = matrix(c(1,2,2,2),nrow=1))
 
 # marker expression start is 1
 listMultiPlot1 <- multiPanelPlots(markerExpressionStart = 1)
 barplotStart1 <- 
   listMultiPlot1$resultsList$Decrease$result$valuesList$ggBarplotStart
-grid.arrange(barplotStart, listMultiPlot1$ggMulti, nrow = 1,
+grid.arrange(barplotStart1, listMultiPlot1$ggMulti, nrow = 1,
              layout_matrix = matrix(c(1,2,2,2),nrow=1))
 
 # marker expression start is 2
 listMultiPlot2 <- multiPanelPlots(markerExpressionStart = 2)
 barplotStart2 <- 
   listMultiPlot2$resultsList$Decrease$result$valuesList$ggBarplotStart
-grid.arrange(barplotStart, listMultiPlot2$ggMulti, nrow = 1,
+grid.arrange(barplotStart2, listMultiPlot2$ggMulti, nrow = 1,
              layout_matrix = matrix(c(1,2,2,2),nrow=1))
 
 #--------------------------
