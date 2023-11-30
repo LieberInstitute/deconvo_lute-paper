@@ -79,6 +79,46 @@ plot3 <-
 grid.arrange(plot1, plot2, plot3, ncol = 1, top = "Plasmablasts")
 ```
 
+# Save
+
+```{r}
+
+dfPlot <- dfPseudobulkA
+dfPlot$condition2 <- 
+  ifelse(dfPlot$condition=="scaled", "withscale", "noscale")
+dfPlot$condition2 <- 
+  factor(dfPlot$condition2, levels = c("noscale", "withscale"))
+
+# zoom level 1, axis maximum 0.5
+
+jpeg("figures/04_transform/supplemental_figure2a.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+
+ggplot(dfPlot, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point(size = 4, alpha = 0.5) + theme_bw() +
+  geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition2) + xlim(0, 0.15) + ylim(0, 0.15) +
+  ylab("Predicted") + xlab("True") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+dev.off()
+
+# zoom level 2, axis maximum 1
+
+jpeg("figures/04_transform/supplemental_figure2b.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+
+ggplot(dfPlot, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point(size = 4, alpha = 0.5) + theme_bw() +
+  geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition2) + xlim(0, 1) + ylim(0, 1) +
+  ylab("Predicted") + xlab("True") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+dev.off()
+
+```
+
 # Session info
 
 ```{r}
