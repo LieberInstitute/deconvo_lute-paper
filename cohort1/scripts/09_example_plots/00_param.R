@@ -227,7 +227,13 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
   # multiPanelPlots
   #
   # Get multiple plot panels from vector of changed cell types.
-  #
+  # 
+  # cellScaleFactorOffTypeValue : value of the cell scale factor for cell not depicted.
+  # markerExpressionStart : beginning marker expression for cell type depicted.
+  # cellScaleFactorsStart : starting value of the cell scale factor for cell type depicted.
+  # trueProportionValue : true proportion value across simulations.
+  # cellScaleFactorVector : vector of second term cell scale factor differences.
+  # labelVector : vector of character labels for the second term cell scale factor value differences.
   #
   #
   #
