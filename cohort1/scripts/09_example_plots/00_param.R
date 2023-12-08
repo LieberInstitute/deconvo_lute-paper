@@ -27,7 +27,12 @@ singleValueTestVariables <- function(cellScaleFactorsStart = 0.5,
   #
   # Run to get example valuesList object.
   #
-  #
+  # cellScaleFactorsStart : starting cell scale factor value.
+  # cellScaleFactorOffTypeValue : value of the difference for new simulation.
+  # trueProportionValue : value of the true proportion across simulations.
+  # markerExpressionStart : starting marker expression.
+  # cellScaleFactorNew : new value of the scale factor.
+  # bulkExpressionValue : value of bulk gene expressions
   #
   #
   
