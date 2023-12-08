@@ -55,6 +55,9 @@ parseExampleStartValues <- function(valuesList, roundValue = 2){
   #
   # Get predictions for starting values, and append to valuesList
   #
+  # valuesList : List of starting simulation values.
+  # roundValue : Second argument to base::round().
+  #
   #
   #
   #
@@ -129,6 +132,7 @@ parseExampleStartValues <- function(valuesList, roundValue = 2){
   valuesList[["errorStart"]] <- errorStart
   valuesList[["errorNull"]] <- errorNull
   valuesList[["ggBarplotStart"]] <- plot1
+  
   return(valuesList)
 }
 
