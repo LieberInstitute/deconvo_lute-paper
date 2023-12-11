@@ -23,6 +23,8 @@ load("./env/09_example_plots/01_example_plots_value_changes_script.RData")
 # get iterations labels
 dfIter <- listMultiPlot05$dfPlotAll
 changeLabels <- unique(gsub("\\..*", "", rownames(dfIter)))
+variablesVector <- c("cellScaleFactor", "markerExpressionScaled",
+                  "predictedProportion", "biasValue", "errorValue")
 
 # get plots data list
 lgg <- lapply(changeLabels, function(changeLabel){
@@ -39,12 +41,12 @@ lgg <- lapply(changeLabels, function(changeLabel){
   errorValue <- abs(biasValue)
   dfPlot <- data.frame(
     values = c(cellScaleFactor, markerExpressionScaled, 
-               trueProportion, predictedProportion, biasValue, errorValue),
-    variables = c("cellScaleFactor", "markerExpressionScaled", 
-                  "trueProportion", "predictedProportion", 
-                  "biasValue", "errorValue"),
-    variableType = c(rep("condition", 3), rep("result", 3))
+               predictedProportion, biasValue, errorValue),
+    variables = variablesVector,
+    variableType = c(rep("condition", 2), rep("result", 3))
   )
+  dfPlot$variables <- 
+    factor(dfPlot$variables, levels = variablesVector)
   dfPlot$type <- changeLabel
   dfPlot$value <- round(dfPlot$value, 2)
   newBarPlot <- 
@@ -57,7 +59,7 @@ lgg <- lapply(changeLabels, function(changeLabel){
                        values=c("#44AA99", "#332288")) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     ggtitle(changeLabel) +
-    ylim(min(dfPlot$values)-1.2, max(dfPlot$values)+1.2)
+    ylim(min(dfPlot$value)-1.2, max(dfPlot$value)+1.2)
   
   return(list(dfPlot = dfPlot,
               plot = newBarPlot))
@@ -102,13 +104,13 @@ newFacetBarplots <-
   geom_bar(stat = "identity", size = 1.2) + theme_bw() +
   scale_color_manual(breaks = c("condition", "result"), 
                      values=c("#44AA99", "#332288")) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ggtitle(changeLabel) +
-  ylim(min(dfPlotAll$values)-1.2, max(dfPlot$values)+1.2) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1)) +
+  ylim(min(dfPlotAll$values)-1.2, max(dfPlotAll$values)+1.2) +
   facet_wrap(~type)
 
 ggsave(filename = 
-         "./figures/09_example_plots/multipanel_simulation_values_barplots.jpg",
+         paste0("./figures/09_example_plots/",
+                "multipanel_simulation_values_barplots.jpg"),
        plot = newFacetBarplots,
        device = "jpeg", width = 10, height = 5, units = "in", dpi = 400)
 
