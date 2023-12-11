@@ -45,9 +45,21 @@ grid.arrange(barplotStart2, listMultiPlot2$ggMulti, nrow = 1,
 
 #--------------------------
 
-# save multipanel plots
+# save
 
 #--------------------------
+
+# save single panel plots
+# note: save this once, because it does not change across conditions
+jpeg(paste0("./figures/09_example_plots/",
+            "scalefactors_example_barplots_marker05.jpg"), width = 5, 
+     height = 3, units = "in", res = 400)
+listMultiPlot05$ggBarCellScaleFactors
+dev.off()
+
+# save marker expression barplots
+
+# save multipanel plots
 # save
 jpeg(paste0("./figures/09_example_plots/",
             "multipanel_example_barplots_marker05.jpg"), width = 11, 

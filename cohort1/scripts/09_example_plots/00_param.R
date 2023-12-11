@@ -110,14 +110,20 @@ parseExampleStartValues <- function(valuesList, roundValue = 2){
   )
   dfp <- melt(dfp)
   dfp$value <- round(dfp$value, roundValue)
-  plot1 <- ggplot(dfp, aes(x = variable, y = value)) + 
-    geom_bar(stat="identity", color = "black", fill = 'gray') + 
+  dfp$variableType <- ifelse(
+    dfp$variable %in% c("cellScaleFactor", "markerExpression"), 
+    "condition", "result")
+  
+  plot1 <- ggplot(dfp, aes(x = variable, y = value, color = variableType)) + 
+    geom_bar(stat="identity", fill = 'gray', size = 1.2) + 
     theme_bw() + geom_hline(yintercept = 0) +
     theme(axis.text.x = element_text(angle=45,hjust=1),
-          axis.title.x = element_blank()) +
+          axis.title.x = element_blank(), legend.position = "none") +
     geom_text(aes(label = value), vjust = -1.5) +
     ylab("Value") + ylim(min(dfp$value-1), max(dfp$value+1)) +
-    ggtitle("Example starting values")
+    ggtitle("Example starting values") +
+    scale_color_manual(breaks = c("condition", "result"), 
+                       values=c("#44AA99", "#332288"))
   
   # return
   valuesList[["deconvoResultsStart"]] <- newParamStart
@@ -257,8 +263,9 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
   names(listResults) <- labelVector
   
   # get barplots of second cell scale factor values
-  dfbp <- data.frame(cellScaleFactor = c(cellScaleFactorVector, cellScaleFactorsStart),
-                     label = c(labelVector, "Start"))
+  dfbp <- data.frame(
+    cellScaleFactor = c(cellScaleFactorVector, cellScaleFactorsStart),
+    label = c(labelVector, "Start"))
   dfbp$change <- ifelse(
     dfbp$cellScaleFactor==cellScaleFactorsStart, "equal", 
     ifelse(dfbp$cellScaleFactor > cellScaleFactorsStart, "increase", "decrease"))
