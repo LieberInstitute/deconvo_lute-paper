@@ -57,6 +57,25 @@ jpeg(paste0("./figures/09_example_plots/",
 listMultiPlot05$ggBarCellScaleFactors
 dev.off()
 
+# save point values for simulation start barplot
+
+ggsave(filename = 
+         paste0("./figures/09_example_plots/",
+                "sim_start_expr05_barplot.jpg"),
+       plot = barplotStart05,
+       device = "jpeg", width = 3, height = 3, 
+       units = "in", dpi = 400)
+
+# save multipanel change plots
+
+ggsave(filename = 
+         paste0("./figures/09_example_plots/",
+                "multipanel_change_expr05_barplots.jpg"),
+       plot = listMultiPlot05$ggMulti,
+       device = "jpeg", width = 10, height = 4, 
+       units = "in", dpi = 400)
+
+
 # save marker expression barplots
 
 # save multipanel plots
