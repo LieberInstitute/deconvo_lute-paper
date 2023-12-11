@@ -282,21 +282,29 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
   dfPlotAll <- do.call(rbind, lapply(listResults, function(item){
     item$result$plotData
   })) |> as.data.frame()
+  dfPlotAll$variableType <- 
+    ifelse(dfPlotAll$variable %in% c("cellScaleFactor", "markerExpression"), 
+           "condition", "result")
   dfPlotAll$conditionLabel <- 
     factor(dfPlotAll$conditionLabel, levels = unique(dfPlotAll$conditionLabel))
-  ggMultiPanel <- ggplot(dfPlotAll, aes(x = variable, y = value, fill = Change)) + 
-    geom_bar(stat="identity", color = "black") + theme_bw() +
+  ggMultiPanel <- 
+    ggplot(dfPlotAll, 
+           aes(x = variable, y = value, fill = Change, color = variableType)) + 
+    geom_bar(stat="identity", size = 1.2) + theme_bw() +
     ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
     geom_hline(yintercept = 0) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
     ggtitle("Affect of scale change") +
     scale_fill_manual(breaks = c("Increase", "Decrease"), 
-                      values=c("dodgerblue", "gold"))
+                      values=c("dodgerblue", "gold")) +
+    scale_color_manual(breaks = c("condition", "result"), 
+                      values=c("#44AA99", "#332288"))
   
   # return
   returnList <- list(resultsList = listResults,
                      resultsPlotList = listPlots,
                      dfPlotAll = dfPlotAll,
+                     ggBarCellScaleFactors = ggBpValues,
                      ggMulti = ggMultiPanel)
   return(returnList)
 }
