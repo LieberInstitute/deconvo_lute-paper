@@ -256,6 +256,25 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
   })
   names(listResults) <- labelVector
   
+  # get barplots of second cell scale factor values
+  dfbp <- data.frame(cellScaleFactor = c(cellScaleFactorVector, cellScaleFactorsStart),
+                     label = c(labelVector, "Start"))
+  dfbp$change <- ifelse(
+    dfbp$cellScaleFactor==cellScaleFactorsStart, "equal", 
+    ifelse(dfbp$cellScaleFactor > cellScaleFactorsStart, "increase", "decrease"))
+  dfbp$label <- factor(dfbp$label, 
+                       levels = dfbp$label[order(dfbp$cellScaleFactor)])
+  ggBpValues <- 
+    ggplot(dfbp, aes(x = label, y = cellScaleFactor, fill = change)) +
+    geom_bar(stat = "identity", color = "black") + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+    geom_text(aes(label = cellScaleFactor), vjust = -0.7) +
+    ylim(0, max(dfbp$cellScaleFactor)+0.5) +
+    scale_fill_manual(
+      breaks = c("equal", "increase", "decrease"), 
+      values=c("gray", "dodgerblue", "gold"))
+  
+  
   # get plots formatted for grid arrange
   listPlots <- lapply(listResults, function(item){item[["plot"]]})
   names(listPlots) <- labelVector
