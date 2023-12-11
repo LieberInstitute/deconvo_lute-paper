@@ -24,7 +24,7 @@ load("./env/09_example_plots/01_example_plots_value_changes_script.RData")
 dfIter <- listMultiPlot05$dfPlotAll
 changeLabels <- unique(gsub("\\..*", "", rownames(dfIter)))
 variablesVector <- c("cellScaleFactor", "markerExpressionScaled",
-                  "predictedProportion", "biasValue", "errorValue")
+                  "predictedProportion", "bias", "error")
 
 # get plots data list
 lgg <- lapply(changeLabels, function(changeLabel){
