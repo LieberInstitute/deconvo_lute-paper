@@ -68,9 +68,18 @@ ggsave(filename =
 
 # save multipanel change plots
 
+# starting marker expression 05
 ggsave(filename = 
          paste0("./figures/09_example_plots/",
                 "multipanel_change_expr05_barplots.jpg"),
+       plot = listMultiPlot05$ggMulti,
+       device = "jpeg", width = 12, height = 4, 
+       units = "in", dpi = 400)
+
+# starting marker expression 1
+ggsave(filename = 
+         paste0("./figures/09_example_plots/",
+                "multipanel_change_expr1_barplots.jpg"),
        plot = listMultiPlot05$ggMulti,
        device = "jpeg", width = 12, height = 4, 
        units = "in", dpi = 400)
