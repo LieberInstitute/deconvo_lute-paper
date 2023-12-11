@@ -175,6 +175,9 @@ singleValueExample <- function(valuesList, conditionLabel = "",
   zrefNew <- 
     lute:::.zstransform(valuesList[["zrefExample"]], 
                         cellScaleFactorsNew)
+  valuesList[["zrefNewScaled"]] <- zrefNew
+  valuesList[["biasNew"]] <- biasNew
+  valuesList[["errorNew"]] <- errorNew
   
   # get changes
   cellScaleFactorChange <- valuesList[["cellScaleFactorNew"]]-

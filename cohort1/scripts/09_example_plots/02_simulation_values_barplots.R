@@ -34,7 +34,7 @@ lgg <- lapply(changeLabels, function(changeLabel){
     listMultiPlot05$resultsList[[changeLabel]]$result$deconvoResult
   deconvoResultNew <- deconvoResultNew@predictionsTable
   cellScaleFactor <- valuesPlot$cellScaleFactorNew
-  markerExpressionScaled <- valuesPlot$zrefExampleScaled[1,1]
+  markerExpressionScaled <- valuesPlot$zrefNewScaled[1,1]
   trueProportion <- valuesPlot$trueProportionValue
   predictedProportion <- deconvoResultNew[1,1]
   biasValue <- trueProportion-predictedProportion
