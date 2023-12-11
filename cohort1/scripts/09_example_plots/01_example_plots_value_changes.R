@@ -72,7 +72,7 @@ ggsave(filename =
          paste0("./figures/09_example_plots/",
                 "multipanel_change_expr05_barplots.jpg"),
        plot = listMultiPlot05$ggMulti,
-       device = "jpeg", width = 10, height = 4, 
+       device = "jpeg", width = 12, height = 4, 
        units = "in", dpi = 400)
 
 

@@ -294,6 +294,7 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
            "condition", "result")
   dfPlotAll$conditionLabel <- 
     factor(dfPlotAll$conditionLabel, levels = unique(dfPlotAll$conditionLabel))
+  dfPlotAll$value <- round(dfPlotAll$value, 2)
   ggMultiPanel <- 
     ggplot(dfPlotAll, 
            aes(x = variable, y = value, fill = Change, color = variableType)) + 
@@ -305,7 +306,10 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
     scale_fill_manual(breaks = c("Increase", "Decrease"), 
                       values=c("dodgerblue", "gold")) +
     scale_color_manual(breaks = c("condition", "result"), 
-                      values=c("#44AA99", "#332288"))
+                      values=c("#44AA99", "#332288")) +
+    geom_text(aes(label = value), 
+              vjust = ifelse(dfPlotAll$value >= 0, -1, 1)) +
+    ylim(min(dfPlotAll$value)-1.5, max(dfPlotAll$value)+1.5)
   
   # return
   returnList <- list(resultsList = listResults,
