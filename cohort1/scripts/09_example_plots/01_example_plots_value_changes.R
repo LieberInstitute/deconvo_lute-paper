@@ -28,6 +28,8 @@ barplotStart05 <-
   listMultiPlot05$resultsList$Decrease$result$valuesList$ggBarplotStart
 grid.arrange(barplotStart05, listMultiPlot05$ggMulti, nrow = 1,
              layout_matrix = matrix(c(1,2,2,2),nrow=1))
+barplotStart05WithLegend <- 
+  barplotStart05 + theme(legend.position = "right")
 
 # marker expression start is 1
 listMultiPlot1 <- multiPanelPlots(markerExpressionStart = 1)
@@ -57,13 +59,25 @@ jpeg(paste0("./figures/09_example_plots/",
 listMultiPlot05$ggBarCellScaleFactors
 dev.off()
 
+#
+#
+#
+#
+#
 # save point values for simulation start barplot
-
+# without legend
 ggsave(filename = 
          paste0("./figures/09_example_plots/",
                 "sim_start_expr05_barplot.jpg"),
        plot = barplotStart05,
        device = "jpeg", width = 3, height = 3, 
+       units = "in", dpi = 400)
+# with legend
+ggsave(filename = 
+         paste0("./figures/09_example_plots/",
+                "sim_start_expr05_barplot-with-legend.jpg"),
+       plot = barplotStart05WithLegend,
+       device = "jpeg", width = 3.5, height = 3, 
        units = "in", dpi = 400)
 
 # save multipanel change plots
