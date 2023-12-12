@@ -1,6 +1,6 @@
 #!/usr/bin/env R
 
-libv <- c("ggplot2", "reshape2")
+libv <- c("ggplot2", "reshape2", "cowplot")
 sapply(libv, library, character.only = T)
 
 # Author: Sean Maden
@@ -124,6 +124,78 @@ grid.arrange(barplotStart2, listMultiPlot2$ggMulti, nrow = 1,
              layout_matrix = matrix(c(1,2,2,2),nrow=1))
 dev.off()
 
+
+#
+#
+#
+#
+#
+# save multipanel plot with shared legend, separated columns by variable type
+plotLegend <- get_legend(listMultiPlot05$ggMulti)
+
+dfPlotAll <- listMultiPlot05$dfPlotAll
+dfPlotAll1 <- dfPlotAll[dfPlotAll$variableType=="condition",]
+dfPlotAll2 <- dfPlotAll[dfPlotAll$variableType=="result",]
+
+
+ggMultiPanel1 <- 
+  ggplot(dfPlotAll1, aes(x = variable, y = value, fill = Change, color = variableType)) + 
+  geom_bar(stat="identity", size = 1.2) + theme_bw() +
+  ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
+  geom_hline(yintercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none",
+        axis.title.y = element_blank(), axis.title.x = element_blank()) + 
+  scale_fill_manual(breaks = c("Increase", "Decrease"), 
+                    values=c("dodgerblue", "gold")) +
+  scale_color_manual(breaks = c("condition", "result"), 
+                     values=c("#44AA99", "#332288")) +
+  geom_text(aes(label = value), vjust = ifelse(dfPlotAll1$value >= 0, -1, 1)) +
+  ylim(min(dfPlotAll1$value)-1.5, max(dfPlotAll1$value)+1.5)
+
+ggMultiPanel2 <- 
+  ggplot(dfPlotAll2, aes(x = variable, y = value, fill = Change, color = variableType)) + 
+  geom_bar(stat="identity", size = 1.2) + theme_bw() +
+  ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
+  geom_hline(yintercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none",
+        axis.title.y = element_blank(), axis.title.x = element_blank()) + 
+  scale_fill_manual(breaks = c("Increase", "Decrease"), 
+                    values=c("dodgerblue", "gold")) +
+  scale_color_manual(breaks = c("condition", "result"), 
+                     values=c("#44AA99", "#332288")) +
+  geom_text(aes(label = value), vjust = ifelse(dfPlotAll2$value >= 0, -1, 1)) +
+  ylim(min(dfPlotAll2$value)-0.2, max(dfPlotAll2$value)+0.2)
+
+ggMultiPanelLegend <- 
+  ggplot(dfPlotAll, 
+         aes(x = variable, y = value, fill = Change)) + 
+  geom_bar(stat="identity", size = 1.2) + theme_bw() +
+  ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
+  geom_hline(yintercept = 0) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  ggtitle("Affect of scale change") +
+  scale_fill_manual(breaks = c("Increase", "Decrease"), 
+                    values=c("dodgerblue", "gold")) +
+  geom_text(aes(label = value), 
+            vjust = ifelse(dfPlotAll$value >= 0, -1, 1)) +
+  ylim(min(dfPlotAll$value)-1.5, max(dfPlotAll$value)+1.5)
+ggMultiPanelLegend <- get_legend(ggMultiPanelLegend)
+
+jpeg(paste0("./figures/09_example_plots/",
+            "barplots_scale-changes_conditions-and-results-separate.jpg"), 
+     width = 10.5, height = 6, units = "in", res = 400)
+grid.arrange(ggMultiPanel1, ggMultiPanel2, ggMultiPanelLegend,
+             layout_matrix = matrix(c(rep(1,5),3,rep(2,5),3), nrow = 2, byrow=T),
+             left = paste0(paste0(rep(" ",10), collapse=""), "Value change (New - Old)"),
+             bottom = paste0("Variable", paste0(rep(" ",30), collapse="")),
+             top = paste0("Affect of scale change", paste0(rep(" ",170), collapse="")))
+dev.off()
+
+#
+#
+#
+#
+#
 # save image
 save.image(
   "./env/09_example_plots/01_example_plots_value_changes_script.RData")

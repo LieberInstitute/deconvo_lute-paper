@@ -322,3 +322,102 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
                      ggMulti = ggMultiPanel)
   return(returnList)
 }
+
+multiPanelScatterPlots <- function(cellScaleFactorOffTypeValue = 10,
+                            markerExpressionStart = 0.5,
+                            cellScaleFactorsStart = 2,
+                            trueProportionValue = 0.6,
+                            cellScaleFactorVector = 
+                              c(0.5, 1.5, 2.5, 3.5, 1),
+                            labelVector = 
+                              c("Decrease", "Slight Decrease", 
+                                "Slight Increase", "Increase", "NULL")){
+  # multiPanelScatterPlots
+  #
+  # Get multiple plot panels from vector of changed cell types.
+  # 
+  # cellScaleFactorOffTypeValue : value of the cell scale factor for cell not depicted.
+  # markerExpressionStart : beginning marker expression for cell type depicted.
+  # cellScaleFactorsStart : starting value of the cell scale factor for cell type depicted.
+  # trueProportionValue : true proportion value across simulations.
+  # cellScaleFactorVector : vector of second term cell scale factor differences.
+  # labelVector : vector of character labels for the second term cell scale factor value differences.
+  #
+  #
+  #
+  
+  listResults <- lapply(seq(length(cellScaleFactorVector)), function(index){
+    cellScaleFactorIndex <- cellScaleFactorVector[index]
+    labelIndex <- labelVector[index]
+    valuesList <- singleValueTestVariables(
+      cellScaleFactorsStart = cellScaleFactorsStart, 
+      markerExpressionStart = markerExpressionStart,
+      cellScaleFactorNew = cellScaleFactorIndex, 
+      trueProportionValue = trueProportionValue)
+    exampleResult <- singleValueExample(
+      valuesList, paste0(labelIndex,"\ncellScaleFactor = ",cellScaleFactorIndex))
+    
+    return(
+      list(result = exampleResult,
+           plot = exampleResult$ggBarplotChange)
+    )
+  })
+  names(listResults) <- labelVector
+  
+  # get barplots of second cell scale factor values
+  dfbp <- data.frame(
+    cellScaleFactor = c(cellScaleFactorVector, cellScaleFactorsStart),
+    label = c(labelVector, "Start"))
+  dfbp$change <- ifelse(
+    dfbp$cellScaleFactor==cellScaleFactorsStart, "equal", 
+    ifelse(dfbp$cellScaleFactor > cellScaleFactorsStart, "increase", "decrease"))
+  dfbp$label <- factor(dfbp$label, 
+                       levels = dfbp$label[order(dfbp$cellScaleFactor)])
+  ggBpValues <- 
+    ggplot(dfbp, aes(x = label, y = cellScaleFactor, fill = change)) +
+    geom_bar(stat = "identity", color = "black") + theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+    geom_text(aes(label = cellScaleFactor), vjust = -0.7) +
+    ylim(0, max(dfbp$cellScaleFactor)+0.5) +
+    scale_fill_manual(
+      breaks = c("equal", "increase", "decrease"), 
+      values=c("gray", "dodgerblue", "gold"))
+  
+  
+  # get plots formatted for grid arrange
+  listPlots <- lapply(listResults, function(item){item[["plot"]]})
+  names(listPlots) <- labelVector
+  
+  dfPlotAll <- do.call(rbind, lapply(listResults, function(item){
+    item$result$plotData
+  })) |> as.data.frame()
+  dfPlotAll$variableType <- 
+    ifelse(dfPlotAll$variable %in% c("cellScaleFactor", "markerExpression"), 
+           "condition", "result")
+  dfPlotAll$conditionLabel <- 
+    factor(dfPlotAll$conditionLabel, levels = unique(dfPlotAll$conditionLabel))
+  dfPlotAll$value <- round(dfPlotAll$value, 2)
+  ggMultiPanel <- 
+    ggplot(dfPlotAll, 
+           aes(x = variable, y = value, fill = Change, color = variableType)) + 
+    geom_bar(stat="identity", size = 1.2) + theme_bw() +
+    ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
+    geom_hline(yintercept = 0) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    ggtitle("Affect of scale change") +
+    scale_fill_manual(breaks = c("Increase", "Decrease"), 
+                      values=c("dodgerblue", "gold")) +
+    scale_color_manual(breaks = c("condition", "result"), 
+                       values=c("#44AA99", "#332288")) +
+    geom_text(aes(label = value), 
+              vjust = ifelse(dfPlotAll$value >= 0, -1, 1)) +
+    ylim(min(dfPlotAll$value)-1.5, max(dfPlotAll$value)+1.5)
+  
+  # return
+  returnList <- list(resultsList = listResults,
+                     resultsPlotList = listPlots,
+                     dfPlotAll = dfPlotAll,
+                     ggBarCellScaleFactors = ggBpValues,
+                     ggMulti = ggMultiPanel)
+  return(returnList)
+}

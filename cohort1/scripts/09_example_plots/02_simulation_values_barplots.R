@@ -141,7 +141,7 @@ grid.arrange(newFacetBarplots1 +
              plotLegend, 
              bottom = paste0("Variables",paste0(rep(" ", 65),collapse="")), 
              left = paste0(paste0(rep(" ", 26),collapse=""),"Value"),
-             layout_matrix = matrix(c(1,1,3,2,2,3), ncol = 3, byrow = T))
+             layout_matrix = matrix(c(rep(1,5),3,rep(2,5),3), nrow = 2, byrow=T))
 dev.off()
 
 
