@@ -81,6 +81,8 @@ dfPlotAll[dfPlotAll$type=="NULL",]$type <- "NULL"
 #
 #--------------------------
 
+plotLegend <- get_legend(lgg[[1]]$plot)
+
 #
 #
 #
@@ -123,8 +125,24 @@ ggsave(filename =
        plot = newFacetBarplots2,
        device = "jpeg", width = 7, height = 3, units = "in", dpi = 400)
 
-# grid.arrange(newFacetBarplots1, newFacetBarplots2, nrow = 2)
+# without legend
+grid.arrange(newFacetBarplots1, newFacetBarplots2, nrow = 2)
 
+# with legend
+jpeg(paste0("./figures/09_example_plots/",
+            "barplots-with-legend_results-and-conditions-separate-rows.jpg"),
+     width = 10, height = 6, units = "in", res = 400)
+grid.arrange(newFacetBarplots1 + 
+               theme(axis.title.x = element_blank(), 
+                     axis.title.y = element_blank()), 
+             newFacetBarplots2 + 
+               theme(axis.title.x = element_blank(), 
+                     axis.title.y = element_blank()), 
+             plotLegend, 
+             bottom = paste0("Variables",paste0(rep(" ", 65),collapse="")), 
+             left = paste0(paste0(rep(" ", 26),collapse=""),"Value"),
+             layout_matrix = matrix(c(1,1,3,2,2,3), ncol = 3, byrow = T))
+dev.off()
 
 
 
@@ -140,7 +158,7 @@ plot3 <- lgg$plot[[2]] + theme(legend.position = "none")
 plot4 <- lgg$plot[[3]] + theme(legend.position = "none")
 plot5 <- lgg$plot[[4]] + theme(legend.position = "none")
 plot6 <- lgg$plot[[5]] + theme(legend.position = "none")
-plotLegend <- get_legend(lgg[[1]])
+
 grid.arrange(plot1, plot2, plot3, plot4,
              plot5, plot6, plotLegend, 
              layout_matrix = matrix(c(1,2,3,4,5,6,7,7), nrow = 2))
