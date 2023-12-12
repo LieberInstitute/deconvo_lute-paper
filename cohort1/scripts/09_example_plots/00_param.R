@@ -354,7 +354,9 @@ multiPanelScatterPlots <- function(cellScaleFactorOffTypeValue = 10,
   #
   #
   
-  listResults <- lapply(seq(length(cellScaleFactorVector)), function(index){
+  dfResAll <- do.call(rbind, 
+                      lapply(seq(length(cellScaleFactorVector)), 
+                             function(index){
     cellScaleFactorIndex <- cellScaleFactorVector[index]
     labelIndex <- labelVector[index]
     
@@ -372,105 +374,47 @@ multiPanelScatterPlots <- function(cellScaleFactorOffTypeValue = 10,
                                trueProportionValue = trueProportionValueVector[indexValue],
                                bulkExpressionValue = bulkExpressionVector[indexValue]
                              )
-               }))
-    
-    exampleResult <- singleValueExample(
-      valuesList, paste0(labelIndex,"\ncellScaleFactor = ",
-                         cellScaleFactorIndex))
-    
-    for(indexValue in seq(length(trueProportionValueVector))){
-      
-      valuesList <- singleValueTestVariables(
-        cellScaleFactorsStart = cellScaleFactorsStart, 
-        markerExpressionStart = markerExpressionStart,
-        cellScaleFactorNew = cellScaleFactorIndex, 
-        trueProportionValue = trueProportionValueVector[indexValue],
-        bulkExpressionValue = bulkExpressionVector[indexValue]
-      )
-      
-      exampleResult <- singleValueExample(
-        valuesList, paste0(labelIndex,"\ncellScaleFactor = ",
-                           cellScaleFactorIndex))
-      
-    }
-    
-    valuesList <- singleValueTestVariables(
-      cellScaleFactorsStart = cellScaleFactorsStart, 
-      markerExpressionStart = markerExpressionStart,
-      cellScaleFactorNew = cellScaleFactorIndex, 
-      trueProportionValue = trueProportionValue
-      )
-    
-    
-    cellScaleFactorsStart = 0.5,
-    cellScaleFactorOffTypeValue = 1,
-    trueProportionValue = 0.8,
-    markerExpressionStart = 0.5,
-    cellScaleFactorNew = 1,
-    bulkExpressionValue = 0.8
-    
-    
-    return(
-      list(result = exampleResult,
-           plot = exampleResult$ggBarplotChange)
-    )
-  })
-  names(listResults) <- labelVector
-  
-  # get barplots of second cell scale factor values
-  dfbp <- data.frame(
-    cellScaleFactor = c(cellScaleFactorVector, cellScaleFactorsStart),
-    label = c(labelVector, "Start"))
-  dfbp$change <- ifelse(
-    dfbp$cellScaleFactor==cellScaleFactorsStart, "equal", 
-    ifelse(dfbp$cellScaleFactor > cellScaleFactorsStart, "increase", "decrease"))
-  dfbp$label <- factor(dfbp$label, 
-                       levels = dfbp$label[order(dfbp$cellScaleFactor)])
-  ggBpValues <- 
-    ggplot(dfbp, aes(x = label, y = cellScaleFactor, fill = change)) +
-    geom_bar(stat = "identity", color = "black") + theme_bw() +
-    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
-    geom_text(aes(label = cellScaleFactor), vjust = -0.7) +
-    ylim(0, max(dfbp$cellScaleFactor)+0.5) +
-    scale_fill_manual(
-      breaks = c("equal", "increase", "decrease"), 
-      values=c("gray", "dodgerblue", "gold"))
-  
-  
-  # get plots formatted for grid arrange
-  listPlots <- lapply(listResults, function(item){item[["plot"]]})
-  names(listPlots) <- labelVector
-  
-  dfPlotAll <- do.call(rbind, lapply(listResults, function(item){
-    item$result$plotData
+                             exampleResult <- singleValueExample(
+                               valuesList, 
+                               paste0(
+                                 labelIndex,"\ncellScaleFactor = ",
+                                 cellScaleFactorIndex))
+                             
+                             dfRes <- data.frame(
+                               cellScaleFactorsStart = cellScaleFactorsStart,
+                               cellScaleFactorNew = cellScaleFactorIndex,
+                               trueProportion = 
+                                 trueProportionValueVector[indexValue],
+                               predProportion = 
+                                 exampleResult$deconvoResult@predictionsTable[1,1]
+                             )
+                             dfRes$label <- paste0(
+                               labelIndex,"\ncellScaleFactor = ",
+                               cellScaleFactorIndex)
+                             dfRes$type <- labelIndex
+                             dfRes$labelAppend <- paste0("\ncellScaleFactor = ",
+                                                         cellScaleFactorIndex)
+                             dfRes
+               })) |> as.data.frame()
+    dfSamples
   })) |> as.data.frame()
-  dfPlotAll$variableType <- 
-    ifelse(dfPlotAll$variable %in% c("cellScaleFactor", "markerExpression"), 
-           "condition", "result")
-  dfPlotAll$conditionLabel <- 
-    factor(dfPlotAll$conditionLabel, levels = unique(dfPlotAll$conditionLabel))
-  dfPlotAll$value <- round(dfPlotAll$value, 2)
-  ggMultiPanel <- 
-    ggplot(dfPlotAll, 
-           aes(x = variable, y = value, fill = Change, color = variableType)) + 
-    geom_bar(stat="identity", size = 1.2) + theme_bw() +
-    ylab("Change (New - Old)") + facet_wrap(~conditionLabel, nrow = 1) + 
-    geom_hline(yintercept = 0) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-    ggtitle("Affect of scale change") +
-    scale_fill_manual(breaks = c("Increase", "Decrease"), 
-                      values=c("dodgerblue", "gold")) +
-    scale_color_manual(breaks = c("condition", "result"), 
-                       values=c("#44AA99", "#332288")) +
-    geom_text(aes(label = value), 
-              vjust = ifelse(dfPlotAll$value >= 0, -1, 1)) +
-    ylim(min(dfPlotAll$value)-1.5, max(dfPlotAll$value)+1.5)
   
-  # return
-  returnList <- list(resultsList = listResults,
-                     resultsPlotList = listPlots,
-                     dfPlotAll = dfPlotAll,
-                     ggBarCellScaleFactors = ggBpValues,
-                     ggMulti = ggMultiPanel)
+  dfResAll$type <- factor(dfResAll$type, 
+                          levels = 
+                            c("Decrease", "Slight Decrease", "Slight Increase", 
+                              "Increase", "NULL"))
+  dfResAll$labelTitle <- paste0(dfResAll$type, "\n", dfResAll$labelAppend)
+  
+  ggScatter <- 
+    ggplot(dfResAll, aes(x = trueProportion, y = predProportion)) + theme_bw() +
+    geom_point(size = 2.5, alpha = 0.5) + geom_abline(slope = 1, intercept = 0)  +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    xlim(0.3, 1) + ylim(0.3, 1) + xlab("True") + ylab("Predicted") +
+    facet_wrap(~type, nrow = 1)
+    
+  returnList <- list(
+    dfResult = dfResAll,
+    ggScatter = ggScatter
+  )
   return(returnList)
 }
