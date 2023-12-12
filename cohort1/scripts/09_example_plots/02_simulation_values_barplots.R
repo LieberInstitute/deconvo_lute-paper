@@ -69,6 +69,7 @@ lgg <- lapply(changeLabels, function(changeLabel){
 dfPlotAll <- do.call(rbind, lapply(lgg, function(item){
   return(item$dfPlot)
 }))
+dfPlotAll[dfPlotAll$type=="NULL",]$type <- "NULL"
 
 
 
@@ -80,9 +81,59 @@ dfPlotAll <- do.call(rbind, lapply(lgg, function(item){
 #
 #--------------------------
 
+#
+#
+#
+#
+#
+# Separate barplots
+levelsVector <- c("Decrease", "Slight Decrease", "Slight Increase", "Increase", "NULL")
+dfFilt1 <- dfPlotAll[dfPlotAll$variableType=="condition",]
+dfFilt2 <- dfPlotAll[dfPlotAll$variableType=="result",]
+dfFilt1$type <- factor(dfFilt1$type, levels = levelsVector)
+dfFilt2$type <- factor(dfFilt2$type, levels = levelsVector)
+newFacetBarplots1 <- 
+  ggplot(dfFilt1, aes(x = variables, y = value, color = variableType)) + 
+  geom_abline(intercept = 0, slope = 0) +
+  geom_text(aes(label = value), 
+            vjust = ifelse(dfFilt1$value >= 0, -1.2, 1.2)) +
+  geom_bar(stat = "identity", size = 1.2) + theme_bw() +
+  scale_color_manual(breaks = c("condition"), values=c("#44AA99")) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1), legend.position = "none") +
+  ylim(min(dfFilt1$values)-1.2, max(dfFilt1$values)+1.2) +
+  facet_wrap(~type, nrow = 1)
+ggsave(filename = 
+         paste0("./figures/09_example_plots/",
+                "barplots_conditions_values-by-variables.jpg"),
+       plot = newFacetBarplots1,
+       device = "jpeg", width = 6, height = 3, units = "in", dpi = 400)
 
+newFacetBarplots2 <- 
+  ggplot(dfFilt2, aes(x = variables, y = value, color = variableType)) + 
+  geom_abline(intercept = 0, slope = 0) +
+  geom_text(aes(label = value), vjust = ifelse(dfFilt2$value >= 0, -1.2, 1.2)) +
+  geom_bar(stat = "identity", size = 1.2) + theme_bw() +
+  scale_color_manual(breaks = c("result"), values=c("#332288")) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1), legend.position = "none") +
+  ylim(min(dfFilt2$values)-0.4, max(dfFilt2$values)+0.4) +
+  facet_wrap(~type, nrow = 1)
+ggsave(filename = 
+         paste0("./figures/09_example_plots/",
+                "barplots_results_values-by-variables.jpg"),
+       plot = newFacetBarplots2,
+       device = "jpeg", width = 7, height = 3, units = "in", dpi = 400)
+
+# grid.arrange(newFacetBarplots1, newFacetBarplots2, nrow = 2)
+
+
+
+
+#
+#
+#
+#
+#
 # Example, one legend, six plots
-
 plot1 <- barplotStart05
 plot2 <- lgg$plot[[1]] + theme(legend.position = "none")
 plot3 <- lgg$plot[[2]] + theme(legend.position = "none")
@@ -90,11 +141,15 @@ plot4 <- lgg$plot[[3]] + theme(legend.position = "none")
 plot5 <- lgg$plot[[4]] + theme(legend.position = "none")
 plot6 <- lgg$plot[[5]] + theme(legend.position = "none")
 plotLegend <- get_legend(lgg[[1]])
-
 grid.arrange(plot1, plot2, plot3, plot4,
              plot5, plot6, plotLegend, 
              layout_matrix = matrix(c(1,2,3,4,5,6,7,7), nrow = 2))
 
+#
+#
+#
+#
+#
 # facet barplots
 newFacetBarplots <- 
   ggplot(dfPlotAll, aes(x = variables, y = value, color = variableType)) + 
