@@ -326,7 +326,8 @@ multiPanelPlots <- function(cellScaleFactorOffTypeValue = 10,
 multiPanelScatterPlots <- function(cellScaleFactorOffTypeValue = 10,
                             markerExpressionStart = 0.5,
                             cellScaleFactorsStart = 2,
-                            trueProportionValue = 0.6,
+                            trueProportionValueVector = c(0.5, 0.55, 0.6, 0.65, 0.7),
+                            bulkExpressionVector = c(0.7, 0.71, 0.8, 0.81, 0.7),
                             cellScaleFactorVector = 
                               c(0.5, 1.5, 2.5, 3.5, 1),
                             labelVector = 
@@ -334,14 +335,21 @@ multiPanelScatterPlots <- function(cellScaleFactorOffTypeValue = 10,
                                 "Slight Increase", "Increase", "NULL")){
   # multiPanelScatterPlots
   #
-  # Get multiple plot panels from vector of changed cell types.
+  # Get multiple scatter plot panels from vector of changed cell types. Uses 
+  # variable conditions as indicated in variables trueProportionValueVector and 
+  # bulkExpressionVector.
   # 
-  # cellScaleFactorOffTypeValue : value of the cell scale factor for cell not depicted.
+  # cellScaleFactorOffTypeValue : value of the cell scale factor for cell not 
+  # depicted.
   # markerExpressionStart : beginning marker expression for cell type depicted.
-  # cellScaleFactorsStart : starting value of the cell scale factor for cell type depicted.
-  # trueProportionValue : true proportion value across simulations.
+  # cellScaleFactorsStart : starting value of the cell scale factor for cell type 
+  # depicted.
+  # trueProportionValueVector : vector of true proportion value across 
+  # simulations.
+  # bulkExpressionVector : vector of bulk expression values.
   # cellScaleFactorVector : vector of second term cell scale factor differences.
-  # labelVector : vector of character labels for the second term cell scale factor value differences.
+  # labelVector : vector of character labels for the second term cell scale 
+  # factor value differences.
   #
   #
   #
@@ -349,13 +357,58 @@ multiPanelScatterPlots <- function(cellScaleFactorOffTypeValue = 10,
   listResults <- lapply(seq(length(cellScaleFactorVector)), function(index){
     cellScaleFactorIndex <- cellScaleFactorVector[index]
     labelIndex <- labelVector[index]
+    
+    # iterate on simulated "samples" from vectors 
+    # values from variables trueProportionValueVector, bulkExpressionVector
+    
+    dfSamples <- do.call(rbind, 
+                         lapply(
+                           seq(length(trueProportionValueVector)), 
+                           function(indexValue){
+                             valuesList <- singleValueTestVariables(
+                               cellScaleFactorsStart = cellScaleFactorsStart, 
+                               markerExpressionStart = markerExpressionStart,
+                               cellScaleFactorNew = cellScaleFactorIndex, 
+                               trueProportionValue = trueProportionValueVector[indexValue],
+                               bulkExpressionValue = bulkExpressionVector[indexValue]
+                             )
+               }))
+    
+    exampleResult <- singleValueExample(
+      valuesList, paste0(labelIndex,"\ncellScaleFactor = ",
+                         cellScaleFactorIndex))
+    
+    for(indexValue in seq(length(trueProportionValueVector))){
+      
+      valuesList <- singleValueTestVariables(
+        cellScaleFactorsStart = cellScaleFactorsStart, 
+        markerExpressionStart = markerExpressionStart,
+        cellScaleFactorNew = cellScaleFactorIndex, 
+        trueProportionValue = trueProportionValueVector[indexValue],
+        bulkExpressionValue = bulkExpressionVector[indexValue]
+      )
+      
+      exampleResult <- singleValueExample(
+        valuesList, paste0(labelIndex,"\ncellScaleFactor = ",
+                           cellScaleFactorIndex))
+      
+    }
+    
     valuesList <- singleValueTestVariables(
       cellScaleFactorsStart = cellScaleFactorsStart, 
       markerExpressionStart = markerExpressionStart,
       cellScaleFactorNew = cellScaleFactorIndex, 
-      trueProportionValue = trueProportionValue)
-    exampleResult <- singleValueExample(
-      valuesList, paste0(labelIndex,"\ncellScaleFactor = ",cellScaleFactorIndex))
+      trueProportionValue = trueProportionValue
+      )
+    
+    
+    cellScaleFactorsStart = 0.5,
+    cellScaleFactorOffTypeValue = 1,
+    trueProportionValue = 0.8,
+    markerExpressionStart = 0.5,
+    cellScaleFactorNew = 1,
+    bulkExpressionValue = 0.8
+    
     
     return(
       list(result = exampleResult,
