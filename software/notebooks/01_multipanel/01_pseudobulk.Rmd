@@ -1,0 +1,196 @@
+---
+title: "Pseudobulk k2 with and without cell size rescaling, cohort1"
+author: "Sean Maden"
+date: "2023-09-17"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("here", "nlme", "lute", "ggplot2", "gridExtra", 
+          "dplyr", "ggforce", "MultiAssayExperiment", 
+          "SingleCellExperiment")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+list.files()
+load("env/01_multipanel/01_pseudobulk_script.RData")
+```
+
+# Plot
+
+## Prep plot data
+
+# Plot params
+
+```{r}
+xAxisLabel <- "True"; yAxisLabel <- "Predicted"
+```
+
+Prep k2 data
+
+```{r}
+# K2
+
+# SCATTERPLOTS
+scatter.c1.k2.no <- ggplot(dfp.tall.c1.k2[dfp.tall.c1.k2$type=="noscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+scatter.c1.k2.yes <- ggplot(dfp.tall.c1.k2[dfp.tall.c1.k2$type=="withscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+scatter.c2.k2.no <- ggplot(dfp.tall.c2.k2[dfp.tall.c2.k2$type=="noscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("Cohort1")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+scatter.c2.k2.yes <- ggplot(dfp.tall.c2.k2[dfp.tall.c2.k2$type=="withscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("Cohort2")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# ERROR JITTERBOXPLOTS
+jbp.c1.k2 <- ggplot(dfp.tall.c1.k2, aes(x = type, y = neuron.abs.error)) + 
+  geom_jitter(alpha = 0.5, size = 3) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
+  ylab("Error (neuron)") + ggtitle("Cohort1")
+jbp.c2.k2 <- ggplot(dfp.tall.c2.k2, aes(x = type, y = neuron.abs.error)) + 
+  geom_jitter(alpha = 0.5, size = 3) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
+  ylab("Error (neuron)") + ggtitle("Cohort2")
+
+```
+
+Prep k3 data
+
+```{r}
+
+# get neuron summary from k3
+newk_value_from_dfresult <- function(df,  operator = c("mean", "median")){
+  if(operator == "mean"){
+      result <- apply(df, 1, function(ri){
+        mean(c(as.numeric(ri)))
+      }) |> unlist()
+    } else if(operator=="median"){
+      result <- apply(df, 1, function(ri){
+        median(c(as.numeric(ri)))
+      }) |> unlist()
+    } else{
+      stop("didn't recognize operator")
+    }
+  return(result)
+}
+# cohort1
+dfp.tall.c1.k3$neuron.true <- 
+  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.true", "Inhib.true")], "mean")
+dfp.tall.c1.k3$neuron.pred <- 
+  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.pred", "Inhib.pred")], "mean")
+dfp.tall.c1.k3$neuron.abs.error <- 
+  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.abs.error", "Inhib.abs.error")], "mean")
+
+# cohort2
+dfp.tall.c2.k3$neuron.true <- 
+  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.true", "Inhib.true")], "mean")
+dfp.tall.c2.k3$neuron.pred <- 
+  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.pred", "Inhib.pred")], "mean")
+dfp.tall.c2.k3$neuron.abs.error <- 
+  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.abs.error", "Inhib.abs.error")], "mean")
+
+# SCATTERPLOTS
+scatter.c1.k3.no <- ggplot(dfp.tall.c1.k3[dfp.tall.c1.k3$type=="noscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+scatter.c1.k3.yes <- ggplot(dfp.tall.c1.k3[dfp.tall.c1.k3$type=="withscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+scatter.c2.k3.no <- ggplot(dfp.tall.c2.k3[dfp.tall.c2.k3$type=="noscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+scatter.c2.k3.yes <- ggplot(dfp.tall.c2.k3[dfp.tall.c2.k3$type=="withscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + 
+  geom_point(size = 4, alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab(xAxisLabel) + ylab(yAxisLabel) +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# ERROR JITTERBOXPLOTS
+jbp.c1.k3 <- ggplot(dfp.tall.c1.k3, aes(x = type, y = neuron.abs.error)) + 
+  geom_jitter(alpha = 0.5, size = 3) + ggtitle("") +
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
+  ylab("Error (neuron)")
+jbp.c2.k3 <- ggplot(dfp.tall.c2.k3, aes(x = type, y = neuron.abs.error)) + 
+  geom_jitter(alpha = 0.5, size = 3) + ggtitle("") +
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
+  ylab("Error (neuron)")
+
+```
+
+Save multipanel
+
+```{r}
+plot1 <- scatter.c1.k2.no + ggtitle("K2\nCohort1 Neuron")
+plot2 <- scatter.c1.k2.yes
+plot3 <- jbp.c1.k2
+plot4 <- scatter.c2.k2.no + ggtitle("Cohort2 Neuron")
+plot5 <- scatter.c2.k2.yes
+plot6 <- jbp.c2.k2
+
+plot7 <- scatter.c1.k3.no + ggtitle("K3\nCohort1 Neuron")
+plot8 <- scatter.c1.k3.yes
+plot9 <- jbp.c1.k3
+plot10 <- scatter.c2.k3.no + ggtitle("Cohort2 Neuron")
+plot11 <- scatter.c2.k3.yes
+plot12 <- jbp.c2.k3
+
+# save
+jpeg("./figures/01_multipanel/multi-pb_k2-k3_cohort-1-2.jpg",
+     width = 10, height = 20, units = "in", res = 400)
+grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, 
+             plot7, plot8, plot9, plot10, plot11, plot12,
+             layout_matrix = matrix(seq(12), ncol = 2))
+dev.off()
+
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,27 @@
+---
+title: "Pseudobulk k2 with and without cell size rescaling, cohort1"
+author: "Sean Maden"
+date: "2023-09-17"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("here", "nlme", "lute", "ggplot2", "gridExtra", 
+          "dplyr", "ggforce", "MultiAssayExperiment", "SingleCellExperiment")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+list.files()
+load("env/01_multipanel/01_pseudobulk_script.RData")
+```
+
+# Summarize
+
+# Session info
+
+```{r}
+sessionInfo()
+```
