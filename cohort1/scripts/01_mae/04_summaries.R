@@ -12,8 +12,19 @@ sapply(libv, library, character.only = TRUE)
 # load
 load("outputs/01_mae/mae_analysis.rda")
 
-# snrnaseq
-# k4 summaries
+#-------------------
+# sizes fold changes
+#-------------------
+# k2
+sce <- mae[["snrnaseq.k2.all"]]
+cd <- colData(sce)
+mean(rowSums(counts(sce[,sce$k2=="neuron"])))/
+  mean(rowSums(counts(sce[,sce$k2=="glial"])))
+
+#-----------------
+# nuclei summaries
+#-----------------
+# k4
 sce <- mae[["snrnaseq.k4.all"]]
 cd <- colData(sce)
 dfs <- table(cd$k4, cd$Sample)
