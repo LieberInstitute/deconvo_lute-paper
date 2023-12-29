@@ -90,7 +90,8 @@ Prep k3 data
 ```{r}
 
 # get neuron summary from k3
-newk_value_from_dfresult <- function(df,  operator = c("mean", "median")){
+newk_value_from_dfresult <- function(df,  
+                                     operator = c("sum", "mean", "median")){
   if(operator == "mean"){
       result <- apply(df, 1, function(ri){
         mean(c(as.numeric(ri)))
@@ -99,6 +100,10 @@ newk_value_from_dfresult <- function(df,  operator = c("mean", "median")){
       result <- apply(df, 1, function(ri){
         median(c(as.numeric(ri)))
       }) |> unlist()
+    } else if(operator=="sum"){
+      result <- apply(df, 1, function(ri){
+        sum(c(as.numeric(ri)))
+      }) |> unlist()
     } else{
       stop("didn't recognize operator")
     }
@@ -106,19 +111,19 @@ newk_value_from_dfresult <- function(df,  operator = c("mean", "median")){
 }
 # cohort1
 dfp.tall.c1.k3$neuron.true <- 
-  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.true", "Inhib.true")], "mean")
+  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.true", "Inhib.true")], "sum")
 dfp.tall.c1.k3$neuron.pred <- 
-  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.pred", "Inhib.pred")], "mean")
+  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.pred", "Inhib.pred")], "sum")
 dfp.tall.c1.k3$neuron.abs.error <- 
-  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.abs.error", "Inhib.abs.error")], "mean")
+  newk_value_from_dfresult(dfp.tall.c1.k3[,c("Excit.abs.error", "Inhib.abs.error")], "sum")
 
 # cohort2
 dfp.tall.c2.k3$neuron.true <- 
-  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.true", "Inhib.true")], "mean")
+  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.true", "Inhib.true")], "sum")
 dfp.tall.c2.k3$neuron.pred <- 
-  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.pred", "Inhib.pred")], "mean")
+  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.pred", "Inhib.pred")], "sum")
 dfp.tall.c2.k3$neuron.abs.error <- 
-  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.abs.error", "Inhib.abs.error")], "mean")
+  newk_value_from_dfresult(dfp.tall.c2.k3[,c("Excit.abs.error", "Inhib.abs.error")], "sum")
 
 # SCATTERPLOTS
 scatter.c1.k3.no <- ggplot(dfp.tall.c1.k3[dfp.tall.c1.k3$type=="noscale",], 
