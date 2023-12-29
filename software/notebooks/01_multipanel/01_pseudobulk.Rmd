@@ -26,7 +26,12 @@ load("env/01_multipanel/01_pseudobulk_script.RData")
 # Plot params
 
 ```{r}
-xAxisLabel <- "True"; yAxisLabel <- "Predicted"
+xAxisLabel <- "True"
+yAxisLabel <- "Predicted"
+titleTextSize <- 35
+axisTextSize <- 25
+pointSize <- 10
+
 ```
 
 Prep k2 data
@@ -37,44 +42,44 @@ Prep k2 data
 # SCATTERPLOTS
 scatter.c1.k2.no <- ggplot(dfp.tall.c1.k2[dfp.tall.c1.k2$type=="noscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(0, 1) + ylim(0, 1)
+
 scatter.c1.k2.yes <- ggplot(dfp.tall.c1.k2[dfp.tall.c1.k2$type=="withscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(0, 1) + ylim(0, 1)
+
 scatter.c2.k2.no <- ggplot(dfp.tall.c2.k2[dfp.tall.c2.k2$type=="noscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) + ggtitle("Cohort1")
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(0, 1) + ylim(0, 1)
+
 scatter.c2.k2.yes <- ggplot(dfp.tall.c2.k2[dfp.tall.c2.k2$type=="withscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) + ggtitle("Cohort2")
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(0, 1) + ylim(0, 1)
 
 # ERROR JITTERBOXPLOTS
 jbp.c1.k2 <- ggplot(dfp.tall.c1.k2, aes(x = type, y = neuron.abs.error)) + 
-  geom_jitter(alpha = 0.5, size = 3) + 
+  geom_jitter(alpha = 0.5, size = pointSize) + 
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
   ylab("Error (neuron)") + ggtitle("Cohort1")
+
 jbp.c2.k2 <- ggplot(dfp.tall.c2.k2, aes(x = type, y = neuron.abs.error)) + 
-  geom_jitter(alpha = 0.5, size = 3) + 
+  geom_jitter(alpha = 0.5, size = pointSize) + 
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
   ylab("Error (neuron)") + ggtitle("Cohort2")
 
@@ -118,45 +123,43 @@ dfp.tall.c2.k3$neuron.abs.error <-
 # SCATTERPLOTS
 scatter.c1.k3.no <- ggplot(dfp.tall.c1.k3[dfp.tall.c1.k3$type=="noscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(0, 1) + ylim(0, 1) + ggtitle("")
 scatter.c1.k3.yes <- ggplot(dfp.tall.c1.k3[dfp.tall.c1.k3$type=="withscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(0, 1) + ylim(0, 1) + ggtitle("")
+
 scatter.c2.k3.no <- ggplot(dfp.tall.c2.k3[dfp.tall.c2.k3$type=="noscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlim(0, 1) + ylim(0, 1) + ggtitle("")
+
 scatter.c2.k3.yes <- ggplot(dfp.tall.c2.k3[dfp.tall.c2.k3$type=="withscale",], 
        aes(x = neuron.true, y = neuron.pred)) + 
-  geom_point(size = 4, alpha = 0.5) + 
+  geom_point(size = pointSize, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
   xlab(xAxisLabel) + ylab(yAxisLabel) +
-  xlim(0, 1) + ylim(0, 1) + ggtitle("") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
+  xlim(0, 1) + ylim(0, 1) + ggtitle("")
 
 # ERROR JITTERBOXPLOTS
 jbp.c1.k3 <- ggplot(dfp.tall.c1.k3, aes(x = type, y = neuron.abs.error)) + 
-  geom_jitter(alpha = 0.5, size = 3) + ggtitle("") +
+  geom_jitter(alpha = 0.5, size = pointSize) + ggtitle("") +
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
   ylab("Error (neuron)")
+  
 jbp.c2.k3 <- ggplot(dfp.tall.c2.k3, aes(x = type, y = neuron.abs.error)) + 
-  geom_jitter(alpha = 0.5, size = 3) + ggtitle("") +
+  geom_jitter(alpha = 0.5, size = pointSize) + ggtitle("") +
   geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
   ylab("Error (neuron)")
 
@@ -165,28 +168,104 @@ jbp.c2.k3 <- ggplot(dfp.tall.c2.k3, aes(x = type, y = neuron.abs.error)) +
 Save multipanel
 
 ```{r}
-plot1 <- scatter.c1.k2.no + ggtitle("K2\nCohort1 Neuron")
-plot2 <- scatter.c1.k2.yes
-plot3 <- jbp.c1.k2
-plot4 <- scatter.c2.k2.no + ggtitle("Cohort2 Neuron")
-plot5 <- scatter.c2.k2.yes
-plot6 <- jbp.c2.k2
+plot1 <- scatter.c1.k2.no + 
+  ggtitle("K2\nCohort1 Neuron") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize),
+        title = element_text(size = titleTextSize))
 
-plot7 <- scatter.c1.k3.no + ggtitle("K3\nCohort1 Neuron")
-plot8 <- scatter.c1.k3.yes
-plot9 <- jbp.c1.k3
-plot10 <- scatter.c2.k3.no + ggtitle("Cohort2 Neuron")
-plot11 <- scatter.c2.k3.yes
-plot12 <- jbp.c2.k3
+plot2 <- scatter.c1.k2.yes + ggtitle("") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
 
+plot3 <- jbp.c1.k2 + ggtitle("") +
+  theme(axis.text.y = element_text(size = axisTextSize),
+        axis.text.x = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot4 <- scatter.c2.k2.no + ggtitle("Cohort2 Neuron") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        title = element_text(size = titleTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot5 <- scatter.c2.k2.yes + ggtitle("") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot6 <- jbp.c2.k2 + ggtitle("") +
+  theme(axis.text.y = element_text(size = axisTextSize),
+        axis.text.x = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot7 <- scatter.c1.k3.no + ggtitle("K3\n ") + ylab("") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        title = element_text(size = titleTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot8 <- scatter.c1.k3.yes + ylab("") + ggtitle("") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot9 <- jbp.c1.k3 + ylab("") + ggtitle("") +
+  theme(axis.text.y = element_text(size = axisTextSize),
+        axis.text.x = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot10 <- scatter.c2.k3.no + ggtitle("") + ylab("") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize),
+        title = element_text(size = titleTextSize))
+
+plot11 <- scatter.c2.k3.yes + ylab("") + ggtitle("") +
+  theme(axis.text.x = 
+          element_text(angle = 45, hjust = 1, size = axisTextSize),
+        axis.text.y = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+
+plot12 <- jbp.c2.k3 + ylab("") + ggtitle("") +
+  theme(axis.text.y = element_text(size = axisTextSize),
+        axis.text.x = element_text(size = axisTextSize),
+        axis.title.x = element_text(size = axisTextSize),
+        axis.title.y = element_text(size = axisTextSize))
+```
+
+Save
+
+```{r}
 # save
+setwd("..")
+setwd("..")
 jpeg("./figures/01_multipanel/multi-pb_k2-k3_cohort-1-2.jpg",
-     width = 10, height = 20, units = "in", res = 400)
+     width = 15, height = 25, units = "in", res = 400)
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, 
              plot7, plot8, plot9, plot10, plot11, plot12,
              layout_matrix = matrix(seq(12), ncol = 2))
 dev.off()
-
 ```
 
 # Session info
