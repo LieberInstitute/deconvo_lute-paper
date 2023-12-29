@@ -184,7 +184,7 @@ plot2 <- scatter.c1.k2.yes + ggtitle("") +
         axis.title.x = element_text(size = axisTextSize),
         axis.title.y = element_text(size = axisTextSize))
 
-plot3 <- jbp.c1.k2 + ggtitle("") +
+plot3 <- jbp.c1.k2 + ggtitle("") + ylim(0, 0.3) +
   theme(axis.text.y = element_text(size = axisTextSize),
         axis.text.x = element_text(size = axisTextSize),
         axis.title.x = element_text(size = axisTextSize),
@@ -205,7 +205,7 @@ plot5 <- scatter.c2.k2.yes + ggtitle("") +
         axis.title.x = element_text(size = axisTextSize),
         axis.title.y = element_text(size = axisTextSize))
 
-plot6 <- jbp.c2.k2 + ggtitle("") +
+plot6 <- jbp.c2.k2 + ggtitle("") + ylim(0, 0.3) +
   theme(axis.text.y = element_text(size = axisTextSize),
         axis.text.x = element_text(size = axisTextSize),
         axis.title.x = element_text(size = axisTextSize),
@@ -226,7 +226,7 @@ plot8 <- scatter.c1.k3.yes + ylab("") + ggtitle("") +
         axis.title.x = element_text(size = axisTextSize),
         axis.title.y = element_text(size = axisTextSize))
 
-plot9 <- jbp.c1.k3 + ylab("") + ggtitle("") +
+plot9 <- jbp.c1.k3 + ylab("") + ggtitle("") + ylim(0, 0.3) +
   theme(axis.text.y = element_text(size = axisTextSize),
         axis.text.x = element_text(size = axisTextSize),
         axis.title.x = element_text(size = axisTextSize),
@@ -247,7 +247,7 @@ plot11 <- scatter.c2.k3.yes + ylab("") + ggtitle("") +
         axis.title.x = element_text(size = axisTextSize),
         axis.title.y = element_text(size = axisTextSize))
 
-plot12 <- jbp.c2.k3 + ylab("") + ggtitle("") +
+plot12 <- jbp.c2.k3 + ylab("") + ggtitle("") + ylim(0, 0.3) +
   theme(axis.text.y = element_text(size = axisTextSize),
         axis.text.x = element_text(size = axisTextSize),
         axis.title.x = element_text(size = axisTextSize),
@@ -257,6 +257,28 @@ plot12 <- jbp.c2.k3 + ylab("") + ggtitle("") +
 Save
 
 ```{r}
+# set layout matrix
+
+repNorm <- 10
+repTop <- 12
+
+lmData <- c(
+  rep(1, repTop),
+  rep(2, repNorm),
+  rep(3, repNorm),
+  rep(4, repTop),
+  rep(5, repNorm),
+  rep(6, repNorm),
+  rep(7, repTop),
+  rep(8, repNorm),
+  rep(9, repNorm),
+  rep(10, repTop),
+  rep(11, repNorm),
+  rep(12, repNorm)
+)
+
+layoutMatrix <- matrix(lmData, ncol = 2)
+
 # save
 setwd("..")
 setwd("..")
@@ -264,7 +286,7 @@ jpeg("./figures/01_multipanel/multi-pb_k2-k3_cohort-1-2.jpg",
      width = 15, height = 25, units = "in", res = 400)
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, 
              plot7, plot8, plot9, plot10, plot11, plot12,
-             layout_matrix = matrix(seq(12), ncol = 2))
+             layout_matrix = layoutMatrix)
 dev.off()
 ```
 
