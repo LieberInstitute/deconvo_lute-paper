@@ -107,28 +107,28 @@ rmseTable <- function(df.k2, df.k3, cohortLabel){
   #-----------
   
   returnListScale <- list(c(rmseK2Scale, rmseK3Scale))
-  supplementTableScale <- do.call(cbind, lapply(seq(length(returnList)), function(ii){
-    c(names(returnList)[ii], returnList[[ii]])
+  returnTableScale <- do.call(cbind, lapply(seq(length(returnListScale)), function(ii){
+    c(names(returnListScale)[ii], returnListScale[[ii]])
   })) |> as.data.frame()
-  supplementTableScale$k <- c(rep("k2", length(listRmseK2)),rep("k3", length(listRmseK3)))
+  returnTableScale$k <- c(rep("k2", length(listRmseK2)),rep("k3", length(listRmseK3)))
   
   returnListNoscale <- list(c(rmseK2Noscale, rmseK3Noscale))
-  supplementTableNoscale <- do.call(cbind, lapply(seq(length(returnList)), function(ii){
-    c(names(returnList)[ii], returnList[[ii]])
+  returnTableNoscale <- do.call(cbind, lapply(seq(length(returnListNoscale)), function(ii){
+    c(names(returnListNoscale)[ii], returnListNoscale[[ii]])
   })) |> as.data.frame()
-  supplementTableNoscale$k <- c(rep("k2", length(listRmseK2)),rep("k3", length(listRmseK3)))
+  returnTableNoscale$k <- c(rep("k2", length(listRmseK2)),rep("k3", length(listRmseK3)))
   
-  supplementTableScale$type <- "scale"
-  supplementTableNoscale$type <- "noscale"
-  supplementTable <- rbind(supplementTableScale, supplementTableNoscale)
-  colnames(supplementTable)[1] <- "rmse"
+  returnTableScale$type <- "scale"
+  returnTableNoscale$type <- "noscale"
+  returnTable <- rbind(returnTableScale, returnTableNoscale)
+  colnames(returnTable)[1] <- "rmse"
   
-  supplementTable$cohort <- cohortLabel
-  supplementTable$numberCellTypes <- sapply(
-    rownames(supplementTable), function(ii){
-      length(unlist(strsplit(ii, ";")))}) |> as.numeric()
+  returnTable$cohort <- cohortLabel
+  returnTable$numberCellTypes <- sapply(
+    rownames(returnTable), function(ii){
+      length(unlist(strsplit(ii, "\\.")))}) |> as.numeric()
   
-  return(supplementTable)
+  return(returnTable)
 }
 
 supplementTable <- rmseTable(df.k2, df.k3, "cohort2")
@@ -137,4 +137,4 @@ supplementTable <- rmseTable(df.k2, df.k3, "cohort2")
 # save
 #-----
 # save
-save(supplementTable, file = "./outputs/02_pseudobulk/rmse_supplementTable.rda")
+save(supplementTable, file = "./outputs/01_pseudobulk/rmse_supplementTable.rda")
