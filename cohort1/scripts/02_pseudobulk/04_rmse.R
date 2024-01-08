@@ -41,7 +41,10 @@ for(sample.id in unique(df.k2$sample.id)){
 # append neuron pred as sum
 df.k3$neuron.pred <- df.k3$Excit.pred + df.k3$Inhib.pred
 
-rmseTable <- function(df.k2, df.k4, cohortLabel){
+#----------------
+# make rmse table
+#----------------
+rmseTable <- function(df.k2, df.k3, cohortLabel){
   # rmseTable
   # df.k2 table for k2 results
   # df.k3 table for k3 results
@@ -127,5 +130,10 @@ rmseTable <- function(df.k2, df.k4, cohortLabel){
   return(supplementTable)
 }
 
-rmseTable(df.k2, df.k4, "cohort1")
+supplementTable <- rmseTable(df.k2, df.k3, "cohort1")
 
+#-----
+# save
+#-----
+# save
+save(supplementTable, file = "./outputs/02_pseudobulk/rmse_supplementTable.rda")
