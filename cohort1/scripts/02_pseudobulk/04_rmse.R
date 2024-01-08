@@ -132,6 +132,15 @@ rmseTable <- function(df.k2, df.k3, cohortLabel){
 
 supplementTable <- rmseTable(df.k2, df.k3, "cohort1")
 
+# gets small k3 values
+rmseType(df.k3[df.k3$type=="withscale",], "glial") # 1.116513e
+rmseType(df.k3[df.k3$type=="withscale",], "Inhib") # 6.589459e-17
+rmseType(df.k3[df.k3$type=="withscale",], "Excit") # 6.482306e-17
+rmseType(df.k3[df.k3$type=="withscale",], c("glial","Excit")) # 9.129088e-17
+rmseType(df.k3[df.k3$type=="withscale",], c("glial","Inhib")) # 9.167365e-17
+rmseType(df.k3[df.k3$type=="withscale",], c("Excit","Inhib")) # 6.536102e-17
+rmseType(df.k3[df.k3$type=="withscale",], c("Excit","Inhib", "glial")) # 8.368621e-17
+
 #-----
 # save
 #-----

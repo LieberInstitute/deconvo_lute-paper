@@ -27,7 +27,6 @@ rmseType <- function(df, type){
   )
 }
 
-
 #--------------------
 # append neuron to k3
 #--------------------
@@ -132,6 +131,16 @@ rmseTable <- function(df.k2, df.k3, cohortLabel){
 }
 
 supplementTable <- rmseTable(df.k2, df.k3, "cohort2")
+
+# gets small k3 values
+rmseType(df.k3[df.k3$type=="withscale",], "glial") # 1.433292e-16
+rmseType(df.k3[df.k3$type=="withscale",], "Inhib") # 1.488227e-16
+rmseType(df.k3[df.k3$type=="withscale",], "Excit") # 2.028564e-16
+rmseType(df.k3[df.k3$type=="withscale",], "neuron") # 1.155557e-16
+rmseType(df.k3[df.k3$type=="withscale",], c("glial","Excit")) # 1.756331e-16
+rmseType(df.k3[df.k3$type=="withscale",], c("glial","Inhib")) # 1.461018e-16
+rmseType(df.k3[df.k3$type=="withscale",], c("Excit","Inhib")) # 1.779029e-16
+rmseType(df.k3[df.k3$type=="withscale",], c("Excit","Inhib", "glial")) # 1.671747e-16
 
 #-----
 # save
