@@ -41,18 +41,35 @@ for(sample.id in unique(df.k2$sample.id)){
 # append neuron pred as sum
 df.k3$neuron.pred <- df.k3$Excit.pred + df.k3$Inhib.pred
 
-#-------------
-# calculations
-#-------------
+#-------------------
+# calculations -- K2
+#-------------------
+
+# K2
+
+# SCALING
 listRmseK2 <- list(
   c("neuron"), c("glial"), c("neuron", "glial")
 )
-rmseK2 <- lapply(listRmseK2, function(typeVector){
-  round(rmseType(df.k2, typeVector),3)
+rmseK2Scale <- lapply(listRmseK2, function(typeVector){
+  rmseType(df.k2[df.k2$type=="withscale",], typeVector)
 })
-names(rmseK2) <- sapply(listRmseK2, function(i){paste0(i,collapse =";")})
-rmseK2
+names(rmseK2Scale) <- sapply(listRmseK2, function(i){paste0(i,collapse =";")})
+rmseK2Scale
 
+# NO SCALING
+# SCALING
+rmseK2Noscale <- lapply(listRmseK2, function(typeVector){
+  round(rmseType(df.k2[df.k2$type=="noscale",], typeVector),3)
+})
+names(rmseK2Noscale) <- sapply(listRmseK2, function(i){paste0(i,collapse =";")})
+rmseK2Noscale
+
+#-------------------
+# calculations -- K3
+#-------------------
+# WITH SCALING
+# NO SCALE
 listRmseK3 <- list(
   c("neuron"), 
   c("glial"), 
@@ -63,8 +80,40 @@ listRmseK3 <- list(
   c("Excit", "Inhib"), 
   c("Excit", "Inhib", "glial")
 )
-rmseK3 <- lapply(listRmseK3, function(typeVector){
-  round(rmseType(df.k3, typeVector), 3)
+
+# WITH SCALE
+rmseK3Scale <- lapply(listRmseK3, function(typeVector){
+  round(rmseType(df.k3[df.k3$type=="withscale",], typeVector), 3)
 })
-names(rmseK3) <- sapply(listRmseK3, function(i){paste0(i,collapse =";")})
-rmseK3
+names(rmseK3Scale) <- sapply(listRmseK3, function(i){paste0(i,collapse =";")})
+rmseK3Scale
+# NO SCALE
+rmseK3Noscale <- lapply(listRmseK3, function(typeVector){
+  round(rmseType(df.k3[df.k3$type=="noscale",], typeVector), 3)
+})
+names(rmseK3Noscale) <- sapply(listRmseK3, function(i){paste0(i,collapse =";")})
+rmseK3Noscale
+
+
+#-----------
+# SUPPLEMENT
+#-----------
+returnList <- list(c(rmseK2Scale, rmseK2Noscale, rmseK3Scale, rmseK3Noscale))
+
+supplementTableScale <- do.call(cbind, lapply(seq(length(returnList)), function(ii){
+  c(names(returnList)[ii], returnList[[ii]])
+})) |> as.data.frame()
+
+supplementTableNoscale <- do.call(cbind, lapply(seq(length(returnList)), function(ii){
+  c(names(returnList)[ii], returnList[[ii]])
+})) |> as.data.frame()
+
+supplementTableScale$type <- "scale"
+supplementTableNoscale$type <- "noscale"
+
+colnames(supplementTable) <- c("k2", "k3")
+supplementTable$cohort <- "cohort1"
+supplementTable$numberCellTypes <- sapply(
+  rownames(supplementTable), function(ii){
+    length(unlist(strsplit(ii, ";")))}) |> as.numeric()
+supplementTable

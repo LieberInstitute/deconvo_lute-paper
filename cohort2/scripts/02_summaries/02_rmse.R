@@ -70,3 +70,19 @@ rmseK3 <- lapply(listRmseK3, function(typeVector){
 })
 names(rmseK3) <- sapply(listRmseK3, function(i){paste0(i,collapse =";")})
 rmseK3
+
+returnList <- list(
+  rmseK2, rmseK3
+)
+
+supplementTable <- do.call(cbind, lapply(seq(length(returnList)), function(ii){
+  c(names(returnList)[ii], returnList[[ii]])
+})) |> as.data.frame()
+
+colnames(supplementTable) <- c("k2", "k3")
+supplementTable$cohort <- "cohort2"
+supplementTable$numberCellTypes <- sapply(
+  rownames(supplementTable), function(ii){
+    length(unlist(strsplit(ii, ";")))}) |> as.numeric()
+supplementTable
+
