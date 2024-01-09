@@ -45,16 +45,20 @@ prop_adj_results <- function(mae, bisque.sce, bisque.bulk, s.vector.scale,
                                      s.vector.scale["neuron"]) 
   # experiment -- nnls
   message("experiment -- nnls")
-  nnls.scale <- lute(sce = sce, y = y,
-                     celltype.variable = "k2",
-                     s = s.vector.scale, 
-                     assay.name = assay.name,
-                     typemarker.algorithm = NULL)$deconvolution.results@predictions.table
-  nnls.noscale <- lute(sce = sce, y = y,
-                       celltype.variable = "k2",
-                       s = s.vector.noscale, 
-                       assay.name = assay.name,
-                       typemarker.algorithm = NULL)$deconvolution.results@predictions.table
+  nnls.scale <- lute(singleCellExperiment = sce, 
+                     bulkExpression = y, 
+                     cellTypeVariable  = "k2", 
+                     cellScaleFactors  = s.vector.scale, 
+                     assayName = assay.name,
+                     typemarkerAlgorithm = NULL)$deconvolutionResults@predictionsTable
+
+  nnls.noscale <- lute(singleCellExperiment = sce, 
+                     bulkExpression = y, 
+                     cellTypeVariable  = "k2", 
+                     cellScaleFactors  = s.vector.noscale, 
+                     assayName = assay.name,
+                     typemarkerAlgorithm = NULL)$deconvolutionResults@predictionsTable
+  
   colnames(nnls.scale) <- paste0(colnames(nnls.scale), ".nnls.scale")
   colnames(nnls.noscale) <- paste0(colnames(nnls.noscale), ".nnls.noscale")
   # experiment -- music
