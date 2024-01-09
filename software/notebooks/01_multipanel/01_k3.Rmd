@@ -1,0 +1,121 @@
+---
+title: "Pseudobulk k2 with and without cell size rescaling, cohort1"
+author: "Sean Maden"
+date: "2023-09-17"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+libv <- c("here", "nlme", "lute", "ggplot2", "gridExtra", 
+          "dplyr", "ggforce", "MultiAssayExperiment", "SingleCellExperiment")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+list.files()
+load("env/01_multipanel/01_pseudobulk_script.RData")
+```
+
+# Plots
+
+```{r}
+
+plotData <- rbind(dfp.tall.c1.k3, dfp.tall.c2.k3) |> as.data.frame()
+
+plotK2.c1Scatter.excit <- ggplot(dfp.tall.c1.k3, aes(x = Excit.true, y = Excit.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
+  xlab("True") + ylab("Predicted") + ggtitle("Cohort1\nExcit") + xlim(0,1) + ylim(0,1)
+plotK2.c2Scatter.excit <- ggplot(dfp.tall.c2.k3, aes(x = Excit.true, y = Excit.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
+  xlab("True") + ylab("Predicted") + ggtitle("Cohort2\n") + xlim(0,1) + ylim(0,1)
+
+plotK2.c1Scatter.inhib <- ggplot(dfp.tall.c1.k3, aes(x = Inhib.true, y = Inhib.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
+  xlab("True") + ylab("Predicted") + ggtitle("Inhib") + xlim(0,1) + ylim(0,1)
+plotK2.c2Scatter.inhib <- ggplot(dfp.tall.c2.k3, aes(x = Inhib.true, y = Inhib.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
+  xlab("True") + ylab("Predicted") + ggtitle("") + xlim(0,1) + ylim(0,1)
+
+plotK2.c1Scatter.glial <- ggplot(dfp.tall.c1.k3, aes(x = glial.true, y = glial.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
+  xlab("True") + ylab("Predicted") + ggtitle("Glial") + xlim(0,1) + ylim(0,1)
+plotK2.c2Scatter.glial <- ggplot(dfp.tall.c2.k3, aes(x = glial.true, y = glial.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
+  xlab("True") + ylab("Predicted") + ggtitle("") + xlim(0,1) + ylim(0,1)
+
+plotK2.c1box.excit <- 
+  ggplot(dfp.tall.c1.k3, aes(x = type, y = Excit.abs.error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) + 
+  ylab("Error") + ggtitle("\n") + ylim(0, 0.25)
+plotK2.c2box.excit <- 
+  ggplot(dfp.tall.c2.k3, aes(x = type, y = Excit.abs.error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) + 
+  ylab("Error") + ggtitle("\n") + ylim(0, 0.25)
+
+plotK2.c1box.inhib <- 
+  ggplot(dfp.tall.c1.k3, aes(x = type, y = Inhib.abs.error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) + ylab("Error") + ggtitle("") + ylim(0, 0.25)
+plotK2.c2box.inhib <- 
+  ggplot(dfp.tall.c2.k3, aes(x = type, y = Inhib.abs.error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) + ylab("Error") + ggtitle("") + ylim(0, 0.25)
+
+plotK2.c1box.glial <- 
+  ggplot(dfp.tall.c1.k3, aes(x = type, y = glial.abs.error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) + 
+  ylab("Error") + ggtitle("") + ylim(0, 0.25)
+plotK2.c2box.glial <- 
+  ggplot(dfp.tall.c2.k3, aes(x = type, y = glial.abs.error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) +
+  ylab("Error") + ggtitle("") + ylim(0, 0.25)
+
+```
+
+```{r}
+
+layoutMatrix <- matrix(c(rep(seq(12), each = 2)), nrow = 3, byrow=T)
+
+grid.arrange(plotK2.c1Scatter.excit,
+             plotK2.c1box.excit,
+             plotK2.c2Scatter.excit,
+             plotK2.c2box.excit,
+             plotK2.c1Scatter.inhib,
+             plotK2.c1box.inhib,
+             plotK2.c2Scatter.inhib,
+             plotK2.c2box.inhib,
+             plotK2.c1Scatter.glial,
+             plotK2.c1box.glial,
+             plotK2.c2Scatter.glial,
+             plotK2.c2box.glial,
+             layout_matrix = layoutMatrix)
+
+```
+Save
+
+```{r}
+
+jpeg("./figures/01_multipanel/pseudobulk-k3-2cohort_multi.jpg", width = 8, height = 6, units = "in", res = 400)
+
+grid.arrange(plotK2.c1Scatter.excit,
+             plotK2.c1box.excit,
+             plotK2.c2Scatter.excit,
+             plotK2.c2box.excit,
+             plotK2.c1Scatter.inhib,
+             plotK2.c1box.inhib,
+             plotK2.c2Scatter.inhib,
+             plotK2.c2box.inhib,
+             plotK2.c1Scatter.glial,
+             plotK2.c1box.glial,
+             plotK2.c2Scatter.glial,
+             plotK2.c2box.glial,
+             layout_matrix = layoutMatrix)
+
+dev.off()
+
+```
+
+# Save
+
+```{r}
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
