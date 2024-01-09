@@ -25,9 +25,9 @@ load("env/01_multipanel/01_pseudobulk_script.RData")
 plotData <- rbind(dfp.tall.c1.k3, dfp.tall.c2.k3) |> as.data.frame()
 
 plotK2.c1Scatter.excit <- ggplot(dfp.tall.c1.k3, aes(x = Excit.true, y = Excit.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
-  xlab("True") + ylab("Predicted") + ggtitle("Cohort1\nExcit") + xlim(0,1) + ylim(0,1)
+  xlab("True") + ylab("Predicted") + ggtitle("Huuki-Meyers et. al. 2023\nExcit") + xlim(0,1) + ylim(0,1)
 plotK2.c2Scatter.excit <- ggplot(dfp.tall.c2.k3, aes(x = Excit.true, y = Excit.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
-  xlab("True") + ylab("Predicted") + ggtitle("Cohort2\n") + xlim(0,1) + ylim(0,1)
+  xlab("True") + ylab("Predicted") + ggtitle("Tran et. al. 2021\n") + xlim(0,1) + ylim(0,1)
 
 plotK2.c1Scatter.inhib <- ggplot(dfp.tall.c1.k3, aes(x = Inhib.true, y = Inhib.pred)) + geom_point() + theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1)) + facet_wrap(~type) + geom_abline(slope = 1) +
   xlab("True") + ylab("Predicted") + ggtitle("Inhib") + xlim(0,1) + ylim(0,1)
