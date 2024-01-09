@@ -41,11 +41,13 @@ parallel_bias_matched <- function(sce, yunadj, dfs, df.true = NULL,
                              function(i){
                                s.vector <- c("glial" = dfs$glial[i], "neuron" = dfs$neuron[i])
                                suppressMessages(
-                                 dfi <-lute(sce, y = yunadj, 
-                                            celltype.variable = celltype.variable, 
-                                            s = s.vector, assay.name = assay.name,
-                                            typemarker.algorithm = NULL
-                                            )$deconvolution.results@predictions.table
+                                 dfi <-lute(singleCellExperiment  = sce, 
+                                            bulkExpression = yunadj, 
+                                            cellTypeVariable  = celltype.variable, 
+                                            cellScaleFactors  = s.vector, 
+                                            assayName = assay.name,
+                                            typemarkerAlgorithm = NULL
+                                 )$deconvolutionResults@predictionsTable
                                )
                                dfi$sample.label <- colnames(yunadj)
                                dfi$s.glial <- s.vector["glial"]
