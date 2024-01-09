@@ -11,8 +11,9 @@ sapply(libv, library, character.only = T)
 source("./source/00_dataset_summaries.R")
 source("./source/00_deconvo_plots.R")
 source("./source/00_sopt.R")
+source("./source/00_sopt_utilities.R")
 source("./source/00_musicParam-class.R")
-source("./scripts/08_adjustment/00_param.R")
+source("./source/00_adjustment.R")
 
 #-----
 # load
@@ -39,8 +40,10 @@ dfs.param <- data.frame(
   s.diff = c(NA, 1, 1e-1)
 )
 list.res.all <- lapply(sample.id.vector, function(sample.id){
-  list.res <- run_sopt_series(dfs.param, sample.id.vector = sample.id, 
-                              df.true.list = df.true.list, y.unadj = y.unadj, 
+  list.res <- run_sopt_series(dfs.param, 
+                              sample.id.vector = sample.id, 
+                              df.true.list = df.true.list, 
+                              y.unadj = y.unadj, 
                               sce = sce, assay.name = "logcounts")
   list.res
 })

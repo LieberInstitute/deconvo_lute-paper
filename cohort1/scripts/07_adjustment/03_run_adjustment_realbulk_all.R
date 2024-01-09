@@ -4,6 +4,9 @@
 #
 # Runs deconvolution with bias adjustment.
 #
+#
+#
+#
 
 libv <- c("MultiAssayExperiment", "ggplot2", "gridExtra")
 sapply(libv, library, character.only = T)
@@ -12,7 +15,7 @@ source("./source/00_dataset_summaries.R")
 source("./source/00_deconvo_plots.R")
 source("./source/00_sopt.R")
 source("./source/00_musicParam-class.R")
-source("./scripts/08_adjustment/00_param.R")
+source("./scripts/07_adjustment/00_param.R")
 
 #-----
 # load
