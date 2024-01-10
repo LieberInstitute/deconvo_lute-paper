@@ -21,7 +21,8 @@ sceK3 <- list.sce.markers[["k3"]]
 dfSummary <- function(sce, 
                       sampleIdVariable = "donor",
                       variablesVector = c("k2", "k3"),
-                      typeNames = c("neuron", "glial", "Inhib", "Excit")){
+                      typeNames = c("neuron", "glial", "Inhib", "Excit"),
+                      roundDigits = 3){
   # dfSummary
   #
   # sce SingleCellExperiment
@@ -49,15 +50,15 @@ dfSummary <- function(sce,
         
         c(variable,
           type,
-          median(sampleVector), # cells/nuclei
-          mean(sampleVector), # cells/nuclei
-          sd(sampleVector), # cells/nuclei
-          median(proportionsVector), # proportion per sample
-          mean(proportionsVector), # proportion per sample
-          sd(proportionsVector), # proportion per sample
-          mean(markerSizes), # marker library size
-          median(markerSizes), # marker library size
-          sd(markerSizes) # marker library size
+          round(median(sampleVector), roundDigits), # cells/nuclei
+          round(mean(sampleVector), roundDigits), # cells/nuclei
+          round(sd(sampleVector), roundDigits), # cells/nuclei
+          round(median(proportionsVector), roundDigits), # proportion per sample
+          round(mean(proportionsVector), roundDigits), # proportion per sample
+          round(sd(proportionsVector), roundDigits), # proportion per sample
+          round(mean(markerSizes), roundDigits), # marker library size
+          round(median(markerSizes), roundDigits), # marker library size
+          round(sd(markerSizes), roundDigits) # marker library size
         )
       }
       
