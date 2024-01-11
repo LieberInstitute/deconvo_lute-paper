@@ -11,7 +11,7 @@ Deconvolution on real bulk samples.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-libv <- c("dplyr", "ggplot2", "GGally")
+libv <- c("dplyr", "ggplot2", "GGally", "gridExtra")
 sapply(libv, library, character.only = TRUE)
 ```
 
@@ -20,6 +20,37 @@ setwd("..")
 setwd("..")
 load("./env/07_adjustment/03_run_adjustment_realbulk_all_script.RData")
 list.df.true <- metadata(sce)[["list.df.true.k2"]]
+plotsList <- function(dfp){
+  # plotsList
+  # 
+  # scatterplot and jitterbox plot of results data, with outlier label.
+  #
+  # dfp.tall results data.frame
+  #
+  #
+dfp$scale <- ifelse(dfp$scale, "withscale", "noscale")
+
+dfLabel <- dfp[dfp$true < 0.75 & dfp$value < 0.25,]
+
+new.plot.tall <- ggplot(dfp, aes(x = true, y = value)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~scale) + 
+  xlab("Known") + ylab("Predicted") + xlim(0.1,0.9) + ylim(0.1,0.9) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(data = dfLabel, aes(x = true, y = value), 
+            label = sample.id, nudge_x = 0.1, nudge_y = 0.1)
+new.plot.tall
+
+new.plot.tall.jitterbox <- ggplot(dfp, aes(x = scale, y = error)) + 
+  geom_jitter(alpha = 0.5, width = 0.5, height = 0) + theme_bw() +
+  geom_boxplot(alpha = 0, color = "cyan") + 
+  xlab("Scale") + ylab("Error (neuron)") + ylim(0, 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank())
+new.plot.tall.jitterbox
+return(list(
+  new.plot.tall, new.plot.tall.jitterbox
+))
+}
 ```
 
 ```{r}
@@ -70,52 +101,102 @@ new.plot.tall.jitterbox <- ggplot(dfp.tall,
 new.plot.tall.jitterbox
 ```
 
-## NNLS
+## Multipanel scatterplots and jitterplots, neuron and glial
 
 ```{r}
-dfp <- dfp.tall[dfp.tall$algorithm=="nnls",]
-dfp$scale <- ifelse(dfp$scale, "withscale", "noscale")
+# append glial
+dfp.tall2 <- dfp.tall
+dfp.tall2$cell.type <- "glial"
+dfp.tall2$value <- 1-dfp.tall2$value
+dfp.tall2$true <- 1-dfp.tall2$true
+dfp.tall <- rbind(dfp.tall, dfp.tall2) |> as.data.frame()
 
-new.plot.tall <- ggplot(dfp, aes(x = true, y = value)) + 
-  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~scale) + 
-  xlab("Known") + ylab("Predicted") + xlim(0.1,0.9) + ylim(0.1,0.9) + theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-new.plot.tall
+plotsList <- function(dfp, outlier = TRUE){
+    # plotsList
+    # 
+    # scatterplot and jitterbox plot of results data, with outlier label.
+    #
+    # dfp.tall results data.frame
+    #
+    #
+    #
+    #
+  
+    
+    dfp$scale <- ifelse(dfp$scale, "withscale", "noscale")
+    
+    newPlot <- ggplot(dfp, aes(x = true, y = value)) + 
+      geom_point(size = 4, alpha = 0.5) + 
+      geom_abline(slope = 1, intercept = 0) + 
+      facet_wrap(~cell.type*scale, nrow = 2) + xlab("Known") + 
+      ylab("Predicted") + theme_bw() + xlim(0, 1) + ylim(0, 1) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        
+    if(outlier){
+      dfLabelGlial <- dfp[dfp$value > 0.75 & dfp$cell.type == "glial",]
+      dfLabelNeuron <- dfp[dfp$value < 0.25 & 
+                             dfp$true < 0.75 & dfp$cell.type == "neuron",]
+    newPlot <- newPlot +
+      geom_text(data = dfLabelNeuron, aes(x = true, y = value), 
+                  label = sample.id, nudge_x = 0.1, nudge_y = 0.1) +
+      geom_text(data = dfLabelGlial, aes(x = true, y = value), 
+                  label = sample.id, nudge_x = 0.1, nudge_y = 0.1)
+    }
+    
+    
+    
+      
+    jitterbox <- ggplot(dfp[dfp$cell.type == "neuron",], aes(x = scale, y = error)) + 
+        geom_jitter(alpha = 0.5, width = 0.5, height = 0) + theme_bw() +
+        geom_boxplot(alpha = 0, color = "cyan") + 
+        xlab("Scale") + ylab("Error") + ylim(0, 0.5) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+              axis.title.x = element_blank())
+    
+    return(list(
+        newPlot, jitterbox
+    ))
+}
 
-new.plot.tall.jitterbox <- ggplot(dfp, aes(x = scale, y = error)) + 
-  geom_jitter(alpha = 0.5, width = 0.5, height = 0) + theme_bw() +
-  geom_boxplot(alpha = 0, color = "cyan") + 
-  xlab("Scale") + ylab("Error (neuron)") + ylim(0, 0.5) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank())
-new.plot.tall.jitterbox
-```
+plotsListNNLS <- plotsList(dfp.tall[dfp.tall$algorithm=="nnls",])
+plotsListMUSIC <- plotsList(dfp.tall[dfp.tall$algorithm=="music",])
+plotsListBISQUE <- plotsList(dfp.tall[dfp.tall$algorithm=="bisque",], outlier = FALSE)
 
-## MuSiC and Bisque
-
-```{r}
-dfp <- dfp.tall[!dfp.tall$algorithm=="nnls",]
-dfp$scale <- ifelse(dfp$scale, "withscale", "noscale")
-
-new.plot.tall <- ggplot(dfp, aes(x = true, y = value)) + 
-  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~scale*algorithm) + 
-  xlab("Known") + ylab("Predicted") + xlim(0.1,0.9) + ylim(0.1,0.9) + theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-new.plot.tall
-
-new.plot.tall.jitterbox <- ggplot(dfp, aes(x = scale, y = error)) + 
-  geom_jitter(alpha = 0.5, width = 0.5, height = 0) + theme_bw() +
-  geom_boxplot(alpha = 0, color = "cyan") + 
-  xlab("Scale") + ylab("Error (neuron)") + ylim(0, 0.5) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_blank())
-new.plot.tall.jitterbox
 ```
 
 # Save
 
+Save NNLS multipanel plot.
+
 ```{r}
-jpeg("./figures/09_fast/figs5_ggpairs_realbulk.jpg", 
+
+jpeg("./figures/07_adjustment/fig3_bulk-results_nnls.jpg", 
+     width = 6, height = 4, units = "in", res = 400)
+
+grid.arrange(plotsListNNLS[[1]], plotsListNNLS[[2]],  
+             layout_matrix = matrix(c(1,1,2), byrow=TRUE, nrow = 1))
+
+dev.off()
+
+```
+
+Save Bisque and MuSiC multipanel plot.
+
+```{r}
+
+jpeg("./figures/07_adjustment/fig3_bulk-results_music-bisque.jpg", 
+     width = 5.5, height = 8, units = "in", res = 400)
+grid.arrange(plotsListMUSIC[[1]] + ggtitle("MuSiC"), plotsListMUSIC[[2]] + ggtitle(""), 
+             plotsListBISQUE[[1]] + ggtitle("Bisque"), plotsListBISQUE[[2]] + ggtitle(""), 
+             layout_matrix = matrix(c(1,1,2,3,3,4), byrow = TRUE, nrow = 2))
+dev.off()
+
+```
+
+Save ggpairs plot.
+
+```{r}
+jpeg("./figures/07_adjustment/figs12_ggpairs_realbulk.jpg", 
      width = 10, height = 10, units = "in", res = 400)
 
 ggpairs(dfp.wide, 
@@ -125,22 +206,8 @@ ggpairs(dfp.wide,
 dev.off()
 ```
 
+# Session info
 
 ```{r}
-jpeg("./figures/09_fast/fig5a_scatterplot_scale_sopt_realbulk.jpg", 
-     width = 6, height = 4, units = "in", res = 400)
-
-new.plot.tall
-
-dev.off()
-```
-
-```{r}
-jpeg("./figures/09_fast/fig5b_jitterbox_scale_sopt_realbulk.jpg", 
-     width = 4, height = 2.5, units = "in", res = 400)
-
-new.plot.tall.jitterbox
-
-dev.off()
-
+sessionInfo()
 ```

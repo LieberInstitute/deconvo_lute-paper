@@ -26,13 +26,6 @@ load("./cohort1/env/02_pseudobulk/02_k3.RData") # pseudobulk, cohort1
 dfp.tall.c1.k3 <- dfp.tall
 rm(dfp.tall)
 
-# K4
-# load
-# load("./cohort1/env/02_pseudobulk/03_k4.RData") # pseudobulk, cohort1
-# assign variables
-# dfp.tall.c1.k4 <- dfp.tall
-# rm(dfp.tall)
-
 #--------
 # cohort2
 #--------
