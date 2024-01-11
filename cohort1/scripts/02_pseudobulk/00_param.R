@@ -92,15 +92,20 @@ get_ypb_experiment_results <- function(sce, sample.id.variable = "Sample",
   unique.sample.id.vector <- unique(sce[[sample.id.variable]])
   dfp <- do.call(rbind, lapply(unique.sample.id.vector, function(sample.id){
     sce.iter <- sce[,sce[[sample.id.variable]]==sample.id]
-    ypb.iter <- ypb_from_sce(sce = sce.iter, assay.name = assay.name, 
-                             celltype.variable = celltype.variable,
-                             sample.id.variable = sample.id.variable,
-                             S = s.vector.ypb) %>% as.matrix()
+    ypb.iter <- ypb_from_sce(singleCellExperiment = sce.iter, assayName = assay.name, 
+                             cellTypeVariable = celltype.variable,
+                             sampleIdVariable = sample.id.variable,
+                             cellScaleFactors = s.vector.ypb) %>% as.matrix()
     prop.true.iter <- table(sce.iter[[celltype.variable]]) %>% prop.table() %>% as.matrix() %>% t()
-    prop.pred.iter <- lute(sce = sce.iter, y = ypb.iter, assay.name = assay.name, 
-                           celltype.variable = celltype.variable, s = s.vector.pred, 
-                           typemarker.algorithm = NULL, return.info = FALSE,
-                           deconvolution.algorithm = deconvolution.algorithm)$deconvolution.results@predictions.table
+    prop.pred.iter <- lute(singleCellExperiment = sce.iter, 
+                           bulkExpression  = ypb.iter, 
+                           assayName = assay.name, 
+                           cellTypeVariable = celltype.variable, 
+                           cellScaleFactors = s.vector.pred, 
+                           typemarkerAlgorithm = NULL, 
+                           returnInfo = FALSE,
+                           deconvolutionAlgorithm = deconvolution.algorithm
+                           )$deconvolutionResults@predictionsTable
     colnames(prop.pred.iter) <- paste0(colnames(prop.pred.iter), ".pred")
     colnames(prop.true.iter) <- paste0(colnames(prop.true.iter), ".true")
     dfp.iter <- cbind(prop.true.iter, prop.pred.iter) %>% as.data.frame()

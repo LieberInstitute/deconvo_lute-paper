@@ -18,7 +18,7 @@ sapply(libv, library, character.only = TRUE)
 ```{r}
 setwd("..")
 setwd("..")
-load("./env/09_fast/03_run_adjustment_realbulk_all_script.RData")
+load("./env/07_adjustment/03_run_adjustment_realbulk_all_script.RData")
 list.df.true <- metadata(sce)[["list.df.true.k2"]]
 ```
 

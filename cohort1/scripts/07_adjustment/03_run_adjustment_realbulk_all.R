@@ -112,9 +112,13 @@ for(sample.id in sample.id.vector){
   y.set <- y.set[,y.set$expt_condition=="Nuc_RiboZeroGold"]
   y.set <- scuttle::logNormCounts(y.set)
   y <- assays(y.set)[["logcounts"]][,,drop=F]
-  nnls.noscale <- lute(sce, y = y, celltype.variable = "k2", 
-                       s = s.vector.scale, assay.name = assay.name,
-                       typemarker.algorithm = NULL)$deconvolution.results@predictions.table
+  nnls.noscale <- dfi <-lute(singleCellExperiment  = sce, 
+                             bulkExpression = y, 
+                             cellTypeVariable  = celltype.variable, 
+                             cellScaleFactors  = s.vector.scale, 
+                             assayName = assay.name,
+                             typemarkerAlgorithm = NULL
+  )$deconvolutionResults@predictionsTable
   neuron.true <- as.numeric(metadata(sce)[["list.df.true.k2"]][[sample.id]]["neuron"])
   error.new <- abs(neuron.true-nnls.noscale$neuron)
   df.sopt[df.sopt$sample.id==sample.id,]$sanity.check.error <- error.new
@@ -135,6 +139,8 @@ ggplot(df.sopt, aes(x = min.error.neuron, y = sanity.check.error)) +
 # > Error in solve.default(t(D.weight) %*% D.weight) : 
 # > Lapack routine dgesv: system is exactly singular: U[1,1] = 0
 # 
+source("./source/00_adjustment.R")
+
 filter.bisque.samples <- c("Br8667_ant", "Br6522_post")
 sample.id.vector <- sample.id.vector[!sample.id.vector %in% filter.bisque.samples]
 
@@ -215,4 +221,4 @@ save(df.sopt, file = "./outputs/09_fast/df_soptimize_realbulk_all.rda")
 
 # save image
 rm(mae)
-save.image(file = "./env/09_fast/03_run_adjustment_realbulk_all_script.RData")
+save.image(file = "./env/07_adjustment/03_run_adjustment_realbulk_all_script.RData")
