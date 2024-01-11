@@ -14,7 +14,7 @@ sapply(libv, library, character.only = T)
 source("./source/00_dataset_summaries.R")
 source("./source/00_deconvo_plots.R")
 source("./source/00_sopt.R")
-source("./source/00_musicParam-class.R")
+#source("./source/00_musicParam-class.R")
 #source("./scripts/07_adjustment/00_param.R")
 
 #-----
@@ -114,7 +114,7 @@ for(sample.id in sample.id.vector){
   y <- assays(y.set)[["logcounts"]][,,drop=F]
   nnls.noscale <- dfi <-lute(singleCellExperiment  = sce, 
                              bulkExpression = y, 
-                             cellTypeVariable  = celltype.variable, 
+                             cellTypeVariable  = "k2", 
                              cellScaleFactors  = s.vector.scale, 
                              assayName = assay.name,
                              typemarkerAlgorithm = NULL
@@ -139,6 +139,7 @@ ggplot(df.sopt, aes(x = min.error.neuron, y = sanity.check.error)) +
 # > Error in solve.default(t(D.weight) %*% D.weight) : 
 # > Lapack routine dgesv: system is exactly singular: U[1,1] = 0
 # 
+library(musicParam)
 source("./source/00_adjustment.R")
 
 filter.bisque.samples <- c("Br8667_ant", "Br6522_post")
@@ -217,7 +218,7 @@ dfp.tall$error <- abs(dfp.tall$true-dfp.tall$value)
 # save
 #-----
 # save s optima
-save(df.sopt, file = "./outputs/09_fast/df_soptimize_realbulk_all.rda")
+save(df.sopt, file = "./outputs/07_adjustment/df_soptimize_realbulk_all.rda")
 
 # save image
 rm(mae)

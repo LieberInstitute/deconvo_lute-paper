@@ -46,7 +46,6 @@ dfSummary <- function(sce,
         
         markerSizes <- sce[,colData(sce)[,variable]==type] |> 
           counts() |> colSums()
-        summary(markerSizes)
         
         c(variable,
           type,
@@ -82,6 +81,14 @@ dfSummary <- function(sce,
 summaryK2 <- dfSummary(sceK2, "Sample", "k2", c("neuron", "glial"))
 summaryK3 <- dfSummary(sceK3, "Sample", "k3", c("Inhib", "Excit", "glial"))
 summaryTable <- rbind(summaryK2, summaryK3)
+
+sce.mrb$Sample <- sce.mrb$donor
+summaryK2 <- dfSummary(sce.mrb, "Sample", "k2", c("neuron", "glial"))
+summaryK3 <- dfSummary(sce.mrb, "Sample", "k3", c("Inhib", "Excit", "glial"))
+
+summaryK3 <- dfSummary(sceK3, "Sample", "k3", c("Inhib", "Excit", "glial"))
+summaryTable <- rbind(summaryK2, summaryK3)
+
 
 #-----
 # save

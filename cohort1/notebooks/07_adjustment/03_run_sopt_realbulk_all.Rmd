@@ -70,6 +70,48 @@ new.plot.tall.jitterbox <- ggplot(dfp.tall,
 new.plot.tall.jitterbox
 ```
 
+## NNLS
+
+```{r}
+dfp <- dfp.tall[dfp.tall$algorithm=="nnls",]
+dfp$scale <- ifelse(dfp$scale, "withscale", "noscale")
+
+new.plot.tall <- ggplot(dfp, aes(x = true, y = value)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~scale) + 
+  xlab("Known") + ylab("Predicted") + xlim(0.1,0.9) + ylim(0.1,0.9) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+new.plot.tall
+
+new.plot.tall.jitterbox <- ggplot(dfp, aes(x = scale, y = error)) + 
+  geom_jitter(alpha = 0.5, width = 0.5, height = 0) + theme_bw() +
+  geom_boxplot(alpha = 0, color = "cyan") + 
+  xlab("Scale") + ylab("Error (neuron)") + ylim(0, 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank())
+new.plot.tall.jitterbox
+```
+
+## MuSiC and Bisque
+
+```{r}
+dfp <- dfp.tall[!dfp.tall$algorithm=="nnls",]
+dfp$scale <- ifelse(dfp$scale, "withscale", "noscale")
+
+new.plot.tall <- ggplot(dfp, aes(x = true, y = value)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~scale*algorithm) + 
+  xlab("Known") + ylab("Predicted") + xlim(0.1,0.9) + ylim(0.1,0.9) + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+new.plot.tall
+
+new.plot.tall.jitterbox <- ggplot(dfp, aes(x = scale, y = error)) + 
+  geom_jitter(alpha = 0.5, width = 0.5, height = 0) + theme_bw() +
+  geom_boxplot(alpha = 0, color = "cyan") + 
+  xlab("Scale") + ylab("Error (neuron)") + ylim(0, 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank())
+new.plot.tall.jitterbox
+```
+
 # Save
 
 ```{r}

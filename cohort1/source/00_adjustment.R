@@ -35,7 +35,7 @@ prop_adj_results <- function(mae, bisque.sce, bisque.bulk, s.vector.scale,
   bulk.eset[["sample.id"]] <- bulk.eset[[bulk.sample.id.variable]]
   # prep z
   message("prep z")
-  z <- lute::get_z_from_sce(sce, assay.name, "k2")
+  z <- lute::referenceFromSingleCellExperiment(sce, assay.name, "k2")
   # get s vectors
   s.vector.noscale <- c("glial" = 1, "neuron" = 1)
   # bisque rescale
@@ -63,10 +63,16 @@ prop_adj_results <- function(mae, bisque.sce, bisque.bulk, s.vector.scale,
   colnames(nnls.noscale) <- paste0(colnames(nnls.noscale), ".nnls.noscale")
   # experiment -- music
   message("experiment -- music")
-  music.prop.scale <- deconvolution(musicParam(y, z, s = s.vector.scale))@predictions.table
-  music.prop.noscale <- deconvolution(musicParam(y, z, s = s.vector.noscale))@predictions.table
-  colnames(music.prop.scale) <- paste0(colnames(music.prop.scale), ".music.scale")
-  colnames(music.prop.noscale) <- paste0(colnames(music.prop.noscale), ".music.noscale")
+  music.prop.scale <- deconvolution(
+    musicParam(bulkExpression = y, referenceExpression = z, 
+               cellScaleFactors = s.vector.scale))@predictionsTable
+  music.prop.noscale <- deconvolution(
+    musicParam(bulkExpression = y, referenceExpression = z, 
+               cellScaleFactors = s.vector.noscale))@predictionsTable
+  colnames(music.prop.scale) <- 
+    paste0(colnames(music.prop.scale), ".music.scale")
+  colnames(music.prop.noscale) <- 
+    paste0(colnames(music.prop.noscale), ".music.noscale")
   # experiment -- bisque
   message("experiment -- bisque")
   # bisque no scale
