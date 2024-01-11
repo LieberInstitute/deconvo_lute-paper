@@ -1,4 +1,4 @@
-# deconvo_method-paper
+# deconvo_lute-paper
 
 Supplementary materials to prepare data and run analyses for the paper "lute: estimating the cell composition of heterogeneous tissue with varying cell sizes using gene expression". The `lute` (1) R package is available from Bioconductor.
 
