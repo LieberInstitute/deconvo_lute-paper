@@ -41,7 +41,7 @@ new.plot <- ggplot(dfp.tall[dfp.tall$type=="noscale",],
   geom_point(size = 4, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
-  xlab("True") + ylab("Predicted") +
+  xlab("Known") + ylab("Predicted") +
   xlim(0, 1) + ylim(0, 1) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -66,7 +66,7 @@ new.plot <- ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) +
   geom_point(size = 4, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
   geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
-  xlab("True") + ylab("Predicted") +
+  xlab("Known") + ylab("Predicted") +
   xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 new.plot

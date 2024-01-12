@@ -21,6 +21,90 @@ load("env/01_multipanel/01_pseudobulk_script.RData")
 # Plots
 
 ```{r}
+# cohort 1
+dfp.c1 <- rbind(data.frame(true = dfp.tall.c1.k3$glial.true, 
+                           pred = dfp.tall.c1.k3$glial.pred, 
+                           cell.type = rep("glial", nrow(dfp.tall.c1.k3)),
+                           type = dfp.tall.c1.k3$type,
+                           error = dfp.tall.c1.k3$glial.abs.error),
+                data.frame(true = dfp.tall.c1.k3$Excit.true, 
+                           pred = dfp.tall.c1.k3$Excit.pred, 
+                           cell.type = rep("Excit", nrow(dfp.tall.c1.k3)),
+                           type = dfp.tall.c1.k3$type,
+                           error = dfp.tall.c1.k3$Excit.abs.error),
+                data.frame(true = dfp.tall.c1.k3$Inhib.true, 
+                           pred = dfp.tall.c1.k3$Inhib.pred, 
+                           cell.type = rep("Inhib", nrow(dfp.tall.c1.k3)),
+                           type = dfp.tall.c1.k3$type,
+                           error = dfp.tall.c1.k3$Inhib.abs.error)) |> 
+  as.data.frame()
+dfp.c1$cell.type <- factor(dfp.c1$cell.type, levels = c("Excit", "Inhib", "glial"))
+
+plotK3.scatter.c1 <- ggplot(dfp.c1, aes(x = true, y = pred)) + 
+  geom_point() + theme_bw() + geom_abline(slope = 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) + 
+  xlab("Known") + ylab("Predicted") + ggtitle("Huuki-Meyers et. al. 2023") + 
+  xlim(0,1) + ylim(0,1) +
+  facet_wrap(~cell.type*type, ncol = 2)
+
+plotK3.box.c1 <- ggplot(dfp.c1, aes(x = type, y = error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) + 
+  ylab("Error") + ggtitle("\n") + ylim(0, 0.3) + facet_wrap(~cell.type, nrow = 3)
+
+```
+
+```{r}
+# cohort 2
+dfp.c2 <- rbind(data.frame(true = dfp.tall.c2.k3$glial.true, 
+                           pred = dfp.tall.c2.k3$glial.pred, 
+                           cell.type = rep("glial", nrow(dfp.tall.c2.k3)),
+                           type = dfp.tall.c2.k3$type,
+                           error = dfp.tall.c2.k3$glial.abs.error),
+                data.frame(true = dfp.tall.c2.k3$Excit.true, 
+                           pred = dfp.tall.c2.k3$Excit.pred, 
+                           cell.type = rep("Excit", nrow(dfp.tall.c2.k3)),
+                           type = dfp.tall.c2.k3$type,
+                           error = dfp.tall.c2.k3$Excit.abs.error),
+                data.frame(true = dfp.tall.c2.k3$Inhib.true, 
+                           pred = dfp.tall.c2.k3$Inhib.pred, 
+                           cell.type = rep("Inhib", nrow(dfp.tall.c2.k3)),
+                           type = dfp.tall.c2.k3$type,
+                           error = dfp.tall.c2.k3$Inhib.abs.error)) |> 
+  as.data.frame()
+dfp.c2$cell.type <- factor(dfp.c2$cell.type, levels = c("Excit", "Inhib", "glial"))
+
+plotK3.scatter.c2 <- ggplot(dfp.c2, aes(x = true, y = pred)) + 
+  geom_point() + theme_bw() + geom_abline(slope = 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) + 
+  xlab("Known") + ylab("Predicted") + ggtitle("Tran et. al. 2021") + 
+  xlim(0,1) + ylim(0,1) + facet_wrap(~cell.type*type, ncol = 2)
+
+plotK3.box.c2 <- ggplot(dfp.c2, aes(x = type, y = error)) +
+  geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45,hjust=1), axis.title.x = element_blank()) + 
+  ylab("Error") + ggtitle("\n") + ylim(0, 0.3) + facet_wrap(~cell.type, nrow = 3)
+
+```
+
+```{r}
+setwd("..")
+setwd("..")
+jpeg("./figures/01_multipanel/pseudobulk-k3-2cohort_multi.jpg", width = 10, height = 4, units = "in", res = 400)
+
+layoutMatrix <- matrix(rep(c(1,1,2,3,3,4), 2), byrow=T, nrow=2)
+
+grid.arrange(plotK3.scatter.c1,
+             plotK3.box.c1,
+             plotK3.scatter.c2,
+             plotK3.box.c2,
+             layout_matrix = layoutMatrix)
+
+dev.off()
+
+```
+
+```{r}
 
 plotData <- rbind(dfp.tall.c1.k3, dfp.tall.c2.k3) |> as.data.frame()
 

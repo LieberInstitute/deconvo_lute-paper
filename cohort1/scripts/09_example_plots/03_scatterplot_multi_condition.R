@@ -54,7 +54,7 @@ jpeg(paste0("./figures/09_example_plots/",
             "scatterplot_samples_true-versus-predicted.jpg"), 
      width = 10, height = 2.5, units = "in", res = 400)
 
-listScatterResult$ggScatter
+listScatterResult$ggScatter + xlab('Known')
 
 dev.off()
 

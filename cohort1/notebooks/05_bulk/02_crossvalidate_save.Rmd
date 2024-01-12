@@ -44,7 +44,7 @@ dfp <- na.omit(dfp)
 
 new.plot.scatter <- ggplot(dfp, aes(x = true.neuron, y = neuron)) + 
   theme_bw() + geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~s.set.label*experiment.type) + xlab("True") + ylab("Predicted")
+  facet_wrap(~s.set.label*experiment.type) + xlab("Known") + ylab("Predicted")
 
 new.plot.scatter
 
@@ -97,10 +97,10 @@ dfp <- na.omit(dfp)
 ```
 
 ```{r}
-
+# combine all samples
 new.plot.jitter.prep <- ggplot(dfp, aes(x = preparation.type, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw() +
-  facet_wrap(~crossvalidation) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylab("Error (neuron)")
 new.plot.jitter.prep
 
@@ -110,19 +110,18 @@ new.plot.jitter.prep
 setwd("..")
 setwd("..")
 
-new.plot.path <- "./figures/05_bulk/figs3c_library_condition.jpg"
+new.plot.path <- "./figures/05_bulk/figs3c_library_condition_allsamples.jpg"
 jpeg(new.plot.path, width = 4, height = 3, units = "in", res = 400)
 new.plot.jitter.prep
 dev.off()
 ```
 
 ```{r}
-
+# combined samples
 dfp$cell_compartment <- gsub("_.*", "", dfp$bulk.sample.condition)
-
 new.plot.jitter.compart <- ggplot(dfp, aes(x = cell_compartment, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw() +
-  facet_wrap(~crossvalidation) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 new.plot.jitter.compart
 
@@ -132,7 +131,7 @@ new.plot.jitter.compart
 setwd("..")
 setwd("..")
 
-new.plot.path <- "./figures/05_bulk/figs3d_cell_compartment.jpg"
+new.plot.path <- "./figures/05_bulk/figs3d_cell_compartment_allsamples.jpg"
 jpeg(new.plot.path, width = 4, height = 3, units = "in", res = 400)
 new.plot.jitter.compart
 dev.off()
