@@ -10,7 +10,7 @@ output:
 Sample source IDs dataset summaries.
 
 ```{r setup, include=FALSE}
-libv <- c("MultiAssayExperiment")
+libv <- c("MultiAssayExperiment", "SummarizedExperiment")
 sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 setwd("..")
@@ -97,6 +97,37 @@ jpeg("./figures/02_summarize_mae/figs_upset-mae-validate.jpg",
      width = 4, height = 2.5, units = "in", res = 400)
 upsetSamples(mae.upset.validate)
 dev.off()
+```
+# Sample quality summaries
+
+Bulk
+
+```{r}
+bulk <- mae[["bulk.rnaseq"]]
+
+# counts summary
+assays(bulk)[["counts"]] |> colSums() |> summary()
+
+# count zeros
+apply(assays(bulk)[["counts"]],2,function(ci){length(ci[ci==0])}) |> summary()
+```
+
+snRNA-seq
+
+```{r}
+sce <- combineCols(mae[["snrnaseq.k2.all"]], mae[["snrnaseq.k2.all"]])
+
+# counts summary
+assays(sce)[["counts"]] |> colSums() |> summary()
+
+# count zeros
+apply(assays(bulk)[["counts"]],2,function(ci){length(ci[ci==0])}) |> summary()
+
+```
+
+RNAscope
+
+```{r}
 ```
 
 # Session info

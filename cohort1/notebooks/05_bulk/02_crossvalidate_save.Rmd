@@ -38,13 +38,16 @@ dfp <- na.omit(dfp)
 
 ```
  
-# Supplemental Figure 3B : Scatterplot of true and predicted proportions across experiments
+# Supplemental Figure : Scatterplot of true and predicted proportions across experiments
 
 ```{r}
 
 new.plot.scatter <- ggplot(dfp, aes(x = true.neuron, y = neuron)) + 
-  theme_bw() + geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~s.set.label*experiment.type) + xlab("Known") + ylab("Predicted")
+  theme_bw() + geom_point(alpha = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  facet_wrap(~s.set.label*experiment.type) + xlab("Known") + 
+  ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 new.plot.scatter
 
@@ -55,12 +58,12 @@ setwd("..")
 setwd("..")
 
 new.plot.path <- "./figures/05_bulk/figs2b_validate.jpg"
-jpeg(new.plot.path, width = 4.2, height = 3.8, units = "in", res = 400)
+jpeg(new.plot.path, width = 4.5, height = 5, units = "in", res = 400)
 new.plot.scatter
 dev.off()
 ```
 
-# Supplemental Figure 3E : Neuron errors across conditions by cross validation set, experiment
+# Supplemental Figure : Neuron errors across conditions by cross validation set, experiment
 
 ```{r}
 
@@ -85,7 +88,7 @@ dev.off()
 
 ```
 
-# Supplemental Figure 3C and 3D
+# Supplemental Figures: Quantile boxplots and jittered points by conditions
 
 ```{r}
 
@@ -101,7 +104,7 @@ dfp <- na.omit(dfp)
 new.plot.jitter.prep <- ggplot(dfp, aes(x = preparation.type, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylab("Error (neuron)")
+  ylab("Error (neuron)") + xlab("Preparation type")
 new.plot.jitter.prep
 
 ```
@@ -121,7 +124,8 @@ dev.off()
 dfp$cell_compartment <- gsub("_.*", "", dfp$bulk.sample.condition)
 new.plot.jitter.compart <- ggplot(dfp, aes(x = cell_compartment, y = abs.error.neuron)) + 
   geom_jitter(alpha = 0.3) + geom_boxplot(alpha = 0, color = "cyan") + theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Error (Neuron)") + xlab("Cell compartment")
 
 new.plot.jitter.compart
 

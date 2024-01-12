@@ -23,6 +23,7 @@ Show
 
 ```{r}
 # plot proportions multipanel -- scale vs with scale
+dfp.ct$celltype <- factor(dfp.ct$celltype, levels = c("Excit", "Inhib", "glial"))
 new.plot <- ggplot(dfp.ct, aes(x = true.noscale, y = pred.noscale)) + 
   geom_point(size = 4, alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
@@ -39,7 +40,7 @@ setwd("..")
 setwd("..")
 new.plot.name <- "fig2c_cohort1.jpg"
 jpeg(file.path("./figures/02_pseudobulk/", new.plot.name), 
-     width = 6, height = 3, units = "in", res = 400)
+     width = 6.5, height = 3, units = "in", res = 400)
 new.plot
 dev.off()
 ```
