@@ -76,7 +76,7 @@ Proportions scatterplots.
 new.plot.scatter <- 
   ggplot(dfp, aes(x = true.neuron, y = neuron, color = bulk.scale.type)) + 
   theme_bw() + geom_point(alpha = 0.5) + geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~experiment.type*assay.name.lutearg*s.set.label) +
+  facet_grid(experiment.type~assay.name.lutearg+s.set.label) +
   xlab("Known") + ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 new.plot.scatter
@@ -89,7 +89,7 @@ setwd("..")
 setwd("..")
 
 new.plot.path <- "./figures/05_bulk/figs3a_scatter.jpg"
-jpeg(new.plot.path, width = 7, height = 7, res = 400, units = "in")
+jpeg(new.plot.path, width = 8, height = 4.2, res = 400, units = "in")
 new.plot.scatter
 dev.off()
 ```

@@ -128,7 +128,7 @@ plotsList <- function(dfp, outlier = TRUE){
     newPlot <- ggplot(dfp, aes(x = true, y = value)) + 
       geom_point(size = 4, alpha = 0.5) + 
       geom_abline(slope = 1, intercept = 0) + 
-      facet_wrap(~cell.type*scale, nrow = 2) + xlab("Known") + 
+      facet_grid(cell.type~scale) + xlab("Known") + 
       ylab("Predicted") + theme_bw() + xlim(0, 1) + ylim(0, 1) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
         
@@ -169,6 +169,8 @@ plotsListBISQUE <- plotsList(dfp.tall[dfp.tall$algorithm=="bisque",], outlier = 
 Save NNLS multipanel plot.
 
 ```{r}
+setwd("..")
+setwd("..")
 
 jpeg("./figures/07_adjustment/fig3_bulk-results_nnls.jpg", 
      width = 6, height = 4, units = "in", res = 400)
@@ -183,7 +185,8 @@ dev.off()
 Save Bisque and MuSiC multipanel plot.
 
 ```{r}
-
+setwd("..")
+setwd("..")
 jpeg("./figures/07_adjustment/fig3_bulk-results_music-bisque.jpg", 
      width = 5.5, height = 8, units = "in", res = 400)
 grid.arrange(plotsListMUSIC[[1]] + ggtitle("MuSiC"), plotsListMUSIC[[2]] + ggtitle(""), 

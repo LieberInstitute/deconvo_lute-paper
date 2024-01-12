@@ -45,7 +45,7 @@ plotK3.scatter.c1 <- ggplot(dfp.c1, aes(x = true, y = pred)) +
   theme(axis.text.x = element_text(angle = 45, hjust=1)) + 
   xlab("Known") + ylab("Predicted") + ggtitle("Huuki-Meyers et. al. 2023") + 
   xlim(0,1) + ylim(0,1) +
-  facet_wrap(~cell.type*type, ncol = 2)
+  facet_grid(cell.type~type)
 
 plotK3.box.c1 <- ggplot(dfp.c1, aes(x = type, y = error)) +
   geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + 
@@ -78,7 +78,7 @@ plotK3.scatter.c2 <- ggplot(dfp.c2, aes(x = true, y = pred)) +
   geom_point() + theme_bw() + geom_abline(slope = 1) +
   theme(axis.text.x = element_text(angle = 45, hjust=1)) + 
   xlab("Known") + ylab("Predicted") + ggtitle("Tran et. al. 2021") + 
-  xlim(0,1) + ylim(0,1) + facet_wrap(~cell.type*type, ncol = 2)
+  xlim(0,1) + ylim(0,1) + facet_grid(cell.type~type)
 
 plotK3.box.c2 <- ggplot(dfp.c2, aes(x = type, y = error)) +
   geom_boxplot(color="cyan") + geom_jitter(alpha = 0.5) + theme_bw() + 

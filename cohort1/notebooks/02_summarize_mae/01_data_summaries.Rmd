@@ -100,6 +100,10 @@ dev.off()
 ```
 # Sample quality summaries
 
+```{r}
+sample.id.train
+```
+
 Bulk
 
 ```{r}
@@ -110,12 +114,35 @@ assays(bulk)[["counts"]] |> colSums() |> summary()
 
 # count zeros
 apply(assays(bulk)[["counts"]],2,function(ci){length(ci[ci==0])}) |> summary()
+
+length(intersect(bulk$batch.id2, sample.id.train)) 
+length(intersect(bulk$batch.id2, sample.id.validate))
+
+bf <- bulk[bulk$library_prep=="Bulk",]
+length(intersect(bf$batch.id2, sample.id.train)) 
+length(intersect(bf$batch.id2, sample.id.validate))
+
+bf <- bulk[bulk$library_prep=="Cyto",]
+length(intersect(bf$batch.id2, sample.id.train)) 
+length(intersect(bf$batch.id2, sample.id.validate))
+
+bf <- bulk[bulk$library_prep=="Nuc",]
+length(intersect(bf$batch.id2, sample.id.train)) 
+length(intersect(bf$batch.id2, sample.id.validate))
+
+bf <- bulk[bulk$library_type=="polyA",]
+length(intersect(bf$batch.id2, sample.id.train)) 
+length(intersect(bf$batch.id2, sample.id.validate))
+
+bf <- bulk[bulk$library_type=="RiboZeroGold",]
+length(intersect(bf$batch.id2, sample.id.train)) 
+length(intersect(bf$batch.id2, sample.id.validate))
 ```
 
 snRNA-seq
 
 ```{r}
-sce <- combineCols(mae[["snrnaseq.k2.all"]], mae[["snrnaseq.k2.all"]])
+sce <- rbind(mae[["snrnaseq.k2.all"]], mae[["snrnaseq.k2.all"]])
 
 # counts summary
 assays(sce)[["counts"]] |> colSums() |> summary()
@@ -128,6 +155,10 @@ apply(assays(bulk)[["counts"]],2,function(ci){length(ci[ci==0])}) |> summary()
 RNAscope
 
 ```{r}
+img <- mae[["sce.img"]]
+length(unique(img$Sample))
+length(intersect(img$Sample, sample.id.train))
+length(intersect(img$Sample, sample.id.validate))
 ```
 
 # Session info

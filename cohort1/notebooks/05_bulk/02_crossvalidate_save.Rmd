@@ -45,7 +45,7 @@ dfp <- na.omit(dfp)
 new.plot.scatter <- ggplot(dfp, aes(x = true.neuron, y = neuron)) + 
   theme_bw() + geom_point(alpha = 0.5) + 
   geom_abline(slope = 1, intercept = 0) + 
-  facet_wrap(~s.set.label*experiment.type) + xlab("Known") + 
+  facet_grid(s.set.label~experiment.type) + xlab("Known") + 
   ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
