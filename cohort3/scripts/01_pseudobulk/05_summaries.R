@@ -9,7 +9,7 @@
 #------
 # load
 #------
-load("env/08_improvement/02_simulation_script.RData")
+load("env/01_pseudobulk/04_simulation.RData")
 df.k2 <- dfPseudobulk
 colnames(df.k2) <- c("non.pred", "plasma.pred", 
                      "condition", "plasma.true", "non.true", "sample.id")
@@ -56,6 +56,3 @@ as.numeric(mrna.yield$Cell_no.) |>
 as.numeric(cellSizes["Plasmablasts"])/
   as.numeric(mean(cellSizes[!names(cellSizes)=="Plasmablasts"]))
 # 15.31991
-
-
-

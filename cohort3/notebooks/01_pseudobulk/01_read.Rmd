@@ -13,7 +13,7 @@ sapply(libv, library, character.only = TRUE)
 knitr::opts_chunk$set(echo = FALSE)
 setwd("..")
 setwd("..")
-load("./env/08_improvement/01_run_script.RData")
+load("./env/01_pseudobulk/01_read_script.RData")
 ```
 
 Notebook plotting bias differences before and after cell size transformation in 

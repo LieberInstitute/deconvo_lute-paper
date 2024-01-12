@@ -34,7 +34,8 @@ proportionsNonplasmablastsCombined
 # range of non-plasmablast cell composition
 proportionsNonplasmablastsAlltypes <- experimentData$p.true
 proportionsNonplasmablastsAlltypes <-
-  pTrue[!rownames(pTrue)=="Plasmablasts",] |> unlist() |> as.numeric() |> summary()
+  proportionsNonplasmablastsAlltypes[
+    !rownames(proportionsNonplasmablastsAlltypes)=="Plasmablasts",] |> unlist() |> as.numeric() |> summary()
 proportionsNonplasmablastsAlltypes
 # Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 # 0.001049 0.015634 0.036024 0.062302 0.088761 0.275502
@@ -55,5 +56,5 @@ save(proportionsTable,
 data.table::fwrite(
   proportionsTable,"./outputs/08_improvements/cellProportionsTable.csv")
 
-save.image("./env/05_summaries/01_run_script.RData")
+save.image("./env/01_pseudobulk/01_read_script.RData")
 

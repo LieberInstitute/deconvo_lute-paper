@@ -15,7 +15,7 @@ sapply(libv, library, character.only = TRUE)
 
 # load 
 # contains experiment data, cell size scale factors
-load("./env/08_improvement/01_run_script.RData")
+load("./env/01_pseudobulk/01_read_script.RData")
 
 
 #-----------------
@@ -100,14 +100,7 @@ dfPseudobulk <- dfPseudobulkA <-
 
 save.image("env/08_improvement/02_simulation_script.RData")
 
-#-----------------
-
-# run simulation B
-
-#-----------------
-# notes:
-# cell expression taken from the cell type reference
-
+#------
 # save
-
-save.image("env/08_improvement/02_simulation_script.RData")
+#------
+save.image("env/01_pseudobulk/04_simulation.RData")

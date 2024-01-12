@@ -16,7 +16,7 @@ sapply(libv, library, character.only = TRUE)
 # load 
 # 01_run_script
 # contains experiment data, cell size scale factors
-load("./env/06_top10markers/01_run_script.RData")
+load("./env/01_pseudobulk/01_read_script.RData")
 source("./source/00_read_experiment_data.R")
 
 
@@ -169,5 +169,4 @@ dfPlotTallTall$trueProportion <- as.numeric(dfPlotTallTall$trueProportion)
 #-----------------
 # save environment
 #-----------------
-save.image("./env/08_improvement/01_run_script.RData")
-
+save.image("./env/01_pseudobulk/03_deconvolve.RData")

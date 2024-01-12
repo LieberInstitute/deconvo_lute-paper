@@ -2,7 +2,9 @@
 title: "02_presentation"
 author: "Sean Maden"
 date: "2023-11-22"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 Main presentation notebook showing improvements after cell size transformations.
@@ -12,7 +14,7 @@ libv <- c("lute", "ggplot2", "gridExtra", "reshape2", "ggforce")
 sapply(libv, library, character.only = TRUE)
 setwd("..")
 setwd("..")
-load("./env/08_improvement/01_run_script.RData")
+load("./env/01_pseudobulk/01_read_script.RData")
 knitr::opts_chunk$set(echo = FALSE)
 ```
 

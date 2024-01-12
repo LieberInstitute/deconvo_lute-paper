@@ -1,0 +1,127 @@
+---
+title: "04_simulations"
+author: "Sean Maden"
+date: "2023-11-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Results from pseudobulk simulations using Plasmablast and Non-plasmablast cell 
+proportions from Monaco et al 2019.
+
+```{r setup, include=FALSE}
+libv <- c("lute", "ggplot2", "gridExtra", "reshape2", "ggforce")
+sapply(libv, library, character.only = TRUE)
+setwd("..")
+setwd("..")
+load("./env/01_pseudobulk/01_read_script.RData")
+load("./env/01_pseudobulk/04_simulation.RData")
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Background
+
+## Simulations 
+
+This simulation used randomized single-cell expression. Two cell type labels 
+were used, either "Plasmablasts" for the larger cell type category, or 
+"Non-plasmablasts" for the smaller cell type category.
+
+In addition, the following data were drawn from the experiment: 1. Proportions 
+were calculated for each category from flow cytometry proportions; 2. Mean 
+expression was calculated from bulk RNA-seq TPM data at ABIS-seq marker genes.
+
+## Cell size calculations
+
+Cell size scale factors obtained as the library sizes (column sums) from the 
+RNA-seq reference in Monaco et al 2019 (Table S5). Binarized cell sizes 
+(Plasmablasts, Non-plasmablasts) for Non-plasmablasts were taken as the median 
+of cell sizes.
+
+# Scatter plots of simulation outcomes
+
+Reporting pseudobulk results, at 3 zoom levels.
+
+```{r}
+dfPlot <- dfPseudobulkA
+plot1 <- ggplot(dfPseudobulkA, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition) + xlim(0, 0.15) + ylim(0, 0.15) +
+  ylab("Predicted") + xlab("True")
+plot2 <- ggplot(dfPseudobulkA, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition) + xlim(0, 0.5) + ylim(0, 0.5) +
+  ylab("Predicted") + xlab("True")
+plot3 <- ggplot(dfPseudobulkA, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point(size = 4, alpha = 0.5) + geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition) + xlim(0, 1) + ylim(0, 1) +
+  ylab("Predicted") + xlab("True")
+plot1
+plot2
+plot3
+```
+
+```{r, fig.height = 15, fig.width = 9}
+# multiplot
+textSize <- 30
+plot1 <- 
+  plot1 + xlab("") + ylab("") + ggtitle("Zoom1") + 
+  theme(text = element_text(size=textSize),
+        axis.text.x = element_text(angle=45,hjust=1))
+plot2 <- 
+  plot2 + xlab("") + ylab("Predicted") + ggtitle("Zoom2") + 
+  theme(text = element_text(size=textSize),
+        axis.text.x = element_text(angle=45,hjust=1))
+plot3 <- 
+  plot3 + xlab("") + ylab("True") + ggtitle("Zoom3") + 
+  theme(text = element_text(size=textSize),
+        axis.text.x = element_text(angle=45,hjust=1))
+grid.arrange(plot1, plot2, plot3, ncol = 1, top = "Plasmablasts")
+```
+
+# Save
+
+```{r}
+
+dfPlot <- dfPseudobulkA
+dfPlot$condition2 <- 
+  ifelse(dfPlot$condition=="scaled", "withscale", "noscale")
+dfPlot$condition2 <- 
+  factor(dfPlot$condition2, levels = c("noscale", "withscale"))
+
+# zoom level 1, axis maximum 0.5
+
+jpeg("figures/04_transform/supplemental_figure2a.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+
+ggplot(dfPlot, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point(size = 4, alpha = 0.5) + theme_bw() +
+  geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition2) + xlim(0, 0.15) + ylim(0, 0.15) +
+  ylab("Predicted") + xlab("Known") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+dev.off()
+
+# zoom level 2, axis maximum 1
+
+jpeg("figures/04_transform/supplemental_figure2b.jpg", 
+     width = 4, height = 2.5, units = "in", res = 400)
+
+ggplot(dfPlot, aes(x = true.plasmablasts, y = Plasmablasts)) + 
+  geom_point(size = 4, alpha = 0.5) + theme_bw() +
+  geom_abline(slope = 1, intercept = 0) +
+  facet_wrap(~condition2) + xlim(0, 1) + ylim(0, 1) +
+  ylab("Predicted") + xlab("Known") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+dev.off()
+
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```

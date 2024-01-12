@@ -12,7 +12,7 @@ sapply(libv, library, character.only=T)
 markersPerType <- 10
 
 # load
-load("./env/05_summaries/01_run_script.RData")
+load("./env/01_pseudobulk/01_read_script.RData")
 
 # format
 #refTpm <- refTpm[!duplicated(refTpm[,1]),]
@@ -62,4 +62,4 @@ Heatmap(refTpm)
 Heatmap(scale(refTpm))
 
 # save
-save.image(file="./env/06_top10markers/01_run_script.RData")
+save.image(file="./env/01_pseudobulk/02_markers_script.RData")

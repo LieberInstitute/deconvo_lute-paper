@@ -15,8 +15,8 @@ libv <- c("lute", "ggplot2", "gridExtra", "reshape2", "ggforce")
 sapply(libv, library, character.only = TRUE)
 setwd("..")
 setwd("..")
-load("./env/08_improvement/01_run_script.RData")
-load("./env/08_improvement/02_simulation_script.RData")
+load("./env/01_pseudobulk/01_read_script.RData")
+load("./env/01_pseudobulk/04_simulation.RData")
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
