@@ -14,9 +14,7 @@
 #------
 # load marker data
 load("env/01_pseudobulk/01_k2_mrb_script.RData")
-
-sceK2 <- list.sce.markers[["k2"]]
-sceK3 <- list.sce.markers[["k3"]]
+load("env/01_pseudobulk/01_k3_mrb_script.RData")
 
 dfSummary <- function(sce, 
                       sampleIdVariable = "donor",
@@ -78,17 +76,9 @@ dfSummary <- function(sce,
   return(dfSummaries)
 }
 
-summaryK2 <- dfSummary(sceK2, "Sample", "k2", c("neuron", "glial"))
-summaryK3 <- dfSummary(sceK3, "Sample", "k3", c("Inhib", "Excit", "glial"))
+summaryK2 <- dfSummary(sce.k2, "donor", "k2", c("neuron", "glial"))
+summaryK3 <- dfSummary(sce.k3, "donor", "k3", c("Inhib", "Excit", "glial"))
 summaryTable <- rbind(summaryK2, summaryK3)
-
-sce.mrb$Sample <- sce.mrb$donor
-summaryK2 <- dfSummary(sce.mrb, "Sample", "k2", c("neuron", "glial"))
-summaryK3 <- dfSummary(sce.mrb, "Sample", "k3", c("Inhib", "Excit", "glial"))
-
-summaryK3 <- dfSummary(sceK3, "Sample", "k3", c("Inhib", "Excit", "glial"))
-summaryTable <- rbind(summaryK2, summaryK3)
-
 
 #-----
 # save
