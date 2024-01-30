@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/543720810.svg)](https://zenodo.org/doi/10.5281/zenodo.10568795)
+
 # deconvo_lute-paper
 
 Supplementary materials to prepare data and run analyses for the paper "lute: estimating the cell composition of heterogeneous tissue with varying cell sizes using gene expression". The `lute` (1) R package is available from Bioconductor.
