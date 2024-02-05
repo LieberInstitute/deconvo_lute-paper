@@ -31,6 +31,7 @@ snRNASeq <- maeAll[["snrnaseq.k2.all"]]
 
 ```{r}
 nuSummaryTable <- function(snRNASeq){
+  # donors map donors
     numDonors.snRNASeq <- unique(snRNASeq$BrNum) |> length()
   numSamples.snRNASeq <- unique(snRNASeq$SAMPLE_ID) |> length()
   
@@ -81,9 +82,69 @@ nuSummaryTable <- function(snRNASeq){
 nuSummaryTable(snRNASeq)
 ```
 
+```{r}
+nuSummaryTable2 <- function(snRNASeq){
+  # donors map samples
+  numSamples.snRNASeq <- unique(snRNASeq$BrNum) |> length()
+  
+  # fract region
+  # CHECK/CONVINCE
+  # as.data.frame(table(snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos))[,1]
+  #
+  fractRegionByDonor.snRNAseq <- 
+    snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos |> 
+    list() |>
+    sapply(function(item){table(item)}) |> 
+    as.data.frame() |> sapply(function(value){value/numDonors.snRNASeq}) |>
+    as.vector()
+  
+  # names fract region
+  # CHECK/CONVINCE
+  # names(table(snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos))==unique(
+  # snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos)[
+  #  order(unique(snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos))]
+  #
+  #
+  namesFractRegion <- unique(
+    snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos)[
+    order(unique(snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos))]
+  namesFractRegion <- paste0(namesFractRegion, "Fraction")
+  
+  # fractRegionByDonor.snRNAseq
+  newSummaryTablePre <- data.frame(
+    numDonors.snRNASeq,
+    numSamples.snRNASeq
+  )
+  newSummaryTablePre <- fractRegionByDonor.snRNAseq |> 
+    matrix(nrow=1) |> 
+    cbind(newSummaryTablePre)
+  # out
+  newSummaryTableOut <- newSummaryTablePre[,c(4,5,1,2,3)]
+  #colnames(newSummaryTableOut)[seq(3,5)] <- unique(
+  #  snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos)[
+  #    order(
+  #      unique(
+  #        snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos))]
+  colnames(newSummaryTableOut)[seq(3,5)] <- namesFractRegion
+  newSummaryTableOut
+    
+  return(newSummaryTableOut)
+}
+
+nuSummaryTable2snRNASeq <- nuSummaryTable2(snRNASeq)
+
+
+
+
+
+```
+
 ## save
 
 ```{r}
+setwd("..")
+setwd("..")
+write.csv(nuSummaryTable2snRNASeq, file = "./outputs/02_summarize_mae/TABLE_S1.csv", row.names = FALSE)
 ```
 
 # MAE Summaries
