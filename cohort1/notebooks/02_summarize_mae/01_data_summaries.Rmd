@@ -110,7 +110,23 @@ nuSummaryTable2 <- function(snRNASeq){
     order(unique(snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos))]
   namesFractRegion <- paste0(namesFractRegion, "Fraction")
   
-  # fractRegionByDonor.snRNAseq
+  # fractSexByDonor
+  # CHECK/CONVINCE
+  # as.data.frame(table(snRNASeq[,!duplicated(snRNASeq$BrNum)]$sex))[,1]
+  fractSexBySample.snRNASeq <- 
+    snRNASeq[,!duplicated(snRNASeq$BrNum)]$sex |> 
+    list() |>
+    sapply(function(item){table(item)}) |> 
+    as.data.frame() |> 
+    sapply(function(value){value/numDonors.snRNASeq}) |>
+    as.vector()
+  # names fract sex
+  namesFractSex.snRNASeq <- unique(
+    snRNASeq[,!duplicated(snRNASeq$BrNum)]$sex)
+  
+  
+  
+  
   newSummaryTablePre <- data.frame(
     numDonors.snRNASeq,
     numSamples.snRNASeq
@@ -118,8 +134,14 @@ nuSummaryTable2 <- function(snRNASeq){
   newSummaryTablePre <- fractRegionByDonor.snRNAseq |> 
     matrix(nrow=1) |> 
     cbind(newSummaryTablePre)
+  newSummaryTablePre <- namesFractSex.snRNAseq |>
+    matrix(nrow=1) |>
+    cbind(newSummaryTablePre)
   # out
-  newSummaryTableOut <- newSummaryTablePre[,c(4,5,1,2,3)]
+  # bind
+  newSummaryTableOut <- newSummaryTablePre
+  
+  newSummaryTablePre[,c(4,5,1,2,3)]
   #colnames(newSummaryTableOut)[seq(3,5)] <- unique(
   #  snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos)[
   #    order(
