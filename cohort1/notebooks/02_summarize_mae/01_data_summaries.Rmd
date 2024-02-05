@@ -161,6 +161,12 @@ length(intersect(img$Sample, sample.id.train))
 length(intersect(img$Sample, sample.id.validate))
 ```
 
+# Summaries
+
+```{r}
+
+```
+
 # Session info
 
 ```{r}

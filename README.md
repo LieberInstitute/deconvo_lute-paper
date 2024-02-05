@@ -121,6 +121,20 @@ The folder contents are described as follows:
 
 * `cohort1/source` : Scripts (`.R`) shared across analysis sections.
 
+### TABLES
+
+* Table S1 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+* Table S2 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+* Table S3 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+* Table S4 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+* Table S5 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+* Table S6 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+* Table S7 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+* Table S8 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
+
+
+
+
 ### Compute environment
 
 Files to repeat analyses have been provided as `.yml` files in the `./deconvo_lute-paper/yml` folder. These may be used to generate new conda environments.
