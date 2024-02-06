@@ -91,11 +91,11 @@ nuSummaryTable2 <- function(snRNASeq){
   # CHECK/CONVINCE
   # as.data.frame(table(snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos))[,1]
   #
-  fractRegionByDonor.snRNAseq <- 
+  fractRegionBySample.snRNAseq <- 
     snRNASeq[,!duplicated(snRNASeq$BrNum)]$pos |> 
     list() |>
     sapply(function(item){table(item)}) |> 
-    as.data.frame() |> sapply(function(value){value/numDonors.snRNASeq}) |>
+    as.data.frame() |> sapply(function(value){value/numSamples.snRNASeq}) |>
     as.vector()
   
   # names fract region
@@ -118,28 +118,25 @@ nuSummaryTable2 <- function(snRNASeq){
     list() |>
     sapply(function(item){table(item)}) |> 
     as.data.frame() |> 
-    sapply(function(value){value/numDonors.snRNASeq}) |>
+    sapply(function(value){value/numSamples.snRNASeq}) |>
     as.vector()
   # names fract sex
   namesFractSex.snRNASeq <- unique(
     snRNASeq[,!duplicated(snRNASeq$BrNum)]$sex)
   
-  
-  
-  
+  # output table
   newSummaryTablePre <- data.frame(
-    numDonors.snRNASeq,
     numSamples.snRNASeq
   )
-  newSummaryTablePre <- fractRegionByDonor.snRNAseq |> 
+  newSummaryTablePre <- fractRegionBySample.snRNAseq |> 
     matrix(nrow=1) |> 
     cbind(newSummaryTablePre)
-  newSummaryTablePre <- namesFractSex.snRNAseq |>
+  newSummaryTablePre <- fractSexBySample.snRNASeq |>
     matrix(nrow=1) |>
     cbind(newSummaryTablePre)
   # out
   # bind
-  newSummaryTableOut <- newSummaryTablePre
+  newSummaryTableOut <- newSummaryTablePre[,c(5,6,1,2,3,4)]
   
   newSummaryTablePre[,c(4,5,1,2,3)]
   #colnames(newSummaryTableOut)[seq(3,5)] <- unique(
@@ -155,9 +152,50 @@ nuSummaryTable2 <- function(snRNASeq){
 
 nuSummaryTable2snRNASeq <- nuSummaryTable2(snRNASeq)
 
+```
+
+Nuclei summaries
+
+```{r}
+
+snRNASeq$BrNum |> table() |> as.data.frame()
+
+# this should work, could explain pipes issues 
+colData(snRNASeq) |> dplyr::group_by(BrNum) |> dplyr::summarise(median = median(count))
+
+group_by(colData(snRNASeq), BrNum)
+
+library(dplyr)
+
+colData(snRNASeq) %>% as_tibble() %>% group_by(BrNum) %>% summarise(median = median(count))
+
+# get the median number of columns in colData(snRNASeq) by BrNum
+# does not work colData(snRNASeq) %>% as_tibble() %>% group_by(BrNum) %>% summarise(median = median(count))
+# does not work counts(snRNASeq) |> colSums() |> summary()
+#
+#
+#
+#
+# does not work counts(snRNASeq) |> aggregate(., by = list(BrNum = snRNASeq$BrNum), FUN = sum) |> summary()
+#
+#
+#
+#
+#
+
+# get function for dplyr median summary by group
 
 
+# search internet for dplyr median summary by group
+# search internet for dplyr median summary by group
 
+counts(snRNASeq) |> dplyr::summarise(median = median(count))
+
+# get median columns snRNASeq
+counts(snRNASeq) |> colSums() |> summary()
+
+# get median columns snRNASeq by BrNum
+counts(snRNASeq) |> dplyr::group_by(BrNum) |> dplyr::summarise(median = median(count))
 
 ```
 
