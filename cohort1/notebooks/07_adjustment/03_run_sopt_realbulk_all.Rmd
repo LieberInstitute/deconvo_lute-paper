@@ -77,9 +77,20 @@ dfp.tall$error <- abs(dfp.tall$true-dfp.tall$value)
 # Plots
 
 ```{r}
-ggpairs(dfp.wide, 
-        columns = rev(colnames(dfp.wide)),
+dfpWide <- dfp.wide
+
+#ggpairs(dfp.wide, 
+#        columns = rev(colnames(dfp.wide)),
+#        xlim = c(0, 1), ylim = c(0, 1))
+
+colnames(dfpWide) <- c("neuron_NNLS_NoScale", "neuron_NNLS_Scale", 
+                       "neuron_MuSiC_Noscale", "neuron_MuSiC_Scale", 
+                       "neuron_Bisque_Scale", "neuron_Bisque_Noscale", 
+                       "neuron_Known")
+ggpairs(dfpWide, 
+        columns = rev(colnames(dfpWide)),
         xlim = c(0, 1), ylim = c(0, 1))
+
 ```
 
 ```{r}
@@ -207,6 +218,27 @@ ggpairs(dfp.wide,
         xlim = c(0, 1), ylim = c(0, 1))
 
 dev.off()
+
+#
+
+jpeg("./figures/07_adjustment/FIG_S7.jpg", 
+     width = 15, height = 15, units = "in", res = 400)
+
+ggpairs(dfpWide, 
+        columns = rev(colnames(dfpWide)),
+        xlim = c(0, 1), ylim = c(0, 1))
+
+dev.off()
+
+pdf("./figures/07_adjustment/FIG_S7.pdf", 
+     width = 15, height = 15, units = "in", res = 400)
+
+ggpairs(dfpWide, 
+        columns = rev(colnames(dfpWide)),
+        xlim = c(0, 1), ylim = c(0, 1))
+
+dev.off()
+
 ```
 
 # Session info
