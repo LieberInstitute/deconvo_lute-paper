@@ -135,6 +135,39 @@ new.plot.jitter.cond <- ggplot(dfp, aes(x = bulk.sample.condition,
 new.plot.jitter.cond
 ```
 
+```{r}
+# RMSE
+
+propRMSE <- data.frame(
+  glial_predicted = dfp$glial,
+  neuron_predicted = dfp$neuron,
+  glial_known = as.numeric(dfp$true.glial),
+  neuron_known = dfp$true.neuron,
+  sample.id = dfp$experiment.type,
+  condition.id = dfp$bulk.scale.type,
+  replicate.id = dfp$experiment.type
+)
+
+# manual
+propRMSEall <- propRMSE
+propRMSE <- propRMSEall[propRMSEall$sample.id=="z_type : shared.reference",]
+errorVector <- propRMSE$glial_predicted-propRMSE$glial_known
+errorVector <- c(errorVector, propRMSE$neuron_predicted-propRMSE$neuron_known)
+errorSq <- errorVector^2
+meanErr <- sum(errorSq)/length(errorSq)
+rmseShared <- sqrt(meanErr)
+rmseShared
+
+propRMSE <- propRMSEall[propRMSEall$sample.id=="z_type : within.reference",]
+errorVector <- propRMSE$glial_predicted-propRMSE$glial_known
+errorVector <- c(errorVector, propRMSE$neuron_predicted-propRMSE$neuron_known)
+errorSq <- errorVector^2
+meanErr <- sum(errorSq)/length(errorSq)
+rmseWithin <- sqrt(meanErr)
+rmseWithin
+
+```
+
 Save plot
 
 ```{r}

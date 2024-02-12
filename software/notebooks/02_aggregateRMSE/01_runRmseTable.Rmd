@@ -175,7 +175,9 @@ setwd("..")
 load("./cohort1/env/05_bulk/02_crossvalidate_script.RData")
 proportionsBulkcv <- df.k2
 rm(df.k2)
+```
 
+```{r}
 # parse prep conditions
 pBulkcv <- proportionsBulkcv
 # format cell labels
@@ -187,6 +189,7 @@ pBulkcv$bulk.sample.id <-
   ifelse(grepl("Nuc1", pBulkcv$bulk.sample.id), gsub("Nuc1", "Nuc", pBulkcv$bulk.sample.id),
          ifelse(grepl("Cyto1", pBulkcv$bulk.sample.id), gsub("Cyto1", "Cyto", pBulkcv$bulk.sample.id),
                 ifelse(grepl("Bulk1", pBulkcv$bulk.sample.id), gsub("Bulk1", "Bulk", pBulkcv$bulk.sample.id), pBulkcv$bulk.sample.id)))
+
 pBulkcv$cell.compartment <- 
   gsub(".*_", "", pBulkcv$bulk.sample.id)
 # append prep condition
@@ -194,11 +197,13 @@ pBulkcvFilt <- pBulkcv[!pBulkcv$bulk.sample.condition=="NA",]
 pBulkcv$bulk.sample.condition <-
   sapply(pBulkcv$bulk.sample.id, function(id){
     pBulkcvFilt[id,]$bulk.sample.condition})
+
 pBulkcv$Librarycondition <- "NA"
 pBulkcv$Librarycondition[
   grepl("polyA", pBulkcv$bulk.sample.condition)] <- "polyA"
 pBulkcv$Librarycondition[
   grepl("RiboZero", pBulkcv$bulk.sample.condition)] <- "RiboZero"
+
 # append cell compartment
 pBulkcv$Cellcompartment <-
   ifelse(
@@ -213,6 +218,8 @@ pBulkcv$glial_known <- as.numeric(pBulkcv$glial_known)
 # parse iterations
 filterCV <- pBulkcv$crossvalidation=="validation"
 filterCV <- filterCV & !pBulkcv$bulk.sample.condition=="NA"
+filterCV <- filterCV & !pBulkcv$bulk.scale.type=="logcounts"
+pBulkcvUnfilt <- pBulkcv
 pBulkcv <- pBulkcv[filterCV,]
 pBulkcv1 <- pBulkcv2 <- pBulkcv3 <- pBulkcv4 <- pBulkcv
 
@@ -231,8 +238,6 @@ pBulkcv2 <- pBulkcv2[,c(1,2,12,13,5,20,21)]
 pBulkcv3$sample.id <- pBulkcv3$Cellcompartment
 pBulkcv3$replicate.id <- pBulkcv3$experiment.type
 pBulkcv3 <- pBulkcv3[,c(1,2,12,13,5,20,21)]
-
-
 ```
 
 Cohort 3 pseudobulk

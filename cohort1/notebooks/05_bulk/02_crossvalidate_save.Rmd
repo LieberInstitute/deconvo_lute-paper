@@ -112,6 +112,47 @@ new.plot.jitter.prep
 ```{r}
 setwd("..")
 setwd("..")
+setwd("..")
+# RMSE
+source("./software/src/rmse.R")
+
+propRMSE <- data.frame(
+  glial_predicted = dfp$glial,
+  neuron_predicted = dfp$neuron,
+  glial_known = as.numeric(dfp$true.glial),
+  neuron_known = dfp$true.neuron,
+  sample.id = dfp$preparation.type,
+  condition.id = dfp$bulk.scale.type,
+  replicate.id = dfp$crossvalidation
+)
+
+#rmseNew <- applyRmse(propRMSE, cellTypesVector = c("neuron", "glial"))
+#rmseNew$returnRmseTall
+
+# manual
+propRMSEall <- propRMSE
+propRMSE <- propRMSEall[propRMSEall$sample.id=="polyA",]
+errorVector <- propRMSE$glial_predicted-propRMSE$glial_known
+errorVector <- c(errorVector, propRMSE$neuron_predicted-propRMSE$neuron_known)
+errorSq <- errorVector^2
+meanErr <- sum(errorSq)/length(errorSq)
+rmsePolyA <- sqrt(meanErr)
+rmsePolyA
+
+propRMSE <- propRMSEall[propRMSEall$sample.id=="RiboZeroGold",]
+errorVector <- propRMSE$glial_predicted-propRMSE$glial_known
+errorVector <- c(errorVector, propRMSE$neuron_predicted-propRMSE$neuron_known)
+errorSq <- errorVector^2
+meanErr <- sum(errorSq)/length(errorSq)
+rmseRZG <- sqrt(meanErr)
+rmseRZG
+
+
+```
+
+```{r}
+setwd("..")
+setwd("..")
 
 new.plot.path <- "./figures/05_bulk/figs3c_library_condition_allsamples.jpg"
 jpeg(new.plot.path, width = 4, height = 3, units = "in", res = 400)
