@@ -347,8 +347,92 @@ rmseSuppTableOut <- rbind(
 ) |> as.data.frame()
 
 ```
+# Save
 
 Save final RMSE table
+
+Save unformatted table
+
+```{r}
+setwd("..")
+setwd("..")
+
+# no round
+write.csv(
+  rmseSuppTableOut, 
+  file = "./outputs/02_aggregateRMSE/supp_table_rmse_write.csv",
+  row.names = FALSE)
+
+# with round
+rmseSuppTableOutRound <- rmseSuppTableOut
+rmseSuppTableOutRound$rmseResult <- format(rmseSuppTableOutRound$rmseResult, digits = 3)
+head(rmseSuppTableOutRound)
+write.csv(
+  rmseSuppTableOutRound, 
+  file = "./outputs/02_aggregateRMSE/supp_table_rmse_round_write.csv",
+  row.names = FALSE)
+```
+
+Save unformatted table for supplement
+
+```{r}
+rmseSupplement <- rmseSuppTableOut
+# append columns
+# append cohort
+rmseSupplement$cohort <- ifelse(
+  grepl("cohort1", rmseSupplement$experimentLabel), "Huuki-Meyers et al 2023",
+  ifelse(grepl("cohort2", rmseSupplement$experimentLabel), "Tran et al 2021",
+         ifelse(grepl("cohort3", rmseSupplement$experimentLabel), "Monaco et al 2019", "NA")))
+# append k
+rmseSupplement$k <- ifelse(grepl("k2|shuffle", rmseSupplement$experimentLabel), "2",
+                           ifelse(grepl("k3", rmseSupplement$experimentLabel), "3", "NA"))
+# append num cell types
+rmseSupplement$numCellTypes <- gsub("k", "", rmseSupplement$k)
+conditionCellTypes <- grepl("neuron|glial|plasmablasts|nonplasmablasts|Inhib|Excit", rmseSupplement$condition)
+rmseSupplement$numCellTypes[conditionCellTypes] <- 1
+
+# append cell type strings
+rmseSupplement$cellTypes <- ""
+# k2
+filterK2Brain <- rmseSupplement$k == "2" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
+filterK2Brain2Types <- filterK2Brain & rmseSupplement$numCellTypes=="2"
+rmseSupplement$cellTypes[filterK2Brain2Types] <- "neuron;glial"
+filterK2BrainNeuron <- filterK2Brain & grepl("neuron", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK2BrainNeuron] <- "neuron"
+filterK2BrainGlial <- filterK2Brain & grepl("glial", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK2BrainGlial] <- "glial"
+# k3
+filterK3Brain <- rmseSupplement$k == "3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
+filterK3Brain3Types <- filterK3Brain & rmseSupplement$numCellTypes==3
+rmseSupplement$cellTypes[filterK3Brain3Types] <- "Excit;Inhib;glial"
+filterK3BrainExcit <- filterK3Brain & grepl("Excit", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK3BrainExcit] <- "Excit"
+filterK3BrainInhib <- filterK3Brain & grepl("Inhib", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK3BrainInhib] <- "Inhib"
+filterK3BrainGlial <- filterK3Brain & grepl("glial", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK3BrainGlial] <- "glial"
+# k2 pbmc
+filterK2Blood <- grepl("cohort3", rmseSupplement$experimentLabel)
+filterK2Blood2Types <- filterK2Blood & rmseSupplement$numCellTypes==2
+rmseSupplement$cellTypes[filterK2Blood2Types] <- "plasmablasts;nonplasmablasts"
+filterK2BloodPlasmablasts <- filterK2Blood & grepl("plasmablasts", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK2BloodPlasmablasts] <- "plasmablasts"
+filterK2BloodNonplasmablasts <- filterK2Blood & grepl("nonplasmablasts", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK2BloodNonplasmablasts] <- "nonplasmablasts"
+
+
+filterK3Brain <- rmseSupplement$k == "k3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
+rmseSupplement$cellTypes[filterK3Brain] <- "Excit;Inhib;glial"
+
+# remove conditions
+dim(rmseSupplement)
+filterCondition <- grepl("sample.id", rmseSupplement$condition)
+filterCondition <- filterCondition & grepl("cohort3", rmseSupplement$experimentLabel)
+rmseSupplement <- rmseSupplement[!filterCondition,]
+dim(rmseSupplement)
+# drop experiment label
+rmseSupplement <- rmseSupplement[,c(2:ncol(rmseSupplement))]
+```
 
 ```{r}
 setwd("..")
