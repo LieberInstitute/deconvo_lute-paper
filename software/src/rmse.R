@@ -239,9 +239,9 @@ rmseParam_rootMeanSquaredError <- function(
     filterDataTypes[,level1Filter],
     filterDataTypes[,level2Filter]) |> unlist()
   errorsSq <- errorsVector^2
-  denomMeanOperator <- length(unique(cellTypesVector))
+  denomMeanOperator <- length(errorsSq) # length(unique(cellTypesVector))
   # get sum of squared errors vector
-  numGroups <- nrow(filterDataTypes[,level1Filter])
+  numGroups <- nrow(filterDataTypes[,level1Filter,drop=F])
   sumErrorsByGroup <- c()
   seqIndexErrors <- 
     seq(from = 1, to = length(errorsSq), 
@@ -255,7 +255,7 @@ rmseParam_rootMeanSquaredError <- function(
   # test
   # sum(errorsSq[1:3])==sumErrorsByGroup[1]
   # sum(errorsSq[4:6])==sumErrorsByGroup[2]
-  errorsSqMean <- mean(sumErrorsByGroup)
+  errorsSqMean <- sum(errorsSq)/denomMeanOperator # mean(sumErrorsByGroup)
   rmseReturn <- sqrt(errorsSqMean)
   if(detail){
     rmseReturnList <- list(

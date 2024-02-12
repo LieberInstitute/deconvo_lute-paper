@@ -2,14 +2,14 @@
 title: "01_runRmseTable"
 author: "Sean Maden"
 date: "2024-02-12"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-# Source proportions results for RMSE calculations
 
 ```{r}
 setwd("..")
@@ -166,6 +166,75 @@ proportionsBulk <- rbind(proportionsBulk,
 
 ```
 
+Cohort 1 bulk crossvalidate
+
+```{r}
+setwd("..")
+setwd("..")
+setwd("..")
+load("./cohort1/env/05_bulk/02_crossvalidate_script.RData")
+proportionsBulkcv <- df.k2
+rm(df.k2)
+
+# parse prep conditions
+pBulkcv <- proportionsBulkcv
+# format cell labels
+colnames(pBulkcv)[c(1,2,12,13)] <- 
+  c("glial_predicted", "neuron_predicted", 
+    "glial_known", "neuron_known")
+# format bulk id
+pBulkcv$bulk.sample.id <- 
+  ifelse(grepl("Nuc1", pBulkcv$bulk.sample.id), gsub("Nuc1", "Nuc", pBulkcv$bulk.sample.id),
+         ifelse(grepl("Cyto1", pBulkcv$bulk.sample.id), gsub("Cyto1", "Cyto", pBulkcv$bulk.sample.id),
+                ifelse(grepl("Bulk1", pBulkcv$bulk.sample.id), gsub("Bulk1", "Bulk", pBulkcv$bulk.sample.id), pBulkcv$bulk.sample.id)))
+pBulkcv$cell.compartment <- 
+  gsub(".*_", "", pBulkcv$bulk.sample.id)
+# append prep condition
+pBulkcvFilt <- pBulkcv[!pBulkcv$bulk.sample.condition=="NA",]
+pBulkcv$bulk.sample.condition <-
+  sapply(pBulkcv$bulk.sample.id, function(id){
+    pBulkcvFilt[id,]$bulk.sample.condition})
+pBulkcv$Librarycondition <- "NA"
+pBulkcv$Librarycondition[
+  grepl("polyA", pBulkcv$bulk.sample.condition)] <- "polyA"
+pBulkcv$Librarycondition[
+  grepl("RiboZero", pBulkcv$bulk.sample.condition)] <- "RiboZero"
+# append cell compartment
+pBulkcv$Cellcompartment <-
+  ifelse(
+    grepl("Nuc", pBulkcv$bulk.sample.condition), "Nuc", 
+         ifelse(
+           grepl("Cyto", pBulkcv$bulk.sample.condition), "Cyto", ifelse(
+             grepl("Bulk", pBulkcv$bulk.sample.condition), "Bulk", "NA")))
+pBulkcv$condition.id <- ifelse(pBulkcv$s.set.label=="s.null", "noscale", "scale")
+# to numeric
+pBulkcv$glial_known <- as.numeric(pBulkcv$glial_known)
+
+# parse iterations
+filterCV <- pBulkcv$crossvalidation=="validation"
+filterCV <- filterCV & !pBulkcv$bulk.sample.condition=="NA"
+pBulkcv <- pBulkcv[filterCV,]
+pBulkcv1 <- pBulkcv2 <- pBulkcv3 <- pBulkcv4 <- pBulkcv
+
+# parse iterations
+varExperiment <- pBulkcv1$bulk.sample.condition
+
+# parse pBulkcv1
+pBulkcv1$sample.id <- pBulkcv1$bulk.sample.condition
+pBulkcv1$replicate.id <- pBulkcv1$experiment.type
+pBulkcv1 <- pBulkcv1[,c(1,2,12,13,5,20,21)]
+# parse pBulkcv2
+pBulkcv2$sample.id <- pBulkcv2$Librarycondition
+pBulkcv2$replicate.id <- pBulkcv2$experiment.type
+pBulkcv2 <- pBulkcv2[,c(1,2,12,13,5,20,21)]
+# parse pBulkcv3
+pBulkcv3$sample.id <- pBulkcv3$Cellcompartment
+pBulkcv3$replicate.id <- pBulkcv3$experiment.type
+pBulkcv3 <- pBulkcv3[,c(1,2,12,13,5,20,21)]
+
+
+```
+
 Cohort 3 pseudobulk
 
 ```{r}
@@ -183,6 +252,7 @@ colnames(proportionsCohort3) <- c(
 proportionsCohort3 <- proportionsCohort3[,c(1,2,4,5,6,3)]
 
 ```
+
 Cohort 1, proportions shuffle
 
 ```{r}
@@ -202,59 +272,18 @@ rm(dfp.tall)
 
 # Run RMSE calculations
 
-```{r}
-setwd("..")
-setwd("..")
-source("./src/rmse.R")
-```
+K2 calculations
 
-```{r}
-experimentLabelsVector <- c("cohort1_k2", "cohort1_k3",
-                            "cohort2_k2", "cohort2_k3",
-                            "cohort1_bulk", "cohort1_shuffle")
-
-# RMSE K3
-cellTypesVectorK3 <- c("glial", "Inhib", "Excit")
-experimentLabelsVectorK3 <- c("cohort1_k3", "cohort2_k3")
-listProportionsTablesK3 <- list(
-  proportionsCohort1K3, proportionsCohort2K3
-)
-rmseSuppTableK3 <- do.call(rbind, 
-                   lapply(seq(length(listProportionsTablesK3)),
-                                function(index){
-  message(index)
-  proportionsData <- listProportionsTablesK3[[index]]
-  if(!"replicate.id" %in% colnames(proportionsData)){
-    proportionsData$replicate.id <- "rep1"
-  }
-  dataLabel <- experimentLabelsVectorK3[[index]]
-  returnList <- applyRmse(
-    proportionsData, 
-    cellTypesVector=cellTypesVectorK3
-  )
-  returnTable <- returnList$returnRmseTall
-  returnTable$experimentLabel <- experimentLabelsVectorK3[index]
-  return(returnTable)
-})) |> 
-  as.data.frame()
-
-
-#-----------------------
-# get k2 rmse values
-#----------------------- 
-# k2 for cohorts 1 and 2
-cellTypesVectorK2 <- c("glial", "neuron")
-#experimentLabelsVectorK2 <- c("cohort1_k2", "cohort2_k2", 
-#                            "cohort1_bulk", "cohort1_shuffle")
-#listProportionsTablesK2 <- list(
-#  proportionsCohort1K2, proportionsCohort2K2,
-#  proportionsBulk, proportionsShuffle
-#)
-experimentLabelsVectorK2 <- c("cohort1_k2", "cohort2_k2", "cohort1_shuffle")
+```{r} 
+# cohorts 1 and 2,
 listProportionsTablesK2 <- list(
   proportionsCohort1K2, proportionsCohort2K2, proportionsShuffle
 )
-rmseSuppTableK2 <- do.call(rbind, 
+
+# 2 cell types
+experimentLabelsVectorK2 <- c("cohort1_k2", "cohort2_k2", "cohort1_shuffle")
+cellTypesVectorK2 <- c("glial", "neuron")
+rmseSuppTableK2Twotypes <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK2)),
                                 function(index){
   message(index)
@@ -273,23 +302,105 @@ rmseSuppTableK2 <- do.call(rbind,
 })) |> 
   as.data.frame()
 
-# k2 for cohort 3
+# 1 cell types
+experimentLabelsVectorK2 <- c("cohort1_neuron_k2", "cohort2_neuron_k2", "cohort1_neuron_shuffle")
+cellTypesVectorK2 <- c("neuron")
+rmseSuppTableK2Neuron <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=c("neuron")
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+experimentLabelsVectorK2 <- c("cohort1_glial_k2", "cohort2_glial_k2", "cohort1_glial_shuffle")
+cellTypesVectorK2 <- c("glial")
+rmseSuppTableK2Glial <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=c("glial")
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+# cohort 3, 
+# 2 cell types
 cellTypesVectorK2 <- c("nonplasmablasts", "plasmablasts")
-experimentLabelsVectorK2 <- c("cohort3_k2", "cohort3_plasmablasts_k2", "cohort3_nonplasmablasts_k2")
-proportionsCohort3Blasts <- proportionsCohort3Noblasts <- proportionsCohort3
-
-proportionsCohort3Blasts$nonplasmablasts_predicted <-
-  proportionsCohort3Blasts$nonplasmablasts_known <- 0
-proportionsCohort3Noblasts <- proportionsCohort3
-proportionsCohort3Noblasts$plasmablasts_predicted <-
-  proportionsCohort3Noblasts$plasmablasts_known <- 0
-
+experimentLabelsVectorK2 <- c("cohort3_k2")
 listProportionsTablesK2 <- list(
-  proportionsCohort3, 
-  proportionsCohort3Blasts,
-  proportionsCohort3Noblasts
+  proportionsCohort3
 )
-rmseSuppTableK2Cohort3 <- do.call(rbind, 
+rmseSuppTableK2Cohort3Twotypes <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK2
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+# 1 cell types
+cellTypesVectorK2 <- c("nonplasmablasts")
+experimentLabelsVectorK2 <- c("cohort3_nonplasmablasts_k2")
+listProportionsTablesK2 <- list(
+  proportionsCohort3
+)
+rmseSuppTableK2Cohort3Nonplasmablasts <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK2
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+cellTypesVectorK2 <- c("plasmablasts")
+experimentLabelsVectorK2 <- c("cohort3_plasmablasts_k2")
+listProportionsTablesK2 <- list(
+  proportionsCohort3
+)
+rmseSuppTableK2Cohort3Plasmablasts <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK2)),
                                 function(index){
   message(index)
@@ -311,7 +422,7 @@ rmseSuppTableK2Cohort3 <- do.call(rbind,
 # try k2 from bulk
 cellTypesVectorK2 <- c("glial", "neuron")
 experimentLabelsVectorK2 <- c(
-  "cohort1_bulk_nnls", "cohort1_bulk_music", "cohort1_bulk_bisque")
+  "cohort1_k2_bulk_nnls", "cohort1_k2_bulk_music", "cohort1_k2_bulk_bisque")
 listProportionsTablesK2 <- list(
   proportionsBulk[proportionsBulk$replicate.id=="nnls",],
   proportionsBulk[proportionsBulk$replicate.id=="music",],
@@ -336,44 +447,174 @@ rmseSuppTableK2Bulk <- do.call(rbind,
 })) |> 
   as.data.frame()
 
-#----------------
-# get final table
-#----------------
-rmseSuppTableOut <- rbind(
-  rmseSuppTableK2,
-  rmseSuppTableK3,
-  rmseSuppTableK2Bulk,
-  rmseSuppTableK2Cohort3
-) |> as.data.frame()
+# k2 from bulk cv
+cellTypesVectorK2 <- c("glial", "neuron")
+experimentLabelsVectorK2 <- c("cohort1_k2_bulkcv_bycondition",
+                              "cohort1_k2_bulkcv_bylibrary",
+                              "cohort1_k2_bulkcv_bycompartment")
+listProportionsTablesK2 <- list(
+  pBulkcv1, pBulkcv2, pBulkcv3
+)
+rmseSuppTableK2Bulkcv <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK2
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
 
 ```
-# Save
 
-Save final RMSE table
-
-Save unformatted table
+K3 calculations
 
 ```{r}
-setwd("..")
-setwd("..")
+# cohort 1 and cohort2
 
-# no round
-write.csv(
-  rmseSuppTableOut, 
-  file = "./outputs/02_aggregateRMSE/supp_table_rmse_write.csv",
-  row.names = FALSE)
+# 3 cell types
+cellTypesVectorK3 <- c("glial", "Inhib", "Excit")
+experimentLabelsVectorK3 <- c("cohort1_k3", "cohort2_k3")
+listProportionsTablesK3 <- list(
+  proportionsCohort1K3, proportionsCohort2K3
+)
+rmseSuppTableK3Threetypes <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK3)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK3[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK3[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK3
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK3[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
 
-# with round
-rmseSuppTableOutRound <- rmseSuppTableOut
-rmseSuppTableOutRound$rmseResult <- format(rmseSuppTableOutRound$rmseResult, digits = 3)
-head(rmseSuppTableOutRound)
-write.csv(
-  rmseSuppTableOutRound, 
-  file = "./outputs/02_aggregateRMSE/supp_table_rmse_round_write.csv",
-  row.names = FALSE)
+# 1 cell types
+cellTypesVectorK3 <- c("glial")
+experimentLabelsVectorK3 <- c("cohort1_glial_k3", "cohort2_glial_k3")
+rmseSuppTableK3Glial <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK3)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK3[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK3[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK3
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK3[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+cellTypesVectorK3 <- c("Inhib")
+experimentLabelsVectorK3 <- c("cohort1_Inhib_k3", "cohort2_Inhib_k3")
+rmseSuppTableK3Inhib <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK3)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK3[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK3[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK3
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK3[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+cellTypesVectorK3 <- c("Excit")
+experimentLabelsVectorK3 <- c("cohort1_Excit_k3", "cohort2_Excit_k3")
+rmseSuppTableK3Excit <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK3)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK3[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK3[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK3
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK3[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
 ```
 
-Save unformatted table for supplement
+# Get aggregated table
+
+Format values across tables on aggregation.
+
+```{r}
+
+roundDigits <- 3
+
+listRmseTables <- list(
+  rmseSuppTableK2Twotypes,
+  rmseSuppTableK2Neuron,
+  rmseSuppTableK2Glial,
+  rmseSuppTableK3Threetypes,
+  rmseSuppTableK3Excit,
+  rmseSuppTableK3Inhib,
+  rmseSuppTableK3Glial,
+  rmseSuppTableK2Bulk,
+  rmseSuppTableK2Bulkcv,
+  rmseSuppTableK2Cohort3Twotypes,
+  rmseSuppTableK2Cohort3Nonplasmablasts,
+  rmseSuppTableK2Cohort3Plasmablasts
+)
+
+# format rmse values
+listRmseTables <- lapply(
+  listRmseTables, function(tableIteration){
+    tableIteration$rmseResult <- format(
+      tableIteration$rmseResult, digits = roundDigits,
+      scientific = TRUE
+    )
+    return(tableIteration)
+  }
+)
+
+# get final table
+rmseSuppTableOut <- do.call(rbind, 
+                            lapply(listRmseTables, function(item){item})) |> as.data.frame()
+
+```
+
+# Save final RMSE table
+
+Save formatted table for supplement
 
 ```{r}
 rmseSupplement <- rmseSuppTableOut
@@ -430,9 +671,9 @@ filterCondition <- grepl("sample.id", rmseSupplement$condition)
 filterCondition <- filterCondition & grepl("cohort3", rmseSupplement$experimentLabel)
 rmseSupplement <- rmseSupplement[!filterCondition,]
 dim(rmseSupplement)
-# drop experiment label
-rmseSupplement <- rmseSupplement[,c(2:ncol(rmseSupplement))]
 ```
+
+Write to file.
 
 ```{r}
 setwd("..")
@@ -440,18 +681,25 @@ setwd("..")
 
 # no round
 write.csv(
-  rmseSuppTableOut, 
-  file = "./outputs/02_aggregateRMSE/supp_table_rmse_write.csv",
+  rmseSupplement, 
+  file = "./outputs/02_aggregateRMSE/supp_table_formatted_rmse_write.csv",
   row.names = FALSE)
 
 # with round
-rmseSuppTableOutRound <- rmseSuppTableOut
+rmseSuppTableOutRound <- rmseSupplement
 rmseSuppTableOutRound$rmseResult <- format(rmseSuppTableOutRound$rmseResult, digits = 3)
 head(rmseSuppTableOutRound)
 write.csv(
   rmseSuppTableOutRound, 
-  file = "./outputs/02_aggregateRMSE/supp_table_rmse_round_write.csv",
+  file = "./outputs/02_aggregateRMSE/supp_table_formatted_rmse_round_write.csv",
   row.names = FALSE)
+
+options(scipen=10)
+write.csv(
+  rmseSuppTableOutRound, 
+  file = "./outputs/02_aggregateRMSE/supp_table_formatted_rmse_round_write_scipen.csv",
+  row.names = FALSE)
+options(scipen=0)  # restore the default
 ```
 
 # Session info
