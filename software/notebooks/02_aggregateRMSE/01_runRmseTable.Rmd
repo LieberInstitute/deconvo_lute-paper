@@ -1,0 +1,377 @@
+---
+title: "01_runRmseTable"
+author: "Sean Maden"
+date: "2024-02-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Source proportions results for RMSE calculations
+
+```{r}
+setwd("..")
+setwd("..")
+source("./src/rmse.R")
+```
+
+# Parse proportions outputs
+
+Cohort 1 pseudobulk, K2 and K3
+
+```{r}
+# proportions cohort 1
+setwd("..")
+setwd("..")
+setwd("..")
+# k2 results
+load(file.path("./cohort1/env/02_pseudobulk/01_k2.RData"))
+proportionsCohort1K2 <- dfp.tall
+rm(dfp.tall)
+# k3 results
+load(file.path("./cohort1/env/02_pseudobulk/02_k3.RData"))
+proportionsCohort1K3 <- dfp.tall
+rm(dfp.tall)
+```
+
+```{r}
+# k2 results
+cellTypesVector <- c("glial", "neuron")
+proportionsCohort1K2 <- proportionsCohort1K2[,c(1:6)]
+colnames(proportionsCohort1K2) <- c(
+  paste0(cellTypesVector, "_known"),
+  paste0(cellTypesVector, "_predicted"),
+  c("condition.id", "sample.id")
+)
+# k3 results
+cellTypesVector <- c("glial", "Excit", "Inhib")
+proportionsCohort1K3 <- proportionsCohort1K3[,c(1:8)]
+colnames(proportionsCohort1K3) <- c(
+  paste0(cellTypesVector, "_known"),
+  paste0(cellTypesVector, "_predicted"),
+  c("condition.id", "sample.id")
+)
+```
+
+Cohort 2 pseudobulk, K2 and K3
+
+```{r}
+# proportions cohort 2
+setwd("..")
+setwd("..")
+setwd("..")
+# k2 results
+load(file.path("./cohort2/env/01_pseudobulk/01_k2_mrb_script.RData"))
+proportionsCohort2K2 <- dfp.tall
+rm(dfp.tall)
+# k3 results
+load(file.path("./cohort2/env/01_pseudobulk/01_k3_mrb_script.RData"))
+proportionsCohort2K3 <- dfp.tall
+rm(dfp.tall)
+```
+
+```{r}
+# k2 results
+cellTypesVector <- c("glial", "neuron")
+proportionsCohort2K2 <- proportionsCohort2K2[,c(1:6)]
+colnames(proportionsCohort2K2) <- c(
+  paste0(cellTypesVector, "_known"),
+  paste0(cellTypesVector, "_predicted"),
+  c("condition.id", "sample.id")
+)
+# k3 results
+cellTypesVector <- c("glial", "Excit", "Inhib")
+proportionsCohort2K3 <- proportionsCohort2K3[,c(1:8)]
+colnames(proportionsCohort2K3) <- c(
+  paste0(cellTypesVector, "_known"),
+  paste0(cellTypesVector, "_predicted"),
+  c("condition.id", "sample.id")
+)
+```
+
+Cohort 1 bulk
+
+```{r}
+setwd("..")
+setwd("..")
+setwd("..")
+load(file.path("./cohort1/env/07_adjustment/03_run_adjustment_realbulk_all_script.RData"))
+
+# nnls
+proportionsBulk <-
+  data.frame(
+    glial_known = 1-dfp.wide$neuron.true,
+    neuron_known = dfp.wide$neuron.true,
+    glial__predicted = 1-dfp.wide$neuron.nnls.scale,
+    neuron_predicted = dfp.wide$neuron.nnls.scale,
+    sample.id = rownames(dfp.wide),
+    condition.id = rep("scale", nrow(dfp.wide)),
+    replicate.id = rep("nnls", nrow(dfp.wide))
+  )
+proportionsBulk <- rbind(proportionsBulk,
+                         data.frame(
+    glial_known = 1-dfp.wide$neuron.true,
+    neuron_known = dfp.wide$neuron.true,
+    glial__predicted = 1-dfp.wide$neuron.nnls.noscale,
+    neuron_predicted = dfp.wide$neuron.nnls.noscale,
+    sample.id = rownames(dfp.wide),
+    condition.id = rep("noscale", nrow(dfp.wide)),
+    replicate.id = rep("nnls", nrow(dfp.wide))
+  ))
+
+# music
+proportionsBulk <- rbind(proportionsBulk,
+                         data.frame(
+    glial_known = 1-dfp.wide$neuron.true,
+    neuron_known = dfp.wide$neuron.true,
+    glial__predicted = 1-dfp.wide$neuron.music.scale,
+    neuron_predicted = dfp.wide$neuron.music.scale,
+    sample.id = rownames(dfp.wide),
+    condition.id = rep("scale", nrow(dfp.wide)),
+    replicate.id = rep("music", nrow(dfp.wide))
+  ))
+proportionsBulk <- rbind(proportionsBulk,
+                         data.frame(
+    glial_known = 1-dfp.wide$neuron.true,
+    neuron_known = dfp.wide$neuron.true,
+    glial__predicted = 1-dfp.wide$neuron.music.noscale,
+    neuron_predicted = dfp.wide$neuron.music.noscale,
+    sample.id = rownames(dfp.wide),
+    condition.id = rep("no", nrow(dfp.wide)),
+    replicate.id = rep("music", nrow(dfp.wide))
+  ))
+# bisque
+proportionsBulk <- rbind(proportionsBulk,
+                         data.frame(
+    glial_known = 1-dfp.wide$neuron.true,
+    neuron_known = dfp.wide$neuron.true,
+    glial__predicted = 1-dfp.wide$neuron.bisque.scale,
+    neuron_predicted = dfp.wide$neuron.bisque.scale,
+    sample.id = rownames(dfp.wide),
+    condition.id = rep("scale", nrow(dfp.wide)),
+    replicate.id = rep("bisque", nrow(dfp.wide))
+  ))
+proportionsBulk <- rbind(proportionsBulk,
+                         data.frame(
+    glial_known = 1-dfp.wide$neuron.true,
+    neuron_known = dfp.wide$neuron.true,
+    glial__predicted = 1-dfp.wide$neuron.bisque.noscale,
+    neuron_predicted = dfp.wide$neuron.bisque.noscale,
+    sample.id = rownames(dfp.wide),
+    condition.id = rep("no", nrow(dfp.wide)),
+    replicate.id = rep("bisque", nrow(dfp.wide))
+  ))
+
+```
+
+Cohort 3 pseudobulk
+
+```{r}
+setwd("..")
+setwd("..")
+setwd("..")
+load(file.path("./cohort3/env/01_pseudobulk/04_simulation.RData"))
+proportionsCohort3 <- dfPseudobulk
+# 
+colnames(proportionsCohort3) <- c(
+  "nonplasmablasts_predicted", "plasmablasts_predicted",
+  "condition.id", "plasmablasts_known", "nonplasmablasts_known",
+  "sample.id"
+)
+proportionsCohort3 <- proportionsCohort3[,c(1,2,4,5,6,3)]
+
+```
+Cohort 1, proportions shuffle
+
+```{r}
+setwd("..")
+setwd("..")
+setwd("..")
+load(file.path("./cohort1/env/03_shuffle/02_figde_script.RData"))
+
+proportionsShuffle <- dfp.tall
+colnames(proportionsShuffle) <- c(
+  "glial_known", "neuron_known", "glial_predicted", "neuron_predicted",
+  "sample.id.shuffle.pred", "condition.id", "sample.id", "matched.id"
+)
+proportionsShuffle <- proportionsShuffle[,c(1,2,3,4,7,6)]
+rm(dfp.tall)
+```
+
+# Run RMSE calculations
+
+```{r}
+setwd("..")
+setwd("..")
+source("./src/rmse.R")
+```
+
+```{r}
+experimentLabelsVector <- c("cohort1_k2", "cohort1_k3",
+                            "cohort2_k2", "cohort2_k3",
+                            "cohort1_bulk", "cohort1_shuffle")
+
+# RMSE K3
+cellTypesVectorK3 <- c("glial", "Inhib", "Excit")
+experimentLabelsVectorK3 <- c("cohort1_k3", "cohort2_k3")
+listProportionsTablesK3 <- list(
+  proportionsCohort1K3, proportionsCohort2K3
+)
+rmseSuppTableK3 <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK3)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK3[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK3[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK3
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK3[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+
+#-----------------------
+# get k2 rmse values
+#----------------------- 
+# k2 for cohorts 1 and 2
+cellTypesVectorK2 <- c("glial", "neuron")
+#experimentLabelsVectorK2 <- c("cohort1_k2", "cohort2_k2", 
+#                            "cohort1_bulk", "cohort1_shuffle")
+#listProportionsTablesK2 <- list(
+#  proportionsCohort1K2, proportionsCohort2K2,
+#  proportionsBulk, proportionsShuffle
+#)
+experimentLabelsVectorK2 <- c("cohort1_k2", "cohort2_k2", "cohort1_shuffle")
+listProportionsTablesK2 <- list(
+  proportionsCohort1K2, proportionsCohort2K2, proportionsShuffle
+)
+rmseSuppTableK2 <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK2
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+# k2 for cohort 3
+cellTypesVectorK2 <- c("nonplasmablasts", "plasmablasts")
+experimentLabelsVectorK2 <- c("cohort3_k2", "cohort3_plasmablasts_k2", "cohort3_nonplasmablasts_k2")
+proportionsCohort3Blasts <- proportionsCohort3Noblasts <- proportionsCohort3
+
+proportionsCohort3Blasts$nonplasmablasts_predicted <-
+  proportionsCohort3Blasts$nonplasmablasts_known <- 0
+proportionsCohort3Noblasts <- proportionsCohort3
+proportionsCohort3Noblasts$plasmablasts_predicted <-
+  proportionsCohort3Noblasts$plasmablasts_known <- 0
+
+listProportionsTablesK2 <- list(
+  proportionsCohort3, 
+  proportionsCohort3Blasts,
+  proportionsCohort3Noblasts
+)
+rmseSuppTableK2Cohort3 <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK2
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+# try k2 from bulk
+cellTypesVectorK2 <- c("glial", "neuron")
+experimentLabelsVectorK2 <- c(
+  "cohort1_bulk_nnls", "cohort1_bulk_music", "cohort1_bulk_bisque")
+listProportionsTablesK2 <- list(
+  proportionsBulk[proportionsBulk$replicate.id=="nnls",],
+  proportionsBulk[proportionsBulk$replicate.id=="music",],
+  proportionsBulk[proportionsBulk$replicate.id=="bisque",]
+)
+rmseSuppTableK2Bulk <- do.call(rbind, 
+                   lapply(seq(length(listProportionsTablesK2)),
+                                function(index){
+  message(index)
+  proportionsData <- listProportionsTablesK2[[index]]
+  if(!"replicate.id" %in% colnames(proportionsData)){
+    proportionsData$replicate.id <- "rep1"
+  }
+  dataLabel <- experimentLabelsVectorK2[[index]]
+  returnList <- applyRmse(
+    proportionsData, 
+    cellTypesVector=cellTypesVectorK2
+  )
+  returnTable <- returnList$returnRmseTall
+  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+  return(returnTable)
+})) |> 
+  as.data.frame()
+
+#----------------
+# get final table
+#----------------
+rmseSuppTableOut <- rbind(
+  rmseSuppTableK2,
+  rmseSuppTableK3,
+  rmseSuppTableK2Bulk,
+  rmseSuppTableK2Cohort3
+) |> as.data.frame()
+
+```
+
+Save final RMSE table
+
+```{r}
+setwd("..")
+setwd("..")
+
+# no round
+write.csv(
+  rmseSuppTableOut, 
+  file = "./outputs/02_aggregateRMSE/supp_table_rmse_write.csv",
+  row.names = FALSE)
+
+# with round
+rmseSuppTableOutRound <- rmseSuppTableOut
+rmseSuppTableOutRound$rmseResult <- format(rmseSuppTableOutRound$rmseResult, digits = 3)
+head(rmseSuppTableOutRound)
+write.csv(
+  rmseSuppTableOutRound, 
+  file = "./outputs/02_aggregateRMSE/supp_table_rmse_round_write.csv",
+  row.names = FALSE)
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
