@@ -124,16 +124,13 @@ The folder contents are described as follows:
 ### TABLES
 
 * Table S1 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-* Table S2 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-* Table S3 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-* Table S4 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-* Table S5 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-* Table S6 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-* Table S7 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-* Table S8 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
-
-
-
+* Table S2 : `\cohort2\outputs\02_summaries\cohort2_sample_summaries.csv`
+* Table S3 : `\cohort1\outputs\02_summarize_mae\cohort1_nuclei_summaries.csv`
+* Table S4 : `\software\outputs\02_aggregateRMSE\supp_table_rmse_round_write.csv`
+* Table S5 : `\cohort2\outputs\02_summaries\cohort2_nuclei_summaries.csv`
+* Table S6 : `\cohort1\outputs\08_sizes\tables_cell_sizes.csv`
+* Table S7 : `\cohort1\outputs\03_shuffle\table_s3_sdeconvo.csv`
+* Table S8 : `\cohort1\outputs\02_summarize_mae\table_compare_filters.csv`
 
 ### Compute environment
 
