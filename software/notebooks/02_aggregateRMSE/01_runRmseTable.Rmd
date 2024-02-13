@@ -626,7 +626,7 @@ rmseSupplement <- rmseSuppTableOut
 # append columns
 # append cohort
 rmseSupplement$cohort <- ifelse(
-  grepl("cohort1", rmseSupplement$experimentLabel), "Huuki-Meyers et al 2023",
+  grepl("cohort1", rmseSupplement$experimentLabel), "Huuki-Myers et al 2023",
   ifelse(grepl("cohort2", rmseSupplement$experimentLabel), "Tran et al 2021",
          ifelse(grepl("cohort3", rmseSupplement$experimentLabel), "Monaco et al 2019", "NA")))
 # append k
