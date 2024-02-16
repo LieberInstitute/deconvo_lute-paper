@@ -1,6 +1,0 @@
-k,cellType,median_nuclei_per_sample,mean_nuclei_per_sample,sd_nuclei_per_sample,median_proportion_nuclei_per_sample,mean_proportion_nuclei_per_sample,sd_proportion_nuclei_per_sample,median_marker_library_size,mean_marker_library_size,sd_marker_library_size
-k2,neuron,2176.5,2078.75,922.92,0.666,0.628,0.165,186.275,129,192.07
-k2,glial,1067.5,1128.667,419.576,0.334,0.372,0.165,107.204,77,101.893
-k3,Inhib,558,554.091,451.741,0.126,0.168,0.146,308.952,261,217.309
-k3,Excit,1819,1659.727,791.794,0.495,0.494,0.159,232.023,195,193.732
-k3,glial,977,1072.636,390.139,0.305,0.338,0.121,141.515,104,128.848

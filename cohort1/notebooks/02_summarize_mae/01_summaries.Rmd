@@ -1,0 +1,140 @@
+---
+title: "01 summaries"
+author: "Sean Maden"
+date: "2024-02-16"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+libv <- c("MultiAssayExperiment", "SummarizedExperiment")
+sapply(libv, library, character.only = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+list.files()
+load('./env/02_summarize_mae/01_data_summaries_script.RData')
+```
+
+Summarizes samples at platform level.
+
+# Process
+
+```{r}
+
+summaryDf <- data.frame()
+
+#
+
+numSamplesBulkTotal <- mae.all[["bulk.rnaseq"]] |> 
+  colnames() |> unique() |> length()
+
+numDonorsBulkTotal <- colData(mae.all[["bulk.rnaseq"]])[["batch.id"]] |> 
+  colnames() |> unique() |> length()
+
+numDonorsBulkTotal <- mae.all[["bulk.rnaseq"]][["batch.id"]] |> 
+  unique() |> length()
+
+summaryDf <- rbind(
+  summaryDf,
+  data.frame(
+    platform = c("bulk_RNAseq"),
+    condition = c("all"),
+    numSamples = c(numSamplesBulkTotal),
+    numDonors = c(numDonorsBulkTotal)
+  )
+)
+
+#
+
+numSamplesBulkConditionVector <- 
+  mae.all[["bulk.rnaseq"]][["expt_condition"]] |> 
+  table() |> as.data.frame()
+
+numDonorsBulkConditionVector <- 
+  sapply(numSamplesBulkConditionVector[,1],
+         function(id){
+           filterMae <- mae.all[["bulk.rnaseq"]][["expt_condition"]] == id
+           mae.all[["bulk.rnaseq"]][,filterMae][["batch.id"]] |> 
+             unique() |> 
+             length()
+         })
+
+numSamplesBulkConditionVectorDf <-
+  data.frame(
+    platform = rep("bulk_RNAseq", length(numSamplesBulkConditionVector)),
+    condition = numSamplesBulkConditionVector$Var1,
+    numSamples = numSamplesBulkConditionVector$Freq,
+    numDonors = numDonorsBulkConditionVector
+  )
+
+summaryDf <- rbind(
+  summaryDf,
+  numSamplesBulkConditionVectorDf
+)
+
+#
+
+numSamplesSnrnaseq <- 
+  mae.all[["snrnaseq.k2.all"]][["Sample"]] |> 
+  unique() |> length()
+
+numDonorsSnrnaseq <- 
+  mae.all[["snrnaseq.k2.all"]][["BrNum"]] |>
+  unique() |> length()
+
+summaryDf <- rbind(
+  summaryDf,
+  data.frame(
+    platform = c("snRNAseq"),
+    condition = c("10x_Chromium"),
+    numSamples = c(numSamplesSnrnaseq),
+    numDonors = c(numDonorsSnrnaseq)
+  )
+)
+
+#
+
+numSamplesRnascope <- 
+  mae.all[["sce.img"]][["Sample"]] |> 
+  unique() |> length()
+
+numDonorsRnascope <- 
+  gsub("_.*", "", mae.all[["sce.img"]][["Sample"]]) |>
+  unique() |> 
+  length()
+
+summaryDf <- rbind(
+  summaryDf,
+  data.frame(
+    platform = c("RNAscope"),
+    condition = c("snFISH"),
+    numSamples = c(numSamplesRnascope),
+    numDonors = c(numDonorsRnascope)
+  )
+)
+
+summaryDf
+
+```
+
+# Save
+
+```{r}
+
+setwd("..")
+setwd("..")
+list.files()
+dfSummariesPath <- file.path("./outputs/02_summarize_mae/TABLE_S8.csv")
+write.csv(summaryDf, file = dfSummariesPath, row.names = FALSE)
+
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```

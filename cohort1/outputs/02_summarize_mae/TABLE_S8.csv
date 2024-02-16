@@ -1,0 +1,10 @@
+"platform","condition","numSamples","numDonors"
+"bulk_RNAseq","all",113,19
+"bulk_RNAseq","Bulk_polyA",19,19
+"bulk_RNAseq","Bulk_RiboZeroGold",19,19
+"bulk_RNAseq","Cyto_polyA",19,19
+"bulk_RNAseq","Cyto_RiboZeroGold",19,19
+"bulk_RNAseq","Nuc_polyA",18,18
+"bulk_RNAseq","Nuc_RiboZeroGold",19,19
+"snRNAseq","10x_Chromium",17,10
+"RNAscope","snFISH",19,10

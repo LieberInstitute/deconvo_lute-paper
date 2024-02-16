@@ -130,7 +130,7 @@ The folder contents are described as follows:
 * Table S5 : `\cohort2\outputs\02_summaries\cohort2_nuclei_summaries.csv`
 * Table S6 : `\cohort1\outputs\08_sizes\tables_cell_sizes.csv`
 * Table S7 : `\cohort1\outputs\03_shuffle\table_s3_sdeconvo.csv`
-* Table S8 : `\cohort1\outputs\02_summarize_mae\table_compare_filters.csv`
+* Table S8 : `\cohort1\outputs\02_summarize_mae\TABLE_S8.csv`
 
 ### Compute environment
 

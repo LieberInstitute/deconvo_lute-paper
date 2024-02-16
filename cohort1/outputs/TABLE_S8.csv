@@ -1,0 +1,10 @@
+"","platform","condition","numSamples"
+"1","bulk_RNAseq","all",113
+"2","bulk_RNAseq","Bulk_polyA",19
+"3","bulk_RNAseq","Bulk_RiboZeroGold",19
+"4","bulk_RNAseq","Cyto_polyA",19
+"5","bulk_RNAseq","Cyto_RiboZeroGold",19
+"6","bulk_RNAseq","Nuc_polyA",18
+"7","bulk_RNAseq","Nuc_RiboZeroGold",19
+"8","snRNAseq","10x_Chromium",17
+"9","RNAscope","snFISH",19
