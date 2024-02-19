@@ -9,6 +9,14 @@ output:
 
 This notebook shows a pseudobulk shuffle experiment in which $S_{deconvolution}$ is shuffled.
 
+# Variables
+
+Descriptions of the variables used.
+
+* `s.data.frame` : is the sample-wise cell sizes table.
+
+* `dfp.tall` : is the output of the experiment function `get_ypb_experiment_series_shuffle()`.
+
 # Load
 
 ```{r setup, include = FALSE}
@@ -107,6 +115,12 @@ dfp.tall.write <- dfp.tall.write[,colnames.write]
 setwd("..")
 setwd("..")
 write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
+```
+
+# Write summary statistics
+
+```{r}
+
 ```
 
 # Session info
