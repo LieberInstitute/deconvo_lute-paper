@@ -28,14 +28,6 @@ load(env.path)
 
 # High neuron proportion sample
 
-The $S_{deconvolution}$ sample has high neuron proportion.
-
-```{r, include = TRUE}
-ggplot(dfp.tall.high, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.high))
-```
-
 Save formatted plot.
 
 ```{r}
@@ -63,14 +55,6 @@ dev.off()
 ```
 
 # Low neuron proportion sample
-
-The $S_{deconvolution}$ sample has low neuron proportion.
-
-```{r, include = TRUE}
-ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, color = sample.id, size = matched.id)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) +
-  ggtitle(paste0("S_deconvolution id: ", s.scale.sample.id.low))
-```
 
 Save formatted plot. 
 
