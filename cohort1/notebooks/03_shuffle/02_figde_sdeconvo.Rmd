@@ -84,7 +84,6 @@ dev.off()
 
 # Write table
 
-
 ```{r}
 # get write table
 dfp.tall.write <- dfp.tall
@@ -109,8 +108,6 @@ setwd("..")
 setwd("..")
 write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
 ```
-
-
 
 # Session info
 
