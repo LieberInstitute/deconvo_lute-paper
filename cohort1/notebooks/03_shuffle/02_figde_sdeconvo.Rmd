@@ -11,7 +11,7 @@ This notebook shows a pseudobulk shuffle experiment in which $S_{deconvolution}$
 
 # Variables
 
-Descriptions of the variables used.
+Descriptions of the variables used. Find referants in `./scripts/02_figde.R`.
 
 * `s.data.frame` : is the sample-wise cell sizes table.
 
@@ -117,9 +117,42 @@ setwd("..")
 write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
 ```
 
-# Write summary statistics
+# Summary statistics
 
 ```{r}
+
+dfSumm <- data.frame(
+  mean_neuron = mean(s.data.frame$s.neuron),
+  mean_glial = mean(s.data.frame$s.glial),
+  median_neuron = median(s.data.frame$s.neuron),
+  median_glial = median(s.data.frame$s.glial),
+  sd_neuron = sd(s.data.frame$s.neuron),
+  sd_glial = sd(s.data.frame$s.glial)
+)
+
+knitr::kable(dfSumm)
+
+mean(s.data.frame$s.neuron)
+
+mean(s.data.frame$s.glial)
+
+median(s.data.frame$s.neuron)
+
+median(s.data.frame$s.glial)
+
+sd(s.data.frame$s.neuron)
+
+sd(s.data.frame$s.glial)
+
+setwd("..")
+setwd("..")
+
+# save 
+# with rounding
+data.table::fwrite(
+  round(dfSumm, 2), 
+  file = "./notebooks/03_shuffle/02_figde_summaryStatistics.csv", 
+  row.names = F)
 
 ```
 
