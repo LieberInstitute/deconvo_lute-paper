@@ -94,7 +94,11 @@ dev.off()
 
 ```{r}
 # get write table
-dfp.tall.write <- dfp.tall
+
+dfp.tall.write <- 
+  rbind(dfp.tall.high, dfp.tall.low)
+
+# dfp.tall.write <- dfp.tall
 colnames(dfp.tall.write)[5] <- "sample.id"
 colnames(dfp.tall.write)[7] <- "index.sample.id"
 
@@ -107,14 +111,60 @@ colnames.write <- c("glial.true", "neuron.true",
                     "type", "sample.id", 
                     "glial.abs.error", "neuron.abs.error",
                     "index.sample.id", "shuffle.term")
-
 dfp.tall.write <- dfp.tall.write[,colnames.write]
+
+# append donor cell sizes to dfp.tall.write
+donorIdVector <- dfp.tall.write[,"index.sample.id"]
+donorIdVariableSdf <- "sample.id"
+for(cellType in c("neuron", "glial")){
+  cellSizesVector <- rep(0, nrow(dfp.tall.write))
+  # for every donor id, append the cell sizes from s.data.frame to dfp.tall.write
+  for (donorId in donorIdVector){
+    cellSizesVector[
+      donorIdVector==donorId] <- 
+      s.data.frame[
+        s.data.frame[,donorIdVariableSdf] == donorId, 
+        paste0("s.",cellType)]
+  }
+  dfp.tall.write$newVarName <- cellSizesVector
+  colnames(dfp.tall.write)[ncol(dfp.tall.write)] <- paste0(cellType,".size")
+}
+
+# round
+roundDigits <- 2
+colNamesRoundVector <- c("glial.true", "neuron.true", 
+                         "glial.pred", "neuron.pred",
+                         "glial.abs.error", "neuron.abs.error",
+                         "neuron.size", "glial.size")
+for(name in colNamesRoundVector){
+  if(grepl("abs", name)){
+    dfp.tall.write[,name] <- format(
+      dfp.tall.write[,name], digits = roundDigits+1, scientific = TRUE)
+  } else{
+    dfp.tall.write[,name] <- round(
+      dfp.tall.write[,name], roundDigits)
+  }
+}
+
+# update nomenclature
+colnames(dfp.tall.write)[grepl("true", colnames(dfp.tall.write))] <- 
+  gsub("true", "known", colnames(dfp.tall.write)[grepl("true", colnames(dfp.tall.write))])
+colnames(dfp.tall.write)[grepl("abs.error", colnames(dfp.tall.write))] <- 
+  gsub("abs.error", "error", colnames(dfp.tall.write)[grepl("error", colnames(dfp.tall.write))])
+
+# displace shuffle term column
+dfp.tall.write$panel <- 
+  ifelse(grepl("Br2743_ant", dfp.tall.write$sample.id), "FigS3A", "FigS3B")
+dfp.tall.write <- dfp.tall.write[,!grepl("shuffle.term", colnames(dfp.tall.write))]
 ```
 
 ```{r}
 setwd("..")
 setwd("..")
-write.csv(dfp.tall.write, row.names = F, file = "./outputs/03_shuffle/table_s3_sdeconvo.csv")
+
+write.csv(dfp.tall.write, 
+          row.names = F, 
+          file = "./outputs/03_shuffle/TABLE_S7.csv")
 ```
 
 # Summary statistics
