@@ -1,0 +1,19 @@
+---
+title: "Samples by assay type summaries"
+author: "Sean Maden"
+date: "2023-10-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+system2("Rscript ./unit_tests/01_mae_summaries.R")
+```
+
+#
+
+# Session info
+
+```{r}
+sessionInfo()
+```
