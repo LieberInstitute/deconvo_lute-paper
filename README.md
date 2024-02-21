@@ -121,6 +121,8 @@ The folder contents are described as follows:
 
 * `cohort1/source` : Scripts (`.R`) shared across analysis sections.
 
+* `cohort1/unit_tests` : Scripts (`.R`) testing sample and sample source filters across analysis sections.
+
 ### TABLES
 
 * Table S1 : `\cohort1\notebooks\02_summarize_mae\01_data_summaries`
