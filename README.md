@@ -123,8 +123,8 @@ The folder contents are described as follows:
 * Figure 3B : `cohort1/notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd`
 
 `cohort1/notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd`
-* Figure S1A : `cohort1/`
-* Figure S1B : `cohort1/`
+* Figure S1A : `cohort1/notebooks/02_pseudobulk/01_k2.Rmd`
+* Figure S1B : `cohort2/`
 * Figure S2 : `cohort1/`
 * Figure S3 : `cohort1/`
 * Figure S4 : `cohort1/`

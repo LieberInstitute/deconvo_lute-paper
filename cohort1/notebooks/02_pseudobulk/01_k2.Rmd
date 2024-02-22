@@ -84,11 +84,64 @@ dev.off()
 
 # Figure S1A
 
+Proportions multipanel (2x2), glial and neuron.
+
 ```{r}
-new.plot <- ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + 
-  geom_jitter(alpha = 0.5, size = 3) + 
-  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + 
-  ylab("Error (neuron)")
+dfp1 <- data.frame(
+  known = dfp.tall$neuron.true,
+  pred = dfp.tall$neuron.pred,
+  type = dfp.tall$type,
+  celltype = rep('neuron', nrow(dfp.tall))
+)
+dfp2 <- data.frame(
+  known = dfp.tall$glial.true,
+  pred = dfp.tall$glial.pred,
+  type = dfp.tall$type,
+  celltype = rep('glial', nrow(dfp.tall))
+)
+dfp <- rbind(dfp1, dfp2) |> as.data.frame()
+
+newScatterGrid <- ggplot(dfp, aes(x = known, y = pred)) +
+  geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) +
+  facet_grid(type~celltype) + theme_bw() +
+  xlab("Known") + ylab("Predicted")
+```
+
+# Figure S1B
+
+Errors boxplots, glial and neuron.
+
+```{r}
+dfp$error <- abs(dfp$known-dfp$pred)
+newBoxGrid <- ggplot(dfp, aes(x = type, y = error)) +
+  geom_jitter(alpha = 0.5) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() +
+  facet_grid(~celltype) + theme_bw()
+```
+
+# Further K2 plots
+
+```{r}
+# make new plots
+# plot proportions panel -- no scale
+ggplot(dfp.tall[dfp.tall$type=="noscale",], 
+       aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True proportion") + ylab("Predicted proportion") +
+  xlim(0, 1) + ylim(0, 1) + ggtitle("Neuron")
+
+# plot proportions multipanel -- scale vs with scale
+ggplot(dfp.tall, aes(x = neuron.true, y = neuron.pred)) + geom_point() + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("True proportion") + ylab("Predicted proportion") +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) + ggtitle("Neuron")
+
+# jitterbox -- jittered points and boxplots of absolute errors
+ggplot(dfp.tall, aes(x = type, y = neuron.abs.error)) + geom_jitter(alpha = 0.5) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() + ggtitle("Neuron")
 ```
 
 ```{r}
