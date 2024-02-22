@@ -114,6 +114,23 @@ The folder contents are described as follows:
 
 * `cohort1/unit_tests` : Scripts (`.R`) testing sample and sample source filters across analysis sections.
 
+### FIGURES
+
+* Figure 1 : (see manuscript)
+* Figure 2A : `cohort1/notebooks/02_pseudobulk/01_k2.Rmd`
+* Figure 2B : `cohort3/notebooks/01_pseudobulk/04_simulations.Rmd"`
+* Figure 3A : `cohort1/notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd`
+* Figure 3B : `cohort1/notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd`
+
+`cohort1/notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd`
+* Figure S1A : `cohort1/`
+* Figure S1B : `cohort1/`
+* Figure S2 : `cohort1/`
+* Figure S3 : `cohort1/`
+* Figure S4 : `cohort1/`
+* Figure S5 : `cohort1/`
+* Figure S6 : `cohort1/`
+
 ### TABLES
 
 * Table S1 : `cohort1/notebooks/02_summarize_mae/01_data_summaries/`
