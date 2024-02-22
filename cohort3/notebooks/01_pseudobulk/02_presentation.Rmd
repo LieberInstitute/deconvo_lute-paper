@@ -14,6 +14,7 @@ libv <- c("lute", "ggplot2", "gridExtra", "reshape2", "ggforce")
 sapply(libv, library, character.only = TRUE)
 setwd("..")
 setwd("..")
+load("./env/01_pseudobulk/03_deconvolve.RData")
 load("./env/01_pseudobulk/01_read_script.RData")
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -59,6 +60,7 @@ ggplot(dfPlotCellSize, aes(x = cellType, y = size, fill = cellType)) +
 Flow cytometry proportions by sample.
 
 ```{r}
+ptrue <- experimentData$p.true
 dfPlotType <- ptrue |> t() |> melt() |> as.data.frame()
 colnames(dfPlotType) <- c("sample.id", "cellType", "proportion.fc")
 dfPlotType$is.plasmablast <- ifelse(
@@ -76,6 +78,18 @@ plot2 <- ggplot(dfPlotType, aes(x = sample.id, y = proportion.fc, fill = is.plas
 
 plot1
 plot2
+```
+
+Sample/donor proportions summary, Plasmablasts.
+
+```{r}
+summary(dfPlotType[dfPlotType$is.plasmablast=="Plasmablasts",]$proportion.fc)
+```
+
+Sample/donor proportions summary, Non-plasmablasts.
+
+```{r}
+summary(dfPlotType[dfPlotType$is.plasmablast=="Not-plasmablasts",]$proportion.fc)
 ```
 
 Just plasmablast proportions by sample, with zoom.
@@ -106,61 +120,6 @@ plot1 <- ggplot(dfPlotNotPlasmablasts, aes(x = proportion.fc)) +
 
 plot1
 ```
-
-## Simulation
-
-Setting the conditions. We simulate scRNAseq data from Plasmablasts and 
-non-Plasmablasts, at similar proportions to the ABIS FC proportions.
-
-```{r}
-setwd("..")
-setwd("..")
-load("./env/08_improvement/02_simulation_script.RData")
-```
-
-```{r}
-ptrue <- ptrue
-cellTypeLabel <- c(rep("Plasmablast", N1), rep("non-Plasmablast", N2))
-zref <- zref
-scrnaseq <- scrnaseq
-ypseudobulk <- ypseudobulk
-```
-
-Heatmap of reference, transformed reference, and pseudobulk.
-
-```{r}
-```
-
-Reporting pseudobulk results, at 3 zoom levels.
-
-```{r}
-plot1 <- ggplot(dfPseudobulk, aes(x = true.plasmablasts, y = Plasmablasts)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) +
-  facet_wrap(~condition) + xlim(0, 0.15) + ylim(0, 0.15) +
-  ylab("Predicted") + xlab("True")
-plot2 <- ggplot(dfPseudobulk, aes(x = true.plasmablasts, y = Plasmablasts)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) +
-  facet_wrap(~condition) + xlim(0, 0.5) + ylim(0, 0.5) +
-  ylab("Predicted") + xlab("True")
-plot3 <- ggplot(dfPseudobulk, aes(x = true.plasmablasts, y = Plasmablasts)) + 
-  geom_point() + geom_abline(slope = 1, intercept = 0) +
-  facet_wrap(~condition) + xlim(0, 1) + ylim(0, 1) +
-  ylab("Predicted") + xlab("True")
-plot1
-plot2
-plot3
-
-# multiplot
-plot1 <- plot1 + xlab("") + ylab("") + ggtitle("Zoom1")
-plot2 <- plot2 + xlab("") + ylab("") + ggtitle("Zoom2")
-plot3 <- plot3 + xlab("") + ylab("") + ggtitle("Zoom3")
-grid.arrange(plot1, plot2, plot3, ncol = 1, top = "Plasmablasts", 
-             left = "Predicted", bottom = "True")
-```
-
-## Main experiments
-
-# Conclusions
 
 # Session info
 
