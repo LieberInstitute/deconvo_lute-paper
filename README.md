@@ -127,8 +127,8 @@ The folder contents are described as follows:
 * Figure S1B : `cohort2/notebooks/01_pseudobulk/01_k2_mrb.Rmd`
 * Figure S2A : `cohort1/notebooks/02_pseudobulk/02_k3.Rmd`
 * Figure S2B : `cohort1/notebooks/02_pseudobulk/02_k3.Rmd`
-* Figure S2C : `cohort1/notebooks/02_pseudobulk/02_k3.Rmd`
-* Figure S2D : `cohort1/notebooks/02_pseudobulk/02_k3.Rmd`
+* Figure S2C : `cohort2/notebooks/01_pseudobulk/02_k3_mrb.Rmd`
+* Figure S2D : `cohort1/notebooks/01_pseudobulk/02_k3_mrb.Rmd`
 * Figure S3 : `cohort1/notebooks/03_shuffle/02_figde_sdeconvo.Rmd`
 * Figure S4 : `cohort3/notebooks/01_pseudobulk/04_simulations.Rmd"`
 * Figure S5 : `cohort1/notebooks/07_adjustment/03_run_sopt_realbulk_all.Rmd`

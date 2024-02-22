@@ -17,7 +17,60 @@ list.files()
 load("./env/01_pseudobulk/01_k3_mrb_script.RData")
 ```
 
-# Figure 2D, scatterplots
+# Figure S2C
+
+Facet grid (3x2) for Ecit, Inhib, glial, scaled and unscaled.
+
+```{r}
+dfp1 <- data.frame(
+  known = dfp.tall$Excit.true,
+  pred = dfp.tall$Excit.pred,
+  type = dfp.tall$type,
+  celltype = rep('Excit', nrow(dfp.tall))
+)
+dfp2 <- data.frame(
+  known = dfp.tall$Inhib.true,
+  pred = dfp.tall$Inhib.pred,
+  type = dfp.tall$type,
+  celltype = rep('Inhib', nrow(dfp.tall))
+)
+dfp3 <- data.frame(
+  known = dfp.tall$glial.true,
+  pred = dfp.tall$glial.pred,
+  type = dfp.tall$type,
+  celltype = rep('glial', nrow(dfp.tall))
+)
+dfp <- rbind(dfp1, rbind(dfp2, dfp3)) |> as.data.frame()
+
+dfp$celltype <- 
+  factor(dfp$celltype, levels = c("Excit", "Inhib", "glial"))
+
+newScatterGrid <- ggplot(dfp, aes(x = known, y = pred)) +
+  geom_point() + geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + geom_vline(xintercept = 0.5) +
+  facet_grid(celltype~type) + theme_bw() +
+  xlab("Known") + ylab("Predicted") +
+  xlim(0,1) + ylim(0,1) + ggtitle("Tran et. al. 2021")
+
+newScatterGrid
+```
+
+# Figure S2B
+
+Errors boxplots, glial and neuron.
+
+```{r}
+dfp$error <- abs(dfp$known-dfp$pred)
+newBoxGrid <- ggplot(dfp, aes(x = type, y = error)) +
+  geom_jitter(alpha = 0.5) + 
+  geom_boxplot(color = "cyan", alpha = 0) + theme_bw() +
+  facet_grid(~celltype) + theme_bw() + ylab("Error") +
+  theme(axis.text.x = element_text(angle = 45, hjust=1),
+        axis.title.x = element_blank())
+newBoxGrid
+```
+
+# Scatterplots
 
 Show
 
