@@ -577,7 +577,6 @@ rmseSupplement$cellTypes[filterK2BloodPlasmablasts] <- "plasmablasts"
 filterK2BloodNonplasmablasts <- filterK2Blood & grepl("nonplasmablasts", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK2BloodNonplasmablasts] <- "nonplasmablasts"
 
-
 filterK3Brain <- rmseSupplement$k == "k3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK3Brain] <- "Excit;Inhib;glial"
 
@@ -595,20 +594,9 @@ Write to file.
 setwd("..")
 setwd("..")
 
-# no round
-write.csv(
-  rmseSupplement, 
-  file = "./outputs/02_aggregateRMSE/supp_table_formatted_rmse_write.csv",
-  row.names = FALSE)
-
-# with round
 rmseSuppTableOutRound <- rmseSupplement
-rmseSuppTableOutRound$rmseResult <- format(rmseSuppTableOutRound$rmseResult, digits = 3)
-head(rmseSuppTableOutRound)
-write.csv(
-  rmseSuppTableOutRound, 
-  file = "./outputs/02_aggregateRMSE/supp_table_formatted_rmse_round_write.csv",
-  row.names = FALSE)
+rmseSuppTableOutRound$rmseResult <- 
+  format(rmseSuppTableOutRound$rmseResult, digits = 3)
 
 options(scipen=10)
 write.csv(

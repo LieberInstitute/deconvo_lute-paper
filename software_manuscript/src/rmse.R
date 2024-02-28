@@ -239,14 +239,10 @@ rmseParam_rootMeanSquaredError <- function(
     filterDataTypes[,level1Filter],
     filterDataTypes[,level2Filter]) |> unlist()
   errorsSq <- errorsVector^2
-  denomMeanOperator <- length(errorsSq) # length(unique(cellTypesVector))
-  # get sum of squared errors vector
-  numGroups <- nrow(filterDataTypes[,level1Filter,drop=F])
-  errorsSqMean <- sum(errorsSq)/numGroups
+  errorsSqMean <- mean(errorsSq)
   rmseReturn <- sqrt(errorsSqMean)
   if(detail){
     rmseReturnList <- list(
-      denomMeanOperator = denomMeanOperator,
       errorsSqMean = errorsSqMean,
       rmseReturn = rmseReturn
     )
