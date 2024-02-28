@@ -397,7 +397,8 @@ K3 calculations
 
 # 3 cell types
 cellTypesVectorK3 <- c("glial", "Inhib", "Excit")
-experimentLabelsVectorK3 <- c("cohort1_k3", "cohort2_k3")
+experimentLabelsVectorK3 <- 
+  c("huuki-meyers-et-al-2023_k3", "tran-et-al-2021_dlpfc-cohort2_k3")
 listProportionsTablesK3 <- list(
   proportionsCohort1K3, proportionsCohort2K3
 )
@@ -422,7 +423,8 @@ rmseSuppTableK3Threetypes <- do.call(rbind,
 
 # 1 cell types
 cellTypesVectorK3 <- c("glial")
-experimentLabelsVectorK3 <- c("cohort1_glial_k3", "cohort2_glial_k3")
+experimentLabelsVectorK3 <- 
+  c("huuki-meyers-et-al-2023_glial_k3", "tran-et-al-2021_dlpfc-cohort2_glial_k3")
 rmseSuppTableK3Glial <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK3)),
                                 function(index){
@@ -443,7 +445,8 @@ rmseSuppTableK3Glial <- do.call(rbind,
   as.data.frame()
 
 cellTypesVectorK3 <- c("Inhib")
-experimentLabelsVectorK3 <- c("cohort1_Inhib_k3", "cohort2_Inhib_k3")
+experimentLabelsVectorK3 <- 
+  c("huuki-meyers-et-al-2023_Inhib_k3", "tran-et-al-2021_dlpfc-cohort2_Inhib_k3")
 rmseSuppTableK3Inhib <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK3)),
                                 function(index){
@@ -464,7 +467,8 @@ rmseSuppTableK3Inhib <- do.call(rbind,
   as.data.frame()
 
 cellTypesVectorK3 <- c("Excit")
-experimentLabelsVectorK3 <- c("cohort1_Excit_k3", "cohort2_Excit_k3")
+experimentLabelsVectorK3 <- 
+  c("huuki-meyers-et-al-2023_Excit_k3", "tran-et-al-2021_dlpfc-cohort2_Excit_k3")
 rmseSuppTableK3Excit <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK3)),
                                 function(index){
@@ -502,7 +506,6 @@ listRmseTables <- list(
   rmseSuppTableK3Inhib,
   rmseSuppTableK3Glial,
   rmseSuppTableK2Bulk,
-  #rmseSuppTableK2Bulkcv,
   rmseSuppTableK2Cohort3Twotypes,
   rmseSuppTableK2Cohort3Nonplasmablasts,
   rmseSuppTableK2Cohort3Plasmablasts
@@ -534,9 +537,9 @@ rmseSupplement <- rmseSuppTableOut
 # append columns
 # append cohort
 rmseSupplement$cohort <- ifelse(
-  grepl("cohort1", rmseSupplement$experimentLabel), "Huuki-Myers et al 2023",
-  ifelse(grepl("cohort2", rmseSupplement$experimentLabel), "Tran et al 2021",
-         ifelse(grepl("cohort3", rmseSupplement$experimentLabel), "Monaco et al 2019", "NA")))
+  grepl("dlpfc-cohort1", rmseSupplement$experimentLabel), "Huuki-Myers et al 2023",
+  ifelse(grepl("dlpfc-cohort2", rmseSupplement$experimentLabel), "Tran et al 2021",
+         ifelse(grepl("pbmc-cohort1", rmseSupplement$experimentLabel), "Monaco et al 2019", "NA")))
 # append k
 rmseSupplement$k <- ifelse(grepl("k2|shuffle", rmseSupplement$experimentLabel), "2",
                            ifelse(grepl("k3", rmseSupplement$experimentLabel), "3", "NA"))
