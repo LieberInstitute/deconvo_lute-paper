@@ -166,80 +166,6 @@ proportionsBulk <- rbind(proportionsBulk,
 
 ```
 
-Cohort 1 bulk crossvalidate
-
-```{r, eval = FALSE}
-setwd("..")
-setwd("..")
-setwd("..")
-load("./huuki-meyers-et-al-2023_dlpfc-cohort1/env/05_bulk/02_crossvalidate_script.RData")
-proportionsBulkcv <- df.k2
-rm(df.k2)
-```
-
-```{r, eval = FALSE}
-# parse prep conditions
-pBulkcv <- proportionsBulkcv
-# format cell labels
-colnames(pBulkcv)[c(1,2,12,13)] <- 
-  c("glial_predicted", "neuron_predicted", 
-    "glial_known", "neuron_known")
-# format bulk id
-pBulkcv$bulk.sample.id <- 
-  ifelse(grepl("Nuc1", pBulkcv$bulk.sample.id), gsub("Nuc1", "Nuc", pBulkcv$bulk.sample.id),
-         ifelse(grepl("Cyto1", pBulkcv$bulk.sample.id), gsub("Cyto1", "Cyto", pBulkcv$bulk.sample.id),
-                ifelse(grepl("Bulk1", pBulkcv$bulk.sample.id), gsub("Bulk1", "Bulk", pBulkcv$bulk.sample.id), pBulkcv$bulk.sample.id)))
-
-pBulkcv$cell.compartment <- 
-  gsub(".*_", "", pBulkcv$bulk.sample.id)
-# append prep condition
-pBulkcvFilt <- pBulkcv[!pBulkcv$bulk.sample.condition=="NA",]
-pBulkcv$bulk.sample.condition <-
-  sapply(pBulkcv$bulk.sample.id, function(id){
-    pBulkcvFilt[id,]$bulk.sample.condition})
-
-pBulkcv$Librarycondition <- "NA"
-pBulkcv$Librarycondition[
-  grepl("polyA", pBulkcv$bulk.sample.condition)] <- "polyA"
-pBulkcv$Librarycondition[
-  grepl("RiboZero", pBulkcv$bulk.sample.condition)] <- "RiboZero"
-
-# append cell compartment
-pBulkcv$Cellcompartment <-
-  ifelse(
-    grepl("Nuc", pBulkcv$bulk.sample.condition), "Nuc", 
-         ifelse(
-           grepl("Cyto", pBulkcv$bulk.sample.condition), "Cyto", ifelse(
-             grepl("Bulk", pBulkcv$bulk.sample.condition), "Bulk", "NA")))
-pBulkcv$condition.id <- ifelse(pBulkcv$s.set.label=="s.null", "noscale", "scale")
-# to numeric
-pBulkcv$glial_known <- as.numeric(pBulkcv$glial_known)
-
-# parse iterations
-filterCV <- pBulkcv$crossvalidation=="validation"
-filterCV <- filterCV & !pBulkcv$bulk.sample.condition=="NA"
-filterCV <- filterCV & !pBulkcv$bulk.scale.type=="logcounts"
-pBulkcvUnfilt <- pBulkcv
-pBulkcv <- pBulkcv[filterCV,]
-pBulkcv1 <- pBulkcv2 <- pBulkcv3 <- pBulkcv4 <- pBulkcv
-
-# parse iterations
-varExperiment <- pBulkcv1$bulk.sample.condition
-
-# parse pBulkcv1
-pBulkcv1$sample.id <- pBulkcv1$bulk.sample.condition
-pBulkcv1$replicate.id <- pBulkcv1$experiment.type
-pBulkcv1 <- pBulkcv1[,c(1,2,12,13,5,20,21)]
-# parse pBulkcv2
-pBulkcv2$sample.id <- pBulkcv2$Librarycondition
-pBulkcv2$replicate.id <- pBulkcv2$experiment.type
-pBulkcv2 <- pBulkcv2[,c(1,2,12,13,5,20,21)]
-# parse pBulkcv3
-pBulkcv3$sample.id <- pBulkcv3$Cellcompartment
-pBulkcv3$replicate.id <- pBulkcv3$experiment.type
-pBulkcv3 <- pBulkcv3[,c(1,2,12,13,5,20,21)]
-```
-
 Cohort 3 pseudobulk
 
 ```{r}
@@ -286,7 +212,10 @@ listProportionsTablesK2 <- list(
 )
 
 # 2 cell types
-experimentLabelsVectorK2 <- c("cohort1_k2", "cohort2_k2", "cohort1_shuffle")
+experimentLabelsVectorK2 <- 
+  c("huuki-meyers-et-al-2023_dlpfc-cohort1_k2", 
+    "tran-et-al-2021_dlpfc-cohort2_k2", 
+    "huuki-meyers-et-al-2023_dlpfc-cohort1_shuffle")
 cellTypesVectorK2 <- c("glial", "neuron")
 rmseSuppTableK2Twotypes <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK2)),
@@ -308,7 +237,10 @@ rmseSuppTableK2Twotypes <- do.call(rbind,
   as.data.frame()
 
 # 1 cell types
-experimentLabelsVectorK2 <- c("cohort1_neuron_k2", "cohort2_neuron_k2", "cohort1_neuron_shuffle")
+experimentLabelsVectorK2 <- 
+  c("huuki-meyers-et-al-2023_dlpfc-cohort1_neuron_k2", 
+    "tran-et-al-2021_dlpfc-cohort2_neuron_k2", 
+    "huuki-meyers-et-al-2023_dlpfc-cohort1_neuron_shuffle")
 cellTypesVectorK2 <- c("neuron")
 rmseSuppTableK2Neuron <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK2)),
@@ -328,7 +260,10 @@ rmseSuppTableK2Neuron <- do.call(rbind,
   return(returnTable)
 })) |> 
   as.data.frame()
-experimentLabelsVectorK2 <- c("cohort1_glial_k2", "cohort2_glial_k2", "cohort1_glial_shuffle")
+experimentLabelsVectorK2 <- 
+  c("huuki-meyers-et-al-2023_dlpfc-cohort1_glial_k2", 
+    "tran-et-al-2021_dlpfc-cohort2_glial_k2", 
+    "huuki-meyers-et-al-2023_dlpfc-cohort1_glial_shuffle")
 cellTypesVectorK2 <- c("glial")
 rmseSuppTableK2Glial <- do.call(rbind, 
                    lapply(seq(length(listProportionsTablesK2)),
@@ -352,7 +287,7 @@ rmseSuppTableK2Glial <- do.call(rbind,
 # cohort 3, 
 # 2 cell types
 cellTypesVectorK2 <- c("nonplasmablasts", "plasmablasts")
-experimentLabelsVectorK2 <- c("cohort3_k2")
+experimentLabelsVectorK2 <- c("monaco-et-al-2019_pbmc-cohort1_k2")
 listProportionsTablesK2 <- list(
   proportionsCohort3
 )
@@ -377,7 +312,7 @@ rmseSuppTableK2Cohort3Twotypes <- do.call(rbind,
 
 # 1 cell types
 cellTypesVectorK2 <- c("nonplasmablasts")
-experimentLabelsVectorK2 <- c("cohort3_nonplasmablasts_k2")
+experimentLabelsVectorK2 <- c("monaco-et-al-2019_pbmc-cohort1_nonplasmablasts_k2")
 listProportionsTablesK2 <- list(
   proportionsCohort3
 )
@@ -401,7 +336,7 @@ rmseSuppTableK2Cohort3Nonplasmablasts <- do.call(rbind,
   as.data.frame()
 
 cellTypesVectorK2 <- c("plasmablasts")
-experimentLabelsVectorK2 <- c("cohort3_plasmablasts_k2")
+experimentLabelsVectorK2 <- c("monaco-et-al-2019_pbmc-cohort1_plasmablasts_k2")
 listProportionsTablesK2 <- list(
   proportionsCohort3
 )
@@ -427,7 +362,9 @@ rmseSuppTableK2Cohort3Plasmablasts <- do.call(rbind,
 # try k2 from bulk
 cellTypesVectorK2 <- c("glial", "neuron")
 experimentLabelsVectorK2 <- c(
-  "cohort1_k2_bulk_nnls", "cohort1_k2_bulk_music", "cohort1_k2_bulk_bisque")
+  "huuki-meyers-et-al-2023_dlpfc-cohort1_k2_bulk_nnls", 
+  "huuki-meyers-et-al-2023_dlpfc-cohort1_k2_bulk_music", 
+  "huuki-meyers-et-al-2023_dlpfc-cohort1_k2_bulk_bisque")
 listProportionsTablesK2 <- list(
   proportionsBulk[proportionsBulk$replicate.id=="nnls",],
   proportionsBulk[proportionsBulk$replicate.id=="music",],
@@ -451,35 +388,6 @@ rmseSuppTableK2Bulk <- do.call(rbind,
   return(returnTable)
 })) |> 
   as.data.frame()
-
-# k2 from bulk cv
-#cellTypesVectorK2 <- c("glial", "neuron")
-#experimentLabelsVectorK2 <- c("cohort1_k2_bulkcv_bycondition",
-#                              "cohort1_k2_bulkcv_bylibrary",
-#                              "cohort1_k2_bulkcv_bycompartment")
-#listProportionsTablesK2 <- list(
-#  pBulkcv1, pBulkcv2, pBulkcv3
-#)
-#rmseSuppTableK2Bulkcv <- do.call(rbind, 
-#                   lapply(seq(length(listProportionsTablesK2)),
-#                                function(index){
-#  message(index)
-#  proportionsData <- listProportionsTablesK2[[index]]
-#  if(!"replicate.id" %in% colnames(proportionsData)){
-#    proportionsData$replicate.id <- "rep1"
-#  }
-#  dataLabel <- experimentLabelsVectorK2[[index]]
-#  returnList <- applyRmse(
-#    proportionsData, 
-#    cellTypesVector=cellTypesVectorK2
-#  )
-#  returnTable <- returnList$returnRmseTall
-#  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
-#  return(returnTable)
-#})) |> 
-#  as.data.frame()
-
-
 ```
 
 K3 calculations
