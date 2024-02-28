@@ -96,6 +96,18 @@ ggplot(dfPlotCellSize, aes(x = cellType, y = size, fill = cellType)) +
   guides(fill=guide_legend(ncol=2))
 ```
 
+```{r}
+savePlot <- ggplot(dfPlotCellSize, aes(x = cellType, y = size)) + 
+  theme_bw() + geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+  guides(fill=guide_legend(ncol=2)) + 
+  ylab("Factor (marker library size)") +
+  xlab("Cell type")
+
+savePlot
+
+```
+
 ## Cell sizes for Non-plasmablast cells
 
 Barplots of cell sizes, with color by cell size.

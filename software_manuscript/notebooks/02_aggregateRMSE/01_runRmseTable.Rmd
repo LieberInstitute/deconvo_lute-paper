@@ -27,11 +27,11 @@ setwd("..")
 setwd("..")
 setwd("..")
 # k2 results
-load(file.path("./cohort1/env/02_pseudobulk/01_k2.RData"))
+load(file.path("./huuki-meyers-et-al-2023_dlpfc-cohort1/env/02_pseudobulk/01_k2.RData"))
 proportionsCohort1K2 <- dfp.tall
 rm(dfp.tall)
 # k3 results
-load(file.path("./cohort1/env/02_pseudobulk/02_k3.RData"))
+load(file.path("./huuki-meyers-et-al-2023_dlpfc-cohort1/env/02_pseudobulk/02_k3.RData"))
 proportionsCohort1K3 <- dfp.tall
 rm(dfp.tall)
 ```
@@ -63,11 +63,11 @@ setwd("..")
 setwd("..")
 setwd("..")
 # k2 results
-load(file.path("./cohort2/env/01_pseudobulk/01_k2_mrb_script.RData"))
+load(file.path("./tran-et-al-2021_dlpfc-cohort2/env/01_pseudobulk/01_k2_mrb_script.RData"))
 proportionsCohort2K2 <- dfp.tall
 rm(dfp.tall)
 # k3 results
-load(file.path("./cohort2/env/01_pseudobulk/01_k3_mrb_script.RData"))
+load(file.path("./tran-et-al-2021_dlpfc-cohort2/env/01_pseudobulk/01_k3_mrb_script.RData"))
 proportionsCohort2K3 <- dfp.tall
 rm(dfp.tall)
 ```
@@ -97,7 +97,7 @@ Cohort 1 bulk
 setwd("..")
 setwd("..")
 setwd("..")
-load(file.path("./cohort1/env/07_adjustment/03_run_adjustment_realbulk_all_script.RData"))
+load(file.path("./huuki-meyers-et-al-2023_dlpfc-cohort1/env/07_adjustment/03_run_adjustment_realbulk_all_script.RData"))
 
 # nnls
 proportionsBulk <-
@@ -168,16 +168,16 @@ proportionsBulk <- rbind(proportionsBulk,
 
 Cohort 1 bulk crossvalidate
 
-```{r}
+```{r, eval = FALSE}
 setwd("..")
 setwd("..")
 setwd("..")
-load("./cohort1/env/05_bulk/02_crossvalidate_script.RData")
+load("./huuki-meyers-et-al-2023_dlpfc-cohort1/env/05_bulk/02_crossvalidate_script.RData")
 proportionsBulkcv <- df.k2
 rm(df.k2)
 ```
 
-```{r}
+```{r, eval = FALSE}
 # parse prep conditions
 pBulkcv <- proportionsBulkcv
 # format cell labels
@@ -246,7 +246,7 @@ Cohort 3 pseudobulk
 setwd("..")
 setwd("..")
 setwd("..")
-load(file.path("./cohort3/env/01_pseudobulk/04_simulation.RData"))
+load(file.path("./monaco-et-al-2019_pbmc-cohort1/env/01_pseudobulk/04_simulation.RData"))
 proportionsCohort3 <- dfPseudobulk
 # 
 colnames(proportionsCohort3) <- c(
@@ -264,7 +264,7 @@ Cohort 1, proportions shuffle
 setwd("..")
 setwd("..")
 setwd("..")
-load(file.path("./cohort1/env/03_shuffle/02_figde_script.RData"))
+load(file.path("./huuki-meyers-et-al-2023_dlpfc-cohort1/env/03_shuffle/02_figde_script.RData"))
 
 proportionsShuffle <- dfp.tall
 colnames(proportionsShuffle) <- c(
@@ -453,31 +453,31 @@ rmseSuppTableK2Bulk <- do.call(rbind,
   as.data.frame()
 
 # k2 from bulk cv
-cellTypesVectorK2 <- c("glial", "neuron")
-experimentLabelsVectorK2 <- c("cohort1_k2_bulkcv_bycondition",
-                              "cohort1_k2_bulkcv_bylibrary",
-                              "cohort1_k2_bulkcv_bycompartment")
-listProportionsTablesK2 <- list(
-  pBulkcv1, pBulkcv2, pBulkcv3
-)
-rmseSuppTableK2Bulkcv <- do.call(rbind, 
-                   lapply(seq(length(listProportionsTablesK2)),
-                                function(index){
-  message(index)
-  proportionsData <- listProportionsTablesK2[[index]]
-  if(!"replicate.id" %in% colnames(proportionsData)){
-    proportionsData$replicate.id <- "rep1"
-  }
-  dataLabel <- experimentLabelsVectorK2[[index]]
-  returnList <- applyRmse(
-    proportionsData, 
-    cellTypesVector=cellTypesVectorK2
-  )
-  returnTable <- returnList$returnRmseTall
-  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
-  return(returnTable)
-})) |> 
-  as.data.frame()
+#cellTypesVectorK2 <- c("glial", "neuron")
+#experimentLabelsVectorK2 <- c("cohort1_k2_bulkcv_bycondition",
+#                              "cohort1_k2_bulkcv_bylibrary",
+#                              "cohort1_k2_bulkcv_bycompartment")
+#listProportionsTablesK2 <- list(
+#  pBulkcv1, pBulkcv2, pBulkcv3
+#)
+#rmseSuppTableK2Bulkcv <- do.call(rbind, 
+#                   lapply(seq(length(listProportionsTablesK2)),
+#                                function(index){
+#  message(index)
+#  proportionsData <- listProportionsTablesK2[[index]]
+#  if(!"replicate.id" %in% colnames(proportionsData)){
+#    proportionsData$replicate.id <- "rep1"
+#  }
+#  dataLabel <- experimentLabelsVectorK2[[index]]
+#  returnList <- applyRmse(
+#    proportionsData, 
+#    cellTypesVector=cellTypesVectorK2
+#  )
+#  returnTable <- returnList$returnRmseTall
+#  returnTable$experimentLabel <- experimentLabelsVectorK2[index]
+#  return(returnTable)
+#})) |> 
+#  as.data.frame()
 
 
 ```
@@ -594,7 +594,7 @@ listRmseTables <- list(
   rmseSuppTableK3Inhib,
   rmseSuppTableK3Glial,
   rmseSuppTableK2Bulk,
-  rmseSuppTableK2Bulkcv,
+  #rmseSuppTableK2Bulkcv,
   rmseSuppTableK2Cohort3Twotypes,
   rmseSuppTableK2Cohort3Nonplasmablasts,
   rmseSuppTableK2Cohort3Plasmablasts
