@@ -1,0 +1,36 @@
+---
+title: "01_runRmseTable"
+author: "Sean Maden"
+date: "2024-02-12"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("..")
+setwd("..")
+load("outputs/02_aggregateRMSE/rmseSupplement.rda")
+```
+
+# Write table
+
+```{r}
+setwd("..")
+setwd("..")
+options(scipen=10)
+write.csv(
+  rmseSupplement, 
+  file = "outputs/02_aggregateRMSE/TABLE_S4.csv",
+  row.names = FALSE)
+options(scipen=0)  # restore the default
+```
+
+# 
+
+# Session info
+
+```{r}
+sessionInfo()
+```
