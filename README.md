@@ -167,7 +167,7 @@ Paths to manuscript figure sources.
 
 * Figure 2A : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/02_pseudobulk/01_k2.Rmd`
 
-* Figure 2B : `cohort3/notebooks/01_pseudobulk/04_simulations.Rmd"`
+* Figure 2B : `cohort3/notebooks/01_pseudobulk/04_simulation.Rmd"`
 
 * Figure 3A : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/07_adjustment/
 03_run_sopt_realbulk_all.Rmd`
