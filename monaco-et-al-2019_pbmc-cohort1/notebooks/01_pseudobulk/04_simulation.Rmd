@@ -32,6 +32,19 @@ In addition, the following data were drawn from the experiment: 1. Proportions
 were calculated for each category from flow cytometry proportions; 2. Mean 
 expression was calculated from bulk RNA-seq TPM data at ABIS-seq marker genes.
 
+## Data summary
+
+# Pseudobulk preparation
+
+Simulations were run for 12 (N = `r length(unique(dfPlotTall$sample.id))`) 
+donors with available known cell type proportions from flow cytometry. In total, 
+data from 17 (N = `r ncol(dfPlotTall[,!colnames(dfPlotTall) %in% c("sample.id", "type")])`) cell types were used, where 16 were aggregated under 
+"non-plasmablast", and "plasmablast" was retained.
+
+# Pseudobulk properties
+
+Pseudobulking used 2 (N = `r ncol(dfPseudobulk[,grepl("plasmablast", colnames(dfPseudobulk))])`) cell types and 12 (N = `r length(unique(dfPseudobulk$sample.id))`) samples.
+
 ## Cell size calculations
 
 Cell size scale factors obtained as the library sizes (column sums) from the 
@@ -83,6 +96,15 @@ grid.arrange(plot1, plot2, plot3, ncol = 1, top = "Plasmablasts")
 # Save
 
 ```{r}
+setwd("..")
+setwd("..")
+list.files("figures")
+```
+
+```{r}
+
+setwd("..")
+setwd("..")
 
 dfPlot <- dfPseudobulkA
 dfPlot$condition2 <- 
@@ -92,7 +114,7 @@ dfPlot$condition2 <-
 
 # zoom level 1, axis maximum 0.5
 
-jpeg("figures/04_transform/supplemental_figure2a.jpg", 
+jpeg("figures/01_pseudobulk/supplemental_figure2a.jpg", 
      width = 4, height = 2.5, units = "in", res = 400)
 
 ggplot(dfPlot, aes(x = true.plasmablasts, y = Plasmablasts)) + 
@@ -106,7 +128,7 @@ dev.off()
 
 # zoom level 2, axis maximum 1
 
-jpeg("figures/04_transform/supplemental_figure2b.jpg", 
+jpeg("figures/01_pseudobulk/supplemental_figure2b.jpg", 
      width = 4, height = 2.5, units = "in", res = 400)
 
 ggplot(dfPlot, aes(x = true.plasmablasts, y = Plasmablasts)) + 
