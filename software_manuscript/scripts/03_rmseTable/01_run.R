@@ -504,10 +504,6 @@ rmseSupplement$cohort <- ifelse(
 # append k
 rmseSupplement$k <- ifelse(grepl("k2|shuffle", rmseSupplement$experimentLabel), "2",
                            ifelse(grepl("k3", rmseSupplement$experimentLabel), "3", "NA"))
-# append num cell types
-rmseSupplement$numCellTypes <- gsub("k", "", rmseSupplement$k)
-conditionCellTypes <- grepl("neuron|glial|plasmablasts|nonplasmablasts|Inhib|Excit", rmseSupplement$condition)
-rmseSupplement$numCellTypes[conditionCellTypes] <- 1
 
 # append cell type strings
 rmseSupplement$cellTypes <- ""
@@ -542,6 +538,16 @@ rmseSupplement$cellTypes[filterK2BloodNonplasmablasts] <- "nonplasmablasts"
 
 filterK3Brain <- rmseSupplement$k == "3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK3Brain] <- "Excit;Inhib;glial"
+
+# append num cell types
+rmseSupplement$numCellTypes <- gsub("k", "", rmseSupplement$k)
+
+singletonCellTypesVector <- c("neuron", "glial", "plasmablasts", "nonplasmablasts", "Inhib", "Excit")
+singletonCellTypesVector <- paste0("^", singletonCellTypesVector, "$")
+singletonCellTypesVector <- paste(singletonCellTypesVector, collapse = "|")
+
+conditionCellTypes <- grepl(singletonCellTypesVector, rmseSupplement$cellTypes)
+rmseSupplement$numCellTypes[conditionCellTypes] <- 1
 
 # remove conditions
 dim(rmseSupplement)

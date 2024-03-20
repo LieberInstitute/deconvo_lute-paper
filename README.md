@@ -203,9 +203,9 @@ Paths to manuscript table sources.
 
 * Table S2 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/02_summarize_mae/cohort1_nuclei_summaries.csv`
 
-* Table S3 : `tran-et-al-2021_dlpfc-cohort2/outputs/02_summaries/cohort2_sample_summaries.csv`
+* Table S3 : `software/outputs/02_aggregateRMSE/table_s3.csv`
 
-* Table S4 : `software/outputs/02_aggregateRMSE/supp_table_rmse_round_write.csv`
+* Table S4 : `tran-et-al-2021_dlpfc-cohort2/outputs/02_summaries/cohort2_sample_summaries.csv`
 
 * Table S5 : `tran-et-al-2021_dlpfc-cohort2/outputs/02_summaries/cohort2_nuclei_summaries.csv`
 

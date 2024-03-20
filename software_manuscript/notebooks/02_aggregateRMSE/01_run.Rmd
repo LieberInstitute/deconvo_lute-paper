@@ -14,35 +14,20 @@ setwd("..")
 load("outputs/02_aggregateRMSE/rmseSupplement.rda")
 ```
 
+```{r}
+rmseSupplement <- rmseSupplement[,c(1,2,4,5,6,7)]
+colnames(rmseSupplement) <- c("condition", "rmse_result", "cohort", "k", "num_cell_types", "cell_types")
+```
+
 # Write table
 
 ```{r}
 setwd("..")
 setwd("..")
-
-write.csv(
-  rmseSupplement, 
-  file = "outputs/02_aggregateRMSE/TABLE_S4_1.csv",
-  row.names = FALSE)
-
-options(scipen=10)
-write.csv(
-  rmseSupplement, 
-  file = "outputs/02_aggregateRMSE/TABLE_S4_2.csv",
-  row.names = FALSE)
-options(scipen=0)  # restore the default
-
-options(scipen=15)
-write.csv(
-  rmseSupplement, 
-  file = "outputs/02_aggregateRMSE/TABLE_S4_3.csv",
-  row.names = FALSE)
-options(scipen=0)  # restore the default
-
 options(scipen=20)
 write.csv(
   rmseSupplement, 
-  file = "outputs/02_aggregateRMSE/TABLE_S4_4.csv",
+  file = "outputs/02_aggregateRMSE/table_s3.csv",
   row.names = FALSE)
 options(scipen=0)  # restore the default
 ```
