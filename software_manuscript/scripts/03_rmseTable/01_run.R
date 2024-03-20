@@ -470,9 +470,28 @@ listRmseTables <- lapply(
   }
 )
 
+#----------------
 # get final table
+#----------------
 rmseSuppTableOut <- do.call(rbind, 
                             lapply(listRmseTables, function(item){item})) |> as.data.frame()
+
+removeSampleRmse <- !grepl("sample.id", rmseSuppTableOut$condition)
+table(removeSampleRmse)
+rmseSuppTableOut <- rmseSuppTableOut[removeSampleRmse,]
+head(rmseSuppTableOut)
+
+rmseSuppTableOut <- rmseSuppTableOut[!grepl('rep1;.*', rmseSuppTableOut$condition),]
+rmseSuppTableOut$condition <- gsub("replicate.id:rep1", "all", rmseSuppTableOut$condition)
+rmseSuppTableOut$condition <- gsub("replicate.id:", "", rmseSuppTableOut$condition)
+rmseSuppTableOut$condition <- gsub("condition.id:", "", rmseSuppTableOut$condition)
+rmseSuppTableOut
+
+rmseSuppTableOut$condition <- gsub("^(scaled|scale)$", "withscale", rmseSuppTableOut$condition)
+rmseSuppTableOut$condition <- gsub(";(scaled|scale)$", ";withscale", rmseSuppTableOut$condition)
+rmseSuppTableOut$condition <- gsub("^(no|unscaled)$", "noscale", rmseSuppTableOut$condition)
+rmseSuppTableOut$condition <- gsub(";(no|unscaled)$", ";noscale", rmseSuppTableOut$condition)
+rmseSuppTableOut
 
 # Save final RMSE table
 rmseSupplement <- rmseSuppTableOut
@@ -519,7 +538,7 @@ rmseSupplement$cellTypes[filterK2BloodPlasmablasts] <- "plasmablasts"
 filterK2BloodNonplasmablasts <- filterK2Blood & grepl("nonplasmablasts", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK2BloodNonplasmablasts] <- "nonplasmablasts"
 
-filterK3Brain <- rmseSupplement$k == "k3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
+filterK3Brain <- rmseSupplement$k == "3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK3Brain] <- "Excit;Inhib;glial"
 
 # remove conditions
