@@ -498,9 +498,9 @@ rmseSupplement <- rmseSuppTableOut
 # append columns
 # append cohort
 rmseSupplement$cohort <- ifelse(
-  grepl("dlpfc-cohort1", rmseSupplement$experimentLabel), "Huuki-Myers et al 2023",
-  ifelse(grepl("dlpfc-cohort2", rmseSupplement$experimentLabel), "Tran et al 2021",
-         ifelse(grepl("pbmc-cohort1", rmseSupplement$experimentLabel), "Monaco et al 2019", "NA")))
+  grepl("huuki-meyers-et-al-2023", rmseSupplement$experimentLabel), "Huuki-Myers et al 2023",
+  ifelse(grepl("tran-et-al-2021", rmseSupplement$experimentLabel), "Tran et al 2021",
+         ifelse(grepl("monaco-et-al-2019", rmseSupplement$experimentLabel), "Monaco et al 2019", "NA")))
 # append k
 rmseSupplement$k <- ifelse(grepl("k2|shuffle", rmseSupplement$experimentLabel), "2",
                            ifelse(grepl("k3", rmseSupplement$experimentLabel), "3", "NA"))
@@ -512,7 +512,8 @@ rmseSupplement$numCellTypes[conditionCellTypes] <- 1
 # append cell type strings
 rmseSupplement$cellTypes <- ""
 # k2
-filterK2Brain <- rmseSupplement$k == "2" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
+filterK2Brain <- rmseSupplement$k == "2" & 
+  grepl("huuki-meyers-et-al-2023|tran-et-al-2021", rmseSupplement$experimentLabel)
 filterK2Brain2Types <- filterK2Brain & rmseSupplement$numCellTypes=="2"
 rmseSupplement$cellTypes[filterK2Brain2Types] <- "neuron;glial"
 filterK2BrainNeuron <- filterK2Brain & grepl("neuron", rmseSupplement$experimentLabel)
@@ -520,7 +521,8 @@ rmseSupplement$cellTypes[filterK2BrainNeuron] <- "neuron"
 filterK2BrainGlial <- filterK2Brain & grepl("glial", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK2BrainGlial] <- "glial"
 # k3
-filterK3Brain <- rmseSupplement$k == "3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
+filterK3Brain <- rmseSupplement$k == "3" & 
+  grepl("huuki-meyers-et-al-2023|tran-et-al-2021", rmseSupplement$experimentLabel)
 filterK3Brain3Types <- filterK3Brain & rmseSupplement$numCellTypes==3
 rmseSupplement$cellTypes[filterK3Brain3Types] <- "Excit;Inhib;glial"
 filterK3BrainExcit <- filterK3Brain & grepl("Excit", rmseSupplement$experimentLabel)
@@ -530,7 +532,7 @@ rmseSupplement$cellTypes[filterK3BrainInhib] <- "Inhib"
 filterK3BrainGlial <- filterK3Brain & grepl("glial", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK3BrainGlial] <- "glial"
 # k2 pbmc
-filterK2Blood <- grepl("cohort3", rmseSupplement$experimentLabel)
+filterK2Blood <- grepl("monaco-et-al-2019", rmseSupplement$experimentLabel)
 filterK2Blood2Types <- filterK2Blood & rmseSupplement$numCellTypes==2
 rmseSupplement$cellTypes[filterK2Blood2Types] <- "plasmablasts;nonplasmablasts"
 filterK2BloodPlasmablasts <- filterK2Blood & grepl("plasmablasts", rmseSupplement$experimentLabel)
