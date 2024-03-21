@@ -14,6 +14,38 @@ setwd("..")
 load("outputs/02_aggregateRMSE/rmseSupplement.rda")
 ```
 
+# Inspect
+
+RMSE calculation conditions.
+
+```{r}
+unique(rmseSupplement$condition)
+```
+
+Datasets used in calculations.
+
+```{r}
+unique(rmseSupplement$dataset)
+```
+
+Experiment types evaluated.
+
+```{r}
+unique(rmseSupplement$experiment)
+```
+
+Cell type dimensions studied ("k_total").
+
+```{r}
+unique(rmseSupplement$k_total)
+```
+
+Cell type dimensions by cell type amounts used in RMSE calculations.
+
+```{r}
+table(rmseSupplement$k_total, rmseSupplement$k_rmse)
+```
+
 # Write table
 
 ```{r}

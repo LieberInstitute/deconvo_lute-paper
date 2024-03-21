@@ -505,6 +505,14 @@ rmseSupplement$cohort <- ifelse(
 rmseSupplement$k <- ifelse(grepl("k2|shuffle", rmseSupplement$experimentLabel), "2",
                            ifelse(grepl("k3", rmseSupplement$experimentLabel), "3", "NA"))
 
+# append num cell types
+rmseSupplement$numCellTypes <- gsub("k", "", rmseSupplement$k)
+singletonCellTypesVector <- c("neuron", "glial", "plasmablasts", "nonplasmablasts", "Inhib", "Excit")
+singletonCellTypesVector <- paste0(".*_", singletonCellTypesVector, "_.*")
+singletonCellTypesVector <- paste(singletonCellTypesVector, collapse = "|")
+conditionCellTypes <- grepl(singletonCellTypesVector, rmseSupplement$experimentLabel)
+rmseSupplement$numCellTypes[conditionCellTypes] <- 1
+
 # append cell type strings
 rmseSupplement$cellTypes <- ""
 # k2
@@ -536,31 +544,7 @@ rmseSupplement$cellTypes[filterK2BloodPlasmablasts] <- "plasmablasts"
 filterK2BloodNonplasmablasts <- filterK2Blood & grepl("nonplasmablasts", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK2BloodNonplasmablasts] <- "nonplasmablasts"
 
-filterK3Brain <- rmseSupplement$k == "3" & grepl("cohort1|cohort2", rmseSupplement$experimentLabel)
-rmseSupplement$cellTypes[filterK3Brain] <- "Excit;Inhib;glial"
-
-# append num cell types
-rmseSupplement$numCellTypes <- gsub("k", "", rmseSupplement$k)
-
-singletonCellTypesVector <- c("neuron", "glial", "plasmablasts", "nonplasmablasts", "Inhib", "Excit")
-singletonCellTypesVector <- paste0("^", singletonCellTypesVector, "$")
-singletonCellTypesVector <- paste(singletonCellTypesVector, collapse = "|")
-
-conditionCellTypes <- grepl(singletonCellTypesVector, rmseSupplement$cellTypes)
-rmseSupplement$numCellTypes[conditionCellTypes] <- 1
-
-# remove conditions
-dim(rmseSupplement)
-filterCondition <- grepl("sample.id", rmseSupplement$condition)
-filterCondition <- filterCondition & grepl("cohort3", rmseSupplement$experimentLabel)
-rmseSupplement <- rmseSupplement[!filterCondition,]
-dim(rmseSupplement)
-
-rmseSuppTableOutRound <- rmseSupplement
-rmseSuppTableOutRound$rmseResult <- 
-  format(rmseSuppTableOutRound$rmseResult, digits = 3)
-
-# append experiment label
+# append formatted experiment label
 elVector <- rmseSupplement$experimentLabel
 rmseSupplement$experiment_label <- ifelse(grepl("bulk", elVector), "bulk",
                                ifelse(grepl("shuffle", elVector), "shuffle", "pseudobulk"))
@@ -568,7 +552,7 @@ rmseSupplement$experiment_label <- ifelse(grepl("bulk", elVector), "bulk",
 # subset and rename columns
 rmseSupplement <- rmseSupplement[,c(1,2,4:8)]
 colnames(rmseSupplement) <- 
-  c("condition", "rmse_result", "dataset", "k_total", "cell_types_rmse", "cell_types", "experiment")
+  c("condition", "rmse_result", "dataset", "k_total", "k_rmse", "cell_types", "experiment")
 
 #-----
 # save
