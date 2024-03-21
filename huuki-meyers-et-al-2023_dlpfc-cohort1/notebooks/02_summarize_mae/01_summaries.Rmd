@@ -17,11 +17,66 @@ setwd("..")
 setwd("..")
 list.files()
 load('./env/02_summarize_mae/01_data_summaries_script.RData')
+sceListPath <- "./outputs/00_preprocess/list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
+list.sce.markers <- get(load(sceListPath))
 ```
 
 Summarizes samples at platform level.
 
-# Process
+# Table S1, sample summaries
+
+Process
+
+```{r}
+cd <- colData(mae[[1]])
+cdUniqueSample <- cd[!duplicated(cd$Sample),]
+cdNuclei <- colData(list.sce.markers[["k2"]])
+sampleSummaries <- data.frame(
+  donors = length(unique(cdUniqueSample$BrNum)),
+  percent_female = sum(cdUniqueSample$sex == "F")/length(cdUniqueSample$sex),
+  number_regions = length(unique(cdUniqueSample$Position)),
+  percent_posterior = sum(cdUniqueSample$Position == "Posterior")/length(cdUniqueSample$Position),
+  percent_middle = sum(cdUniqueSample$Position == "Middle")/length(cdUniqueSample$Position),
+  percent_anterior = sum(cdUniqueSample$Position == "Anterior")/length(cdUniqueSample$Position),
+  mean_nuclei_per_sample = mean(table(cdNuclei$Sample)) |> round(0),
+  median_nuclei_per_sample = median(table(cdNuclei$Sample)) |> round(0),
+  sd_nuclei_per_sample = sd(table(cdNuclei$Sample)) |> round(0),
+  total_nuclei = sum(table(cdNuclei$Sample)) |> round(0)
+)
+# convert to percent
+for(c in c(2, 4:6)){sampleSummaries[,c] <- 100*sampleSummaries[,c]}
+# round
+for(c in c(2, 4:6)){sampleSummaries[,c] <- round(sampleSummaries[,c],0)}
+```
+
+Save
+
+```{r}
+setwd("..")
+setwd("..")
+write.csv(
+  sampleSummaries, 
+  file = "./outputs/02_summarize_mae/TABLE_S1.csv", 
+  row.names = FALSE
+)
+
+```
+
+## Save
+
+```{r}
+
+setwd("..")
+setwd("..")
+list.files()
+dfSummariesPath <- file.path("./outputs/02_summarize_mae/TABLE_S1.csv")
+write.csv(summaryDf1, file = dfSummariesPath, row.names = FALSE)
+
+```
+
+# Table S8, platform summaries
+
+## Process
 
 ```{r}
 

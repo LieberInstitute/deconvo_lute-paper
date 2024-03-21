@@ -199,7 +199,7 @@ Paths to manuscript figure sources.
 
 Paths to manuscript table sources.
 
-* Table S1 : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/02_summarize_mae/01_data_summaries/`
+* Table S1 : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/02_summarize_mae/TABLE_S1.csv`
 
 * Table S2 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/02_summarize_mae/TABLE_S2.csv`
 
