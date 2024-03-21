@@ -14,11 +14,6 @@ setwd("..")
 load("outputs/02_aggregateRMSE/rmseSupplement.rda")
 ```
 
-```{r}
-rmseSupplement <- rmseSupplement[,c(1,2,4,5,6,7)]
-colnames(rmseSupplement) <- c("condition", "rmse_result", "cohort", "k", "num_cell_types", "cell_types")
-```
-
 # Write table
 
 ```{r}

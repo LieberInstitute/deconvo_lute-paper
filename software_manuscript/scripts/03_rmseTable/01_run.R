@@ -560,6 +560,16 @@ rmseSuppTableOutRound <- rmseSupplement
 rmseSuppTableOutRound$rmseResult <- 
   format(rmseSuppTableOutRound$rmseResult, digits = 3)
 
+# append experiment label
+elVector <- rmseSupplement$experimentLabel
+rmseSupplement$experiment_label <- ifelse(grepl("bulk", elVector), "bulk",
+                               ifelse(grepl("shuffle", elVector), "shuffle", "pseudobulk"))
+
+# subset and rename columns
+rmseSupplement <- rmseSupplement[,c(1,2,4:8)]
+colnames(rmseSupplement) <- 
+  c("condition", "rmse_result", "dataset", "k_total", "cell_types_rmse", "cell_types", "experiment")
+
 #-----
 # save
 #-----
