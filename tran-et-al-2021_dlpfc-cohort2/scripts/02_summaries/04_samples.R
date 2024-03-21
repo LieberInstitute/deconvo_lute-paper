@@ -35,7 +35,7 @@ summary(dfp[,"glial"])
 # 0.1163  0.2587  0.4011  0.3333  0.4419  0.4826
 
 sampleSummaries <- data.frame(
-  samples = length(unique(cd$donor)),
+  donors = length(unique(cd$donor)),
   precent_female = sum(cd$sex == "F")/length(cd$sex),
   number_regions = length(unique(cd$region)),
   percent_posterior = sum(cd$region == "posterior")/length(cd$region),

@@ -205,7 +205,7 @@ Paths to manuscript table sources.
 
 * Table S3 : `software/outputs/02_aggregateRMSE/table_s3.csv`
 
-* Table S4 : `tran-et-al-2021_dlpfc-cohort2/outputs/02_summaries/cohort2_sample_summaries.csv`
+* Table S4 : `tran-et-al-2021_dlpfc-cohort2/outputs/02_summaries/TABLE_S4.csv`
 
 * Table S5 : `tran-et-al-2021_dlpfc-cohort2/outputs/02_summaries/cohort2_nuclei_summaries.csv`
 
