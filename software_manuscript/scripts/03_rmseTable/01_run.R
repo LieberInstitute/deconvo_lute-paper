@@ -529,11 +529,11 @@ filterK3Brain <- rmseSupplement$k == "3" &
   grepl("huuki-meyers-et-al-2023|tran-et-al-2021", rmseSupplement$experimentLabel)
 filterK3Brain3Types <- filterK3Brain & rmseSupplement$numCellTypes==3
 rmseSupplement$cellTypes[filterK3Brain3Types] <- "Excit;Inhib;glial"
-filterK3BrainExcit <- filterK3Brain & grepl("Excit", rmseSupplement$experimentLabel)
+filterK3BrainExcit <- filterK3Brain & grepl(".*_Excit_.*", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK3BrainExcit] <- "Excit"
-filterK3BrainInhib <- filterK3Brain & grepl("Inhib", rmseSupplement$experimentLabel)
+filterK3BrainInhib <- filterK3Brain & grepl(".*_Inhib_.*", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK3BrainInhib] <- "Inhib"
-filterK3BrainGlial <- filterK3Brain & grepl("glial", rmseSupplement$experimentLabel)
+filterK3BrainGlial <- filterK3Brain & grepl(".*_glial_.*", rmseSupplement$experimentLabel)
 rmseSupplement$cellTypes[filterK3BrainGlial] <- "glial"
 # k2 pbmc
 filterK2Blood <- grepl("monaco-et-al-2019", rmseSupplement$experimentLabel)
