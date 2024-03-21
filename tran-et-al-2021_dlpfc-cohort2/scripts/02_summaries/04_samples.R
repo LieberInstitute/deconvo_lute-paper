@@ -53,5 +53,5 @@ sampleSummaries$percent_posterior <- 100
 #-----
 write.csv(
   sampleSummaries, 
-  file = "./outputs/02_summaries/cohort2_sample_summaries.csv", 
+  file = "./outputs/02_summaries/TABLE_S4.csv", 
   row.names = FALSE)
