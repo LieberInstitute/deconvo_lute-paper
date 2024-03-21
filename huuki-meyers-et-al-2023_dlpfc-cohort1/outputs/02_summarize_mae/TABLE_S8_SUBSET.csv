@@ -1,4 +1,0 @@
-"assay","primary.all","region.all","brnum.all","primary.train","region.train","brnum.train","primary.validate","region.validate","brnum.validate","assay.type","platform.name","filter.type"
-"snrnaseq.k2.all",17,3,10,12,3,7,5,3,3,"snRNAseq","10X Chromium","prefilter"
-"bulk.rnaseq",19,3,10,11,3,7,5,3,3,"bulk RNAseq","Illumina HiSeq","prefilter"
-"cell.sizes",19,3,10,11,3,7,4,3,2,"fluorescent in situ hybridization","RNAscope","prefilter"
