@@ -201,7 +201,7 @@ Paths to manuscript table sources.
 
 * Table S1 : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/02_summarize_mae/01_data_summaries/`
 
-* Table S2 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/02_summarize_mae/cohort1_nuclei_summaries.csv`
+* Table S2 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/02_summarize_mae/TABLE_S2.csv`
 
 * Table S3 : `software/outputs/02_aggregateRMSE/table_s3.csv`
 

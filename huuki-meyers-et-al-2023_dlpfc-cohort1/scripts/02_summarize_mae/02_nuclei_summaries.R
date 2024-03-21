@@ -17,6 +17,9 @@ sapply(libv, library, character.only = T)
 # load marker data
 load("env/02_pseudobulk/01_k2.RData")
 
+sceListPath <- "./outputs/00_preprocess/list-scef_markers-k2-k3-k4_ro1-dlpfc.rda"
+list.sce.markers <- get(load(sceListPath))
+
 sceK2 <- list.sce.markers[["k2"]]
 sceK3 <- list.sce.markers[["k3"]]
 
@@ -89,4 +92,5 @@ summaryTable <- rbind(summaryK2, summaryK3)
 #-----
 # save
 #-----
-data.table::fwrite(summaryTable, file = "./outputs/02_summarize_mae/cohort1_nuclei_summaries.csv")
+data.table::fwrite(
+  summaryTable, file = "./outputs/02_summarize_mae/TABLE_S2.csv")
