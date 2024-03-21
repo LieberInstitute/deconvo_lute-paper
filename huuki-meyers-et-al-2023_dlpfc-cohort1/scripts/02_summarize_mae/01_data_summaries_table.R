@@ -29,12 +29,8 @@ list.summaries.prefilter <- summaries_df_list(mae.all, filter.type.label = "pref
 list.summaries.postfilter <- summaries_df_list(mae.filter, filter.type.label = "postfilter")
 
 # write summary tables
-write.csv(list.summaries.prefilter[["df.wide"]], 
-          file = "./outputs/02_summarize_mae/table2_platforms.csv", row.names = FALSE)
-df.filter.all <- rbind(list.summaries.postfilter[[1]],
-                       list.summaries.prefilter[[1]])
-write.csv(df.filter.all, 
-          file = "./outputs/02_summarize_mae/table_compare_filters.csv", row.names = FALSE)
+write.csv(list.summaries.prefilter[["wide"]], 
+          file = "./outputs/02_summarize_mae/TABLE_S8_SUBSET.csv", row.names = FALSE)
 
 # save image
 save.image(file = './env/02_summarize_mae/01_data_summaries_script.RData')
