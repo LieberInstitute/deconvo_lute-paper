@@ -54,7 +54,7 @@ setwd("..")
 options(scipen=20)
 write.csv(
   rmseSupplement, 
-  file = "outputs/02_aggregateRMSE/table_s3.csv",
+  file = "outputs/02_aggregateRMSE/TABLE_S3.csv",
   row.names = FALSE)
 options(scipen=0)  # restore the default
 ```

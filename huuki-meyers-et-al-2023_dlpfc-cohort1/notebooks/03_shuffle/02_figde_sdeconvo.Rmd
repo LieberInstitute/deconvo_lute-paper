@@ -55,7 +55,7 @@ setwd("..")
 
 new.plot.path <- file.path("figures", "03_shuffle", "figS3B.jpg")
 
-jpeg(new.plot.path, width = 5.5, height = 3, units = "in", res = 400)
+jpeg(new.plot.path, width = 6, height = 3, units = "in", res = 400)
 
 new.plot.low
 
