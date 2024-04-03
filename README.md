@@ -186,7 +186,9 @@ Paths to manuscript figure sources.
 
 * Figure S2D : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/01_pseudobulk/02_k3_mrb.Rmd`
 
-* Figure S3 : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/03_shuffle/02_figde_sdeconvo.Rmd`
+* Figure S3A : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/03_shuffle/figS3A.Rmd`
+
+* Figure S3B : `huuki-meyers-et-al-2023_dlpfc-cohort1/notebooks/03_shuffle/figS3B.Rmd`
 
 * Figure S4 : `monaco-et-al-2019_pbmc-cohort1/notebooks/01_pseudobulk/04_simulations.Rmd"`
 
@@ -211,7 +213,7 @@ Paths to manuscript table sources.
 
 * Table S6 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/08_sizes/tables_cell_sizes.csv`
 
-* Table S7 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/03_shuffle/table_s3_sdeconvo.csv`
+* Table S7 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/03_shuffle/TABLE_S7.csv`
 
 * Table S8 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/02_summarize_mae/TABLE_S8.csv`
 

@@ -43,8 +43,8 @@ new.plot.low <- ggplot(dfp.tall.high,
        aes(x = neuron.true, y = neuron.pred, shape = matched.id)) + 
   geom_point(size = 5, alpha = 0.55, colour = point.color) +
   geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
-  xlab("Known") + ylab("Predicted") +
-  ggtitle(paste0("S deconvo id: ", s.scale.sample.high)) + xlim(0.2, 1) + ylim(0.2, 1) +
+  xlab("Known") + ylab("Predicted") + xlim(0, 1) + ylim(0, 1) +
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.high)) + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 new.plot.low
 ```
@@ -53,7 +53,7 @@ new.plot.low
 setwd("..")
 setwd("..")
 
-new.plot.path <- file.path("figures", "03_shuffle", "fig3d.jpg")
+new.plot.path <- file.path("figures", "03_shuffle", "figS3B.jpg")
 
 jpeg(new.plot.path, width = 5.5, height = 3, units = "in", res = 400)
 
@@ -71,7 +71,8 @@ new.plot.high <- ggplot(dfp.tall.low, aes(x = neuron.true, y = neuron.pred, shap
   geom_point(size = 5, alpha = 0.55, colour = point.color) + 
   geom_abline(slope = 1, intercept = 0) + facet_wrap(~type) + theme_bw() +
   xlab("Known") + ylab("Predicted") + theme(legend.position = "none") +
-  ggtitle(paste0("S deconvo id: ", s.scale.sample.id.low)) + xlim(0.2, 1) + ylim(0.2, 1) +
+  ggtitle(paste0("S deconvo id: ", s.scale.sample.id.low)) + 
+  xlim(0, 1) + ylim(0, 1) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 new.plot.high
 ```
@@ -80,7 +81,7 @@ new.plot.high
 setwd("..")
 setwd("..")
 
-new.plot.filename <- "fig3e.jpg"
+new.plot.filename <- "figS3A.jpg"
 new.plot.path <- file.path("figures", "03_shuffle", new.plot.filename)
 
 jpeg(new.plot.path, width = 5, height = 3, units = "in", res = 400)
