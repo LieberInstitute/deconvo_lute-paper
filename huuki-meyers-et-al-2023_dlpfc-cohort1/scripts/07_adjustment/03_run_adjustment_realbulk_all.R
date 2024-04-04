@@ -112,10 +112,10 @@ for(sample.id in sample.id.vector){
   y.set <- y.set[,y.set$expt_condition=="Nuc_RiboZeroGold"]
   y.set <- scuttle::logNormCounts(y.set)
   y <- assays(y.set)[["logcounts"]][,,drop=F]
-  nnls.noscale <- dfi <-lute(singleCellExperiment  = sce, 
-                             bulkExpression = y, 
-                             cellTypeVariable  = "k2", 
-                             cellScaleFactors  = s.vector.scale, 
+  nnls.noscale <- dfi <-lute(singleCellExperiment = sce, 
+                             bulkExpression = y,
+                             cellTypeVariable = "k2", 
+                             cellScaleFactors = s.vector.scale, 
                              assayName = assay.name,
                              typemarkerAlgorithm = NULL
   )$deconvolutionResults@predictionsTable
