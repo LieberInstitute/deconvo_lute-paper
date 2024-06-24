@@ -102,6 +102,27 @@ new.plot.tall <- ggplot(dfp.tall, aes(x = true, y = value, color = sample.id)) +
 new.plot.tall
 ```
 
+Same as previous plot, but showing neuron and glial proportions.
+
+```{r}
+# parse dfp.tall
+
+# append glial data
+# pred value
+dfp.tall2 <- dfp.tall
+dfp.tall2$cell.type <- "glial"
+dfp.tall2$value <- 1-dfp.tall2$value
+dfp.tall2$true <- 1-dfp.tall2$true
+# error
+dfp.tall2$error <- abs(dfp.tall2$true-dfp.tall2$value)
+
+# recombine
+# bind
+dfp.tall <- rbind(dfp.tall, dfp.tall2) |> as.data.frame()
+# rename type variables
+dfp.tall$type <- ifelse(dfp.tall$scale, "withscale", "noscale")
+```
+
 ```{r}
 new.plot.tall.jitterbox <- ggplot(dfp.tall, 
                                   aes(x = scale, y = error)) + 
@@ -239,6 +260,119 @@ ggpairs(dfpWide,
 
 dev.off()
 
+```
+
+# Composite K2 plots
+
+Prepare the plot data.
+
+```{r}
+# parse dfp.tall
+dfp.tall <- dfp.tall[dfp.tall$cell.type=="neuron",]
+
+# append glial data
+# pred value
+dfp.tall2 <- dfp.tall
+dfp.tall2$cell.type <- "glial"
+dfp.tall2$value <- 1-dfp.tall2$value
+dfp.tall2$true <- 1-dfp.tall2$true
+
+# recombine
+# bind
+dfp.tall <- rbind(dfp.tall, dfp.tall2) |> as.data.frame()
+dfp.tall$error.negative <- dfp.tall$true-dfp.tall$value
+dfp.tall$error <- abs(dfp.tall$error.negative)
+# rename type variables
+dfp.tall$type <- ifelse(dfp.tall$scale, "withscale", "noscale")
+```
+
+Plots showing neuron and glial proportions from K2 results.
+
+```{r}
+cellTypeColor1 <- "blue"
+cellTypeColor2 <- "red"
+idLineColor <- "orange"
+
+# get plot objects
+new.plot.nnls.k2.noline <- ggplot(dfp.tall[dfp.tall$algorithm=="nnls",], 
+                   aes(x = true, y = value, colour = cell.type)) + 
+  geom_point(size = 4, alpha = 0.3) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + 
+  geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("Known") + ylab("Predicted") +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = c(cellTypeColor2, cellTypeColor1))
+new.plot.nnls.k2.withline <-
+  new.plot.nnls.k2.noline + geom_line(aes(group=sample.id), color = idLineColor)
+
+# preview plots
+new.plot.nnls.k2.noline
+new.plot.nnls.k2.withline
+```
+
+Errors boxplots.
+
+```{r}
+dfp.tall$type <- factor(dfp.tall$type)
+dfp.tall$celltype <- as.character(dfp.tall$cell.type)
+dfp.tall$bp.id <- paste0(dfp.tall$sample.id,"_",dfp.tall$type) |> factor()
+
+set.seed(0)
+posdodged <- position_jitterdodge(dodge.width=0.9)
+new.plot.k2.2celltype.noline <- ggplot(dfp.tall[dfp.tall$algorithm=="nnls",], 
+                                aes(x = type, y = error.negative, 
+                                    colour = celltype)) + 
+  geom_hline(yintercept = 0, color = "black") +
+  geom_point(position=posdodged, alpha = 0.3, size = 4) + theme_bw() +
+  geom_boxplot(alpha = 0, position = position_dodge(1), size = 0.8, width = 0.9) + 
+  xlab("Scale") + ylab("Error (Known - Predicted)") + ylim(-0.5, 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = c(cellTypeColor2, cellTypeColor1))
+  
+new.plot.k2.2celltype.noline
+```
+
+```{r}
+dfp.tall$type <- factor(dfp.tall$type)
+dfp.tall$celltype <- as.character(dfp.tall$cell.type)
+dfp.tall$bp.id <- paste0(dfp.tall$sample.id,"_",dfp.tall$type) |> factor()
+
+set.seed(0)
+posdodged <- position_jitterdodge(dodge.width=0.9)
+new.boxplot.abserr.k2.2celltype.noline <- ggplot(dfp.tall[dfp.tall$algorithm=="nnls",], 
+                                aes(x = type, y = error.negative, 
+                                    colour = celltype)) + 
+  geom_hline(yintercept = 0, color = "black") +
+  geom_point(position=posdodged, alpha = 0.3, size = 2) + theme_bw() +
+  geom_boxplot(alpha = 0, position = position_dodge(1), size = 0.8, width = 0.9) + 
+  xlab("Scale") + ylab("Error (Known - Predicted)") + ylim(-0.5, 0.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = c(cellTypeColor2, cellTypeColor1))
+  
+new.boxplot.abserr.k2.2celltype.noline
+```
+
+Save k2 plots. 
+
+```{r}
+setwd("..")
+setwd("..")
+lm <- matrix(c(rep(1,10),rep(2,7)),nrow=1)
+jpeg("./figures/07_adjustment/fig3_scatter-box_bulk-nnls-noline.jpg", 
+     width = 8, height = 3, units = "in", res = 400)
+grid.arrange(new.plot.nnls.k2.noline + theme(legend.position = "none"),
+             new.boxplot.abserr.k2.2celltype.noline,
+             layout_matrix = lm, ncol = 2)
+dev.off()
+
+jpeg("./figures/07_adjustment/fig3_scatter-box_bulk-nnls-withline.jpg", 
+     width = 8, height = 3, units = "in", res = 400)
+grid.arrange(new.plot.nnls.k2.withline + theme(legend.position = "none"),
+             new.boxplot.abserr.k2.2celltype.noline, 
+             layout_matrix = lm, ncol = 2)
+dev.off()
 ```
 
 # Session info
