@@ -142,6 +142,139 @@ dev.off()
 
 ```
 
+# Scatterplots with 2 cell types from K2 results
+
+Make plot from pseudobulk results.
+
+```{r}
+dfi <- dfPseudobulkA
+dfi1 <- data.frame(
+  true = dfi$true.plasmablasts,
+  pred = dfi$Plasmablasts,
+  sample.id = dfi$sample.id,
+  type = dfi$condition,
+  celltype = "plasmablast"
+)
+dfi2 <- data.frame(
+  true = dfi$true.not.plasmablasts,
+  pred = dfi$'Non-plasmablast',
+  sample.id = dfi$sample.id,
+  type = dfi$condition,
+  celltype = "non-plasmablast"
+)
+dfp <- rbind(dfi1, dfi2) |> as.data.frame()
+```
+
+Preview plots.
+
+```{r}
+library(ggforce)
+cellTypeColor1 <- "blue"
+cellTypeColor2 <- "red"
+idLineColor <- "orange"
+
+# get plot objects
+new.plot.k2.noline <- ggplot(dfp, 
+                   aes(x = true, y = pred, colour = celltype)) + 
+  geom_point(size = 4, alpha = 0.3) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + 
+  geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("Known") + ylab("Predicted") +
+  xlim(0, 1) + ylim(0, 1) + facet_wrap(~type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = c(cellTypeColor2, cellTypeColor1))
+new.plot.k2.withline <-
+  new.plot.k2.noline + geom_line(aes(group=sample.id), color = idLineColor)
+
+new.plot.k2.noline
+new.plot.k2.withline
+```
+
+Try more complicated visualizations with facet zooms.
+
+```{r}
+new.plot.k2.noline + facet_zoom(ylim = c(0, 0.2), xlim = c(0, 0.2),
+                                split = TRUE)
+new.plot.k2.withline + facet_zoom(ylim = c(0, 0.2), xlim = c(0, 0.2),
+                                  split = TRUE)
+```
+
+```{r}
+# example without line
+plot.zoom.1 <- ggplot(dfp[dfp$type=="scaled",], 
+                   aes(x = true, y = pred, colour = celltype)) + 
+  geom_point(size = 4, alpha = 0.3) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + 
+  geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("Known") + ylab("Predicted") +
+  xlim(0, 1) + ylim(0, 1) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = c(cellTypeColor2, cellTypeColor1)) +
+  facet_zoom(ylim = c(0, 0.1), xlim = c(0, 0.1), split = FALSE,
+             show.area = FALSE) +
+  ggtitle("withscale")
+
+plot.zoom.2 <- ggplot(dfp[dfp$type=="unscaled",], 
+                   aes(x = true, y = pred, colour = celltype)) + 
+  geom_point(size = 4, alpha = 0.3) + 
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_hline(yintercept = 0.5) + 
+  geom_vline(xintercept = 0.5) + theme_bw() +
+  xlab("Known") + ylab("Predicted") +
+  xlim(0, 1) + ylim(0, 1) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = c(cellTypeColor2, cellTypeColor1)) +
+  facet_zoom(ylim = c(0, 0.1), xlim = c(0, 0.1), split = FALSE,
+             show.area = FALSE) +
+  ggtitle("noscale")
+
+grid.arrange(plot.zoom.1, plot.zoom.2, ncol = 2)
+
+# example with line
+plot.zoom.1.withline <- plot.zoom.1 + geom_line(aes(group = sample.id), 
+                                                col=idLineColor)
+plot.zoom.2.withline <- plot.zoom.2 + geom_line(aes(group = sample.id), 
+                                                col=idLineColor)
+
+grid.arrange(plot.zoom.2, plot.zoom.1, ncol = 2)
+```
+
+Save to JPEG.
+
+```{r}
+setwd("..")
+setwd("..")
+jpeg("./figures/01_pseudobulk/fig2_pbmc-k2-result-withline.jpg", 
+     width = 6.5, height = 3, units = "in", res = 400)
+new.plot.k2.withline
+dev.off()
+
+jpeg("./figures/01_pseudobulk/fig2_pbmc-k2-result-noline.jpg", 
+     width = 6.5, height = 3, units = "in", res = 400)
+new.plot.k2.noline
+dev.off()
+
+lm <- matrix(c(rep(1,6),rep(2,8)),nrow=1)
+jpeg("./figures/01_pseudobulk/fig2_pbmc-k2-result-withline_zooms.jpg", 
+     width = 10, height = 3, units = "in", res = 400)
+grid.arrange(plot.zoom.2.withline +
+               theme(
+                 legend.position = "none",
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank()
+               ),
+             plot.zoom.1.withline + 
+               theme(
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank()
+              ),
+             layout_matrix = lm, ncol = 2,
+             bottom = "Known", left = "Predicted")
+dev.off()
+```
+
 # Session info
 
 ```{r}
