@@ -191,6 +191,12 @@ new.plot.k2.noline
 new.plot.k2.withline
 ```
 
+```{r}
+new.plot.facet <- new.plot.k2.noline + facet_grid(celltype~type)
+new.plot.facet
+new.plot.facet + ylim(0, 0.1) + xlim(0, 0.1)
+```
+
 Try more complicated visualizations with facet zooms.
 
 ```{r}
@@ -258,7 +264,7 @@ dev.off()
 
 lm <- matrix(c(rep(1,6),rep(2,8)),nrow=1)
 jpeg("./figures/01_pseudobulk/fig2_pbmc-k2-result-withline_zooms.jpg", 
-     width = 10, height = 3, units = "in", res = 400)
+     width = 10, height = 2.8, units = "in", res = 400)
 grid.arrange(plot.zoom.2.withline +
                theme(
                  legend.position = "none",
@@ -272,6 +278,21 @@ grid.arrange(plot.zoom.2.withline +
               ),
              layout_matrix = lm, ncol = 2,
              bottom = "Known", left = "Predicted")
+dev.off()
+```
+
+```{r}
+setwd("..")
+setwd("..")
+
+jpeg("./figures/01_pseudobulk/fig2_pbmc-k2-result_facet.jpg", 
+     width = 7, height = 5.5, units = "in", res = 400)
+new.plot.facet
+dev.off()
+
+jpeg("./figures/01_pseudobulk/fig2_pbmc-k2-result_facet-zoom.jpg", 
+     width = 7, height = 5.5, units = "in", res = 400)
+new.plot.facet + ylim(0, 0.1) + xlim(0, 0.1)
 dev.off()
 ```
 
