@@ -312,6 +312,11 @@ new.plot.nnls.k2.noline
 new.plot.nnls.k2.withline
 ```
 
+```{r}
+new.plot.facet.color <- new.plot.nnls.k2.noline + facet_grid(cell.type~type)
+new.plot.facet.color
+```
+
 Errors boxplots.
 
 ```{r}
@@ -372,6 +377,20 @@ jpeg("./figures/07_adjustment/fig3_scatter-box_bulk-nnls-withline.jpg",
 grid.arrange(new.plot.nnls.k2.withline + theme(legend.position = "none"),
              new.boxplot.abserr.k2.2celltype.noline, 
              layout_matrix = lm, ncol = 2)
+dev.off()
+```
+
+```{r}
+setwd("..")
+setwd("..")
+lm <- matrix(c(rep(1,10),rep(2,7)),nrow=1)
+jpeg("./figures/07_adjustment/fig3_scatter-box_bulk-nnls_facet-color.jpg", 
+     width = 9, height = 4.5, units = "in", res = 400)
+grid.arrange(
+  new.plot.facet.color,
+  new.boxplot.abserr.k2.2celltype.noline,
+  layout_matrix = lm, ncol = 2
+)
 dev.off()
 ```
 

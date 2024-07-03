@@ -189,6 +189,17 @@ new.plot.k2.noline
 new.plot.k2.withline
 ```
 
+```{r}
+new.plot.k2.noline + facet_grid(celltype~type)
+
+setwd("..")
+setwd("..")
+jpeg("./figures/02_pseudobulk/fig2_dlpfc-k2-result-facet.jpg", 
+     width = 6.5, height = 5.5, units = "in", res = 400)
+new.plot.k2.noline + facet_grid(celltype~type)
+dev.off()
+```
+
 Save to JPEG.
 
 ```{r}
