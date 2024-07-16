@@ -211,7 +211,7 @@ Paths to manuscript table sources.
 
 * Table S5 : `tran-et-al-2021_dlpfc-cohort2/outputs/02_summaries/cohort2_nuclei_summaries.csv`
 
-* Table S6 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/08_sizes/tables_cell_sizes.csv`
+* Table S6 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/08_sizes/TABLE_S6.csv`
 
 * Table S7 : `huuki-meyers-et-al-2023_dlpfc-cohort1/outputs/03_shuffle/TABLE_S7.csv`
 
